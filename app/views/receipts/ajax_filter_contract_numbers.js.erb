@@ -1,0 +1,12 @@
+// Фильтрация списка договоров, Если нет договоров тогда неактивный элемент
+
+
+var $contract_number = $('#contract_number');
+$contract_number.empty().append('<%= j render("receipts/select_contract_numbers") %>')
+
+if ( $contract_number.children().length > 1 ) {
+  $contract_number.prop('disabled', false);
+  selectСontractNumber(); // Выбор договора
+} else {
+  emptyСontractNumber(); // Очистка договора
+}

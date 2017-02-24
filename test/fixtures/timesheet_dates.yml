@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  timesheet: one
+  children_group: one
+  child: one
+  reasons_absences: one
+  date: 2017-02-17
+
+two:
+  timesheet: two
+  children_group: two
+  child: two
+  reasons_absences: two
+  date: 2017-02-17

@@ -1,0 +1,17 @@
+
+#receipt-products {
+  #text-header { width: 560px; }
+
+  .menu-panel {
+    #invoice_number { width: 100px; }
+    #date_sa { width: 78px; }
+    #supplier_order_number { width: 122px; }
+    #supplier_name { width: 224px;}
+    #contract_number { width: 139px; }
+  }
+
+  table {
+    tr { .product_name { width: 457px; padding-left: 25px; text-align: left; } }
+  }
+}
+

@@ -1,0 +1,126 @@
+
+/* Табличка */
+table.table {
+  font-size: 13px;
+  word-wrap: break-word;
+  border-spacing: 0;
+
+  /* Заголовок таблицы */
+  thead {
+    &, th { background-color: #fbfbfb; }
+    color: #333;
+
+    tr:nth-child(1) th {
+      & { border-top: 1px solid #e7e7e7; }
+      &:first-child { border-top-left-radius: 5px; }
+      &:last-child { border-top-right-radius: 5px; }
+    }
+
+    tr th:first-child { border-left: 1px solid #e7e7e7; }
+    tr th:last-child { border-right: 1px solid #e7e7e7; }
+  }
+
+  tr { height: 27px; padding: 0; margin: 0 }
+
+  th:not(:nth-last-child(1)), td:not(:nth-last-child(1)) { border-right: 1px dotted #e7e7e7; }
+
+  th, td { text-align: center; padding: 0; font-weight: normal; }
+
+  th, tr:not(:nth-last-child(1)) td { border-bottom: 1px dotted #e7e7e7; }
+
+  /* Поле ввода */
+  input {
+    width: 100%;
+    font-size: 13px;
+    height: 26px;
+    text-align: center;
+    border: none;
+
+    &:focus { outline: none; }
+  }
+
+  /* Выделение в таблички строку */
+  tbody tr {
+    td { background-color: white; }
+    cursor: pointer;
+    &:hover, &:hover td, &:hover input { background-color: #fbfbfb; }
+
+    td:first-child { border-left: 1px solid #e7e7e7; }
+    td:last-child { border-right: 1px solid #e7e7e7; }
+
+    /* Нажатие в таблички строку для JQUERY */
+    &.selected {
+      td, input { background-color: #e7e7e7; }
+      td { border-right: 1px solid white; }
+      input:focus { background-color: white; }
+      cursor: default;
+    }
+  }
+
+  /* Выделение в таблички строку */
+  tfoot {
+    background-color: #e7e7e7;
+    tr td {
+      font-weight: bold;
+      &:first-child { border-bottom-left-radius: 5px; }
+      &:last-child { border-bottom-right-radius: 5px; }
+    };
+  }
+
+  /* Базовая кнопка */
+  button {
+    height: 100%;
+    width: 25px;
+    background-color: transparent;
+    text-align: center;
+    font-size: 12px;
+    border-style: none;
+    cursor: pointer;
+    &:disabled { color: #e7e7e7; cursor: default; };
+    &:before { font-family: 'Glyphicons Halflings'; top: 1px; position: relative; }
+  }
+
+  /* Кнопка просмотр */
+  button.btn_view {
+    &:before { content: "\e105"; }
+    &:enabled { color: #5bc0de; }
+    &:hover:enabled { color: #31b0d5; }
+  }
+
+  /* Кнопка редактировать */
+  button.btn_edit {
+    &:before { content: "\270f"; }
+    &:enabled {color: #5cb85c;}
+    &:hover:enabled { color: #449d44; }
+  }
+
+  /* Кнопка удалить */
+  button.btn_del {
+    &:before { content: "\e014"; }
+    &:enabled {color: #d9534f; }
+    &:hover:enabled { color: #c9302c; }
+  }
+
+  /* Группировка колонок */
+  .row_group {
+    background-color: #fbfbfb;
+    text-align: left;
+    font-weight: bold;
+    padding-left: 5px;
+  }
+
+  .date_field { width: 85px; } /* Поле даты */
+  .datetime_field { width: 130px; } /* Поле даты и времени */
+  .count { width: 100px; input { width: 100px } } /* Поле количества */
+  .number_field { width: 100px; }
+
+  .uncheck_field { width: 60px; }
+
+  .check_field { width: 60px;
+    &:before { content: "\e013"; font-family: 'Glyphicons Halflings'; top: 1px; position: relative; color: #aaa;}
+  }
+
+  .negative { color: red };
+  .positive { color: green };
+
+}

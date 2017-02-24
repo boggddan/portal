@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  branch: one
+  supplier: one
+  number: MyString
+  date: 2017-01-09
+  date_start: 2017-01-09
+  date_end: 2017-01-09
+
+two:
+  branch: two
+  supplier: two
+  number: MyString
+  date: 2017-01-09
+  date_start: 2017-01-09
+  date_end: 2017-01-09

@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  children_category: one
+  cost_date: 2017-01-25
+  cost: 9.99
+
+two:
+  children_category: two
+  cost_date: 2017-01-25
+  cost: 9.99

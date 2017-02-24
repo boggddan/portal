@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  branch: one
+  institution: one
+  number: MyString
+  date: 2017-01-10
+  splendingdate: 2017-01-10
+  date_sap: 2017-01-10
+  date_saf: 2017-01-10
+
+two:
+  branch: two
+  institution: two
+  number: MyString
+  date: 2017-01-10
+  splendingdate: 2017-01-10
+  date_sap: 2017-01-10
+  date_saf: 2017-01-10

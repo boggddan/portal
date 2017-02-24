@@ -1,0 +1,15 @@
+//  Фильтрация таблицы поступлений
+
+$( '#table_io_corrections' ).empty().append( '<%= j render( "institution_orders/table_io_corrections" ) %>' );
+
+var $table = $( '#table_io_corrections table' );
+
+/* Если существуют заявки по выбраному фильтру */
+if ( $table.length ) {
+  $table.tableHeadFixer();  // Фиксируем шапку таблицы
+  if ( sessionStorage.instituiton_orders_table_io_corrections_scroll ) { $( '#table_io_corrections' ).scrollTop( sessionStorage.instituiton_orders_table_io_corrections_scroll ) };
+  if ( sessionStorage.instituiton_orders_table_io_corrections_row ) { $( '#table_io_corrections tbody tr:nth-of-type('+ sessionStorage.instituiton_orders_table_io_corrections_row +')' ).addClass( 'selected' ) };
+} else {
+  sessionStorage.removeItem( 'instituiton_orders_table_io_corrections_scroll' );
+  sessionStorage.removeItem( 'instituiton_orders_table_io_corrections_row' );
+}

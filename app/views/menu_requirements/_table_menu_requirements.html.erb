@@ -1,0 +1,39 @@
+<!-- Табличка со списком меню требований -->
+
+<% if @menu_requirements.present? %>
+
+  <%= content_tag :table, class: :table  do %>
+    <%= content_tag :thead do %>
+      <%= content_tag :tr do %>
+        <%= content_tag :th, 'План' %>
+        <%= content_tag :th, 'Факт' %>
+        <%= content_tag :th, 'Номер' %>
+        <%= content_tag :th, 'Дата створення' %>
+        <%= content_tag :th, 'Дата списання' %>
+        <%= content_tag :th, '', colspan: 3 %>
+      <% end %>
+    <% end %>
+
+    <%= content_tag :tbody do %>
+      <% @menu_requirements.each do |menu_requirement| %>
+        <%= content_tag :tr, '', data: { path: "#{menu_requirements_products_path}?id=#{menu_requirement.id}" } do %>
+          <%= content_tag :td, menu_requirement.number_sap, class: :number_field %>
+          <%= content_tag :td, menu_requirement.number_saf, class: :number_field %>
+          <%= content_tag :td, menu_requirement.number, class: :number_field %>
+          <%= content_tag :td, date_str(menu_requirement.date), class: :date_field %>
+          <%= content_tag :td, date_str(menu_requirement.splendingdate), class: :date_field %>
+          <%= content_tag :td do %>
+            <%= button_tag '', class: :btn_view, disabled: !menu_requirement.date_saf %>
+          <% end %>
+          <%= content_tag :td do %>
+            <%= button_tag '', class: :btn_edit, disabled: menu_requirement.date_saf %>
+          <% end %>
+          <%= content_tag :td do %>
+            <%= button_tag '', class: :btn_del, disabled: menu_requirement.date_sap %>
+          <% end %>
+       <% end %>
+     <% end %>
+    <% end %>
+
+  <% end %>
+<% end %>

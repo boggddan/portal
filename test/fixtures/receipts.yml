@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  supplier_order: one
+  institution: one
+  contract_number: MyString
+  invoice_number: MyString
+  date: 2017-01-09
+  date_sa: 2017-01-09
+
+two:
+  supplier_order: two
+  institution: two
+  contract_number: MyString
+  invoice_number: MyString
+  date: 2017-01-09
+  date_sa: 2017-01-09

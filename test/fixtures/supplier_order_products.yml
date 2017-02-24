@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  Supplier_Order: one
+  institution: one
+  product: one
+  contract_number: MyString
+  date: 2017-01-09
+  count: 9.99
+
+two:
+  Supplier_Order: two
+  institution: two
+  product: two
+  contract_number: MyString
+  date: 2017-01-09
+  count: 9.99

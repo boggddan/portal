@@ -1,0 +1,49 @@
+<!-- Табличка с поступлениями по заявках поставщика -->
+
+<% if @users then %>
+
+    <table class="table-view" data-toggle="table" >
+      <thead>
+      <tr>
+        <th>Користувач</th>
+        <th>Тип</th>
+        <th>Організація</th>
+        <th>Дата створення</th>
+        <th>Дата оновлення</th>
+        <th colspan="3"></th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <% @users.each do |user| %>
+        <% if user.is_admin then %>
+          <% type="А" %>
+          <% class_type="type-admin" %>
+        <% elsif user.institution_id.present? %>
+          <% type="Д" %>
+          <% class_type="type-institution" %>
+          <% organization=user.institution.name %>
+        <% elsif user.supplier_id.present? %>
+          <% type="П" %>
+          <% class_type="type-supplier" %>
+          <% organization=user.supplier.name %>
+        <% end %>
+
+          <tr>
+            <td class='username'><%= user.username %></td>
+            <td class='type ' <%= class_type %>><%= type %></td>
+            <td class='organization'><%= organization  %></td>
+            <td class='datetime-field'><%= user.created_at.strftime('%d.%m.%Y %H:%M:%S')  %></td>
+            <td class='datetime-field'><%= user.updated_at.strftime('%d.%m.%Y %H:%M:%S')  %></td>
+
+            <td><%= button_tag '', { disabled: true, class: "btn btn-view" } %></td>
+            <td><%= button_tag '', { class: "btn btn-edit", onclick: "location.href='#{users_new_path}?user_id=#{user.id}'" } %></td>
+            <td><%= button_tag '', { disabled: user.username=="admin", class: "btn btn-del",  data: { 'ajax-path': "#{users_ajax_delete_user_path}?user_id=#{user.id}" } } %></td>
+          </tr>
+      <% end %>
+      </tbody>
+    </table>
+
+<% end %>
+
+

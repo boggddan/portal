@@ -1,0 +1,245 @@
+/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS and SCSS file within this directory, lib/assets/stylesheets, vendor/assets/stylesheets,
+ * or any plugin's vendor/assets/stylesheets directory can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the bottom of the
+ * compiled file so the styles you add here take precedence over styles defined in any other CSS/SCSS
+ * files in this directory. Styles in this file should be added after the last require_* statement.
+ * It is generally better to create a new file per style scope.
+ *
+ *= require jquery-ui
+ *= require_tree .
+ *= require_self
+ */
+
+@font-face {
+  font-family: 'Glyphicons Halflings';
+  src: url("glyphicons-halflings-regular.eot");
+  src: url("glyphicons-halflings-regular.eot?#iefix") format("embedded-opentype"),
+  url("glyphicons-halflings-regular.woff") format("woff"),
+  url("glyphicons-halflings-regular.ttf") format("truetype"),
+  url("glyphicons-halflings-regular.svg#glyphicons_halflingsregular") format("svg");
+}
+
+* { box-sizing: border-box; }
+
+/* Для холера */
+input::-webkit-input-placeholder { color: #e7e7e7; text-align: left; }
+input::-moz-placeholder          { color: #e7e7e7; text-align: left; }
+input:-ms-input-placeholder      { color: #e7e7e7; text-align: left; }
+input:focus { outline: none; }
+
+body { /* Главний блок */
+  margin: 0;
+  padding: 0;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  > div:nth-of-type(2) { margin-left: 15px; width: 1065px; }
+  > main { margin-left: 15px; width: 1065px; }
+
+}
+
+
+
+/* Заголовок на страничке */
+.text-header {
+  width: 100%;
+  margin-bottom: 5px;
+  border-bottom: 3px solid #e7e7e7;
+  padding: 3px;
+  font-size: 22px;
+}
+
+
+/* Менюшка панелька */
+.menu-panel {
+  height: 32px;
+  line-height: 28px;
+  width: 100%;
+  padding: 2px;
+  margin: 5px 0;
+  color: #333;
+  text-align: left;
+  font-size: 13px;
+
+
+  .form-area { display: inline-block; height: 100%; width: 100%; } /* Форма на всю область */
+  .form-fluid { display: inline-block; height: 100%; } /* Форма под размер контролов */
+
+  /* Отступ между елементами */
+  .menu-margin { height: 100%; width: 4px; }
+
+  span { margin: 0 4px; }
+
+  /* Для всех елементов */
+  select, input, button {
+    margin: 0 4px;
+    height: 100% ;
+    border-radius: 3px;
+    border: 1px solid;
+    background-color: white;
+    cursor: pointer;
+    &:disabled, &:hover:disabled { color: #e7e7e7; background-color: #fbfbfb; border-color: #dadada; cursor: default; }
+  }
+
+  /* Список выбора и поле ввода */
+  select, input[type="text"] {
+    padding: 5px;
+    border-color: #e7e7e7;
+    &:hover:enabled { border-color: #aaa; }
+  }
+
+  /* Для того что бы значение по-умолчанию сделать другим цветом */
+  select {
+    option { color: black; }
+    option[value=""] { color: #e7e7e7; }
+    &.placeholder:enabled { color: #e7e7e7; }
+    &:focus { outline: none; }
+  }
+
+  /* Блок для того что бы нарисовать иконку перед элементок */
+  .field-icon {
+    display: inline-block;
+    position: relative;
+    &:after {content: "\e138"; font-family: 'Glyphicons Halflings'; position: absolute; top: 6px; left: 6px; color: #aaa; line-height: 1;}
+    input, select { padding-left: 20px; }
+  }
+
+  .field-icon-filter { &:after {content: "\e138"; } } /* Иконка фильтрации */
+  .field-icon-edit { &:after {content: "\270f"; } }  /* Иконка редактирования */
+  .field-icon-сalendar { &:after {content: "\e109"; } }  /* Иконка календарь */
+
+  /* Тестовое поле на панельке */
+  label {
+    display: inline-block;
+    height: 100%;
+    color: #333;
+    background-color: #e7e7e7;
+    border-radius: 3px;
+    padding: 0 3px;
+  }
+
+  /* Дата */
+  input.date-field { text-align: center; padding-left: 0; padding-right: 0; width: 100px; }
+
+  .btn-create { /* Кнопка создать */
+    background-color: #5cb85c; color: white; border-color: #4cae4c;
+    &:hover:enabled { background-color: #449d44; border-color: #398439; }
+    &:before { content: 'Створити'; }
+  }
+
+  .btn-send { /* Кнопка отправить */
+    background-color: #5bc0de; color: white; border-color: #46b8da;
+    &:hover:enabled { background-color: #31b0d5; border-color: #269abc; }
+    &:before { content: 'Надіслати'; }
+  }
+
+  .btn-exit { /* Кнопка выход */
+    background-color: #f0ad4e; color: #fff; border-color: #eea236;
+    &:hover:enabled { background-color: #ec971f; border-color: #d58512; }
+    &:before { content: 'Зберегти та закрити'; }
+  }
+
+  .align-right { float: right; } /* Позиционирование елементов */
+  .align-left { float: left; }
+}
+
+/* Табличка */
+.table-view {
+  margin-top: 10px;
+  font-size: 13px;
+  border-radius: 5px;
+  border-spacing: 0; border-collapse: collapse; border: 1px solid #e7e7e7; background-color: white;
+
+  thead { background-color: #fbfbfb; color: #333; border: 1px solid #e7e7e7; } /* Заголовок таблицы */
+
+  tr { height: 27px; }
+  th, td { border: 1px dotted #e7e7e7; text-align: center; padding: 0; font-weight: normal; }
+
+  /* Нажатие в таблички строку для JQUERY */
+  .row-selected { background-color: #e7e7e7; }
+
+  /* Выделение в таблички строку */
+  tbody tr {
+    cursor: pointer;
+    &:hover { background-color: #fbfbfb; border: 1px solid #dadada }
+    &:hover td { border-color: transparent ; }
+
+  }
+
+  /* Базовая кнопка */
+  .btn {
+    height: 100%;
+    width: 25px;
+    background-color: transparent;
+    text-align: center;
+    font-size: 12px;
+    border-style: none;
+    cursor: pointer;
+    &:disabled { color: #e7e7e7; cursor: default; };
+    &:before { font-family: 'Glyphicons Halflings'; top: 1px; position: relative; }
+  }
+
+  /* Кнопка просмотр */
+  .btn-view {
+    &:before { content: "\e105"; }
+    &:enabled { color: #5bc0de; }
+    &:hover:enabled { color: #31b0d5; }
+  }
+
+  /* Кнопка редактировать */
+  .btn-edit {
+    &:before { content: "\270f"; }
+    &:enabled {color: #5cb85c;}
+    &:hover:enabled { color: #449d44; }
+  }
+
+  /* Кнопка удалить */
+  .btn-del {
+    &:before { content: "\e014"; }
+    &:enabled {color: #d9534f; }
+    &:hover:enabled { color: #c9302c; }
+  }
+
+  /* Группировка колонок */
+  .row-group {
+    background-color: #e7e7e7;
+    text-align: left;
+    font-weight: bold;
+    padding-left: 5px;
+  }
+
+  /* Цыфровое поле ввода */
+  input[type="number"] {
+    font-size: 15px;
+    height: 25px;
+    text-align: right;
+    border: none;
+    &:focus { outline: none; }
+    &:hover:enabled { border-color: #aaa; }
+  }
+
+  .date-field { width: 100px; } /* Поле даты */
+  .datetime-field { width: 130px; } /* Поле даты и времени */
+  .count { width: 100px; input { width: 100px } } /* Поле количества */
+  .number-field { width: 150px; }
+
+  .uncheck-field { width: 60px; }
+
+  .check-field { width: 60px;
+    &:before { content: "\e013"; font-family: 'Glyphicons Halflings'; top: 1px; position: relative; color: #aaa;}
+  }
+
+
+}
+
+/* Для удаления записи */
+.delete-dialog {
+  &:after { content: 'Ви дійсно бажаєте видалити цей документ?'; }
+  &:before { content: "\e014"; font-family: 'Glyphicons Halflings'; margin-right: 3px; top: 2px; position: relative; color: #d9534f; }
+}
+
+
+

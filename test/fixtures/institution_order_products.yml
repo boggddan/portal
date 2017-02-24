@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  institution_order: one
+  product: one
+  date: 2017-01-12
+  count: 9.99
+
+two:
+  institution_order: two
+  product: two
+  date: 2017-01-12
+  count: 9.99

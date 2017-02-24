@@ -1,0 +1,15 @@
+//  Фильтрация таблицы поступлений
+
+$( '#table_timesheets' ).empty().append( '<%= j render( "timesheets/table_timesheets" ) %>' );
+
+var $table = $( '#table_timesheets table' );
+
+/* Если существуют заявки по выбраному фильтру */
+if ( $table.length ) {
+  $table.tableHeadFixer();  // Фиксируем шапку таблицы
+  if ( sessionStorage.timesheets_table_scroll ) { $( '#table_timesheets' ).scrollTop( sessionStorage.timesheets_table_scroll ) };
+  if ( sessionStorage.timesheets_table_row ) { $( '#table_io_corrections tbody tr:nth-of-type('+ sessionStorage.timesheets_table_row +')' ).addClass( 'selected' ) };
+} else {
+  sessionStorage.removeItem( 'timesheets_table_scroll' );
+  sessionStorage.removeItem( 'timesheets_table_row' );
+}

@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  institution: one
+  supplier: one
+  usename: MyString
+  password_digest: MyString
+  is_admin: false
+  is_supplier: false
+  is_institution: false
+
+two:
+  institution: two
+  supplier: two
+  usename: MyString
+  password_digest: MyString
+  is_admin: false
+  is_supplier: false
+  is_institution: false

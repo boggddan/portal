@@ -1,0 +1,87 @@
+/* Менюшка панелька */
+header, .panel {
+  height: 32px;
+  line-height: 28px;
+  width: 100%;
+  padding: 2px;
+  margin: 5px 0;
+  color: #333;
+  text-align: left;
+  font-size: 13px;
+
+  /* Для всех елементов */
+  select, input, button {
+    height: 100% ;
+    border-radius: 3px;
+    border: 1px solid;
+    background-color: white;
+    cursor: pointer;
+    &:disabled, &:hover:disabled { color: #e7e7e7; background-color: #fbfbfb; border-color: #dadada; cursor: default; }
+  }
+
+  /* Список выбора и поле ввода */
+  select, input {
+    padding: 5px;
+    border-color: #e7e7e7;
+    &:hover:enabled { border-color: #aaa; }
+  }
+
+  /* Для того что бы значение по-умолчанию сделать другим цветом */
+  select {
+    option { color: black; }
+    option[value=""] { color: #e7e7e7; }
+    &.placeholder:enabled { color: #e7e7e7; }
+    &:focus { outline: none; }
+  }
+
+  /* Блок для того что бы нарисовать иконку перед элементок */
+  nav {
+    display: inline-block;
+    position: relative;
+    &:after {content: "\e138"; font-family: 'Glyphicons Halflings'; position: absolute; top: 7px; left: 4px; color: #aaa; line-height: 1;}
+    input, select, input::-webkit-input-placeholder { padding-left: 19px; }
+    input { width: 100%; }
+
+    &.icon_filter { &:after {content: "\e138"; } } /* Иконка фильтрации */
+    &.icon_edit { &:after {content: "\270f"; } }  /* Иконка редактирования */
+    &.icon_сalendar { width: 100px; input { text-align: center; padding-left: 7px; padding-right: 0; }; &:after {content: "\e109"; }; }  /* Иконка календарь */
+    &.icon_number { width: 120px; &:after {content: "\e022"; }; }
+  }
+
+  /* Тестовое поле на панельке */
+  span {
+    display: inline-block;
+    height: 100%;
+    color: #333;
+    background-color: #e7e7e7;
+    border-radius: 3px;
+    padding: 0 3px;
+  }
+
+  .btn_create { /* Кнопка создать */
+    background-color: #5cb85c; color: white; border-color: #4cae4c;
+    &:hover:enabled { background-color: #449d44; border-color: #398439; }
+    &:before { content: 'Створити'; }
+  }
+
+  .btn_send { /* Кнопка отправить */
+    background-color: #5bc0de; color: white; border-color: #46b8da;
+    &:hover:enabled { background-color: #31b0d5; border-color: #269abc; }
+    &:before { content: 'Надіслати'; }
+  }
+
+  .btn_exit { /* Кнопка выход */
+    background-color: #f0ad4e; color: #fff; border-color: #eea236;
+    &:hover:enabled { background-color: #ec971f; border-color: #d58512; }
+    &:before { content: 'Закрити'; }
+  }
+
+  .btn_save { /* Кнопка сохранить */
+    background-color: #f0ad4e; color: #fff; border-color: #eea236;
+    &:hover:enabled { background-color: #ec971f; border-color: #d58512; }
+    &:before { content: 'Зберегти та закрити'; }
+  }
+
+  .align_right { float: right; } /* Позиционирование елементов */
+}
+

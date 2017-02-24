@@ -1,0 +1,14 @@
+<!-- Вход пользователя -->
+
+<%= content_tag :div, "Кількість дітей по категоріях", id: :main_log_in do %>
+  <%= form_tag sessions_create_path, method: :post do %>
+    <%= content_tag :span, "Вхід в портал" %>
+    <%= content_tag :div do %>
+      <%= text_field_tag :username, '', { placeholder: "Користувач..." } %>
+    <% end %>
+    <%= content_tag :div do %>
+      <%= password_field_tag :password, '', { placeholder: "Пароль..." } %>
+    <% end %>
+    <button></button>
+  <% end %>
+<% end %>

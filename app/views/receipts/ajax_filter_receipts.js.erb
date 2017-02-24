@@ -1,0 +1,15 @@
+//  Фильтрация таблицы поступлений
+
+$('#table_receipts').empty().append('<%= j render("receipts/table_receipts") %>');
+
+var $table = $('#table_receipts table');
+
+/* Если существуют заявки по выбраному фильтру */
+if ( $table.length ) {
+  $table.tableHeadFixer();  // Фиксируем шапку таблицы
+  if (sessionStorage.receipts_table_receipts_scroll) { $('#table_receipts').scrollTop(sessionStorage.receipts_table_receipts_scroll); };
+  if (sessionStorage.receipts_table_receipts_orders_row) { $('#table_receipts tbody tr:nth-of-type('+ sessionStorage.receipts_table_receipts_orders_row +')').addClass('selected'); };
+} else {
+  sessionStorage.removeItem('receipts_table_receipts_scroll');
+  sessionStorage.removeItem('receipts_table_receipts_orders_row');
+}

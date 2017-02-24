@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  receipt: one
+  product: one
+  date: 2017-01-09
+  count: 9.99
+
+two:
+  receipt: two
+  product: two
+  date: 2017-01-09
+  count: 9.99
