@@ -28,7 +28,7 @@
 
   <!-- Отображение коректировки  -->
   <%= content_tag :div, '', class: :clmn do %>
-    <%= content_tag :h1, '',  data: { text: "Корегування заявки №", ajax_path: "#{institution_orders_ajax_filter_io_corrections_path}?id=" } %>
+    <%= content_tag :h1, '',  data: { text: "Коригування заявки №", ajax_path: "#{institution_orders_ajax_filter_io_corrections_path}?id=" } %>
 
     <%= content_tag :div, '', class: :panel do %>
       <%= button_tag '', class: [:btn_create, :align_right], id: :create_io_correction, data: { ajax_path: "#{institution_orders_correction_create_path}?id=" } %>
