@@ -148,8 +148,8 @@ $( document ).on( 'turbolinks:load', function() {
 
     // Нажатие на кнопочку для перехода заполнения информации
     $( document ).on( 'click', '#table_institution_orders td .btn_view, #table_institution_orders td .btn_edit', function() {
-      var $tr = $( this ).parents( 'tr' );
-      window.location.replace( $tr.data( 'path' ) + $tr.data( 'id' ) );
+      var $tr = $(this).parents('tr');
+      window.location.replace( $( this ).parents( 'table' ).data( 'path-view' ) + $tr.data( 'id' ) );
     } );
 
     // Нажатие на кнопочку удалить поступление
@@ -170,8 +170,6 @@ $( document ).on( 'turbolinks:load', function() {
       sessionStorage.instituiton_orders_table_io_corrections_scroll = $( '#table_io_corrections' ).scrollTop();
       window.location.replace( $( this ).parents( 'table' ).data( 'path-view' ) + $tr.data( 'id' ) );
     } );
-
-
 
   };
 

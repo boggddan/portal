@@ -13,9 +13,9 @@
     <% end %>
 
     <%= content_tag :tbody do %>
-      <% @io_corrections.each do |io_correction| %>
+      <% @io_corrections.each do | io_correction | %>
         <%= content_tag :tr, data: { id: io_correction.id } do %>
-          <%= content_tag :td, date_str(io_correction.date), class: :date_field %>
+          <%= content_tag :td, date_str( io_correction.date ), class: :date_field %>
           <%= content_tag :td, io_correction.number, class: :number_field %>
           <%= content_tag :td, io_correction.number_sa, class: :number_field %>
           <%= content_tag :td do button_tag '', class: :btn_view, disabled: !io_correction.date_sa end %>
