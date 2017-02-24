@@ -97,13 +97,14 @@ Rails.application.routes.draw do
     post :product_update # Обновление количества
     post :update # Обновление реквизитов документа заявки
     post :send_sa # Веб-сервис отправки
-    delete :ajax_delete_institution_order # Удаление
+    delete :delete # Удаление
 
     post :correction_create # Создания корректировки заявки
     delete :correction_delete # Удаление корректировки заявки
     get :correction_products # Отображение товаров корректировки заявки
     post :correction_update # Обновление реквизитов документа корректировки заявки
     post :correction_product_update # Обновление количества корректировки заявки
+    post :correction_send_sa # Веб-сервис отправки корректировки
   end
 
   # Меню-требования

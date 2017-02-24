@@ -27,9 +27,9 @@ class InstitutionOrdersController < ApplicationController
     date_start = params[ :date_start ].to_date
     date_end = params[ :date_end ].to_date
 
-    message = { "GetRequest" => { "ins0:StartDate" => date_start,
-                                  "ins0:EndDate" => date_end,
-                                  "ins0:DepartmentsCode" => current_institution.code } }
+    message = { 'GetRequest' => { 'ins0:StartDate' => date_start,
+                                  'ins0:EndDate' => date_end,
+                                  'ins0:DepartmentsCode' => current_institution.code } }
     response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] ).call( :get_schedule_of_food_supply, message: message )
 
     interface_state = response.body[ :get_schedule_of_food_supply_response ][ :return ][ :interface_state ]
@@ -64,14 +64,14 @@ class InstitutionOrdersController < ApplicationController
     institution_order = InstitutionOrder.find_by( id: params[ :id ] )
     institution_order_products = institution_order.institution_order_products.where.not( count: 0 )
     if institution_order_products
-      message = { "CreateRequest" => { "ins0:Institutions_id" => institution_order.institution.code,
-                                       "ins0:DateStart" => institution_order.date_start.strftime("%Y-%m-%d"),
-                                       "ins0:DateFinish" => institution_order.date_end.strftime("%Y-%m-%d"),
-                                       "ins0:NumberFromWebPortal" => institution_order.number,
-                                       "ins0:TMC" => institution_order_products.map{ | o | {
-                                         "ins0:Product_id" => o.product.code,
-                                         "ins0:Date" => o.date,
-                                         "ins0:Count_po" => o.count.to_s } } } }
+      message = { 'CreateRequest' => { 'ins0:Institutions_id' => institution_order.institution.code,
+                                       'ins0:DateStart' => institution_order.date_start.strftime('%Y-%m-%d'),
+                                       'ins0:DateFinish' => institution_order.date_end.strftime('%Y-%m-%d'),
+                                       'ins0:NumberFromWebPortal' => institution_order.number,
+                                       'ins0:TMC' => institution_order_products.map{ | o | {
+                                         'ins0:Product_id' => o.product.code,
+                                         'ins0:Date' => o.date,
+                                         'ins0:Count_po' => o.count.to_s } } } }
       response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] ).
         call( :creation_application_units, message: message )
       interface_state = response.body[ :creation_application_units_response ][ :return ][ :interface_state ]
@@ -84,7 +84,7 @@ class InstitutionOrdersController < ApplicationController
        render json: { interface_state: interface_state, message: message }
       end
     else
-      render text: "Количество не проставлено"
+      render text: 'Количество не проставлено'
     end
   end
 
@@ -92,9 +92,9 @@ class InstitutionOrdersController < ApplicationController
   def correction_create
     institution_order = InstitutionOrder.find_by( id: params[:id] )
 
-    message = { "GetRequest" => { "ins0:StartDate" => institution_order.date_start,
-                                  "ins0:EndDate" => institution_order.date_end,
-                                  "ins0:DepartmentsCode" => current_institution.code } }
+    message = { 'GetRequest' => { 'ins0:StartDate' => institution_order.date_start,
+                                  'ins0:EndDate' => institution_order.date_end,
+                                  'ins0:DepartmentsCode' => current_institution.code } }
     response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] ).call( :get_schedule_of_food_supply, message: message )
 
     interface_state = response.body[ :get_schedule_of_food_supply_response ][ :return ][ :interface_state ]
@@ -142,5 +142,34 @@ class InstitutionOrdersController < ApplicationController
     update = params.permit( :diff ).to_h
     IoCorrectionProduct.where( id: params[ :id ] ).update_all( update ) if params[ :id ] && update.any?
   end
+
+  def correction_send_sa # Веб-сервис отправки корректировки
+    io_correction = IoCorrection.find_by( id: params[ :id ] )
+    institution_order = io_correction.institution_order
+    io_correction_products = io_correction.io_correction_products.where.not( diff: 0 )
+    if io_correction_products
+      message = { 'CreateRequest' => { 'ins0:Institutions_id' => institution_order.institution.code,
+                                       'ins0:NumberFromWebPortal' => io_correction.number,
+                                       'ins0:ApplicationNumber' => institution_order.number,
+                                       'ins0:TMC' => io_correction_products.map{ | o | {
+                                         'ins0:Product_id' => o.product.code,
+                                         'ins0:Date' => o.date,
+                                         'ins0:Count_po' => o.diff.to_s } } } }
+      response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] ).
+        call( :creation_correction_application_units, message: message )
+      interface_state = response.body[ :creation_correction_application_units_response ][ :return ][ :interface_state ]
+      number = response.body[ :creation_correction_application_units_response ][ :return ][ :respond ]
+
+      if interface_state == 'OK' then
+        io_correction.update( date_sa: Date.today, number_sa: number )
+        redirect_to institution_orders_index_path
+      else
+        render json: { interface_state: interface_state, message: message }
+      end
+    else
+      render text: 'Количество не проставлено'
+    end
+  end
+
 
 end

@@ -1,7 +1,8 @@
 <!-- Табличка с заявками -->
 <% if @institution_orders.present? %>
 
-  <%= content_tag :table, class: :table  do %>
+  <%= content_tag :table, class: :table, data: { path_view: "#{institution_orders_products_path}?id=",
+                                                 path_del: "#{institution_orders_delete_path}?id=" }  do %>
     <%= content_tag :thead do %>
       <%= content_tag :tr do %>
         <%= content_tag :th, 'Дата' %>
@@ -14,22 +15,16 @@
     <% end %>
 
     <%= content_tag :tbody do %>
-      <% @institution_orders.each do |institution_order| %>
-        <%= content_tag :tr, '', data: { path: "#{institution_orders_products_path}?id=", id: institution_order.id } do %>
-          <%= content_tag :td, date_str(institution_order.date), class: :date_field %>
+      <% @institution_orders.each do | institution_order | %>
+        <%= content_tag :tr, '', data: { id: institution_order.id } do %>
+          <%= content_tag :td, date_str( institution_order.date ), class: :date_field %>
           <%= content_tag :td, institution_order.number, class: :number_field %>
           <%= content_tag :td, institution_order.number_sa, class: :number_field %>
-          <%= content_tag :td, date_str(institution_order.date_start), class: :date_field %>
-          <%= content_tag :td, date_str(institution_order.date_end), class: :date_field %>
-          <%= content_tag :td do %>
-            <%= button_tag '', class: :btn_view, disabled: !institution_order.date_sa %>
-          <% end %>
-          <%= content_tag :td do %>
-            <%= button_tag '', class: :btn_edit, disabled: institution_order.date_sa %>
-          <% end %>
-          <%= content_tag :td do %>
-            <%= button_tag '', class: :btn_del, disabled: institution_order.date_sa %>
-          <% end %>
+          <%= content_tag :td, date_str( institution_order.date_start ), class: :date_field %>
+          <%= content_tag :td, date_str( institution_order.date_end ), class: :date_field %>
+          <%= content_tag :td do button_tag '', class: :btn_view, disabled: !institution_order.date_sa end %>
+          <%= content_tag :td do button_tag '', class: :btn_edit, disabled: institution_order.date_sa end %>
+          <%= content_tag :td do button_tag '', class: :btn_del, disabled: institution_order.date_sa end %>
         <% end %>
       <% end %>
     <% end %>

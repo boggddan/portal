@@ -15,6 +15,12 @@ $( document ).on( 'turbolinks:load', function() {
       if ( $this.val() ) { $this.addClass( $this.val() > 0 ? 'positive' : 'negative' ) };
     });
 
+    // Нажатие на кнопочку отправить
+    $( '#send_sa' ).click( function() {
+      $( '#dialog_wait' ).dialog( 'open' );
+      $.ajax( { url: $( this ).data( 'ajax-path' ), type: 'POST', dataType: 'script' } );
+    } );
+
     // Дата
     $( '#date' ).datepicker( {
       onSelect: function() {

@@ -44,7 +44,7 @@ $( document ).on( 'turbolinks:load', function() {
     emptyInstitutionOrder = function() {
       var $h1 = $( '.clmn:nth-of-type(2) h1' );
       sessionStorage.removeItem( 'instituiton_orders_table_instituiton_orders_row' );
-      sessionStorage.removeItem( 'instituiton_orders_table_instituiton_orders_scroll' );
+      s1essionStorage.removeItem( 'instituiton_orders_table_instituiton_orders_scroll' );
       $h1.text( $h1.data( 'text' ) );
     };
 
@@ -60,17 +60,16 @@ $( document ).on( 'turbolinks:load', function() {
 
     // Удаление заявки
     deleteInstituitonOrder = function() {
-      $.ajax( { url: $( '#table_institution_orders tr.delete .btn_del' ).data( 'ajax-path' ), type: 'DELETE', dataType: 'script' } );
+      var $path_ajax = $( '#table_institution_orders .table' ).data( 'path-del' ) + $( '#table_institution_orders tr.delete' ).data( 'id' );
+      $.ajax( { url: $path_ajax, type: 'DELETE', dataType: 'script' } );
 
       // Если один одна строка, тогда удаляем всю табличку
-      if ( $( '#table_institution_orders tbody' ).children().length == 1 ) {
-        $( '#table_institution_orders' ).empty()
-      } else {
-        $( '#table_institution_orders tr.delete' ).remove() } ;
+      if ( $( '#table_institution_orders tbody' ).children().length == 1 ) { $( '#table_institution_orders' ).empty()
+      } else { $( '#table_institution_orders tr.delete' ).remove() } ;
     };
 
     // Отмена удаления заявки
-    unDeleteInstituitonOrder = function() { $( '#table_institution_orders tr.delete' ).removeClass( 'delete' ); };
+    unDeleteInstituitonOrder = function() { $( '#table_institution_orders tr.delete' ).removeClass( 'delete' ) };
 
     // Удаление корректировки заявки
     deleteIoCorrection = function() {

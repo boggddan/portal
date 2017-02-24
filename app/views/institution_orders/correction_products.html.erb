@@ -7,7 +7,8 @@
 
   <%= content_tag :div, '', id: :panel_main do %>
     <%= content_tag :div, '', class: :panel do %>
-      <%= button_tag '', class: :btn_send, id: :send_sa, disabled: @io_correction.date_sa, data: { ajax_path: "#{institution_orders_send_sa_path}?id=#{@io_correction.id}" } %>
+      <%= button_tag '', class: :btn_send, id: :send_sa, disabled: @io_correction.date_sa,
+          data: { ajax_path: "#{institution_orders_correction_send_sa_path}?id=#{@io_correction.id}" } %>
       <%= button_tag '', class: (@io_correction.date_sa ? :btn_exit : :btn_save), onclick: "location.href='#{institution_orders_index_path}'" %>
 
       <% if @io_correction.date_sa %>

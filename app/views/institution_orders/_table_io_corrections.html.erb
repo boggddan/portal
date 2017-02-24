@@ -1,7 +1,8 @@
 <!-- Табличка с заявками -->
 <% if @io_corrections.present? %>
 
-  <%= content_tag :table, class: :table, data: { path_view: "#{institution_orders_correction_products_path}?id=", path_del: "#{institution_orders_correction_delete_path}?id=" }  do %>
+  <%= content_tag :table, class: :table, data: { path_view: "#{institution_orders_correction_products_path}?id=",
+                                                 path_del: "#{institution_orders_correction_delete_path}?id=" }  do %>
     <%= content_tag :thead do %>
       <%= content_tag :tr do %>
         <%= content_tag :th, 'Дата' %>
