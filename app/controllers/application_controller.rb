@@ -3,7 +3,6 @@ class ApplicationController < ActionController::Base
   helper_method :day_of_week, :year_month_names
   helper_method :current_user, :date_str, :f3_to_s, :f2_to_s
 
-
   $ghSavon = { wsdl: "http://192.168.1.2:8080/gos1/ws/createsd.1cws?wsdl",  namespaces: { "xmlns:ins0" => 'http://www.reality.sh' } }
   #$ghSavon = { wsdl: "http://77.123.138.82:999/edu/ws/createsd.1cws?wsdl",  namespaces: { "xmlns:ins0" => 'http://www.reality.sh' } }
 
@@ -17,7 +16,6 @@ class ApplicationController < ActionController::Base
   def short_day_of_week( wday )
     { 0 => "Нд", 1 => "Пн", 2 => "Вт", 3 => "Ср", 4 => "Чт", 5 => "Пт", 6 => "Сб" }[ wday ]
   end
-
 
   def month_names( month )
     { 1 => "Січень", 2 => "Лютий", 3 => "Березень", 4 => "Квітень", 5 => "Травень", 6 => "Червень",
