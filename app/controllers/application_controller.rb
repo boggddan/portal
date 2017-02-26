@@ -1,4 +1,4 @@
-class ApplicationController < ActionController::Base
+﻿class ApplicationController < ActionController::Base
   before_action :verify_log_in # Фильтр на проверку зарегистрированости пользователя
   helper_method :day_of_week, :year_month_names
   helper_method :current_user, :date_str, :f3_to_s, :f2_to_s
@@ -27,8 +27,6 @@ class ApplicationController < ActionController::Base
   def year_month_names( date )
     "#{month_names( date.month )} #{date.year} р."
   end
-
-
 
   def current_user # Текущий пользователь
     @current_user ||= User.find_by(id: session[:user_id])
