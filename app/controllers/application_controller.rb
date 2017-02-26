@@ -19,6 +19,8 @@
   #comment4 reality
   #comment5 reality
 
+  #comment6 bogdan
+
 
   def day_of_week( wday )
     { 0 => "Неділя", 1 => "Понеділок", 2 => "Вівторок", 3 => "Середа", 4 => "Четвер", 5 => "П'ятниця", 6 => "Субота" }[ wday ]
