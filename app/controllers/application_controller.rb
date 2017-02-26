@@ -20,6 +20,7 @@
   #comment5 reality
 
   #comment6 bogdan
+  #comment6 reality
 
 
   def day_of_week( wday )
