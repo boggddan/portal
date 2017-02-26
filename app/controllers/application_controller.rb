@@ -9,6 +9,7 @@ class ApplicationController < ActionController::Base
   #$ghSavon = { wsdl: "http://77.123.138.82:999/edu/ws/createsd.1cws?wsdl",  namespaces: { "xmlns:ins0" => 'http://www.reality.sh' } }
 
   #comment bogdan
+  #comment2 bogdan
 
   def day_of_week( wday )
     { 0 => "Неділя", 1 => "Понеділок", 2 => "Вівторок", 3 => "Середа", 4 => "Четвер", 5 => "П'ятниця", 6 => "Субота" }[ wday ]
