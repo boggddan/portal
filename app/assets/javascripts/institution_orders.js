@@ -161,7 +161,6 @@ $( document ).on( 'turbolinks:load', function() {
       $( '#dialog_delete' ).dialog( 'open' );
     });
 
-
     // Нажатие на кнопочку для перехода заполнения информации
     $( document ).on( 'click', '#table_io_corrections td .btn_view, #table_io_corrections td .btn_edit', function() {
       var $tr = $(this).parents('tr');
