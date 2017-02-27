@@ -7,4 +7,6 @@ class Institution < ApplicationRecord
   has_many :institution_orders
   has_many :price_products
   has_many :timesheets
+
+  has_many :users, as: :userable
 end

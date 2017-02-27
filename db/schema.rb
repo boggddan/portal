@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170222140648) do
+ActiveRecord::Schema.define(version: 20170227124753) do
 
   create_table "branches", force: :cascade do |t|
     t.string   "code",       limit: 4
@@ -312,15 +312,13 @@ ActiveRecord::Schema.define(version: 20170222140648) do
   end
 
   create_table "users", force: :cascade do |t|
-    t.integer  "institution_id"
-    t.integer  "supplier_id"
     t.string   "username"
     t.string   "password_digest"
-    t.boolean  "is_admin"
     t.datetime "created_at",      null: false
     t.datetime "updated_at",      null: false
-    t.index ["institution_id"], name: "index_users_on_institution_id"
-    t.index ["supplier_id"], name: "index_users_on_supplier_id"
+    t.string   "userable_type"
+    t.integer  "userable_id"
+    t.index ["userable_type", "userable_id"], name: "index_users_on_userable_type_and_userable_id"
     t.index ["username"], name: "index_users_on_username"
   end
 
