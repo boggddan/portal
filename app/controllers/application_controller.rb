@@ -8,36 +8,10 @@
 
   #$ghSavon = { wsdl: "http://77.123.138.82:999/edu/ws/createsd.1cws?wsdl",  namespaces: { "xmlns:ins0" => 'http://www.reality.sh' } }
 
-  #comment bogdan
-  #comment2 bogdan
-  #comment reality
-  #comment2 reality
-
-  #commen3 bogdan
-  #comment3 reality
-
-  #comment4 reality
-  #comment5 reality
-
-  #comment6 bogdan
-  #comment6 reality
-
-  #comment7 bogdan
-
-  #comment7 reality
-  #comment8 reality
-  #comment9 reality
-  #comment10 reality
-  #comment11 reality
-
-  #comment8 bogdan
-  #comment9 bogdan
-  #comment10 bogdan
-
-  #comment12 reality
-  #comment14 reality
-
+ 
   #comment11 bogdan
+
+  #comment15 reality
 
   def day_of_week( wday )
     { 0 => "Неділя", 1 => "Понеділок", 2 => "Вівторок", 3 => "Середа", 4 => "Четвер", 5 => "П'ятниця", 6 => "Субота" }[ wday ]
