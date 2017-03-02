@@ -3,15 +3,11 @@
   helper_method :day_of_week, :year_month_names
   helper_method :current_user, :date_str, :f3_to_s, :f2_to_s
 
-  $ghSavon = { wsdl: 'http://192.168.1.2:8080/gos1_new/ws/createsd.1cws?wsdl',
+
+  $ghSavon = { wsdl: Rails.env.production? ?
+    'http://192.168.1.2:8080/gos1_new/ws/createsd.1cws?wsdl' :
+    'http://77.123.138.82:999/edu/ws/createsd.1cws?wsdl',
                namespaces: { 'xmlns:ins0' => 'http://www.reality.sh' } }
-
-  #$ghSavon = { wsdl: "http://77.123.138.82:999/edu/ws/createsd.1cws?wsdl",  namespaces: { "xmlns:ins0" => 'http://www.reality.sh' } }
-
- 
-  #comment11 bogdan
-  #comment17 reality
-  #comment18 bogdan
 
   def day_of_week( wday )
     { 0 => "Неділя", 1 => "Понеділок", 2 => "Вівторок", 3 => "Середа", 4 => "Четвер", 5 => "П'ятниця", 6 => "Субота" }[ wday ]

@@ -4,16 +4,15 @@ default: &default
   timeout: 5000
 
 development:
-  <<: *default
-  database: db/development.sqlite3
-#  adapter: postgresql
-#  encoding: unicode
-#  database: portal
-#  host: 192.168.1.88
-#  pool: 5
-#  username: postgres
-#  password: 6k3vddrb2v
-
+ # <<: *default
+ # database: db/development.sqlite3
+  adapter: postgresql
+  encoding: unicode
+  database: portal
+  host: 192.168.1.88
+  pool: 5
+  username: postgres
+  password: 6k3vddrb2v
 
 test:
   <<: *default

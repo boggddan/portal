@@ -1094,7 +1094,7 @@ class SyncCatalogsController < ApplicationController
 
             ### menu_products
             menu_products = menu_requirement.menu_products
-            menu_products.update_all( count_fact: 0, count_fact: 0 )
+            menu_products.update_all( count_fact: 0 )
 
             error_products = []
             params[:products].each_with_index do |product_par, index|

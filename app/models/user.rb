@@ -9,7 +9,7 @@ class User < ApplicationRecord
   #belongs_to :institution
   #belongs_to :supplier
 
-
+  #scope :institution, -> { joins( 'institutions' ) }
 
   validates :username, presence: true, uniqueness: true
 end
