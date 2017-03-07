@@ -6,7 +6,7 @@
 
   $ghSavon = { wsdl: Rails.env.production? ?
     'http://192.168.1.2:8080/gos1_new/ws/createsd.1cws?wsdl' :
-    'http://77.123.138.82:999/edu/ws/createsd.1cws?wsdl',
+    'http://192.168.1.88:8084/gos_release/ws/createsd.1cws?wsdl',
                namespaces: { 'xmlns:ins0' => 'http://www.reality.sh' } }
 
   def day_of_week( wday )
