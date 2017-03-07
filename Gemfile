@@ -60,5 +60,4 @@ gem 'thor', '0.19.1'
 
 gem 'baby_squeel'
 gem 'slim'
-
 gem 'pg'

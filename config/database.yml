@@ -6,9 +6,9 @@ default: &default
 
 development:
   <<: *default
-  host: localhost
+  host: 192.168.1.88
   username: postgres
-  password: 1
+  password: 6k3vddrb2v
 
 production:
   <<: *default
