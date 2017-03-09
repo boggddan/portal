@@ -8,8 +8,8 @@ class MenuRequirementsController < ApplicationController
     end
   end
 
-  def ajax_delete_menu_requirement # Удаление документа
-    MenuRequirement.where(id: params[:id]).delete_all if params[:id].present?
+  def delete # Удаление документа
+    MenuRequirement.find_by( id: params[ :id ] ).destroy if params[ :id ]
   end
 
   def products # Отображение товаров

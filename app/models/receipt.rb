@@ -2,7 +2,7 @@ class Receipt < ApplicationRecord
   belongs_to :supplier_order
   belongs_to :institution
 
-  has_many :receipt_products
+  has_many :receipt_products, dependent: :destroy
 
   #
   before_save :set_default_value
@@ -19,6 +19,5 @@ class Receipt < ApplicationRecord
     self.number ||= number.to_s.rjust(12, '0')
     self.date ||= Date.today
   end
-
 
 end

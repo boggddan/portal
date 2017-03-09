@@ -1,7 +1,9 @@
 class IoCorrection < ApplicationRecord
   belongs_to :institution_order
 
-  has_many :io_correction_products, -> { select( :id, :io_correction_id, :product_id, :date, :diff, :description, :code, :name ).joins( :product ) }
+  has_many :io_correction_products,
+    -> { select( :id, :io_correction_id, :product_id, :date, :diff, :description, :code, :name ).joins( :product ) },
+    dependent: :destroy
 
   #
   before_save :set_default_value

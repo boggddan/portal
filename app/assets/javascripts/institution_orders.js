@@ -5,15 +5,17 @@ $( document ).on( 'turbolinks:load', function() {
     $( '#main_menu li' ).removeClass( 'active' );
     $( '#mm_instituiton_orders' ).addClass( 'active' );
 
-    if ( sessionStorage.instituiton_orders_date_start ) { $( '#date_start' ).val( sessionStorage.instituiton_orders_date_start ) };
-    if ( sessionStorage.instituiton_orders_date_end ) { $( '#date_end' ).val( sessionStorage.instituiton_orders_date_end ) };
+    if ( sessionStorage.instituiton_orders_date_start ) {
+      $( '#date_start' ).val( sessionStorage.instituiton_orders_date_start ) };
+    if ( sessionStorage.instituiton_orders_date_end ) {
+      $( '#date_end' ).val( sessionStorage.instituiton_orders_date_end ) };
 
     filterTableInstituitonOrders(); // Фильтрация таблицы заявок
 
     // Фильтрация таблицы заявок
     function filterTableInstituitonOrders() {
-      var $date_start = $('#date_start');
-      var $date_end = $('#date_end');
+      var $date_start = $( '#date_start' );
+      var $date_end = $( '#date_end' );
       var $date_start_val = $date_start.val();
       var $date_end_val = $date_end.val();
 
@@ -43,9 +45,9 @@ $( document ).on( 'turbolinks:load', function() {
     // Очистка заявки
     emptyInstitutionOrder = function() {
       var $h1 = $( '.clmn:nth-of-type(2) h1' );
+      $h1.text( $h1.data( 'text' ) );
       sessionStorage.removeItem( 'instituiton_orders_table_instituiton_orders_row' );
       sessionStorage.removeItem( 'instituiton_orders_table_instituiton_orders_scroll' );
-      $h1.text( $h1.data( 'text' ) );
     };
 
     // Фильтрация таблицы корректировки заявки
@@ -101,7 +103,7 @@ $( document ).on( 'turbolinks:load', function() {
     });
 
     // Начальная дата фильтрации
-    $( '#date_start' ).datepicker({
+    $( '#date_start' ).datepicker( {
       onSelect: function() {
         var $this = $( this );
         var $thisVal =  $this.val();
@@ -112,10 +114,10 @@ $( document ).on( 'turbolinks:load', function() {
           filterTableInstituitonOrders(); // Фильтрация таблицы заявок
         };
       }
-    });
+    } );
 
     // Конечная дата фильтрации
-    $( '#date_end' ).datepicker({
+    $( '#date_end' ).datepicker( {
       onSelect: function() {
         var $this = $( this );
         var $thisVal =  $this.val();
@@ -126,7 +128,7 @@ $( document ).on( 'turbolinks:load', function() {
           filterTableInstituitonOrders(); // Фильтрация таблицы заявок
         };
       }
-    });
+    } );
 
     // Нажатие на кнопочку удалить поступление
     $( document ).on( 'click', '#table_institution_orders td .btn_del', function() {
@@ -140,7 +142,7 @@ $( document ).on( 'turbolinks:load', function() {
     // Нажатие на кнопочку для перехода заполнения информации
     $( document ).on( 'click', '#table_institution_orders tbody tr', function() {
       var $this = $( this );
-      if ( !$this.hasClass('selected') ) {
+      if ( !$this.hasClass( 'selected' ) ) {
         sessionStorage.instituiton_orders_table_instituiton_orders_row = $this.index() + 1;
         sessionStorage.instituiton_orders_table_instituiton_orders_scroll = $( '#table_institution_orders' ).scrollTop();
         selectInstitutionOrder(); } // Выбор заявки
@@ -148,23 +150,22 @@ $( document ).on( 'turbolinks:load', function() {
 
     // Нажатие на кнопочку для перехода заполнения информации
     $( document ).on( 'click', '#table_institution_orders td .btn_view, #table_institution_orders td .btn_edit', function() {
-      var $tr = $(this).parents('tr');
+      var $tr = $( this ).parents( 'tr' );
       window.location.replace( $( this ).parents( 'table' ).data( 'path-view' ) + $tr.data( 'id' ) );
     } );
 
     // Нажатие на кнопочку удалить поступление
     $( document ).on( 'click', '#table_io_corrections td .btn_del', function() {
       $( this ).parents( 'tr' ).addClass( 'delete' );
-      var dialogDelete = $( '#dialog_delete' )
-      dialogDelete.data( 'delete', 'deleteIoCorrection();' ); // Функция для удаления заявки
-      dialogDelete.data( 'un-delete', 'unDeleteIoCorrection();' ); // Отмена удаления заявки
-      $( '#dialog_delete' ).dialog( 'open' );
+      var $dialogDelete = $( '#dialog_delete' )
+      $dialogDelete.data( 'delete', 'deleteIoCorrection();' ); // Функция для удаления заявки
+      $dialogDelete.data( 'un-delete', 'unDeleteIoCorrection();' ); // Отмена удаления заявки
+      $dialogDelete.dialog( 'open' );
     });
 
     // Нажатие на кнопочку для перехода заполнения информации
     $( document ).on( 'click', '#table_io_corrections td .btn_view, #table_io_corrections td .btn_edit', function() {
-      var $tr = $(this).parents('tr');
-
+      var $tr = $( this ).parents( 'tr' );
       sessionStorage.instituiton_orders_table_io_corrections_row = $tr.index() + 1;
       sessionStorage.instituiton_orders_table_io_corrections_scroll = $( '#table_io_corrections' ).scrollTop();
       window.location.replace( $( this ).parents( 'table' ).data( 'path-view' ) + $tr.data( 'id' ) );

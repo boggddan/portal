@@ -2,9 +2,12 @@ class InstitutionOrder < ApplicationRecord
   #
   belongs_to :institution
 
-  has_many :io_corrections
-  has_many :institution_order_products, -> { select( :id, :institution_order_id, :product_id, :date, :count, :description, :code, :name ).joins( :product ) }
+  has_many :io_corrections, dependent: :destroy
 
+  has_many :institution_order_products,
+     -> { select( :id, :institution_order_id, :product_id, :date, :count, :description, :code, :name )
+            .joins( :product ) },
+    dependent: :destroy
   #
   before_save :set_default_value
 

@@ -9,7 +9,7 @@ class TimesheetsController < ApplicationController
   end
 
   def delete_timesheet # Удаление документа
-    Timesheet.delete_all( id: params[ :id ] ) if params[ :id ]
+    Timesheet.find_by( id: params[ :id ] ).destroy if params[ :id ]
   end
 
   def dates # Отображение дней табеля

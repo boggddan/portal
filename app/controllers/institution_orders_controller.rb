@@ -14,8 +14,8 @@ class InstitutionOrdersController < ApplicationController
     @io_corrections = IoCorrection.where( institution_order_id: params[ :id ] ).order( :number ) if params[ :id ]
   end
 
-  def ajax_delete_institution_order # Удаление
-    InstitutionOrder.delete_all( id: params[ :institution_order_id ] ) if params[ :institution_order_id ]
+  def delete # Удаление
+    InstitutionOrder.find_by( id: params[ :id ] ).destroy if params[ :id ]
   end
 
   def products # Отображение товаров
@@ -122,7 +122,7 @@ class InstitutionOrdersController < ApplicationController
   end
 
   def correction_delete # Удаление корректировки заявки
-    IoCorrection.delete_all( id: params[ :id ] ) if params[ :id ]
+    IoCorrection.find_by( id: params[ :id ] ).destroy if params[ :id ]
   end
 
   def correction_products # Отображение товаров корректировки заявки

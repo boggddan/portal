@@ -22,7 +22,7 @@
           <%= content_tag :td, receipt.number_sa, class: :number_field %>
           <%= content_tag :td do button_tag '', class: :btn_view, disabled: !receipt.date_sa end %>
           <%= content_tag :td do button_tag '', class: :btn_edit, disabled: receipt.date_sa end %>
-          <%= content_tag :td do button_tag '', class: :btn_del, disabled: receipt.date_sa, data: { ajax_path: "#{receipts_ajax_delete_receipt_path}?receipt_id=#{receipt.id}" } end %>
+          <%= content_tag :td do button_tag '', class: :btn_del, disabled: receipt.date_sa, data: { ajax_path: "#{receipts_ajax_delete_receipt_path}?id=#{receipt.id}" } end %>
         <% end %>
       <% end %>
     <% end %>

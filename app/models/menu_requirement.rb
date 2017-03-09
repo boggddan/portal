@@ -2,8 +2,8 @@ class MenuRequirement < ApplicationRecord
   belongs_to :branch
   belongs_to :institution
 
-  has_many :menu_children_categories
-  has_many :menu_products
+  has_many :menu_children_categories, dependent: :destroy
+  has_many :menu_products, dependent: :destroy
 
   #
   before_save :set_default_value

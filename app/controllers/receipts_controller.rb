@@ -1,6 +1,5 @@
 class ReceiptsController < ApplicationController
 
-
   def ajax_filter_supplier_orders # Фильтрация заявок поставщикам
     if params[:date_start] && params[:date_end]
       date_start = params[:date_start] ? params[:date_start] : params[:date_end]
@@ -18,7 +17,10 @@ class ReceiptsController < ApplicationController
 
   def ajax_filter_receipts # Фильтрация документов поставок
     if params[:id]
-      @receipts = Receipt.where(supplier_order_id: params[:id]).where(({ contract_number: (params[:contract_number]) } if params[:contract_number] && !params[:contract_number].blank? )).order(:date)
+      @receipts = Receipt.where( supplier_order_id: params[ :id ])
+        .where( ( { contract_number: (params[:contract_number] )
+          } if params[ :contract_number ] && !params[:contract_number].blank? ) )
+        .order( :date )
     end
   end
 
@@ -78,7 +80,7 @@ class ReceiptsController < ApplicationController
   end
 
   def ajax_delete_receipt # Удаление поступления
-    Receipt.delete_all(id: params[:receipt_id]) if params[:receipt_id].present?
+    Receipt.find_by( id: params[ :id ] ).destroy if params[ :id ]
   end
 
   def products # Отображение товаров поступления
