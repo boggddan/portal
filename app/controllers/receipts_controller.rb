@@ -27,7 +27,7 @@ class ReceiptsController < ApplicationController
   end
 
   def send_sa # Веб-сервис отправки поступления
-    receipt = Receipt.find_by( id: params[:id] )
+    receipt = Receipt.find_by( id: params[ :id ] )
     receipt_products = receipt.receipt_products.where.not( count: 0 )
 
     if receipt_products.present?
@@ -37,14 +37,17 @@ class ReceiptsController < ApplicationController
                                     'ins0:OrderNumber' => receipt.supplier_order.number,
                                     'ins0:NumberFromWebPortal' => receipt.number,
                                     'ins0:Date' => receipt.date,
-                                    'ins0:Goods' => receipt_products.map{|o| { 'ins0:CodeOfGoods' => o.product.code,
-                                                                             'ins0:Quantity' => o.count.to_s } } } }
+                                    'ins0:Goods' => receipt_products.map{ |o |
+                                      { 'ins0:CodeOfGoods' => o.product.code,
+                                        'ins0:Quantity' => o.count.to_s } } } }
 
-      response = Savon.client( wsdl: $ghSavon[:wsdl], namespaces:  $ghSavon[:namespaces] ).call( :create_doc_supply_goods, message: message )
-      interface_state = response.body[:create_doc_supply_goods_response][:return][:interface_state]
+      response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces:  $ghSavon[ :namespaces ] )
+                   .call( :create_doc_supply_goods, message: message )
 
-      if interface_state == 'OK' then
-        @receipt.update!(date_sa: Date.today)
+      return_value = response.body[ :create_doc_supply_goods_response ][ :return ]
+
+      if return_value[ :interface_state ] && return_value[ :interface_state ] == 'OK'
+        receipt.update( date_sa: Date.today, number_sa: return_value[ :respond ] )
         redirect_to receipts_index_path
       else
         render json: { interface_state: interface_state, message: message }

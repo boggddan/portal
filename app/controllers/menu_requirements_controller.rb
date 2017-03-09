@@ -129,10 +129,10 @@ class MenuRequirementsController < ApplicationController
       } }
 
       response = Savon.client( wsdl: $ghSavon[:wsdl], namespaces:  $ghSavon[:namespaces] ).call( :create_menu_requirement_plan, message: message )
-      return_value = response.body[:create_menu_requirement_plan_response][:return]
+      return_value = response.body[ :create_menu_requirement_plan_response ][ :return ]
 
-      if return_value[:interface_state] && return_value[:interface_state] == 'OK'
-        menu_requirement.update!( date_sap: Date.today, number_sap: return_value[:respond] )
+      if return_value[ :interface_state ] && return_value[ :interface_state ] == 'OK'
+        menu_requirement.update!( date_sap: Date.today, number_sap: return_value[ :respond ] )
         menu_children_categories.update_all( 'count_all_fact = count_all_plan, count_exemption_fact = count_exemption_plan' )
         menu_requirement_products.update_all( 'count_fact = count_plan' );
       end

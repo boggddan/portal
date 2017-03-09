@@ -6,7 +6,7 @@
   <div id="text-header" class="text-header"><%= "Поставка № #{@receipt.invoice_number} від #{@receipt.date.strftime('%d.%m.%Y')}" %></div>
 
   <div class="menu-panel">
-    <%= form_tag receipts_send_sa_path, method: :patch, class: 'form-fluid' do %>
+    <%= form_tag receipts_send_sa_path, method: :post, class: 'form-fluid' do %>
       <%= hidden_field_tag :id, @receipt.id %>
       <%= button_tag '', { class: 'btn btn-send', disabled: date_sa_present }  %>
     <% end %>
