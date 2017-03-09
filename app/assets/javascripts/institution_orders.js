@@ -44,7 +44,7 @@ $( document ).on( 'turbolinks:load', function() {
     emptyInstitutionOrder = function() {
       var $h1 = $( '.clmn:nth-of-type(2) h1' );
       sessionStorage.removeItem( 'instituiton_orders_table_instituiton_orders_row' );
-      s1essionStorage.removeItem( 'instituiton_orders_table_instituiton_orders_scroll' );
+      sessionStorage.removeItem( 'instituiton_orders_table_instituiton_orders_scroll' );
       $h1.text( $h1.data( 'text' ) );
     };
 

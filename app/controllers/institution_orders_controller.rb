@@ -1,25 +1,26 @@
 class InstitutionOrdersController < ApplicationController
 
   def ajax_filter_institution_orders # Фильтрация таблицы заявок
-    if params[:date_start] && params[:date_start]
-      date_start = params[:date_start] ? params[:date_start] : params[:date_end]
-      date_end = params[:date_end] ? params[:date_end] : params[:date_start]
-      @institution_orders = InstitutionOrder.where( institution: current_institution ).where( date_start: date_start..date_end ).or(
+    if params[ :date_start ] && params[ :date_start ]
+      date_start = params[ :date_start ] ? params[ :date_start ] : params[ :date_end ]
+      date_end = params[ :date_end ] ? params[ :date_end ] : params[ :date_start ]
+      @institution_orders = InstitutionOrder.where( institution: current_institution )
+                              .where( date_start: date_start..date_end ).or(
         InstitutionOrder.where( date_end: date_start..date_end )).order( :date_start )
     end
   end
 
   def ajax_filter_io_corrections # Фильтрация корректировок заявки
-    @io_corrections = IoCorrection.where( institution_order_id: params[:id] ).order( :number ) if params[:id]
+    @io_corrections = IoCorrection.where( institution_order_id: params[ :id ] ).order( :number ) if params[ :id ]
   end
 
   def ajax_delete_institution_order # Удаление
-    InstitutionOrder.delete_all(id: params[:institution_order_id]) if params[:institution_order_id].present?
+    InstitutionOrder.delete_all( id: params[ :institution_order_id ] ) if params[ :institution_order_id ]
   end
 
   def products # Отображение товаров
-    @institution_order = InstitutionOrder.find_by(id: params[:id])
-    @institution_order_products = @institution_order.institution_order_products.order(:date)
+    @institution_order = InstitutionOrder.find_by( id: params[ :id ] )
+    @institution_order_products = @institution_order.institution_order_products.order( :date )
   end
 
   # Веб-сервис загрузки графика
@@ -30,18 +31,20 @@ class InstitutionOrdersController < ApplicationController
     message = { 'GetRequest' => { 'ins0:StartDate' => date_start,
                                   'ins0:EndDate' => date_end,
                                   'ins0:DepartmentsCode' => current_institution.code } }
-    response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] ).call( :get_schedule_of_food_supply, message: message )
-
+    response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] )
+                 .call( :get_schedule_of_food_supply, message: message )
     interface_state = response.body[ :get_schedule_of_food_supply_response ][ :return ][ :interface_state ]
     respond = response.body[ :get_schedule_of_food_supply_response ][ :return ][ :food ]
 
-    if interface_state == 'OK' then
+    if interface_state == 'OK'
       InstitutionOrder.transaction do
-        institution_order = InstitutionOrder.create( institution: current_institution, date_start: date_start, date_end: date_end )
-        if respond then
-          respond.each do |f|
-            product = product_code( f[ :code_of_food ] )
-            institution_order.institution_order_products.create( product: product, date: f[ :date ], description: f[ :comments ], count: 0 ) unless product[:error]
+        institution_order = InstitutionOrder.create( institution: current_institution,
+                                                     date_start: date_start, date_end: date_end )
+        if respond
+          respond.each do | f |
+            product = product_code( f[ :code_of_food ].strip )
+            institution_order.institution_order_products.create( product: product, date: f[ :date ],
+              description: f[ :comments ], count: 0 ) unless product[ :error ]
           end
         end
 
@@ -65,8 +68,8 @@ class InstitutionOrdersController < ApplicationController
     institution_order_products = institution_order.institution_order_products.where.not( count: 0 )
     if institution_order_products
       message = { 'CreateRequest' => { 'ins0:Institutions_id' => institution_order.institution.code,
-                                       'ins0:DateStart' => institution_order.date_start.strftime('%Y-%m-%d'),
-                                       'ins0:DateFinish' => institution_order.date_end.strftime('%Y-%m-%d'),
+                                       'ins0:DateStart' => institution_order.date_start.strftime( '%Y-%m-%d' ),
+                                       'ins0:DateFinish' => institution_order.date_end.strftime( '%Y-%m-%d' ),
                                        'ins0:NumberFromWebPortal' => institution_order.number,
                                        'ins0:TMC' => institution_order_products.map{ | o | {
                                          'ins0:Product_id' => o.product.code,
@@ -77,7 +80,7 @@ class InstitutionOrdersController < ApplicationController
       interface_state = response.body[ :creation_application_units_response ][ :return ][ :interface_state ]
       number = response.body[ :creation_application_units_response ][ :return ][ :respond ]
 
-      if interface_state == 'OK' then
+      if interface_state == 'OK'
         institution_order.update( date_sa: Date.today, number_sa: number )
         redirect_to institution_orders_index_path
       else
@@ -90,12 +93,13 @@ class InstitutionOrdersController < ApplicationController
 
   # Создания корректировки заявки
   def correction_create
-    institution_order = InstitutionOrder.find_by( id: params[:id] )
+    institution_order = InstitutionOrder.find_by( id: params[ :id ] )
 
     message = { 'GetRequest' => { 'ins0:StartDate' => institution_order.date_start,
                                   'ins0:EndDate' => institution_order.date_end,
                                   'ins0:DepartmentsCode' => current_institution.code } }
-    response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] ).call( :get_schedule_of_food_supply, message: message )
+    response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] )
+                 .call( :get_schedule_of_food_supply, message: message )
 
     interface_state = response.body[ :get_schedule_of_food_supply_response ][ :return ][ :interface_state ]
     respond = response.body[ :get_schedule_of_food_supply_response ][ :return ][ :food ]
@@ -106,8 +110,9 @@ class InstitutionOrdersController < ApplicationController
 
         if respond
           respond.each do |f|
-            product = product_code( f[ :code_of_food ] )
-            io_correction.io_correction_products.create( product: product, date: f[ :date ], description: f[ :comments ] ) unless product[ :error ]
+            product = product_code( f[ :code_of_food ].strip )
+            io_correction.io_correction_products.create( product: product, date: f[ :date ],
+                                                         description: f[ :comments ] ) unless product[ :error ]
           end
         end
 
@@ -121,16 +126,17 @@ class InstitutionOrdersController < ApplicationController
   end
 
   def correction_products # Отображение товаров корректировки заявки
-    @io_correction = IoCorrection.find_by( id: params[:id] )
+    @io_correction = IoCorrection.find_by( id: params[ :id ] )
     @institution_order = @io_correction.institution_order
 
-    select_column = [ 'ifnull(institution_order_products.count, 0) as count' ]
+    select_column = [ 'COALESCE(institution_order_products.count, 0) as count' ]
     joins_table = " LEFT OUTER JOIN institution_order_products
                       ON institution_order_products.product_id = io_correction_products.product_id
                         AND institution_order_products.date = io_correction_products.date
-                        AND institution_order_products.institution_order_id = #{@institution_order.id} "
+                        AND institution_order_products.institution_order_id = #{ @institution_order.id } "
 
-    @io_correction_products = @io_correction.io_correction_products.select( select_column ).joins( joins_table ).order( :date, 'products.name' )
+    @io_correction_products = @io_correction.io_correction_products.select( select_column )
+                                .joins( joins_table ).order( :date, 'products.name' )
   end
 
   def correction_update # Обновление реквизитов документа корректировки
@@ -155,12 +161,12 @@ class InstitutionOrdersController < ApplicationController
                                          'ins0:Product_id' => o.product.code,
                                          'ins0:Date' => o.date,
                                          'ins0:Count_po' => o.diff.to_s } } } }
-      response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] ).
-        call( :creation_correction_application_units, message: message )
+      response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] )
+                      .call( :creation_correction_application_units, message: message )
       interface_state = response.body[ :creation_correction_application_units_response ][ :return ][ :interface_state ]
       number = response.body[ :creation_correction_application_units_response ][ :return ][ :respond ]
 
-      if interface_state == 'OK' then
+      if interface_state == 'OK'
         io_correction.update( date_sa: Date.today, number_sa: number )
         redirect_to institution_orders_index_path
       else
@@ -170,6 +176,5 @@ class InstitutionOrdersController < ApplicationController
       render text: 'Количество не проставлено'
     end
   end
-
 
 end

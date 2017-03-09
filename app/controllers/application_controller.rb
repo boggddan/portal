@@ -38,10 +38,11 @@
   end
 
   def product_code( code )
+    code = code.strip
     if product = Product.find_by( code: code )
       product
     else
-      { error: { product: "Не знайдений код продукту [#{code}]" } }
+      { error: { product: "Не знайдений код продукту [#{ code }]" } }
     end
   end
 
