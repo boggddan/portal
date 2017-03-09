@@ -1,20 +1,14 @@
 <!-- Отображение списка пользователей -->
 
-<div id="users">
+<%= content_tag :div, id: :users do %>
 
-  <!-- Отображение пользователя поставщика -->
+  <%= content_tag :h1, 'Користувачі' %>
 
-  <div class="text-header">Користувачі порталу</div>
-  <div class="menu-panel">
+  <%= content_tag :div, '', class: :panel do %>
+     <%= button_tag '', class: [:btn_create, :align_right], id: :create_institution_order, data: { ajax_path: institution_orders_create_path } %>
+  <% end %>
 
-  </div>
-
-  <div id="area-ajax"><%= render("users/table_users") %></div>
-</div>
-
-</div>
-
-<!-- Сообщение при удалении -->
-<div id="user-delete-dialog" title="Ви впевнені?">
-  <div class="delete-dialog"></div>
-</div>
+  <%= content_tag :div, '', id: :table_users do %>
+    <%= render('users/table_users') %>
+  <% end %>
+<% end %>

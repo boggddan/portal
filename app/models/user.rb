@@ -1,5 +1,5 @@
 class User < ApplicationRecord
-  #has_secure_password
+  has_secure_password
 
   belongs_to :userable, polymorphic: true, optional: true
   belongs_to :supplier, foreign_key: :userable_id, optional: true

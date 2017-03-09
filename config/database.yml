@@ -3,12 +3,13 @@ default: &default
   encoding: unicode
   database: portal
   timeout: 5000
+  pool: 5
 
 development:
   <<: *default
-  host: 192.168.1.88
+  host: localhost
   username: postgres
-  password: 6k3vddrb2v
+  password: 1
 
 production:
   <<: *default
@@ -18,4 +19,6 @@ production:
 
 test:
   <<: *default
-  database: db/test.sqlite3
+  host: localhost
+  username: postgres
+  password: 1

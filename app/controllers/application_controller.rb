@@ -3,7 +3,6 @@
   helper_method :day_of_week, :year_month_names
   helper_method :current_user, :date_str, :f3_to_s, :f2_to_s
 
-
   $ghSavon = { wsdl: Rails.env.production? ?
     'http://192.168.1.2:8080/gos1_new/ws/createsd.1cws?wsdl' :
     'http://192.168.1.2:8080/gos_release/ws/createsd.1cws?wsdl',
@@ -46,26 +45,24 @@
     end
   end
 
-  def date_str(date)
-    date.strftime('%d.%m.%Y') if date
+  def date_str( date )
+    date.strftime( '%d.%m.%Y' ) if date
   end
 
-  def f3_to_s(value)
+  def f3_to_s( value )
     ActionController::Base.helpers.number_with_precision( value, precision: 3 ) if value && value.nonzero?
   end
 
-  def f2_to_s(value)
+  def f2_to_s( value )
     ActionController::Base.helpers.number_with_precision( value, precision: 2 ) if value && value.nonzero?
   end
 
-  def date_int_to_str(date)
-    Time.at(date.to_i).strftime('%Y-%m-%d')
+  def date_int_to_str( date )
+    Time.at( date.to_i ).strftime( '%Y-%m-%d' )
   end
 
   def verify_log_in # Переход на страничку ввод логина и пароля, если не был произведен вход
     redirect_to log_in_path unless current_user
   end
-
-
 
 end
