@@ -13,64 +13,66 @@ class MenuRequirementsController < ApplicationController
   end
 
   def products # Отображение товаров
-    @menu_requirement = MenuRequirement.find_by(id: params[:id])
+    @menu_requirement = MenuRequirement.find_by( id: params[ :id ] )
 
     date = @menu_requirement.date
     institution_id = @menu_requirement.institution_id
     menu_requirement_id = @menu_requirement.id
 
     ####
-    select_column = [:id, :children_category_id, :count_all_plan, :count_exemption_plan, :count_all_fact, :count_exemption_fact,
-                     'children_categories.code', 'children_categories.name', 'aa.cost']
+    select_column = [ :id, :children_category_id, :count_all_plan, :count_exemption_plan, :count_all_fact,
+                     :count_exemption_fact, 'children_categories.code', 'children_categories.name', 'aa.cost' ]
 
-    joins_table = "INNER JOIN children_categories ON children_categories.id = menu_children_categories.children_category_id
+    joins_table = "INNER JOIN children_categories
+                    ON children_categories.id = menu_children_categories.children_category_id
                     LEFT OUTER JOIN
-                      (SELECT children_category_id, cost
+                      (SELECT children_category_id, MAX(cost) AS cost
                         FROM children_day_costs
-                        WHERE cost_date <= '#{date}'
-                        GROUP BY children_category_id HAVING MAX(cost_date)) aa
+                        WHERE cost_date <= '#{ date }'
+                        GROUP BY children_category_id HAVING MAX(cost_date) <= '#{ date }' ) aa
                     ON aa.children_category_id = children_categories.id "
 
-    @menu_children_categories = @menu_requirement.menu_children_categories.select(select_column).joins(joins_table).order('children_categories.name')
+    @menu_children_categories = @menu_requirement.menu_children_categories.select( select_column )
+                                  .joins( joins_table ).order( 'children_categories.name' )
     ####
 
     ####
-    select_column = [:product_id, 'products.code', 'products.name', 'aa.price']
+    select_column = [ :product_id, 'MAX(products.code) as code', 'MAX(products.name) as name', 'MAX(COALESCE(aa.price, 0)) as price' ]
     joins_table = "INNER JOIN products ON products.id = menu_products.product_id
                     LEFT OUTER JOIN
-                      (SELECT product_id, price FROM price_products
-                        WHERE price_date <= '#{date}' AND institution_id = #{institution_id}
-                        GROUP BY product_id HAVING MAX(price_date)) aa
+                      (SELECT product_id, MAX(price) AS price FROM price_products
+                        WHERE price_date <= '#{ date }' AND institution_id = #{institution_id}
+                        GROUP BY product_id HAVING MAX(price_date) <= '#{ date }') aa
                     ON aa.product_id = menu_products.product_id "
     column_fact_all = ''
     column_plan_all = ''
-    @menu_children_categories.each_with_index do |menu_children_category, index|
-      select_column << [ "b#{index}.id AS id_#{index}",
-                        "b#{index}.count_fact AS count_fact_#{index}",
-                        "b#{index}.count_plan AS count_plan_#{index}",
-                        "ifnull(b#{index}.count_fact, 0) - ifnull(b#{index}.count_plan, 0) AS count_diff_#{index}",
-                        "round(ifnull(b#{index}.count_fact, 0) * aa.price, 2) as sum_fact_#{index}",
-                        "round(ifnull(b#{index}.count_plan, 0) * aa.price, 2) as sum_plan_#{index}" ]
+    @menu_children_categories.each_with_index do | menu_children_category, index |
+      select_column << [ "MAX(b#{ index }.id) AS id_#{index}",
+                        "MAX(b#{ index }.count_fact) AS count_fact_#{ index }",
+                        "MAX(b#{ index }.count_plan) AS count_plan_#{ index }",
+                        "MAX(COALESCE(b#{ index }.count_fact, 0) - COALESCE(b#{ index }.count_plan, 0)) AS count_diff_#{ index }",
+                        "MAX(ROUND(COALESCE(b#{ index }.count_fact, 0) * COALESCE(aa.price, 0), 2)) AS sum_fact_#{ index }",
+                        "MAX(ROUND(COALESCE(b#{ index }.count_plan, 0) * COALESCE(aa.price, 0), 2)) AS sum_plan_#{ index }" ]
 
       joins_table = joins_table +
         "LEFT OUTER JOIN
           (SELECT id, product_id, count_fact, count_plan
             FROM menu_products
-            WHERE menu_requirement_id = #{menu_requirement_id} AND children_category_id = #{menu_children_category.children_category_id}) b#{index}
-        ON b#{index}.product_id = menu_products.product_id "
+            WHERE menu_requirement_id = #{ menu_requirement_id }
+              AND children_category_id = #{ menu_children_category.children_category_id }) b#{ index }
+        ON b#{ index }.product_id = menu_products.product_id "
 
-      if index == @menu_children_categories.size-1
-         select_column << ["round(#{column_fact_all} + ifnull(b#{index}.count_fact, 0), 3)  AS count_fact_all",
-                           "round(#{column_plan_all} + ifnull(b#{index}.count_plan, 0), 3)  AS count_plan_all" ]
+      if index == @menu_children_categories.size - 1
+         select_column << [ "MAX(ROUND(#{ column_fact_all } + COALESCE(b#{ index }.count_fact, 0), 3))  AS count_fact_all",
+                           "MAX(ROUND(#{ column_plan_all } + COALESCE(b#{ index }.count_plan, 0), 3))  AS count_plan_all" ]
       else
-        column_fact_all = column_fact_all + "ifnull(b#{index}.count_fact, 0) + "
-        column_plan_all = column_plan_all + "ifnull(b#{index}.count_plan, 0) + "
+        column_fact_all = column_fact_all + "COALESCE(b#{ index }.count_fact, 0) + "
+        column_plan_all = column_plan_all + "COALESCE(b#{ index }.count_plan, 0) + "
       end
     end
 
-    @menu_products = @menu_requirement.menu_products.select(select_column).joins(joins_table).group(:product_id).order('products.name')
-    ####
-
+    @menu_products = @menu_requirement.menu_products.select( select_column ).joins( joins_table )
+                       .group(:product_id).order( 3 )
   end
 
   def create # Создание документа
