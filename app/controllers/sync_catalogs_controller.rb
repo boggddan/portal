@@ -746,7 +746,7 @@ class SyncCatalogsController < ApplicationController
 
         unless error = supplier_order[ :error ]
           Receipt.transaction do
-            contact_number = params[ :contract_number ].strip
+            contract_number = params[ :contract_number ].strip
             update_fields = { invoice_number: params[ :invoice_number ].strip, date: date_int_to_str( params[ :date ] ),
                               date_sa: date_int_to_str( params[ :date_sa ] ), number_sa: params[ :number_sa ] }
             if receipt = supplier_order.receipts.find_by( institution: institution,
