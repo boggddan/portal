@@ -631,7 +631,7 @@ class SyncCatalogsController < ApplicationController
               date_start: 'Не знайдений параметр [date_start]',
               date_end: 'Не знайдений параметр [date_end]',
               products: 'Не знайдений параметр [products]' }.stringify_keys!.except( *params.keys )
-
+    number = params[ :number ].strip
     if error.empty?
       supplier = supplier_code( params[ :supplier_code ].strip )
       error.merge!( supplier[ :error ] ) if supplier[ :error ]
@@ -644,7 +644,6 @@ class SyncCatalogsController < ApplicationController
           update_fields = { supplier: supplier, date: date_int_to_str( params[ :date ] ),
                             date_start: date_int_to_str( params[ :date_start ] ),
                             date_end: date_int_to_str( params[ :date_end ] ) }
-          number = params[ :number ].strip
 
           if supplier_order = branch.supplier_orders.find_by( number: number )
             supplier_order.update( update_fields )
