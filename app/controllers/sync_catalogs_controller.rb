@@ -11,7 +11,6 @@ class SyncCatalogsController < ApplicationController
   end
 
   def institution_code( code )
-    code = code.strip
     if institution = Institution.find_by( code: code )
       institution
     else
@@ -212,7 +211,7 @@ class SyncCatalogsController < ApplicationController
       institution = Institution.last
     else
       if error.empty?
-        institution = institution_code( params[ :code ].strip )
+        institution = institution_code( params[ :code ] )
         error = institution[ :error ]
       end
     end
@@ -391,7 +390,7 @@ class SyncCatalogsController < ApplicationController
       branch = branch_code( params[ :branch_code ].strip )
       error.merge!( branch[ :error ] ) if branch[ :error ]
 
-      institution = institution_code( params[ :institution_code ].strip )
+      institution = institution_code( params[ :institution_code ] )
       error.merge!( institution[ :error ] ) if institution[ :error ]
 
       product = product_code( params[ :product_code ].strip )
@@ -423,7 +422,7 @@ class SyncCatalogsController < ApplicationController
         branch = branch_code( params[ :branch_code ].strip )
         error.merge!( branch[ :error ] ) if branch[ :error ]
 
-        institution = institution_code( params[ :institution_code ].strip )
+        institution = institution_code( params[ :institution_code ] )
         error.merge!( institution[ :error ] ) if institution[ :error ]
 
         product = product_code( params[ :product_code ].strip )
@@ -666,7 +665,7 @@ class SyncCatalogsController < ApplicationController
                       count: 'Не знайдений параметр [count]' }.stringify_keys!.except( *product_par.keys )
 
             if error.empty?
-              institution = institution_code( product_par[ :institution_code ].strip )
+              institution = institution_code( product_par[ :institution_code ] )
               error.merge!( institution[ :error ] ) if institution[ :error ]
 
               product = product_code( product_par[ :product_code ].strip )
@@ -741,7 +740,7 @@ class SyncCatalogsController < ApplicationController
               products: 'Не знайдений параметр [products]' }.stringify_keys!.except( *params.keys )
     number = params[ :number ].strip
     if error.empty?
-      institution = institution_code( params[ :institution_code ].strip )
+      institution = institution_code( params[ :institution_code ] )
 
       unless error = institution[ :error ]
         supplier_order = supplier_order_number( institution.branch, params[ :supplier_order_number ].strip )
@@ -807,7 +806,7 @@ class SyncCatalogsController < ApplicationController
       error = {}
       receipt = Receipt.last
     else
-      institution = institution_code( params[ :institution_code ].strip )
+      institution = institution_code( params[ :institution_code ] )
 
       unless error = institution[ :error ]
         supplier_order = supplier_order_number( institution.branch, params[ :supplier_order_number ].strip )
@@ -843,7 +842,7 @@ class SyncCatalogsController < ApplicationController
               products: 'Не знайдений параметр [products]' }.stringify_keys!.except( *params.keys )
     number = params[ :number ].strip
     if error.empty?
-      institution = institution_code( params[ :institution_code ].strip )
+      institution = institution_code( params[ :institution_code ] )
 
       unless error = institution[ :error ]
         InstitutionOrder.transaction do
@@ -906,7 +905,7 @@ class SyncCatalogsController < ApplicationController
     else
 
       if error.empty?
-        institution = institution_code( params[ :institution_code ].strip )
+        institution = institution_code( params[ :institution_code ] )
 
         unless error = institution[ :error ]
           institution_order = institution_order_number( institution, params[ :number ].strip )
@@ -937,7 +936,7 @@ class SyncCatalogsController < ApplicationController
               products: 'Не знайдений параметр [products]' }.stringify_keys!.except( *params.keys )
     number = params[:number].strip
     if error.empty?
-      institution = institution_code( params[ :institution_code ].strip )
+      institution = institution_code( params[ :institution_code ] )
 
       unless error = institution[ :error ]
         institution_order = institution_order_number( institution, params[ :institution_order_number ].strip )
@@ -1003,7 +1002,7 @@ class SyncCatalogsController < ApplicationController
       io_correction = IoCorrection.last
     else
       if error.empty?
-        institution = institution_code( params[ :institution_code ].strip )
+        institution = institution_code( params[ :institution_code ] )
 
         unless error = institution[ :error ]
           institution_order = institution_order_number( institution, params[ :institution_order_number ].strip )
@@ -1045,7 +1044,7 @@ class SyncCatalogsController < ApplicationController
       branch = branch_code( params[ :branch_code ].strip )
       error.merge!( branch[ :error ] ) if branch[ :error ]
 
-      institution = institution_code( params[ :institution_code ].strip )
+      institution = institution_code( params[ :institution_code ] )
       error.merge!( institution[ :error ] ) if institution[ :error ]
 
       if error.empty?
@@ -1158,7 +1157,7 @@ class SyncCatalogsController < ApplicationController
       branch = branch_code( params[ :branch_code ].strip )
       error.merge!( branch[ :error ] ) if branch[ :error ]
 
-      institution = institution_code( params[ :institution_code ].strip )
+      institution = institution_code( params[ :institution_code ] )
       error.merge!( institution[ :error ] ) if institution[ :error ]
 
       if error.empty?
@@ -1252,7 +1251,7 @@ class SyncCatalogsController < ApplicationController
       menu_requirement = MenuRequirement.last
     else
       if error.empty?
-        institution = institution_code( params[ :institution_code ].strip )
+        institution = institution_code( params[ :institution_code ] )
 
         unless error = institution[ :error ]
           menu_requirement = menu_requirement_number( institution, params[ :number ].strip )
@@ -1295,7 +1294,7 @@ class SyncCatalogsController < ApplicationController
       branch = branch_code( params[ :branch_code ].strip )
       error.merge!( branch[ :error ] ) if branch[ :error ]
 
-      institution = institution_code( params[ :institution_code ].strip )
+      institution = institution_code( params[ :institution_code ] )
       error.merge!( institution[ :error ] ) if institution[ :error ]
 
       if error.empty?
@@ -1360,7 +1359,7 @@ class SyncCatalogsController < ApplicationController
       timesheet = Timesheet.last
     else
       if error.empty?
-        institution = institution_code( params[ :institution_code ].strip )
+        institution = institution_code( params[ :institution_code ] )
 
         unless error = institution[ :error ]
           timesheet = timesheet_number( institution, params[ :number ].strip )
