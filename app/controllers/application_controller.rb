@@ -8,6 +8,31 @@
     'http://192.168.1.2:8080/gos_release/ws/createsd.1cws?wsdl',
                namespaces: { 'xmlns:ins0' => 'http://www.reality.sh' } }
 
+  def verify_log_in # Переход на страничку ввод логина и пароля, если не был произведен вход
+    redirect_to log_in_path unless current_user
+  end
+
+  def verify_admin
+    redirect_root unless current_user_type == 'Admin'
+  end
+
+  def verify_institution
+    redirect_root unless current_user_type == 'Institution'
+  end
+
+  def index
+    redirect_root
+  end
+
+  def redirect_root
+    puts current_user_type
+    if current_user_type == 'Admin'
+      redirect_to admin_users_index_path
+    else
+      redirect_to institution_institution_orders_index_path
+    end
+  end
+
   def day_of_week( wday )
     { 0 => "Неділя", 1 => "Понеділок", 2 => "Вівторок", 3 => "Середа", 4 => "Четвер", 5 => "П'ятниця", 6 => "Субота" }[ wday ]
   end
@@ -26,15 +51,11 @@
   end
 
   def current_user # Текущий пользователь
-    @current_user ||= User.find_by(id: session[:user_id])
+    @current_user ||= User.find_by( id: session[ :user_id ] )
   end
 
-  def current_institution # Текущее подразделение
-    current_user.institution
-  end
-
-  def current_branch # Текущий отдел
-    current_institution.branch
+  def current_user_type # Текущий пользователь
+    @current_user_type ||= current_user.userable_type
   end
 
   def product_code( code )
@@ -60,10 +81,6 @@
 
   def date_int_to_str( date )
     Time.at( date.to_i ).strftime( '%Y-%m-%d' )
-  end
-
-  def verify_log_in # Переход на страничку ввод логина и пароля, если не был произведен вход
-    redirect_to log_in_path unless current_user
   end
 
 end

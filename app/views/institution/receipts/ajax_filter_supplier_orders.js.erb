@@ -1,0 +1,16 @@
+//-------------------------------------------------------------
+// Фильтрация таблицы заявок
+//-------------------------------------------------------------
+$('#table_supplier_orders').empty().append('<%= j render("institution/receipts/table_supplier_orders") %>'); // Рендеринг блока с табличкой
+
+var $table = $('#table_supplier_orders table');
+
+/* Если существуют заявки по выбраному фильтру */
+if ( $table.length ) {
+  $table.tableHeadFixer();  // Фиксируем шапку таблицы
+  selectSupplierOrder(); // Выбор заявки поставщику
+} else {
+  emptySupplierOrder(); // Очистка заявки поставщику
+};
+
+

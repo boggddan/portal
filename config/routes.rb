@@ -1,6 +1,8 @@
 Rails.application.routes.draw do
 
-  root 'institution_orders#index'
+  root 'application#index'
+
+  #root 'institution/institution_orders#index'
 
   # Веб-сервисы
   scope :api, controller: :sync_catalogs do
@@ -70,77 +72,79 @@ Rails.application.routes.draw do
     get :timesheet_view, path: :timesheet
   end
 
+  namespace :institution do
+    # Поступление
+    namespace :receipts do
+      get :index, path: '' # Главная страничка
+      post :create # создание поступления
+      patch :update # Обновление шапки поступления
+      get :products # Отображение товаров поступления
+      post :product_update # Обновление количества
+      post :send_sa # Веб-сервис отправки поступления
+      get :ajax_suppliers_autocomplete_source # Источник для автозаполнение для фильтрации поставщиков
+      get :ajax_filter_supplier_orders # Фильтрация таблицы заявок
+      get :ajax_filter_contract_numbers
+      get :ajax_filter_receipts # Фильтрация таблицы поступлений
+      delete :ajax_delete_receipt # Удаление поступления
+    end
 
-  # Поступление
-  namespace :receipts do
-    get :index, path: '' # Главная страничка
-    post :create # создание поступления
-    patch :update # Обновление шапки поступления
-    get :products # Отображение товаров поступления
-    post :product_update # Обновление количества
-    post :send_sa # Веб-сервис отправки поступления
-    get :ajax_suppliers_autocomplete_source # Источник для автозаполнение для фильтрации поставщиков
-    get :ajax_filter_supplier_orders # Фильтрация таблицы заявок
-    get :ajax_filter_contract_numbers
-    get :ajax_filter_receipts # Фильтрация таблицы поступлений
-    delete :ajax_delete_receipt # Удаление поступления
+    # Заявки садика
+    namespace :institution_orders do
+      get :ajax_filter_institution_orders # Фильтрация таблицы заявок
+      get :ajax_filter_io_corrections # Фильтрация корректировок заявки
+
+      get :index, path: '' # Главная страничка
+      post :create # создание заявки
+      get :products # Отображение товаров заявки
+      post :product_update # Обновление количества
+      post :update # Обновление реквизитов документа заявки
+      post :send_sa # Веб-сервис отправки
+      delete :delete # Удаление
+
+      post :correction_create # Создания корректировки заявки
+      delete :correction_delete # Удаление корректировки заявки
+      get :correction_products # Отображение товаров корректировки заявки
+      post :correction_update # Обновление реквизитов документа корректировки заявки
+      post :correction_product_update # Обновление количества корректировки заявки
+      post :correction_send_sa # Веб-сервис отправки корректировки
+    end
+
+    # Меню-требования
+    namespace :menu_requirements do
+      get :index, path: '' # Главная страничка
+      get :ajax_filter_menu_requirements # Фильтрация документов
+      delete :delete # Удаление документа
+      get :products # Отображение товаров
+      post :create # Создание документа
+      post :children_category_update # Обновление количества по категориям
+      post :product_update # Обновление количества по продуктам
+      post :update # Обновление реквизитов документа
+      post :send_sap # Веб-сервис отправки плана меню-требования
+      post :send_saf # Веб-сервис отправки факта меню-требования
+    end
+
+    # Меню-требования
+    namespace :timesheets do
+      get :index, path: '' # Главная страничка
+      get :ajax_filter_timesheets # Фильтрация документов
+      delete :delete_timesheet # Удаление документа
+      get :dates # Отображение дней табеля
+  #    post :create # Создание документа
+  #    post :children_category_update # Обновление количества по категориям
+  #    post :product_update # Обновление количества по продуктам
+      post :update # Обновление реквизитов документа
+  #    post :send_sap # Веб-сервис отправки плана меню-требования
+  #    post :send_saf # Веб-сервис отправки факта меню-требования
+    end
   end
-
-  # Заявки садика
-  namespace :institution_orders do
-    get :ajax_filter_institution_orders # Фильтрация таблицы заявок
-    get :ajax_filter_io_corrections # Фильтрация корректировок заявки
-
-    get :index, path: '' # Главная страничка
-    post :create # создание заявки
-    get :products # Отображение товаров заявки
-    post :product_update # Обновление количества
-    post :update # Обновление реквизитов документа заявки
-    post :send_sa # Веб-сервис отправки
-    delete :delete # Удаление
-
-    post :correction_create # Создания корректировки заявки
-    delete :correction_delete # Удаление корректировки заявки
-    get :correction_products # Отображение товаров корректировки заявки
-    post :correction_update # Обновление реквизитов документа корректировки заявки
-    post :correction_product_update # Обновление количества корректировки заявки
-    post :correction_send_sa # Веб-сервис отправки корректировки
-  end
-
-  # Меню-требования
-  namespace :menu_requirements do
-    get :index, path: '' # Главная страничка
-    get :ajax_filter_menu_requirements # Фильтрация документов
-    delete :delete # Удаление документа
-    get :products # Отображение товаров
-    post :create # Создание документа
-    post :children_category_update # Обновление количества по категориям
-    post :product_update # Обновление количества по продуктам
-    post :update # Обновление реквизитов документа
-    post :send_sap # Веб-сервис отправки плана меню-требования
-    post :send_saf # Веб-сервис отправки факта меню-требования
-  end
-
-  # Меню-требования
-  namespace :timesheets do
-    get :index, path: '' # Главная страничка
-    get :ajax_filter_timesheets # Фильтрация документов
-    delete :delete_timesheet # Удаление документа
-    get :dates # Отображение дней табеля
-#    post :create # Создание документа
-#    post :children_category_update # Обновление количества по категориям
-#    post :product_update # Обновление количества по продуктам
-    post :update # Обновление реквизитов документа
-#    post :send_sap # Веб-сервис отправки плана меню-требования
-#    post :send_saf # Веб-сервис отправки факта меню-требования
-  end
-
   # Пользователи
-  namespace :users do
-    get :index, path: '' # Главная страничка
-    get :new
-    post :create # создание поступления
-    delete :ajax_delete_user # Удаление
+  namespace :admin do
+    namespace :users do
+      get :index, path: '' # Главная страничка
+      get :new
+      post :create # создание поступления
+      delete :delete # Удаление
+    end
   end
 
   # Сесия
@@ -150,6 +154,5 @@ Rails.application.routes.draw do
 
   get :log_in, controller: :sessions  # Главная страничка
   get :log_out, controller: :sessions  # Выход пользователя
-
 
 end

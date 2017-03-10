@@ -1,0 +1,14 @@
+<!-- Отображение списка пользователей -->
+
+<%= content_tag :div, id: :users do %>
+
+  <%= content_tag :h1, 'Користувачі' %>
+
+  <%= content_tag :div, '', class: :panel do %>
+     <%= button_tag '', class: [:btn_create, :align_right], id: :create_institution_order, data: { ajax_path: admin_users_create_path } %>
+  <% end %>
+
+  <%= content_tag :div, '', id: :table_users do %>
+    <%= render('admin/users/table_users') %>
+  <% end %>
+<% end %>

@@ -1,0 +1,45 @@
+<!-- Отображение заявок  -->
+
+<%= content_tag :main, id: :institution_orders do %>
+
+  <!-- Отображение заявок  -->
+  <%= content_tag :div, '', class: :clmn do %>
+    <%= content_tag :h1, "Заявки" %>
+
+    <%= content_tag :div, '', class: :panel do %>
+      <%= label_tag :date_start, 'З' %>
+      <%= content_tag :nav, '', class: :icon_сalendar do %>
+        <%= text_field_tag :date_start, '', readonly: true, placeholder: 'Дата...',
+                           data: { ajax_path: institution_institution_orders_ajax_filter_institution_orders_path } %>
+      <% end %>
+
+      <%= label_tag :date_end, 'ПО' %>
+      <%= content_tag :nav, '', class: :icon_сalendar do %>
+        <%= text_field_tag :date_end, '', readonly: true, placeholder: 'Дата...' %>
+      <% end %>
+
+      <%= button_tag '', class: [:btn_create, :align_right], id: :create_institution_order,
+                     data: { ajax_path: institution_institution_orders_create_path } %>
+    <% end %>
+
+    <%= content_tag :div, '', id: :table_institution_orders do %>
+      <%= render( "institution/institution_orders/table_institution_orders" ) %>
+    <% end %>
+  <% end %>
+
+  <!-- Отображение коректировки  -->
+  <%= content_tag :div, '', class: :clmn do %>
+    <%= content_tag :h1, '',  data: { text: "Коригування заявки №",
+          ajax_path: "#{ institution_institution_orders_ajax_filter_io_corrections_path }?id=" } %>
+
+    <%= content_tag :div, '', class: :panel do %>
+      <%= button_tag '', class: [:btn_create, :align_right], id: :create_io_correction,
+                     data: { ajax_path: "#{ institution_institution_orders_correction_create_path }?id=" } %>
+    <% end %>
+
+    <%= content_tag :div, '', id: :table_io_corrections do %>
+      <%= render( "institution/institution_orders/table_io_corrections" ) %>
+    <% end %>
+  <% end %>
+
+<% end %>

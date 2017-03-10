@@ -1,0 +1,9 @@
+<%= content_tag :main, id: :user_new do %>
+  <%= content_tag :h1, "Створення користувача" %>
+
+  <%= content_tag :header, '' do %>
+    <%= button_tag '', class: :btn_save, id: :save, data: { ajax_path: "#{users_create_path}" } %>
+    <%= button_tag '', class: :btn_exit, onclick: "location.href='#{users_index_path}'" %>
+  <% end %>
+
+<% end %>

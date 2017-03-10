@@ -10,11 +10,6 @@
 
   <body>
 
-  <%= render("layouts/wait") %> <!-- Сообщение ожидания -->
-  <%= render("layouts/delete") %> <!-- Сообщение при удалении -->
-
-  <%= render("layouts/main_menu") if @current_user %>
-
   <%= yield %>
 
   </body>

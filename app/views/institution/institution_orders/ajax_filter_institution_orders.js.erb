@@ -1,0 +1,21 @@
+//-------------------------------------------------------------
+// Фильтрация таблицы заявок
+//-------------------------------------------------------------
+
+$( '#table_institution_orders' ).empty()
+  .append( '<%= j render( "institution/institution_orders/table_institution_orders" ) %>' );
+
+var $table = $( '#table_institution_orders table' );
+
+/* Если существуют заявки по выбраному фильтру */
+if ( $table.length ) {
+  $table.tableHeadFixer();  // Фиксируем шапку таблицы
+  $( '#create_institution_order' ).prop( 'disabled', true );
+  $( '#create_io_correction' ).prop( 'disabled', false );
+  selectInstitutionOrder(); // // Выбор заявки
+} else {
+  $( '#create_institution_order' ).prop( 'disabled', false );
+  $( '#create_io_correction' ).prop( 'disabled', true );
+  emptyInstitutionOrder(); // Очистка заявки
+};
+
