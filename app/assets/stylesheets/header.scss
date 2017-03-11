@@ -10,8 +10,8 @@ header, .panel {
   font-size: 13px;
 
   /* Для всех елементов */
-  select, input, button {
-    height: 100% ;
+  select, input[type='text'], input[type='password'], button {
+    height: 100%;
     border-radius: 3px;
     border: 1px solid;
     background-color: white;
@@ -20,7 +20,7 @@ header, .panel {
   }
 
   /* Список выбора и поле ввода */
-  select, input {
+  select, input[type='text'], input[type='password'] {
     padding: 5px;
     border-color: #e7e7e7;
     &:hover:enabled { border-color: #aaa; }
@@ -83,5 +83,24 @@ header, .panel {
   }
 
   .align_right { float: right; } /* Позиционирование елементов */
+
+  /* */
+  .radio_button {
+    display: inline-block;
+    position: relative;
+    width: 17px;
+    &:after { content: "\a0"; }
+
+    input[type='radio'] {
+      top: 0; left: 0;
+      height: 100%; width: 100%;
+      position: absolute;
+      margin: 0;
+    }
+
+
+  }
+
+
 }
 

@@ -8,8 +8,6 @@ $( document ).on('turbolinks:load', function() {
     $('#receipt-products #text-header').text($val);
   };
 
-
-
   // Номер накладной - при потери фокуса сохраняем значение
   $('#receipt-products #invoice_number').blur( function() {
     var $this = $(this);

@@ -2,7 +2,7 @@
 
 <% if @users.present? %>
 
-  <%= content_tag :table, class: :table, data: { path_view: "#{ admin_users_create_path }?id=",
+  <%= content_tag :table, class: :table, data: { path_view: "#{ admin_users_new_path }?id=",
                                                  path_del: "#{ admin_users_delete_path }?id=" }  do %>
     <%= content_tag :thead do %>
       <%= content_tag :tr do %>
@@ -35,7 +35,7 @@
           <%= content_tag :td, organization %>
           <%= content_tag :td, date_str( user.created_at ), class: :date_field %>
           <%= content_tag :td, date_str( user.updated_at ), class: :date_field %>
-          <%= content_tag :td do button_tag '', class: :btn_view end %>
+          <%= content_tag :td do button_tag '', class: :btn_view, disabled: true end %>
           <%= content_tag :td do button_tag '', class: :btn_edit end %>
           <%= content_tag :td do button_tag '', class: :btn_del, disabled: user.username=='admin' end %>
         <% end %>

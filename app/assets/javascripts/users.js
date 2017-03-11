@@ -1,37 +1,38 @@
-$( document ).on('turbolinks:load', function() {
+$( document ).on( 'turbolinks:load', function() {
 
-   //-------------------------------------------------------------
-  // Нажатие на кнопочку удалить поступление
-  $(document).on('click', '#users td .btn-del', function() {
-    $(this).parents('tr').addClass("user-delete");
-    $( "#user-delete-dialog" ).dialog( "open" );
-  });
-  //-------------------------------------------------------------
+  // Если объект существует
+  if ( $( '#users' ).length ) {
+    $('#main_menu li').removeClass('active');
+    $('#mm_users').addClass('active');
 
-  //-------------------------------------------------------------
-  // Диалог удаления поступления
-  $( "#user-delete-dialog" ).dialog({
-    autoOpen: false,
-    resizable: false,
-    height: "auto",
-    width: 400,
-    modal: true,
-    buttons: {
-      "Так": function() {
-        $.ajax({ url: $('#users table tr.user-delete .btn-del').data('ajax-path'), type: 'DELETE', dataType: "script" });
+    $( '#dialog_delete' ).data( 'delete', 'deleteUser();' ); // Функция для удаления пользователя
+    $( '#dialog_delete' ).data( 'un-delete', 'unDeleteUser();' ); // Отмена удаления пользователя
 
-        // Если один одна строка, тогда удаляем всю табличку
-        if ( $('#users table tbody').children().length == 1 ) {
-          $('#users table').remove();
-        } else {
-          $('#users table tr.user-delete').remove();
-        } ;
-        $(this).dialog( "close" );
-      },
-      "Hі": function() { $(this).dialog( "close" );
-      }
-    }
-  });
-  //-------------------------------------------------------------
+    $( '.table' ).tableHeadFixer(); // Фиксируем шапку таблицы
 
-});
+    // Удаление пользователя
+    deleteUser = function () {
+      var $path_ajax = $( '.table' ).data( 'path-del' ) + $( 'tr.delete' ).data( 'id' );
+      $.ajax( { url: $path_ajax, type: 'DELETE', dataType: 'script' } );
+
+      // Если один одна строка, тогда удаляем всю табличку
+      if ($( 'tbody' ).children().length == 1 ) { $( '#table_users' ).empty() }
+        else { $( 'tr.delete' ).remove() }
+    } };
+
+    // Отмена удаления заявки
+    unDeleteUser = function() { $( 'tr.delete' ).removeClass( 'delete' ) };
+
+    // Нажатие на кнопочку удалить поступление
+    $( document ).on( 'click', 'td .btn_del', function() {
+      $( this ).parents( 'tr' ).addClass( 'delete' );
+      $( '#dialog_delete' ).dialog( 'open' );
+    } );
+
+    // Нажатие на кнопочку для перехода заполнения информации
+    $( document ).on( 'click', 'td .btn_view, td .btn_edit', function() {
+      window.location.replace( $( this ).parents( 'table' )
+          .data( 'path-view' ) + $( this ).parents( 'tr' ).data( 'id' ) );
+    } );
+
+} );

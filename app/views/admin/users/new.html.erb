@@ -1,9 +1,53 @@
-<%= content_tag :main, id: :user_new do %>
+<%= content_tag :div, id: :user_new do %>
   <%= content_tag :h1, "Створення користувача" %>
 
-  <%= content_tag :header, '' do %>
-    <%= button_tag '', class: :btn_save, id: :save, data: { ajax_path: "#{users_create_path}" } %>
-    <%= button_tag '', class: :btn_exit, onclick: "location.href='#{users_index_path}'" %>
+  <%= form_for( @user, url: admin_users_create_path, method: :post ) do | user | %>
+    <%= user.hidden_field :id %>
+
+    <%= content_tag :div, class: :panel do %>
+      <%= user.button '', class: :btn_save %>
+      <%= button_tag '', class: :btn_exit, onclick: "location.href='#{ admin_users_index_path }'" %>
+    <% end %>
+
+    <%= content_tag :div, class: :panel do %>
+      <%= user.label :username, 'Користувач:' %>
+      <%= user.text_field :username, placeholder: 'Логін...', class: :align_right, readonly: @user.username=='admin' %>
+    <% end %>
+
+    <%= content_tag :div, class: :panel do %>
+      <%= user.label :password, 'Пароль:' %>
+      <%= user.password_field :password, placeholder: 'Пароль...', class: :align_right %>
+    <% end %>
+
+    <%= content_tag :div, class: :panel do %>
+      <%= user.label :password_confirmation, 'Підтвердження:' %>
+      <%= user.password_field  :password_confirmation, placeholder: 'Пароль...', class: :align_right %>
+    <% end %>
+
+    <%= content_tag :fieldset do %>
+      <%= content_tag :legend, 'Тип користувача' %>
+
+      <%= content_tag :div, class: :panel do %>
+        <%= content_tag :div, class: :radio_button do user.radio_button :userable_type, 'Admin' end %>
+        <%= user.label :userable_type_admin, 'Адміністратор' %>
+        <%= user.hidden_field :userable_id, value: 0, id: :user_admin %>
+      <% end %>
+
+      <%= content_tag :div, class: :panel do %>
+        <%= content_tag :div, class: :radio_button do user.radio_button( :userable_type, 'Institution' ) end %>
+        <%= user.label :userable_type_institution, 'Дитячий садок:' %>
+        <%= user.select :userable_id, options_from_collection_for_select( @institution, :id, :name ),
+                        { class: :align_right }, id: :user_institution %>
+      <% end %>
+
+      <%= content_tag :div, class: :panel do %>
+        <%= content_tag :div, class: :radio_button do user.radio_button( :userable_type, 'Supplier' ) end %>
+        <%= user.label :userable_type_supplier, 'Постачальник:' %>
+        <%= user.select :userable_id, options_from_collection_for_select( @supplier, :id, :name ),
+                        { class: :align_right }, id: :user_supplier %>
+      <% end %>
+    <% end %>
   <% end %>
+
 
 <% end %>
