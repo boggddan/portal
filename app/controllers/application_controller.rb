@@ -5,7 +5,7 @@
 
   $ghSavon = { wsdl: Rails.env.production? ?
     'http://192.168.1.2:8080/gos_release/ws/createsd.1cws?wsdl' :
-    'http://192.168.1.2:8080/gos1_new/ws/createsd.1cws?wsdl',
+    'http://192.168.1.2:8080/gos_release/ws/createsd.1cws?wsdl',
                namespaces: { 'xmlns:ins0' => 'http://www.reality.sh' } }
 
   def verify_log_in # Переход на страничку ввод логина и пароля, если не был произведен вход
