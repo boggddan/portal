@@ -51,7 +51,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
           end
         end
 
-        redirect_to institution_orders_products_path( id: institution_order.id )
+        redirect_to institution_institution_orders_products_path( id: institution_order.id )
       end
     end
   end
