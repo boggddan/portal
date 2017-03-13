@@ -43,30 +43,34 @@ class Institution::TimesheetsController < Institution::BaseController
   end
 
   def send_sa
-    @timesheet = InstitutionOrder.find_by( id: params[ :id ] )
-    institution_order_products = institution_order.institution_order_products.where.not( count: 0 )
-    if institution_order_products
-      message = { 'CreateRequest' => { 'ins0:Institutions_id' => institution_order.institution.code,
-                                       'ins0:DateStart' => institution_order.date_start.strftime( '%Y-%m-%d' ),
-                                       'ins0:DateFinish' => institution_order.date_end.strftime( '%Y-%m-%d' ),
-                                       'ins0:NumberFromWebPortal' => institution_order.number,
-                                       'ins0:TMC' => institution_order_products.map{ | o | {
-                                         'ins0:Product_id' => o.product.code,
-                                         'ins0:Date' => o.date,
-                                         'ins0:Count_po' => o.count.to_s } } } }
-      response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] ).
-        call( :creation_application_units, message: message )
-      interface_state = response.body[ :creation_application_units_response ][ :return ][ :interface_state ]
-      number = response.body[ :creation_application_units_response ][ :return ][ :respond ]
+    timesheet = Timesheet.find_by( id: params[ :id ] )
+    timesheet_dates = timesheet.timesheet_dates_join.where.not( reasons_absences_code: '' )
+    if timesheet_dates
+      message = { 'CreateRequest' => { 'ins0:Institutions_id' => timesheet.institution.code,
+                                       'ins0:NumberFromWebPortal' => timesheet.number,
+                                       'ins0:StartDate' => date_str( timesheet.date_vb ),
+                                       'ins0:EndDate' => date_str( timesheet.date_ve ),
+                                       'ins0:StartDateOfTheFill' => date_str( timesheet.date_eb ),
+                                       'ins0:EndDateOfTheFill' => date_str( timesheet.date_ee ),
+                                       'ins0:TS' => timesheet_dates.map{ | o | {
+                                         'ins0:Children_group_code' => o.children_group_code,
+                                         'ins0:Child_code' => o.child_code,
+                                         'ins0:Reasons_absence_code' => o.reasons_absence_code,
+                                         'ins0:Date' => date_str( o.date ) } } } }
+
+      response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] )
+        .call( :creation_time_sheet, message: message )
+      interface_state = response.body[ :creation_time_sheet_response ][ :return ][ :interface_state ]
+      number = response.body[ :creation_time_sheet_response ][ :return ][ :respond ]
 
       if interface_state == 'OK'
-        institution_order.update( date_sa: Date.today, number_sa: number )
-        redirect_to institution_orders_index_path
+        timesheet.update( date_sa: Date.today, number_sa: number )
+        redirect_to institution_timesheets_index_path
       else
         render json: { interface_state: interface_state, message: message }
       end
     else
-      render text: 'Количество не проставлено'
+      render text: 'Пустая таблица не проставлено'
     end
   end
 

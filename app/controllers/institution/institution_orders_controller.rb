@@ -85,7 +85,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
 
       if interface_state == 'OK'
         institution_order.update( date_sa: Date.today, number_sa: number )
-        redirect_to institution_orders_index_path
+        redirect_to institution_institution_orders_index_path
       else
        render json: { interface_state: interface_state, message: message }
       end
