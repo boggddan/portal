@@ -63,33 +63,6 @@ class SyncCatalogsController < ApplicationController
     end
   end
 
-  def child_code( code )
-    code = code.strip
-    if child = Child.find_by( code: code )
-      child
-    else
-      { error: { child: "Не знайдений код дитини [#{ code }]" } }
-    end
-  end
-
-  def reasons_absence_code( code )
-    code = code.strip
-    if reasons_absence = ReasonsAbsence.find_by( code: code )
-      reasons_absence
-    else
-      { error: { reasons_absence: "Не знайдений код причини відсутності [#{ code }]" } }
-    end
-  end
-
-  def children_group_code( code )
-    code = code.strip
-    if children_group = ChildrenGroup.find_by( code: code )
-      children_group
-    else
-      { error: { children_group:  "Не знайдений код дитячої группи [#{ code }]" } }
-    end
-  end
-
   def supplier_order_number( branch, number )
     number = number.strip
     if supplier_order = SupplierOrder.find_by( branch: branch, number: number )

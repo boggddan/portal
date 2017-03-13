@@ -39,7 +39,7 @@ header, .panel {
     display: inline-block;
     position: relative;
     &:after {content: "\e138"; font-family: 'Glyphicons Halflings'; position: absolute; top: 7px; left: 4px; color: #aaa; line-height: 1;}
-    input, select, input::-webkit-input-placeholder { padding-left: 19px; }
+    input[type='text'], input[type='password'], select, input::-webkit-input-placeholder { padding-left: 19px; }
     input { width: 100%; }
 
     &.icon_filter { &:after {content: "\e138"; } } /* Иконка фильтрации */

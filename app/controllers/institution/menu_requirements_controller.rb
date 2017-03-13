@@ -90,7 +90,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
         end
       end
 
-      redirect_to menu_requirements_products_path(id: menu_requirement.id)
+      redirect_to institution_menu_requirements_products_path( id: menu_requirement.id )
     end
 
   end

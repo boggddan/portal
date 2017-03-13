@@ -11,9 +11,12 @@
 
   <%= content_tag :div, id: :panel_main do %>
     <%= content_tag :div, class: :panel do %>
-      <%= button_tag ' план', class: :btn_send, id: :send_sap, disabled: date_sap || date_saf, data: { ajax_path: "#{menu_requirements_send_sap_path}?id=#{@menu_requirement.id}" } %>
-      <%= button_tag ' факт', class: :btn_send, id: :send_saf, disabled: !date_sap || date_saf, data: { ajax_path: "#{menu_requirements_send_saf_path}?id=#{@menu_requirement.id}" } %>
-      <%= button_tag '', class: (date_saf ? :btn_exit : :btn_save), onclick: "location.href='#{menu_requirements_index_path}'" %>
+      <%= button_tag ' план', class: :btn_send, id: :send_sap, disabled: date_sap || date_saf,
+                     data: { ajax_path: "#{ institution_menu_requirements_send_sap_path }?id=#{ @menu_requirement.id }" } %>
+      <%= button_tag ' факт', class: :btn_send, id: :send_saf, disabled: !date_sap || date_saf,
+                     data: { ajax_path: "#{ institution_menu_requirements_send_saf_path }?id=#{ @menu_requirement.id }" } %>
+      <%= button_tag '', class: (date_saf ? :btn_exit : :btn_save),
+                     onclick: "location.href='#{ institution_menu_requirements_index_path }'" %>
 
       <% if date_sap %>
         <%= label_tag '', 'Надіслано план:' %>

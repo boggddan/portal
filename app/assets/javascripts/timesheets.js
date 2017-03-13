@@ -31,7 +31,7 @@ $( document ).on( 'turbolinks:load', function() {
 
     // Удаление меню-требования
     deleteTimesheet = function() {
-      $.ajax( { url: $( 'tr.delete' ).data( 'path-del' ), type: 'DELETE', dataType: 'script' } );
+      $.ajax( { url: $( '.table' ).data( 'path-del' ) + $( 'tr.delete' ).data( 'id' ), type: 'delete', dataType: 'script' } );
 
       // Если один одна строка, тогда удаляем всю табличку
       if ( $( 'tbody' ).children().length == 1 ) { $( '#table_timesheets' ).empty() } else { $( 'tr.delete' ).remove() };
@@ -39,12 +39,6 @@ $( document ).on( 'turbolinks:load', function() {
 
     // Отмена удаления меню-требования
     unDeleteMenuRequirement = function() { $( 'tr.delete' ).removeClass( 'delete' ) };
-
-    // Нажатие на кнопочку создать
-    $( '#create_timesheet' ).click( function() {
-      $( '#dialog_wait' ).dialog( 'open' );
-      $.ajax( { url: $( this ).data( 'ajax-path' ), type: 'POST', dataType: 'script' } );
-    } );
 
     // Начальная дата фильтрации
     $( '#date_start' ).datepicker( {

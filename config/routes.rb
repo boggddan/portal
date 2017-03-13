@@ -127,13 +127,14 @@ Rails.application.routes.draw do
     namespace :timesheets do
       get :index, path: '' # Главная страничка
       get :ajax_filter_timesheets # Фильтрация документов
-      delete :delete_timesheet # Удаление документа
+      delete :delete # Удаление документа
       get :dates # Отображение дней табеля
-  #    post :create # Создание документа
+      get :new #
+      post :create # Создание документа
   #    post :children_category_update # Обновление количества по категориям
   #    post :product_update # Обновление количества по продуктам
       post :update # Обновление реквизитов документа
-  #    post :send_sap # Веб-сервис отправки плана меню-требования
+      post :send_sa # Веб-сервис отправки табеля
   #    post :send_saf # Веб-сервис отправки факта меню-требования
     end
   end

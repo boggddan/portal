@@ -2,8 +2,8 @@ $( document ).on( 'turbolinks:load', function() {
 
   // Если объект существует
   if ( $( '#users' ).length ) {
-    $('#main_menu li').removeClass('active');
-    $('#mm_users').addClass('active');
+    $( '#main_menu li' ).removeClass( 'active' );
+    $( '#mm_users' ).addClass( 'active' );
 
     $( '#dialog_delete' ).data( 'delete', 'deleteUser();' ); // Функция для удаления пользователя
     $( '#dialog_delete' ).data( 'un-delete', 'unDeleteUser();' ); // Отмена удаления пользователя

@@ -1,11 +1,11 @@
 ﻿class ApplicationController < ActionController::Base
   before_action :verify_log_in # Фильтр на проверку зарегистрированости пользователя
-  helper_method :day_of_week, :year_month_names
+  helper_method :day_of_week, :year_month_names, :short_day_of_week
   helper_method :current_user, :date_str, :f3_to_s, :f2_to_s
 
   $ghSavon = { wsdl: Rails.env.production? ?
-    'http://192.168.1.2:8080/gos1_new/ws/createsd.1cws?wsdl' :
-    'http://192.168.1.2:8080/gos_release/ws/createsd.1cws?wsdl',
+    'http://192.168.1.2:8080/gos_release/ws/createsd.1cws?wsdl' :
+    'http://192.168.1.2:8080/gos1_new/ws/createsd.1cws?wsdl',
                namespaces: { 'xmlns:ins0' => 'http://www.reality.sh' } }
 
   def verify_log_in # Переход на страничку ввод логина и пароля, если не был произведен вход
@@ -58,15 +58,6 @@
     @current_user_type ||= current_user.userable_type
   end
 
-  def product_code( code )
-    code = code.strip
-    if product = Product.find_by( code: code )
-      product
-    else
-      { error: { product: "Не знайдений код продукту [#{ code }]" } }
-    end
-  end
-
   def date_str( date )
     date.strftime( '%d.%m.%Y' ) if date
   end
@@ -82,5 +73,46 @@
   def date_int_to_str( date )
     Time.at( date.to_i ).strftime( '%Y-%m-%d' )
   end
+
+  def product_code( code )
+    code = code.strip
+    if product = Product.find_by( code: code )
+      product
+    else
+      { error: { product: "Не знайдений код продукту [#{ code }]" } }
+    end
+  end
+
+  def child_code( code )
+    code = code.strip
+    if child = Child.find_by( code: code )
+      child
+    else
+      { error: { child: "Не знайдений код дитини [#{ code }]" } }
+    end
+  end
+
+  def reasons_absence_code( code )
+    code = code.strip
+    if reasons_absence = ReasonsAbsence.find_by( code: code )
+      reasons_absence
+    else
+      { error: { reasons_absence: "Не знайдений код причини відсутності [#{ code }]" } }
+    end
+  end
+
+  def children_group_code( code )
+    code = code.strip
+    if children_group = ChildrenGroup.find_by( code: code )
+      children_group
+    else
+      { error: { children_group:  "Не знайдений код дитячої группи [#{ code }]" } }
+    end
+  end
+
+
+
+
+
 
 end

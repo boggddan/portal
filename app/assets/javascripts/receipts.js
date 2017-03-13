@@ -93,9 +93,10 @@ $( document ).on('turbolinks:load', function() {
 
     // Фильтрация таблицы поступлений
     filterTableReceipts = function() {
-      var $contract_number = $('#contract_number');
-      var $path_ajax = $contract_number.data('ajax-path')+$('#table_supplier_orders tbody tr.selected').data('id')+'&'+$contract_number.attr('name')+'='+$contract_number.val();
-      $.ajax({ url: $path_ajax, type: 'GET', dataType: "script" });
+      var $contract_number = $( '#contract_number' );
+      var $path_ajax = $contract_number.data( 'ajax-path' ) + $( '#table_supplier_orders tbody tr.selected' ).data( 'id' )
+        + '&' + $contract_number.attr( 'name' ) + '=' + $contract_number.val();
+      $.ajax( { url: $path_ajax, type: 'GET', dataType: 'script' } );
     };
 
     // Удаление поступления

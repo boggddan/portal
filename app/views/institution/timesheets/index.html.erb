@@ -16,8 +16,8 @@
       <%= text_field_tag :date_end, '', readonly: true, placeholder: 'Дата...' %>
     <% end %>
 
-    <%= button_tag '', class: [:btn_create, :align_right], id: :create_timesheet, data: {
-      ajax_path: institution_institution_orders_create_path } %>
+    <%= button_tag '', class: [ :btn_create, :align_right ],
+                   onclick: "location.href='#{ institution_timesheets_new_path }'" %>
   <% end %>
 
   <%= content_tag :div, '', id: :table_timesheets do %>
