@@ -209,7 +209,8 @@
                         <% if (!date_sap && value1 == :plan) || (date_sap && !date_saf && value1 == :fact) %>
                           <%= text_field_tag "count_#{value2}_#{menu_product.product_id}_#{children_category[:id]}_#{menu_product_id}", f3_to_s(count_value),
                             class: ((count_value.positive? ? :positive : :negative) if value2 == :diff),
-                            data: ( { sum: menu_product["sum_#{value1}_#{index}"], ajax_path: "#{menu_requirements_product_update_path}?id=#{menu_product_id}" } unless value2 == :diff ) %>
+                            data: ( { sum: menu_product["sum_#{value1}_#{index}"],
+                                      ajax_path: "#{ institution_menu_requirements_product_update_path }?id=#{ menu_product_id }" } unless value2 == :diff ) %>
                         <% else %>
                           <%= f3_to_s(count_value) %>
                         <% end %>

@@ -57,7 +57,7 @@ class Institution::TimesheetsController < Institution::BaseController
                                          'ins0:Children_group_code' => o.children_group_code,
                                          'ins0:Reasons_absence_code' => o.reasons_absence_code,
                                          'ins0:Date' => o.date  } } } }
-      puts message
+
       response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] )
         .call( :creation_time_sheet, message: message )
       interface_state = response.body[ :creation_time_sheet_response ][ :return ][ :interface_state ]
