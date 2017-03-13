@@ -6,9 +6,9 @@ class Timesheet < ApplicationRecord
 
   has_many :timesheet_dates_join,
     -> { select( :id, :timesheet_id, :children_group_id, :child_id, :reasons_absence_id, :date,
-                 'children_groups.code AS group_code', 'children.code AS child_code',
+                 'children_groups.code AS children_group_code', 'children.code AS child_code',
                  'reasons_absences.code AS reasons_absence_code' )
-       .joins( :institution, :children_group, :child, :reasons_absence ) }, class_name: TimesheetDate
+       .joins( :children_group, :child, :reasons_absence ) }, class_name: TimesheetDate
 
   #
   before_save :set_default_value

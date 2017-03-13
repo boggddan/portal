@@ -6,7 +6,7 @@
 
 <%= content_tag :main, id: :menu_requirement_products do %>
 
-  <%= content_tag :h1, "Меню-вимога № #{ @menu_requirement.number } від #{ date_str(@menu_requirement.date ) }",
+  <%= content_tag :h1, "Меню-вимога № #{ @menu_requirement.number } від #{ date_str( @menu_requirement.date ) }",
       data: { text: "Меню-вимога № #{ @menu_requirement.number } від" }, class: :icon_hide %>
 
   <%= content_tag :div, id: :panel_main do %>
@@ -54,12 +54,13 @@
 
       <%= label_tag :date, 'від' %>
       <%= content_tag :nav, class: :icon_сalendar do %>
-        <%= text_field_tag :date, date_str(@menu_requirement.date), disabled: date_sap, readonly: true, data: { ajax_path: "#{menu_requirements_update_path}?id=#{@menu_requirement.id}" } %>
+        <%= text_field_tag :date, date_str(@menu_requirement.date), disabled: date_sap, readonly: true, data: {
+          ajax_path: "#{ institution_menu_requirements_update_path }?id=#{ @menu_requirement.id }" } %>
       <% end %>
 
       <%= label_tag :splendingdate, 'Дата списання' %>
       <%= content_tag :nav, class: :icon_сalendar do %>
-        <%= text_field_tag :splendingdate, date_str(@menu_requirement.splendingdate), disabled: date_saf, readonly: true  %>
+        <%= text_field_tag :splendingdate, date_str( @menu_requirement.splendingdate ), disabled: date_saf, readonly: true  %>
       <% end %>
     <% end %>
   <% end %>
@@ -108,9 +109,10 @@
                   <%= content_tag :td do %>
                     <% if (!date_sap && value1 == :plan ) || (date_sap && !date_saf && value1 == :fact ) %>
                       <%= text_field_tag "#{value2}_#{value1}_#{menu_children_category.children_category_id}", menu_children_category["#{value2}_#{value1}"].nonzero?,
-                        data: { ajax_path: "#{menu_requirements_children_category_update_path}?id=#{menu_children_category.id}" } %>
+                        data: { ajax_path: "#{ institution_menu_requirements_children_category_update_path }?id=
+                            #{ menu_children_category.id }" } %>
                     <% else %>
-                      <%= menu_children_category["#{value2}_#{value1}"].nonzero? %>
+                      <%= menu_children_category[ "#{ value2 }_#{ value1 }"].nonzero? %>
                     <% end %>
                   <% end %>
 

@@ -44,20 +44,20 @@ class Institution::TimesheetsController < Institution::BaseController
 
   def send_sa
     timesheet = Timesheet.find_by( id: params[ :id ] )
-    timesheet_dates = timesheet.timesheet_dates_join.where.not( reasons_absences_code: '' )
+    timesheet_dates = timesheet.timesheet_dates_join.where.not( 'reasons_absences.code = ? ', '' )
     if timesheet_dates
       message = { 'CreateRequest' => { 'ins0:Institutions_id' => timesheet.institution.code,
                                        'ins0:NumberFromWebPortal' => timesheet.number,
-                                       'ins0:StartDate' => date_str( timesheet.date_vb ),
-                                       'ins0:EndDate' => date_str( timesheet.date_ve ),
-                                       'ins0:StartDateOfTheFill' => date_str( timesheet.date_eb ),
-                                       'ins0:EndDateOfTheFill' => date_str( timesheet.date_ee ),
+                                       'ins0:StartDate' => timesheet.date_vb,
+                                       'ins0:EndDate' => timesheet.date_ve,
+                                       'ins0:StartDateOfTheFill' => timesheet.date_eb,
+                                       'ins0:EndDateOfTheFill' => timesheet.date_ee,
                                        'ins0:TS' => timesheet_dates.map{ | o | {
-                                         'ins0:Children_group_code' => o.children_group_code,
                                          'ins0:Child_code' => o.child_code,
+                                         'ins0:Children_group_code' => o.children_group_code,
                                          'ins0:Reasons_absence_code' => o.reasons_absence_code,
-                                         'ins0:Date' => date_str( o.date ) } } } }
-
+                                         'ins0:Date' => o.date  } } } }
+      puts message
       response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] )
         .call( :creation_time_sheet, message: message )
       interface_state = response.body[ :creation_time_sheet_response ][ :return ][ :interface_state ]
