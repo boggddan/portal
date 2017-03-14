@@ -6,7 +6,7 @@
   <%= content_tag :div, '', id: :panel_main do %>
     <%= content_tag :div, '', class: :panel do %>
       <%= button_tag '', class: :btn_send, id: :send_sa, disabled: @io_correction.date_sa,
-          data: { ajax_path: "#{ institution_institution_orders_correction_send_sa_path}?id=#{@io_correction.id}" } %>
+          data: { ajax_path: "#{ institution_institution_orders_correction_send_sa_path }?id=#{ @io_correction.id }" } %>
       <%= button_tag '', class: (@io_correction.date_sa ? :btn_exit : :btn_save),
                      onclick: "location.href='#{ institution_institution_orders_index_path }'" %>
       <% if @io_correction.date_sa %>
@@ -77,7 +77,7 @@
                 <%= content_tag :td do %>
                   <% if @io_correction.date_sa.nil? %>
                     <%= text_field_tag "#{value}_#{io_correction_product.product_id}", value_count,
-                          data: { ajax_path: ("#{ institution_institution_orders_correction_product_update_path}?id=
+                          data: { ajax_path: ("#{ institution_institution_orders_correction_product_update_path }?id=
                             #{ io_correction_product.id }" if value == :diff ) } %>
                   <% else %>
                     <%= value_count %>

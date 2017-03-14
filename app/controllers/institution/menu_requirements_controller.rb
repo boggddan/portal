@@ -141,7 +141,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       end
     end
 
-    redirect_to menu_requirements_products_path( id: params[:id] )
+    redirect_to institution_menu_requirements_products_path( id: params[:id] )
   end
 
   def send_saf # Веб-сервис отправки факта меню-требования
@@ -175,7 +175,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       end
     end
 
-    redirect_to menu_requirements_products_path( id: params[:id] )
+    redirect_to institution_menu_requirements_products_path( id: params[ :id ] )
   end
 
 end

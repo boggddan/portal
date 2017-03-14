@@ -119,7 +119,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
           end
         end
 
-        redirect_to institution_orders_correction_products_path( id: io_correction.id )
+        redirect_to institution_institution_orders_correction_products_path( id: io_correction.id )
       end
     end
   end
@@ -171,7 +171,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
 
       if interface_state == 'OK'
         io_correction.update( date_sa: Date.today, number_sa: number )
-        redirect_to institution_orders_index_path
+        redirect_to institution_institution_orders_index_path
       else
         render json: { interface_state: interface_state, message: message }
       end

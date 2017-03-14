@@ -9,7 +9,7 @@
       <%= label_tag :date_start, 'З' %>
       <%= content_tag :nav, '', class: :icon_сalendar do %>
         <%= text_field_tag :date_start, '', readonly: true, placeholder: 'Дата...',
-                           data: { ajax_path: institution_receipts_ajax_filter_supplier_orders_path} %>
+                           data: { ajax_path: institution_receipts_ajax_filter_supplier_orders_path } %>
       <% end %>
 
       <%= label_tag :date_end, 'ПО' %>
@@ -37,13 +37,10 @@
       <% end %>
 
       <%= button_tag '', class: [:btn_create, :align_right], id: :create_receipt, data: {
-        ajax_path: "#{institution_receipts_create_path}?id=" } %>
+        ajax_path: "#{ institution_receipts_create_path }?id=" } %>
     <% end %>
 
-    <%= content_tag :div, '', id: :table_receipts do %>
-      <%= render("institution/receipts/table_receipts") %>
-    <% end %>
-
+    <%= content_tag :div, '', id: :table_receipts do render( 'institution/receipts/table_receipts' ) end %>
   <% end %>
 
 <% end %>
