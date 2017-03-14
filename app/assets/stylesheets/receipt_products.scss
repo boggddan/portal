@@ -1,17 +1,20 @@
 
-#receipt-products {
-  #text-header { width: 560px; }
+#receipt_products {
+  #supplier_name { width: 224px;}
+  #contract_number { width: 139px; }
 
-  .menu-panel {
-    #invoice_number { width: 100px; }
-    #date_sa { width: 78px; }
-    #supplier_order_number { width: 122px; }
-    #supplier_name { width: 224px;}
-    #contract_number { width: 139px; }
-  }
+  #table_institution_order_products { height: 370px; }
 
-  table {
-    tr { .product_name { width: 457px; padding-left: 25px; text-align: left; } }
+  .table {
+    col {
+      &:nth-of-type(1) { width: 400px; };
+      &:nth-of-type(2) { width: 100px; };
+    }
+
+    td {
+      &:nth-of-type(1) { padding-left: 25px; text-align: left; };
+      &.row_group:nth-of-type(1) { padding-left: 3px; text-align: left; };
+    }
   }
 }
 

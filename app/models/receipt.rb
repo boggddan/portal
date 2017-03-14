@@ -2,8 +2,9 @@ class Receipt < ApplicationRecord
   belongs_to :supplier_order
   belongs_to :institution
 
-  has_many :receipt_products, dependent: :destroy
-
+  has_many :receipt_products,
+           -> { select( :id, :receipt_id, :product_id, :date, :count, :code, :name )
+                                        .joins( :product ) }, dependent: :destroy
   #
   before_save :set_default_value
 

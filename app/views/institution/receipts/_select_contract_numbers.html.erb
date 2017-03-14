@@ -1,4 +1,4 @@
 <!-- Список выбора с договорами с заявок поставщику -->
 
-<option value>Договір</option>
-<%= (options_from_collection_for_select(@contracts, :contract_number, :contract_number)) if @contracts %>
+<%= content_tag :option, 'Договір' %>
+<%= ( options_from_collection_for_select( @contracts, :contract_number, :contract_number ) ) if @contracts %>

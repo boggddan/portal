@@ -16,7 +16,7 @@ $( document ).on( 'turbolinks:load', function() {
       var $date_val = $date.val();
       var $path_ajax = $date.data( 'ajax-path' ) + '&' + $date.attr( 'name' ) + '=' + $date_val + '&' + $splendingdate.attr( 'name' ) + '=' + $splendingdate.val();
 
-      $( 'h1' ).text( $h1.data( 'text' ) + ' ' + $date_val );
+      $h1.text( $h1.data( 'text' ) + ' ' + $date_val );
       $.ajax( { url: $path_ajax, type: 'POST', dataType: 'script' } );
     };
 
@@ -27,7 +27,7 @@ $( document ).on( 'turbolinks:load', function() {
     } );
 
     // Дата - при выборе сохраняем значение
-    $( '#date, #splendingdate' ).datepicker({
+    $( '#date, #splendingdate' ).datepicker( {
       onSelect: function() {
         var $this = $( this );
         if ( $this.data( 'old-value' ) != $this.val() ) { MenuRequirementUpdate() };  // Обновление реквизитов и заголовок формы

@@ -77,7 +77,7 @@ Rails.application.routes.draw do
     namespace :receipts do
       get :index, path: '' # Главная страничка
       post :create # создание поступления
-      patch :update # Обновление шапки поступления
+      post :update # Обновление шапки поступления
       get :products # Отображение товаров поступления
       post :product_update # Обновление количества
       post :send_sa # Веб-сервис отправки поступления
@@ -85,7 +85,7 @@ Rails.application.routes.draw do
       get :ajax_filter_supplier_orders # Фильтрация таблицы заявок
       get :ajax_filter_contract_numbers
       get :ajax_filter_receipts # Фильтрация таблицы поступлений
-      delete :ajax_delete_receipt # Удаление поступления
+      delete :delete # Удаление поступления
     end
 
     # Заявки садика

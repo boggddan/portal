@@ -29,10 +29,10 @@ class Institution::MenuRequirementsController < Institution::BaseController
     joins_table = "INNER JOIN children_categories
                     ON children_categories.id = menu_children_categories.children_category_id
                     LEFT OUTER JOIN
-                      (SELECT children_category_id, MAX(cost) AS cost
+                      (SELECT DISTINCT ON(children_category_id) children_category_id, cost
                         FROM children_day_costs
                         WHERE cost_date <= '#{ date }'
-                        GROUP BY children_category_id HAVING MAX(cost_date) <= '#{ date }' ) aa
+                        ORDER BY children_category_id, cost_date DESC ) aa
                     ON aa.children_category_id = children_categories.id "
 
     @menu_children_categories = @menu_requirement.menu_children_categories.select( select_column )
@@ -43,9 +43,9 @@ class Institution::MenuRequirementsController < Institution::BaseController
     select_column = [ :product_id, 'MAX(products.code) as code', 'MAX(products.name) as name', 'MAX(COALESCE(aa.price, 0)) as price' ]
     joins_table = "INNER JOIN products ON products.id = menu_products.product_id
                     LEFT OUTER JOIN
-                      (SELECT product_id, MAX(price) AS price FROM price_products
+                      (SELECT DISTINCT ON(product_id) product_id, price FROM price_products
                         WHERE price_date <= '#{ date }' AND institution_id = #{institution_id}
-                        GROUP BY product_id HAVING MAX(price_date) <= '#{ date }') aa
+                        ORDER BY product_id, price_date DESC) aa
                     ON aa.product_id = menu_products.product_id "
     column_fact_all = ''
     column_plan_all = ''

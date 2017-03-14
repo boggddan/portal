@@ -98,14 +98,11 @@ puts message
     end
 
     @timesheet_dates = @timesheet.timesheet_dates.select( select_column ).
-      joins( :children_category, :child, :reasons_absence ).group( 'children_categories.code', 'children_groups.code', 'children.code' )
+      joins( :children_category, :child, :reasons_absence )
+                         .group( 'children_categories.code', 'children_groups.code', 'children.code' )
 
-    #render json: @timesheet_dates
-
-    @date_range = { start: @timesheet.date_ve.day, end: @timesheet.date_vb.day, count: (@timesheet.date_ve.day - @timesheet.date_vb.day + 1) }
-
-    puts "dsdsd #{ @date_range }"
-
+    @date_range = { start: @timesheet.date_ve.day, end: @timesheet.date_vb.day,
+                    count: (@timesheet.date_ve.day - @timesheet.date_vb.day + 1) }
   end
 
   def update # Обновление реквизитов документа

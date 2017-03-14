@@ -65,8 +65,14 @@
         <% end %>
 
         <%= content_tag :tbody do %>
-          <% date = '' %>
+          <% category_name = '' %>
           <% @timesheet_dates.each do | timesheet_dates | %>
+
+            <% if category_name != timesheet_dates.category_name %>
+              <% category_name = timesheet_dates.category_name %>
+              <%= content_tag :tr do %>
+                <%= content_tag( :td, category_name, class: :row_group ) end %>
+            <% end %>
 
             <%= content_tag :tr do %>
               <%= content_tag :td, timesheet_dates.child_name %>
