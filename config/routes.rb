@@ -123,12 +123,13 @@ Rails.application.routes.draw do
       post :send_saf # Веб-сервис отправки факта меню-требования
     end
 
-    # Меню-требования
+    # Табель
     namespace :timesheets do
       get :index, path: '' # Главная страничка
       get :ajax_filter_timesheets # Фильтрация документов
       delete :delete # Удаление документа
       get :dates # Отображение дней табеля
+      get :ajax_filter_timesheet_dates # Фильтрация таблицы
       get :new #
       post :create # Создание документа
   #    post :children_category_update # Обновление количества по категориям

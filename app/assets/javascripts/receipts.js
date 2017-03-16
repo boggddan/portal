@@ -5,11 +5,11 @@ $( document ).on( 'turbolinks:load', function() {
     $( '#main_menu li' ).removeClass( 'active' );
     $( '#mm_receipts' ).addClass( 'active' );
 
-    if ( sessionStorage.receipts_date_start) { $( '#date_start' ).val( sessionStorage.receipts_date_start ) };
-    if ( sessionStorage.receipts_date_end) { $( '#date_end' ).val( sessionStorage.receipts_date_end ) };
-    if ( sessionStorage.receipts_supplier_name) { $( '#supplier_name' ).val( sessionStorage.receipts_supplier_name ) };
-    if ( sessionStorage.receipts_supplier_name_value) { 
-      $( '#supplier_name' ).data( 'value', sessionStorage.receipts_supplier_name_value) };
+    if ( sessionStorage.receipts_date_start ) { $( '#date_start' ).val( sessionStorage.receipts_date_start ) };
+    if ( sessionStorage.receipts_date_end ) { $( '#date_end' ).val( sessionStorage.receipts_date_end ) };
+    if ( sessionStorage.receipts_supplier_name ) { $( '#supplier_name' ).val( sessionStorage.receipts_supplier_name ) };
+    if ( sessionStorage.receipts_supplier_name_value ) {
+      $( '#supplier_name' ).data( 'value', sessionStorage.receipts_supplier_name_value ) };
 
     $( '#dialog_delete' ).data( 'delete', 'deleteReceipt();' ); // Функция для удаления меню-требования
     $( '#dialog_delete' ).data( 'un-delete', 'unDeleteReceipt();' ); // Отмена удаления меню-требования

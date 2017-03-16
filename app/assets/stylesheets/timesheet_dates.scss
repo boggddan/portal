@@ -9,10 +9,16 @@
     col:nth-child(1) { width: 250px; }
     col ~ col { width: 50px; }
 
+    th { font-weight: bold; }
+
     /* Колонка с наименованием продуктов */
     tbody td {
-      &:first-child { padding-left: 3px; text-align: left; }
+      &:first-child { padding-left: 27px; text-align: left; }
     }
 
+    td { border-right-color: #aaa; }
+
+    .category_name { background-color:  #dadada; &:first-child { padding-left: 3px; } }
+    .group_name { background-color: #f1f1f1; &:first-child { padding-left: 15px; } }
   }
 }

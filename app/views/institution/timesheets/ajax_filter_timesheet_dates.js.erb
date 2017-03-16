@@ -1,0 +1,10 @@
+//  Фильтрация таблицы поступлений
+
+$( '#table_timesheet_dates' ).empty().append( '<%= j render( "institution/timesheets/table_timesheet_dates" ) %>' );
+
+var $table = $( '#table_timesheet_dates .table' );
+
+/* Если существуют заявки по выбраному фильтру */
+if ( $table.length ) {
+  $table.tableHeadFixer( { 'left' : 1 }  ); // Фиксируем шапку таблицы
+};

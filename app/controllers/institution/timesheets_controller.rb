@@ -34,7 +34,7 @@ class Institution::TimesheetsController < Institution::BaseController
           reasons_absence = reasons_absence_code(  ( ts[ :reasons_absence_code ] || '' ).strip )
 
           timesheet.timesheet_dates.create( child: child, children_group: children_group, reasons_absence: reasons_absence,
-            date: ts[ :date ]) unless child[ :error ] && children_group[ :error ] && reasons_absence[ :error ]
+            date: ts[ :date ]) unless child[ :error ] || children_group[ :error ] || reasons_absence[ :error ]
         end
 
         redirect_to institution_timesheets_dates_path( id: timesheet.id )
@@ -89,25 +89,57 @@ puts message
   def dates # Отображение дней табеля
     @timesheet = Timesheet.find_by( id: params[ :id ] )
 
-    select_column = [ 'MAX(children_categories.name) AS category_name', 'MAX(children_groups.name) AS group_name',
-                      'MAX(children.name) AS child_name' ]
+    @group_timesheet =[]
+    children_category_id = 0
 
-    ( @timesheet.date_vb..@timesheet.date_ve ).each_with_index do | value, index |
-      select_column << "MAX(CASE date WHEN '#{value}' THEN timesheet_dates.id || '_' || reasons_absences.id || '_' ||
-                        reasons_absences.mark ELSE '' END) AS d_#{index+1}"
-    end
+    @timesheet.timesheet_dates
+      .select( 'DISTINCT ON (children_groups.children_category_id, timesheet_dates.children_group_id)
+        children_groups.children_category_id', :children_group_id,
+        'children_categories.name AS category_name', 'children_groups.name AS group_name' )
+      .joins( :children_category, :children_group )
+      .each do | o |
+        if children_category_id != o.children_category_id
+          children_category_id = o.children_category_id
+          @group_timesheet << [ o.category_name, o.children_category_id,
+                                { class: :row_group, data: { field: :children_category_id } } ]
+        end
 
-    @timesheet_dates = @timesheet.timesheet_dates.select( select_column ).
-      joins( :children_category, :child, :reasons_absence )
-                         .group( 'children_categories.code', 'children_groups.code', 'children.code' )
-
-    @date_range = { start: @timesheet.date_ve.day, end: @timesheet.date_vb.day,
-                    count: (@timesheet.date_ve.day - @timesheet.date_vb.day + 1) }
+        @group_timesheet << [ o.group_name, o.children_group_id, { data: { field: :children_group_id } } ]
+      end
   end
 
   def update # Обновление реквизитов документа
     update = params.permit( :date ).to_h
     Timesheet.where( id: params[ :id ] ).update_all( update ) if params[ :id ] && update.any?
+  end
+
+
+  def ajax_filter_timesheet_dates # Фильтрация таблицы
+    if params[ :id ]
+      @timesheet = Timesheet.find_by( id: params[ :id ] )
+
+      select = [ 'MAX(children_categories.name) AS category_name', 'MAX(children_groups.name) AS group_name',
+                        'MAX(children.name) AS child_name', 'MAX(children_category_id) AS children_category_id',
+                        'MAX(children_group_id) AS children_group_id' ]
+
+      ( @timesheet.date_vb..@timesheet.date_ve ).each_with_index{ | v, i | select << "MAX( CASE date WHEN '#{ v }'
+        THEN timesheet_dates.id || '_' || reasons_absences.id || '_' || reasons_absences.mark ELSE '' END) AS d_#{ i + 1 }" }
+
+      if params[ :field ] == 'children_group_id'
+        where = { children_group_id: params[ :field_id ] }
+      elsif params[ :field ] == 'children_category_id'
+        where = "children_groups.children_category_id = #{ params[ :field_id ] }"
+      else
+        where = ''
+      end
+
+      @timesheet_dates = @timesheet.timesheet_dates
+        .select( select )
+        .joins( :children_category, :child, :reasons_absence )
+        .group( 'children_categories.code', 'children_groups.code', 'children.code')
+        .where( where )
+        .order( 1, 2, 3 )
+    end
   end
 
 
