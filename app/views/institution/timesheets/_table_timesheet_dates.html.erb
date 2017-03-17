@@ -51,7 +51,7 @@
              <%= content_tag :tr do %>
                <%= content_tag :td, v[ 0 ].child_name %>
                <% v.each do | k1, v1 | %>
-                 <%= content_tag :td, k1.mark, disabled: k1.mark.blank? && !k1.reason_code.blank?,
+                 <%= content_tag :td, k1.mark, disabled: @timesheet.date_sa || ( k1.mark.blank? && !k1.reason_code.blank? ),
                    data: { id: k1.id, reasons_absence_id: k1.reasons_absence_id }, class: :tb_mark %>
                <% end %>
              <% end %>

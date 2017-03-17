@@ -14,8 +14,8 @@ class Institution::TimesheetsController < Institution::BaseController
     date_ee = params[ :date_ee ].to_date
     date_eb = params[ :date_eb ].to_date
 
-    message = { 'CreateRequest' => { 'ins0:StartDate' => date_ee,
-                                     'ins0:EndDate' => date_eb,
+    message = { 'CreateRequest' => { 'ins0:StartDate' => date_eb,
+                                     'ins0:EndDate' => date_ee,
                                      'ins0:Institutions_id' => current_institution.code } }
     response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] )
                  .call( :get_data_time_sheet, message: message )
@@ -56,8 +56,8 @@ class Institution::TimesheetsController < Institution::BaseController
                                        'ins0:EndDateOfTheFill' => timesheet.date_ee,
                                        'ins0:TS' => timesheet_dates.map{ | o | {
                                          'ins0:Child_code' => o.child_code,
-                                         'ins0:Children_group_code' => o.children_group_code,
-                                         'ins0:Reasons_absence_code' => o.reasons_absence_code,
+                                         'ins0:Children_group_code' => o.group_code,
+                                         'ins0:Reasons_absence_code' => o.reason_code,
                                          'ins0:Date' => o.date  } } } }
 
       response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] )
@@ -91,11 +91,11 @@ class Institution::TimesheetsController < Institution::BaseController
   def dates # Отображение дней табеля
     @timesheet = Timesheet.find_by( id: params[ :id ] )
 
-    @group_timesheet =[]
+    @group_timesheet = []
     children_category_id = 0
 
     @timesheet.timesheet_dates
-      .select( 'DISTINCT ON (children_groups.children_category_id, timesheet_dates.children_group_id)
+      .select( 'DISTINCT ON ( children_groups.children_category_id, timesheet_dates.children_group_id )
         children_groups.children_category_id', :children_group_id,
         'children_categories.name AS category_name', 'children_groups.name AS group_name' )
       .joins( :children_category, :children_group )
@@ -108,9 +108,6 @@ class Institution::TimesheetsController < Institution::BaseController
 
         @group_timesheet << [ o.group_name, o.children_group_id, { data: { field: :children_group_id } } ]
       end
-
-    @reasons_absences = ReasonsAbsence.select( :id, :code, :mark ).where( code: '' ).or(
-      ReasonsAbsence.select( :id, :code, :mark ).where.not( mark: '' ) ).order( :priority ).pluck( :id, :code, :mark )
   end
 
   def update # Обновление реквизитов документа
