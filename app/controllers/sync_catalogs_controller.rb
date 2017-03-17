@@ -130,9 +130,10 @@ class SyncCatalogsController < ApplicationController
     if error.empty?
       code = params[ :code ].strip
       update_fields = { name: params[ :name ] }
-      Branch.create_with( update_fields ).find_or_create_by( code: code ).update( update_fields )
+      branch = Branch.create_with( update_fields ).find_or_create_by( code: code )
+      branch.update( update_fields )
     end
-    render json: error.any? ? { result: false, error: [ error ] } : { result: true, code: code }
+    render json: error.any? ? { result: false, error: [ error ] } : { result: true, code: code, id: branch.id  }
   end
 
   # GET /api/branch?code=0001

@@ -29,13 +29,21 @@ class Institution::TimesheetsController < Institution::BaseController
           date_vb: return_value[ :date_vb ], date_ve: return_value[ :date_ve ],
           date_eb: return_value[ :date_eb ], date_ee: return_value[ :date_ee ], date: params[ :date ].to_date )
 
+
         return_value[ :ts ].each do | ts |
           child = child_code( ts[ :child_code ].strip )
           children_group = children_group_code( ts[ :children_group_code ].strip )
           reasons_absence = reasons_absence_code(  ( ts[ :reasons_absence_code ] || '' ).strip )
 
-          timesheet.timesheet_dates.create( child: child, children_group: children_group, reasons_absence: reasons_absence,
-            date: ts[ :date ]) unless child[ :error ] || children_group[ :error ] || reasons_absence[ :error ]
+          unless child[ :error ] || children_group[ :error ] || reasons_absence[ :error ]
+            timesheet.timesheet_dates.new( date: ts[ :date ] ) do | o |
+              o.child_id = child.id
+              o.children_group_id = children_group.id
+              o.reasons_absence_id = reasons_absence.id
+              o.save( validate: false )
+            end
+          end
+
         end
 
         redirect_to institution_timesheets_dates_path( id: timesheet.id )
@@ -80,7 +88,7 @@ class Institution::TimesheetsController < Institution::BaseController
     if params[ :date_start ] && params[ :date_start ]
       date_start = params[ :date_start ] ? params[ :date_start ] : params[ :date_end ]
       date_end = params[ :date_end ] ? params[ :date_end ] : params[ :date_start ]
-      @timesheets = Timesheet.where( institution: current_institution, date: date_start..date_end ).order( :date )
+      @timesheets = Timesheet.where( institution: current_institution, date: date_start..date_end )
     end
   end
 
@@ -111,13 +119,14 @@ class Institution::TimesheetsController < Institution::BaseController
   end
 
   def update # Обновление реквизитов документа
-    update = params.permit( :date ).to_h
+    update = params.permit( :id, :date ).to_h
     Timesheet.where( id: params[ :id ] ).update_all( update ) if params[ :id ] && update.any?
   end
 
   def dates_update # Обновление маркера
-    update = params.permit( :reasons_absence_id ).to_h
+    update = params.permit( :id, :reasons_absence_id ).to_h
     TimesheetDate.where( id: params[ :id ] ).update_all( update ) if params[ :id ] && update.any?
+    render body: nil
   end
 
   def ajax_filter_timesheet_dates # Фильтрация таблицы

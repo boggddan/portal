@@ -14,6 +14,8 @@ class Timesheet < ApplicationRecord
        .joins( :children_category, :children_group, :child, :reasons_absence )
        .order( 'category_name', 'group_name', 'child_name', :date ) }, class_name: TimesheetDate
 
+  default_scope{ order( :date, :number ) }
+
   #
   before_save :set_default_value
 
