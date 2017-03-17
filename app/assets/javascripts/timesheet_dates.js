@@ -30,7 +30,8 @@ $( document ).on( 'turbolinks:load', function() {
 
     $( '#date' ).data( 'old-value',  $( '#date' ).val() );
     $( 'h1' ).text( $( 'h1' ).data( 'text' ) + ' ' + $( '#date' ).val() );
-    filterGroupTimesheet(); // Фильтрация категории / группы
+
+    if( $( '#group_timesheet' ).length ) { filterGroupTimesheet() } // Фильтрация категории / группы
 
     // Нажатие на кнопочку отправить
     $( '#send_sa' ).click( function() {
@@ -65,31 +66,23 @@ $( document ).on( 'turbolinks:load', function() {
       $.ajax( { url: $pathAjax, type: 'POST', dataType: 'script' } );
     } );
 
+
     // Выбор со списка категории / группы
     $( '#group_timesheet' ).change( function() { filterGroupTimesheet() } ) ; // Фильтрация категории / группы
 
-    // Нажати на ячейку
-    $( document ).on( 'click', 'td.tb_mark', function() {
-      var $this = $( this );
-      if ( !$this.attr( 'disabled' ) ) {
-        var $reasonsAbsence = $( '#reasons_absence_'  + $this.data( 'reasons-absence-id' ) );
-        var $reasonsAbsenceId = $reasonsAbsence.data( 'next-id' );
-        $this.data( 'reasons-absence-id', $reasonsAbsenceId );
-        $this.html( $reasonsAbsence.data( 'next-val' ) );
-        timesheetDatesUpdate( $this.data( 'id' ), $reasonsAbsenceId ); // Обновление маркера
-      }
-    } );
 
-    $( document ).on( 'contextmenu', 'td.tb_mark', function( event ) {
-      event.preventDefault();
+
+    // Нажатие на кнопочку создать
+    $( '#create' ).click( function() {
+      $( '#dialog_wait' ).dialog( 'open' );
       var $this = $( this );
-      if ( $this.html() || !$this.attr('disabled')  ) {
-        var $reasonsAbsence = $( '#reasons_absences li:first-child' );
-        var $reasonsAbsenceId = $reasonsAbsence.data( 'id' );
-        $this.data( 'reasons-absence-id', $reasonsAbsenceId );
-        $this.html( $reasonsAbsence.html( ) );
-        timesheetDatesUpdate( $this.data( 'id' ), $reasonsAbsenceId ); // Обновление маркера
-      }
+      var $dateEb = $( '#date_eb' );
+      var $dateEe = $( '#date_ee' );
+      var $date = $( '#date' );
+
+      var $pathAjax = $this.data( 'ajax-path' ) + '?' + $dateEb.attr( 'name' ) + '=' + $dateEb.val() + '&'
+        + $dateEe.attr( 'name' ) + '=' + $dateEe.val() + '&' + $date.attr( 'name' ) + '=' + $date.val()
+      $.ajax( { url: $pathAjax, type: 'POST', dataType: 'script' } );
     } );
 
   };

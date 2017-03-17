@@ -7,4 +7,29 @@ var $table = $( '#table_timesheet_dates .table' );
 /* Если существуют заявки по выбраному фильтру */
 if ( $table.length ) {
   $table.tableHeadFixer( { 'left' : 1 }  ); // Фиксируем шапку таблицы
+
+  // Нажати на ячейку
+  $( 'td.tb_mark' ).click( function() {
+    var $this = $( this );
+    if ( !$this.attr( 'disabled' ) ) {
+      var $reasonsAbsence = $( '#reasons_absence_'  + $this.data( 'reasons-absence-id' ) );
+      var $reasonsAbsenceId = $reasonsAbsence.data( 'next-id' );
+      $this.data( 'reasons-absence-id', $reasonsAbsenceId );
+      $this.html( $reasonsAbsence.data( 'next-val' ) );
+      timesheetDatesUpdate( $this.data( 'id' ), $reasonsAbsenceId ); // Обновление маркера
+    }
+  } );
+
+  $( 'td.tb_mark' ).contextmenu( function( event ) {
+    event.preventDefault();
+    var $this = $( this );
+    if ( $this.html() && !$this.attr('disabled')  ) {
+      var $reasonsAbsence = $( '#reasons_absences li:first-child' );
+      var $reasonsAbsenceId = $reasonsAbsence.data( 'id' );
+      $this.data( 'reasons-absence-id', $reasonsAbsenceId );
+      $this.html( $reasonsAbsence.html( ) );
+      timesheetDatesUpdate( $this.data( 'id' ), $reasonsAbsenceId ); // Обновление маркера
+    }
+  } );
+
 };
