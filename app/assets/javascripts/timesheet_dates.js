@@ -17,6 +17,14 @@ $( document ).on( 'turbolinks:load', function() {
       $.ajax( { url: $path_ajax, type: 'get', dataType: 'script' } );
     };
 
+    timesheetDatesUpdate = function( $timesheetDatesId, $reasonsAbsenceId ) { // Обновление маркера
+      var $table = $( '#table_timesheet_dates .table' );
+      var $path_ajax = $table.data( 'path-update' ) + $timesheetDatesId
+        + '&' + $table.data('param-name') + '=' + $reasonsAbsenceId;
+      $.ajax( { url: $path_ajax, type: 'post', dataType: 'script' } );
+    };
+
+
     $( '#main_menu li' ).removeClass( 'active' );
     $( '#mm_timesheets' ).addClass( 'active' );
 
@@ -59,6 +67,30 @@ $( document ).on( 'turbolinks:load', function() {
 
     // Выбор со списка категории / группы
     $( '#group_timesheet' ).change( function() { filterGroupTimesheet() } ) ; // Фильтрация категории / группы
+
+    // Нажати на ячейку
+    $( document ).on( 'click', 'td.tb_mark', function() {
+      var $this = $( this );
+      if ( !$this.attr( 'disabled' ) ) {
+        var $reasonsAbsence = $( '#reasons_absence_'  + $this.data( 'reasons-absence-id' ) );
+        var $reasonsAbsenceId = $reasonsAbsence.data( 'next-id' );
+        $this.data( 'reasons-absence-id', $reasonsAbsenceId );
+        $this.html( $reasonsAbsence.data( 'next-val' ) );
+        timesheetDatesUpdate( $this.data( 'id' ), $reasonsAbsenceId ); // Обновление маркера
+      }
+    } );
+
+    $( document ).on( 'contextmenu', 'td.tb_mark', function( event ) {
+      event.preventDefault();
+      var $this = $( this );
+      if ( $this.html() || !$this.attr('disabled')  ) {
+        var $reasonsAbsence = $( '#reasons_absences li:first-child' );
+        var $reasonsAbsenceId = $reasonsAbsence.data( 'id' );
+        $this.data( 'reasons-absence-id', $reasonsAbsenceId );
+        $this.html( $reasonsAbsence.html( ) );
+        timesheetDatesUpdate( $this.data( 'id' ), $reasonsAbsenceId ); // Обновление маркера
+      }
+    } );
 
   };
 });

@@ -4,7 +4,8 @@ class Institution::TimesheetsController < Institution::BaseController
   end
 
   def new
-    @timesheet = Timesheet.new( date: Date.today, date_eb: Date.today.beginning_of_month, date_ee: Date.today.end_of_month )
+    @timesheet = Timesheet.new( date: Date.today, date_eb: Date.today.beginning_of_month,
+                                date_ee: Date.today.end_of_month )
     render :dates
   end
 
@@ -14,8 +15,8 @@ class Institution::TimesheetsController < Institution::BaseController
     date_eb = params[ :date_eb ].to_date
 
     message = { 'CreateRequest' => { 'ins0:StartDate' => date_ee,
-                                  'ins0:EndDate' => date_eb,
-                                  'ins0:Institutions_id' => current_institution.code } }
+                                     'ins0:EndDate' => date_eb,
+                                     'ins0:Institutions_id' => current_institution.code } }
     response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] )
                  .call( :get_data_time_sheet, message: message )
 
@@ -45,6 +46,7 @@ class Institution::TimesheetsController < Institution::BaseController
   def send_sa
     timesheet = Timesheet.find_by( id: params[ :id ] )
     timesheet_dates = timesheet.timesheet_dates_join
+
     if timesheet_dates
       message = { 'CreateRequest' => { 'ins0:Institutions_id' => timesheet.institution.code,
                                        'ins0:NumberFromWebPortal' => timesheet.number,
@@ -57,7 +59,7 @@ class Institution::TimesheetsController < Institution::BaseController
                                          'ins0:Children_group_code' => o.children_group_code,
                                          'ins0:Reasons_absence_code' => o.reasons_absence_code,
                                          'ins0:Date' => o.date  } } } }
-puts message
+
       response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] )
         .call( :creation_time_sheet, message: message )
       interface_state = response.body[ :creation_time_sheet_response ][ :return ][ :interface_state ]
@@ -106,6 +108,9 @@ puts message
 
         @group_timesheet << [ o.group_name, o.children_group_id, { data: { field: :children_group_id } } ]
       end
+
+    @reasons_absences = ReasonsAbsence.select( :id, :code, :mark ).where( code: '' ).or(
+      ReasonsAbsence.select( :id, :code, :mark ).where.not( mark: '' ) ).order( :priority ).pluck( :id, :code, :mark )
   end
 
   def update # Обновление реквизитов документа
@@ -113,17 +118,14 @@ puts message
     Timesheet.where( id: params[ :id ] ).update_all( update ) if params[ :id ] && update.any?
   end
 
+  def dates_update # Обновление маркера
+    update = params.permit( :reasons_absence_id ).to_h
+    TimesheetDate.where( id: params[ :id ] ).update_all( update ) if params[ :id ] && update.any?
+  end
 
   def ajax_filter_timesheet_dates # Фильтрация таблицы
     if params[ :id ]
       @timesheet = Timesheet.find_by( id: params[ :id ] )
-
-      select = [ 'MAX(children_categories.name) AS category_name', 'MAX(children_groups.name) AS group_name',
-                        'MAX(children.name) AS child_name', 'MAX(children_category_id) AS children_category_id',
-                        'MAX(children_group_id) AS children_group_id' ]
-
-      ( @timesheet.date_vb..@timesheet.date_ve ).each_with_index{ | v, i | select << "MAX( CASE date WHEN '#{ v }'
-        THEN timesheet_dates.id || '_' || reasons_absences.id || '_' || reasons_absences.mark ELSE '' END) AS d_#{ i + 1 }" }
 
       if params[ :field ] == 'children_group_id'
         where = { children_group_id: params[ :field_id ] }
@@ -133,16 +135,7 @@ puts message
         where = ''
       end
 
-      @timesheet_dates = @timesheet.timesheet_dates
-        .select( select )
-        .joins( :children_category, :child, :reasons_absence )
-        .group( 'children_categories.code', 'children_groups.code', 'children.code')
-        .where( where )
-        .order( 1, 2, 3 )
+      @timesheet_dates = @timesheet.timesheet_dates_join.where( where )
     end
   end
-
-
-
-
 end

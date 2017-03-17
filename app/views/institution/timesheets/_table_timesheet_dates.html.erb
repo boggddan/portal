@@ -6,7 +6,8 @@
   <% date_vb = @timesheet.date_vb %>
   <% count_days = date_ve.day - date_vb.day + 1 %>
 
-  <%= content_tag :table, class: :table  do %>
+  <%= content_tag :table, class: :table, data: { param_name: :reasons_absence_id,
+        path_update: "#{ institution_timesheets_dates_update_path }?id=" } do %>
 
     <% for i in 0..count_days do %>
       <%= content_tag :col %>
@@ -22,35 +23,40 @@
     <% end %>
 
     <%= content_tag :tbody do %>
-      <% category_name = '' %>
-      <% group_name = '' %>
+      <% children_category_id = 0 %>
+      <% children_group_id = 0 %>
 
-      <% @timesheet_dates.each do | timesheet_date | %>
+      <% @timesheet_dates.group_by{ | o | [ o.children_category_id, o.children_group_id, o.child_id ] }
+           .each do | k, v | %>
 
-        <% if category_name != timesheet_date.category_name %>
-          <% category_name = timesheet_date.category_name %>
-          <% group_name = '' %>
-          <%= content_tag :tr do %>
-            <%= content_tag( :td, category_name, class: [ :row_group, :category_name ] ) %>
-            <%= content_tag( :td, '', class: [ :row_group, :category_name ], colspan: count_days ) %>
-          <% end %>
-        <% end %>
+             <% if children_category_id != k[ 0 ] %>
+               <% children_category_id = k[ 0 ] %>
+               <% children_group_id = 0 %>
 
-        <% if group_name != timesheet_date.group_name %>
-          <% group_name = timesheet_date.group_name %>
-          <%= content_tag :tr do %>
-            <%= content_tag( :td, group_name, class: [ :row_group, :group_name ] ) %>
-            <%= content_tag( :td, '', class: [ :row_group, :group_name ], colspan: count_days ) %>
-          <% end %>
-        <% end %>
+               <%= content_tag :tr, class: [ :row_group, :category_name ] do %>
+                 <%= content_tag( :td, v[ 0 ].category_name ) %>
+                 <%= content_tag( :td, '', colspan: count_days ) %>
+               <% end %>
+             <% end %>
 
-        <%= content_tag :tr do %>
-          <%= content_tag :td, timesheet_date.child_name %>
-          <% for i in 1..count_days do %>
-            <%= content_tag :td, timesheet_date[ "d_#{i}" ].split( '_' )[ 2 ]  %>
-          <% end %>
-        <% end %>
-      <% end %>
+             <% if children_group_id != k[ 1 ] %>
+               <% children_group_id = k[ 1 ] %>
+
+               <%= content_tag :tr, class: [ :row_group, :group_name ] do %>
+                 <%= content_tag( :td, v[ 0 ].group_name ) %>
+                 <%= content_tag( :td, '', colspan: count_days ) %>
+               <% end %>
+             <% end %>
+
+             <%= content_tag :tr do %>
+               <%= content_tag :td, v[ 0 ].child_name %>
+               <% v.each do | k1, v1 | %>
+                 <%= content_tag :td, k1.mark, disabled: k1.mark.blank? && !k1.reason_code.blank?,
+                   data: { id: k1.id, reasons_absence_id: k1.reasons_absence_id }, class: :tb_mark %>
+               <% end %>
+             <% end %>
+           <% end %>
+
     <% end %>
   <% end %>
 

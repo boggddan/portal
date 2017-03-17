@@ -12,13 +12,21 @@
     th { font-weight: bold; }
 
     /* Колонка с наименованием продуктов */
-    tbody td {
-      &:first-child { padding-left: 27px; text-align: left; }
+    tbody td { &:first-child { cursor: default; padding-left: 27px; text-align: left; } }
+
+    td { border-right-color: #aaa; &:hover:not([disabled]) { background-color: #dadada } }
+
+    .category_name {
+      cursor: default;
+      &:hover, td:hover, td { background-color:  #dadada }
+      td:first-child { padding-left: 3px; }
     }
 
-    td { border-right-color: #aaa; }
+    .group_name {
+      cursor: default;
+      &:hover, td:hover, td { background-color:  #f1f1f1 }
+      &:first-child { padding-left: 15px; }
+    }
 
-    .category_name { background-color:  #dadada; &:first-child { padding-left: 3px; } }
-    .group_name { background-color: #f1f1f1; &:first-child { padding-left: 15px; } }
   }
 }

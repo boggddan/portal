@@ -132,11 +132,9 @@ Rails.application.routes.draw do
       get :ajax_filter_timesheet_dates # Фильтрация таблицы
       get :new #
       post :create # Создание документа
-  #    post :children_category_update # Обновление количества по категориям
-  #    post :product_update # Обновление количества по продуктам
       post :update # Обновление реквизитов документа
+      post :dates_update # Обновление маркера
       post :send_sa # Веб-сервис отправки табеля
-  #    post :send_saf # Веб-сервис отправки факта меню-требования
     end
   end
   # Пользователи

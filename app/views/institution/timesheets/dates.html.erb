@@ -53,5 +53,13 @@
     <% end %>
   <% end %>
 
+  <%= content_tag :ul, id: :reasons_absences, style: 'display: none;' do %>
+    <% @reasons_absences.each_with_index do | v, i | %>
+      <% next_v = @reasons_absences[ @reasons_absences.last == v ? 0 : i + 1 ] %>
+      <%= content_tag :li, v[ 2 ], id: "reasons_absence_#{ v[ 0 ] }",
+                      data: { id: v[ 0 ], next_id: next_v[ 0 ], next_val: next_v[ 2 ]  } %>
+    <% end %>
+  <% end %>
+
   <%= content_tag :div, '', id: :table_timesheet_dates %>
 <% end %>

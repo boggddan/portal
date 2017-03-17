@@ -41,7 +41,11 @@ table.table {
 
   /* Выделение в таблички строку */
   tbody tr {
-    td { background-color: white; }
+    td {
+      background-color: white;
+      &[disabled] { background-color: #f1f1f1; cursor: default; }
+    }
+
     cursor: pointer;
     &:hover, &:hover td, &:hover input { background-color: #fbfbfb; }
 
