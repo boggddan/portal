@@ -1,0 +1,22 @@
+<%= content_tag :div, id: :institution_report_children_day_cost do %>
+
+  <%= content_tag :h1, 'Звіт "Вартість дітодня за меню-вимогами"' %>
+
+  <%= content_tag :div, class: :panel do %>
+
+    <%= label_tag :date_start, 'З' %>
+    <%= content_tag :nav, class: :icon_сalendar do %>
+      <%= text_field_tag :date_start, date_str( Date.today.beginning_of_month ), readonly: true %>
+    <% end %>
+
+    <%= label_tag :date_end, 'ПО' %>
+    <%= content_tag :nav, class: :icon_сalendar do %>
+      <%= text_field_tag :date_end, date_str( Date.today.end_of_month ), readonly: true %>
+    <% end %>
+
+    <%= button_tag '', class: :btn_create, id: :create,
+                     data: { ajax_path: institution_reports_ajax_children_day_cost_create_path } %>
+  <% end %>
+
+  <%= content_tag :div, '', id: :view_children_day_cost %>
+<% end %>

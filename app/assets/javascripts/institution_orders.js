@@ -20,7 +20,7 @@ $( document ).on( 'turbolinks:load', function() {
       var $date_end_val = $date_end.val();
 
       $date_start.data( 'old-value',  $date_start_val );
-      $date_end.data( 'old-value',  $date_end );
+      $date_end.data( 'old-value',  $date_end_val );
 
       sessionStorage.instituiton_orders_date_start = $date_start_val;
       sessionStorage.instituiton_orders_date_end = $date_end_val;

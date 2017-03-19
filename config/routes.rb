@@ -136,7 +136,18 @@ Rails.application.routes.draw do
       post :dates_update # Обновление маркера
       post :send_sa # Веб-сервис отправки табеля
     end
+
+
+    # Отчеты
+    namespace :reports do
+      get :index, path: '' # Главная страничка
+      get :children_day_cost # Вартість дітодня за меню-вимогами
+      post :ajax_children_day_cost_create # Создание
+    end
+
   end
+
+
   # Пользователи
   namespace :admin do
     namespace :users do

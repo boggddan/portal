@@ -1,47 +1,8 @@
-<%= content_tag :div, id: :receipts do %>
-  <!-- Отображение заявок поставщика  -->
+<%= content_tag :div, id: :institution_reports do %>
 
-  <%= content_tag :div, '', class: :clmn do %>
-    <%= content_tag :h1, "Замовлення постачальникам" %>
+  <%= content_tag :h1, 'Звіти' %>
 
-    <%= content_tag :header do %>
-      <%= label_tag :date_start, 'З' %>
-      <%= content_tag :nav, '', class: :icon_сalendar do %>
-        <%= text_field_tag :date_start, '', readonly: true, placeholder: 'Дата...',
-                           data: { ajax_path: institution_receipts_ajax_filter_supplier_orders_path } %>
-      <% end %>
-
-      <%= label_tag :date_end, 'ПО' %>
-      <%= content_tag :nav, '', class: :icon_сalendar do %>
-        <%= text_field_tag :date_end, '', readonly: true, placeholder: 'Дата...' %>
-      <% end %>
-
-      <%= content_tag :nav, '', class: :icon_filter do
-        text_field_tag :supplier_name, '', placeholder: 'Постачальник...', spellcheck: :false, data: { value: '',
-          ajax_source: institution_receipts_ajax_suppliers_autocomplete_source_path, ajax_param: :supplier_id } end %>
-    <% end %>
-
-    <%= content_tag :div, id: :table_supplier_orders do render( "institution/receipts/table_supplier_orders" ) end %>
-  <% end %>
-
-  <!-- Отображение поступлений -->
-
-  <%= content_tag :div, '', class: :clmn do %>
-    <%= content_tag :h1, "Поставки за замовленням №",  data: { text: "Поставки за замовленням №" } %>
-
-    <%= content_tag :header do %>
-      <%= content_tag :nav, '', class: :icon_filter do %>
-        <%= select_tag :contract_number, '', prompt: "Договір", data: {
-          ajax_path: "#{ institution_receipts_ajax_filter_receipts_path }?id=" } %>
-      <% end %>
-
-      <%= button_tag '', class: [:btn_create, :align_right], id: :create_receipt, data: {
-        ajax_path: "#{ institution_receipts_create_path }?id=" } %>
-    <% end %>
-
-    <%= content_tag :div, '', id: :table_receipts do render( 'institution/receipts/table_receipts' ) end %>
-  <% end %>
-
+  <%= content_tag :div, class: :panel do
+    button_tag 'Вартість дітодня за меню-вимогами', class: :btn_default,
+               onclick: "location.href='#{ institution_reports_children_day_cost_path }'" end %>
 <% end %>
-
-

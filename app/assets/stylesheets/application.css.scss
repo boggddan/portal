@@ -1,27 +1,16 @@
 /*
- * This is a manifest file that'll be compiled into application.css, which will include all the files
- * listed below.
- *
- * Any CSS and SCSS file within this directory, lib/assets/stylesheets, vendor/assets/stylesheets,
- * or any plugin's vendor/assets/stylesheets directory can be referenced here using a relative path.
- *
- * You're free to add application-wide styles to this file and they'll appear at the bottom of the
- * compiled file so the styles you add here take precedence over styles defined in any other CSS/SCSS
- * files in this directory. Styles in this file should be added after the last require_* statement.
- * It is generally better to create a new file per style scope.
- *
  *= require jquery-ui
  *= require_tree .
  *= require_self
- */
+*/
 
 @font-face {
   font-family: 'Glyphicons Halflings';
-  src: url("glyphicons-halflings-regular.eot");
-  src: url("glyphicons-halflings-regular.eot?#iefix") format("embedded-opentype"),
-  url("glyphicons-halflings-regular.woff") format("woff"),
-  url("glyphicons-halflings-regular.ttf") format("truetype"),
-  url("glyphicons-halflings-regular.svg#glyphicons_halflingsregular") format("svg");
+  src: font_url("glyphicons-halflings-regular.eot");
+  src: font_url("glyphicons-halflings-regular.eot?#iefix") format("embedded-opentype"),
+  font_url("glyphicons-halflings-regular.woff") format("woff"),
+  font_url("glyphicons-halflings-regular.ttf") format("truetype"),
+  font_url("glyphicons-halflings-regular.svg#glyphicons_halflingsregular") format("svg");
 }
 
 * { box-sizing: border-box; }
@@ -38,7 +27,6 @@ body { /* Главний блок */
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   > div:nth-of-type(2) { margin-left: 15px; width: 1065px; }
   > main { margin-left: 15px; width: 1065px; }
-
 }
 
 

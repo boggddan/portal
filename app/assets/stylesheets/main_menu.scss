@@ -17,7 +17,7 @@
     height: 20px;
     width: 20px;
     display: inline-block;
-    background: url("food-ico.png");
+    background: url('food-ico.png');
     background-size: 100% 100%;
     &:before { content: "\a0"; }
   }
@@ -103,5 +103,5 @@
   #mm_receipts a:before { content: "\e230";  }
   #mm_timesheets a:before { content: "\231b";  }
   #mm_menu_requirements a:before { content: "\e179";  }
-  #mm_menu_reports a:before { content: "\e045";  }
+  #mm_menu_institution_reports a:before { content: "\e045";  }
 }
