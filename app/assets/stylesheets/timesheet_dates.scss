@@ -14,7 +14,7 @@
     /* Колонка с наименованием продуктов */
     tbody td { &:first-child { cursor: default; padding-left: 27px; text-align: left; } }
 
-    td { border-right-color: #aaa; &:hover:not([disabled]) { background-color: #dadada } }
+    td { border-right-color: #aaa; }
 
     .category_name {
       cursor: default;

@@ -41,13 +41,15 @@ table.table {
 
   /* Выделение в таблички строку */
   tbody tr {
+    cursor: pointer;
+    &:hover td { background-color: #c0def7; }
+
     td {
       background-color: white;
       &[disabled] { background-color: #f1f1f1; cursor: default; }
+      &:hover:not([disabled]), &:hover:not([disabled]) input { background-color: #a1caec }
+      input:hover:focus { background-color: white }
     }
-
-    cursor: pointer;
-    &:hover, &:hover td, &:hover input { background-color: #fbfbfb; }
 
     td:first-child { border-left: 1px solid #e7e7e7; }
     td:last-child { border-right: 1px solid #e7e7e7; }
