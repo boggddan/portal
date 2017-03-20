@@ -61,6 +61,13 @@ table.table {
       input:focus { background-color: white; }
       cursor: default;
     }
+
+    /* Выделение в таблички строку */
+    &:last-child td {
+      border-bottom: 1px solid #e7e7e7;
+      &:first-child { &, input { border-bottom-left-radius: 5px; } }
+      &:last-child { &, input { border-bottom-right-radius: 5px; } }
+    }
   }
 
   /* Выделение в таблички строку */

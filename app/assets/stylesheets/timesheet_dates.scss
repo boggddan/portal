@@ -16,6 +16,8 @@
 
     td { border-right-color: #aaa; }
 
+    tr:last-child td { border-bottom-color: #aaa; }
+
     .category_name {
       cursor: default;
       &:hover, td:hover, td { background-color:  #dadada }
