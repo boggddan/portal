@@ -63,27 +63,13 @@ $( document ).on( 'turbolinks:load', function() {
 
       var $pathAjax = $this.data( 'ajax-path' ) + '?' + $dateEb.attr( 'name' ) + '=' + $dateEb.val() + '&'
           + $dateEe.attr( 'name' ) + '=' + $dateEe.val() + '&' + $date.attr( 'name' ) + '=' + $date.val()
+
       $.ajax( { url: $pathAjax, type: 'POST', dataType: 'script' } );
     } );
 
 
     // Выбор со списка категории / группы
     $( '#group_timesheet' ).change( function() { filterGroupTimesheet() } ) ; // Фильтрация категории / группы
-
-
-
-    // Нажатие на кнопочку создать
-    $( '#create' ).click( function() {
-      $( '#dialog_wait' ).dialog( 'open' );
-      var $this = $( this );
-      var $dateEb = $( '#date_eb' );
-      var $dateEe = $( '#date_ee' );
-      var $date = $( '#date' );
-
-      var $pathAjax = $this.data( 'ajax-path' ) + '?' + $dateEb.attr( 'name' ) + '=' + $dateEb.val() + '&'
-        + $dateEe.attr( 'name' ) + '=' + $dateEe.val() + '&' + $date.attr( 'name' ) + '=' + $date.val()
-      $.ajax( { url: $pathAjax, type: 'POST', dataType: 'script' } );
-    } );
 
   };
 });

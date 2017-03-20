@@ -29,21 +29,20 @@ class Institution::TimesheetsController < Institution::BaseController
           date_vb: return_value[ :date_vb ], date_ve: return_value[ :date_ve ],
           date_eb: return_value[ :date_eb ], date_ee: return_value[ :date_ee ], date: params[ :date ].to_date )
 
-
         return_value[ :ts ].each do | ts |
           child = child_code( ts[ :child_code ].strip )
           children_group = children_group_code( ts[ :children_group_code ].strip )
           reasons_absence = reasons_absence_code(  ( ts[ :reasons_absence_code ] || '' ).strip )
 
           unless child[ :error ] || children_group[ :error ] || reasons_absence[ :error ]
-            timesheet.timesheet_dates.new( date: ts[ :date ] ) do | o |
+            TimesheetDate.new( date: ts[ :date ] ) do | o |
+              o.timesheet_id = timesheet.id
               o.child_id = child.id
               o.children_group_id = children_group.id
               o.reasons_absence_id = reasons_absence.id
               o.save( validate: false )
             end
           end
-
         end
 
         redirect_to institution_timesheets_dates_path( id: timesheet.id )
