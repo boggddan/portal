@@ -1,0 +1,198 @@
+@charset "UTF-8";
+/* line 1, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu {
+  height: 32px;
+  line-height: 28px;
+  padding: 2px 3px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  color: #333;
+  text-align: left;
+  font-size: 13px;
+  background-color: #e7e7e7;
+  /* Картинка */
+  /* Наименование */
+  /* Домашняя страничка */
+  /* Активна кнопка */
+  /* Кнопки для детского сада */
+}
+/* line 13, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu > div:nth-of-type(1) {
+  margin-left: 15px;
+  position: relative;
+  top: 4px;
+  height: 20px;
+  width: 20px;
+  display: inline-block;
+  background: url(/assets/food-ico-be26bcef2fe64e5dd1fa2c07fde8c087b7f7a835a3d4de6ea4c91a028b3794f8.png);
+  background-size: 100% 100%;
+}
+/* line 22, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu > div:nth-of-type(1):before {
+  content: "\a0";
+}
+/* line 26, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu > div:nth-of-type(2) {
+  display: inline-block;
+  padding: 0 5px;
+  font-size: 14px;
+  color: #777;
+}
+/* line 31, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu > div:nth-of-type(2):before {
+  content: "Портал";
+}
+/* line 34, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu ul {
+  display: inline-block;
+  margin-bottom: 0;
+  margin-top: 0;
+  padding-left: 0;
+  list-style: none;
+  font-size: 13px;
+}
+/* line 43, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu ul > li {
+  display: inline-block;
+  /* Отступ для всех блоков кроме первого */
+}
+/* line 45, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu ul > li + li {
+  margin-left: 3px;
+}
+/* line 48, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu ul > li > a {
+  display: inline-block;
+  border-radius: 4px;
+  padding: 0 25px;
+  text-decoration: none;
+  color: #337ab7;
+}
+/* line 54, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu ul > li > a:visited {
+  color: #337ab7;
+}
+/* line 55, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu ul > li > a:hover, #main_menu ul > li > a:hover:before {
+  background-color: #eeeeee;
+  color: #333;
+}
+/* line 56, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu ul > li > a:before {
+  font-family: 'Glyphicons Halflings';
+  margin-right: 3px;
+  top: 2px;
+  position: relative;
+  color: #aaa;
+  line-height: 1;
+}
+/* line 59, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu ul:first-of-type li:first-of-type a:before {
+  content: "\e021";
+}
+/* line 61, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu ul:last-of-type {
+  float: right;
+  /* Информация о пользователе */
+  /* Кнопка выход */
+}
+/* line 65, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu ul:last-of-type li:first-of-type {
+  position: relative;
+  display: inline-block;
+  width: 200px;
+  top: -1px;
+}
+/* line 71, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu ul:last-of-type li:first-of-type:before {
+  content: "\a0";
+}
+/* line 73, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu ul:last-of-type li:first-of-type > div {
+  position: absolute;
+  font-size: 11px;
+  color: #777;
+  line-height: 1;
+}
+/* line 76, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu ul:last-of-type li:first-of-type > div > span:nth-child(1) {
+  display: inline-block;
+  width: 80px;
+}
+/* line 78, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu ul:last-of-type li:first-of-type > div > span:nth-child(1):before {
+  font-family: 'Glyphicons Halflings';
+  margin-right: 4px;
+  top: 1px;
+  position: relative;
+  color: #aaa;
+}
+/* line 81, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu ul:last-of-type li:first-of-type > div > span:nth-child(2) {
+  display: inline-block;
+  color: #333;
+}
+/* line 83, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu ul:last-of-type li:first-of-type > div:nth-child(1) {
+  top: 0;
+}
+/* line 83, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu ul:last-of-type li:first-of-type > div:nth-child(1) span:nth-child(1):before {
+  content: "\e008";
+}
+/* line 83, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu ul:last-of-type li:first-of-type > div:nth-child(1) span:nth-child(1):after {
+  content: "Користувач:";
+}
+/* line 84, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu ul:last-of-type li:first-of-type > div:nth-child(2) {
+  bottom: 0;
+}
+/* line 84, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu ul:last-of-type li:first-of-type > div:nth-child(2) span:nth-child(1):before {
+  content: "";
+}
+/* line 84, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu ul:last-of-type li:first-of-type > div:nth-child(2) span:nth-child(1):after {
+  content: "Організація:";
+}
+/* line 88, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu ul:last-of-type li:last-of-type a:before {
+  content: "\e163";
+}
+/* line 92, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu li.active a {
+  background-color: #337ab7;
+  color: white;
+  cursor: default;
+  pointer-events: none;
+}
+/* line 97, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu li.active a:visited, #main_menu li.active a:before {
+  color: white;
+}
+/* line 98, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu li.active a:hover, #main_menu li.active a:hover:before {
+  background-color: #337ab7;
+  color: white;
+}
+/* line 102, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu #mm_instituiton_orders a:before {
+  content: "\e109";
+}
+/* line 103, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu #mm_receipts a:before {
+  content: "\e230";
+}
+/* line 104, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu #mm_timesheets a:before {
+  content: "\231b";
+}
+/* line 105, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu #mm_menu_requirements a:before {
+  content: "\e179";
+}
+/* line 106, D:/projectruby/portal/app/assets/stylesheets/main_menu.scss */
+#main_menu #mm_menu_institution_reports a:before {
+  content: "\e045";
+}

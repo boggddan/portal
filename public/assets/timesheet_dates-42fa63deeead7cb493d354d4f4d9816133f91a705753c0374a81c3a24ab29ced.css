@@ -1,0 +1,58 @@
+@charset "UTF-8";
+/* line 3, D:/ProjectRuby/portal/app/assets/stylesheets/timesheet_dates.scss */
+#timesheet_dates #table_timesheet_dates {
+  height: 500px;
+  width: 1065px;
+  /* Колонка с наименованием продуктов */
+}
+/* line 7, D:/ProjectRuby/portal/app/assets/stylesheets/timesheet_dates.scss */
+#timesheet_dates #table_timesheet_dates table {
+  table-layout: fixed;
+  width: 100%;
+}
+/* line 9, D:/ProjectRuby/portal/app/assets/stylesheets/timesheet_dates.scss */
+#timesheet_dates #table_timesheet_dates col:nth-child(1) {
+  width: 250px;
+}
+/* line 10, D:/ProjectRuby/portal/app/assets/stylesheets/timesheet_dates.scss */
+#timesheet_dates #table_timesheet_dates col ~ col {
+  width: 50px;
+}
+/* line 12, D:/ProjectRuby/portal/app/assets/stylesheets/timesheet_dates.scss */
+#timesheet_dates #table_timesheet_dates th {
+  font-weight: bold;
+}
+/* line 15, D:/ProjectRuby/portal/app/assets/stylesheets/timesheet_dates.scss */
+#timesheet_dates #table_timesheet_dates tbody td:first-child {
+  cursor: default;
+  padding-left: 27px;
+  text-align: left;
+}
+/* line 17, D:/ProjectRuby/portal/app/assets/stylesheets/timesheet_dates.scss */
+#timesheet_dates #table_timesheet_dates td {
+  border-right-color: #aaa;
+}
+/* line 19, D:/ProjectRuby/portal/app/assets/stylesheets/timesheet_dates.scss */
+#timesheet_dates #table_timesheet_dates .category_name {
+  cursor: default;
+}
+/* line 21, D:/ProjectRuby/portal/app/assets/stylesheets/timesheet_dates.scss */
+#timesheet_dates #table_timesheet_dates .category_name:hover, #timesheet_dates #table_timesheet_dates .category_name td:hover, #timesheet_dates #table_timesheet_dates .category_name td {
+  background-color: #dadada;
+}
+/* line 22, D:/ProjectRuby/portal/app/assets/stylesheets/timesheet_dates.scss */
+#timesheet_dates #table_timesheet_dates .category_name td:first-child {
+  padding-left: 3px;
+}
+/* line 25, D:/ProjectRuby/portal/app/assets/stylesheets/timesheet_dates.scss */
+#timesheet_dates #table_timesheet_dates .group_name {
+  cursor: default;
+}
+/* line 27, D:/ProjectRuby/portal/app/assets/stylesheets/timesheet_dates.scss */
+#timesheet_dates #table_timesheet_dates .group_name:hover, #timesheet_dates #table_timesheet_dates .group_name td:hover, #timesheet_dates #table_timesheet_dates .group_name td {
+  background-color: #f1f1f1;
+}
+/* line 28, D:/ProjectRuby/portal/app/assets/stylesheets/timesheet_dates.scss */
+#timesheet_dates #table_timesheet_dates .group_name:first-child {
+  padding-left: 15px;
+}

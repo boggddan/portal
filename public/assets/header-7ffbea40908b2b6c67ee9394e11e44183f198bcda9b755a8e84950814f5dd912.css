@@ -1,0 +1,229 @@
+@charset "UTF-8";
+/* Менюшка панелька */
+/* line 3, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header, .panel {
+  height: 32px;
+  line-height: 28px;
+  width: 100%;
+  padding: 2px;
+  margin: 5px 0;
+  color: #333;
+  text-align: left;
+  font-size: 13px;
+  /* Для всех елементов */
+  /* Список выбора и поле ввода */
+  /* Для того что бы значение по-умолчанию сделать другим цветом */
+  /* Блок для того что бы нарисовать иконку перед элементок */
+  /* Тестовое поле на панельке */
+  /* Позиционирование елементов */
+  /* */
+}
+/* line 14, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header select, header input[type='text'], header input[type='password'], header button, .panel select, .panel input[type='text'], .panel input[type='password'], .panel button {
+  height: 100%;
+  border-radius: 3px;
+  border: 1px solid;
+  background-color: white;
+  cursor: pointer;
+}
+/* line 20, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header select:disabled, header select:hover:disabled, header input[type='text']:disabled, header input[type='text']:hover:disabled, header input[type='password']:disabled, header input[type='password']:hover:disabled, header button:disabled, header button:hover:disabled, .panel select:disabled, .panel select:hover:disabled, .panel input[type='text']:disabled, .panel input[type='text']:hover:disabled, .panel input[type='password']:disabled, .panel input[type='password']:hover:disabled, .panel button:disabled, .panel button:hover:disabled {
+  color: #666;
+  background-color: #f5f4f4;
+  border-color: #dadada;
+  cursor: default;
+}
+/* line 24, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header select, header input[type='text'], header input[type='password'], .panel select, .panel input[type='text'], .panel input[type='password'] {
+  padding: 5px;
+  border-color: #e7e7e7;
+}
+/* line 27, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header select:hover:enabled, header input[type='text']:hover:enabled, header input[type='password']:hover:enabled, .panel select:hover:enabled, .panel input[type='text']:hover:enabled, .panel input[type='password']:hover:enabled {
+  border-color: #aaa;
+}
+/* line 32, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header select option, .panel select option {
+  color: black;
+}
+/* line 33, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header select option[value=""], .panel select option[value=""] {
+  color: #666;
+}
+/* line 34, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header select.placeholder:enabled, .panel select.placeholder:enabled {
+  color: #666;
+}
+/* line 35, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header select:focus, .panel select:focus {
+  outline: none;
+}
+/* line 37, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header select option.row_group, .panel select option.row_group {
+  font-weight: bold;
+  background-color: #dadada;
+}
+/* line 41, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header nav, .panel nav {
+  display: inline-block;
+  position: relative;
+  /* Иконка фильтрации */
+  /* Иконка редактирования */
+  /* Иконка календарь */
+}
+/* line 44, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header nav:after, .panel nav:after {
+  content: "\e138";
+  font-family: 'Glyphicons Halflings';
+  position: absolute;
+  top: 7px;
+  left: 4px;
+  color: #aaa;
+  line-height: 1;
+}
+/* line 45, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header nav input[type='text'], header nav input[type='password'], header nav select, header nav input::-webkit-input-placeholder, .panel nav input[type='text'], .panel nav input[type='password'], .panel nav select, .panel nav input::-webkit-input-placeholder {
+  padding-left: 19px;
+}
+/* line 46, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header nav input, .panel nav input {
+  width: 100%;
+}
+/* line 48, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header nav.icon_filter:after, .panel nav.icon_filter:after {
+  content: "\e138";
+}
+/* line 49, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header nav.icon_edit:after, .panel nav.icon_edit:after {
+  content: "\270f";
+}
+/* line 50, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header nav.icon_сalendar, .panel nav.icon_сalendar {
+  width: 100px;
+}
+/* line 50, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header nav.icon_сalendar input, .panel nav.icon_сalendar input {
+  text-align: center;
+  padding-left: 7px;
+  padding-right: 0;
+}
+/* line 50, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header nav.icon_сalendar:after, .panel nav.icon_сalendar:after {
+  content: "\e109";
+}
+/* line 51, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header nav.icon_number, .panel nav.icon_number {
+  width: 120px;
+}
+/* line 51, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header nav.icon_number:after, .panel nav.icon_number:after {
+  content: "\e022";
+}
+/* line 55, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header span, .panel span {
+  display: inline-block;
+  height: 100%;
+  color: #333;
+  background-color: #e7e7e7;
+  border-radius: 3px;
+  padding: 0 3px;
+}
+/* line 64, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header .btn_create, .panel .btn_create {
+  /* Кнопка создать */
+  background-color: #5cb85c;
+  color: white;
+  border-color: #4cae4c;
+}
+/* line 66, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header .btn_create:hover:enabled, .panel .btn_create:hover:enabled {
+  background-color: #449d44;
+  border-color: #398439;
+}
+/* line 67, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header .btn_create:before, .panel .btn_create:before {
+  content: 'Створити';
+}
+/* line 70, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header .btn_send, .panel .btn_send {
+  /* Кнопка отправить */
+  background-color: #5bc0de;
+  color: white;
+  border-color: #46b8da;
+}
+/* line 72, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header .btn_send:hover:enabled, .panel .btn_send:hover:enabled {
+  background-color: #31b0d5;
+  border-color: #269abc;
+}
+/* line 73, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header .btn_send:before, .panel .btn_send:before {
+  content: 'Надіслати';
+}
+/* line 76, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header .btn_exit, .panel .btn_exit {
+  /* Кнопка выход */
+  background-color: #f0ad4e;
+  color: #fff;
+  border-color: #eea236;
+}
+/* line 78, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header .btn_exit:hover:enabled, .panel .btn_exit:hover:enabled {
+  background-color: #ec971f;
+  border-color: #d58512;
+}
+/* line 79, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header .btn_exit:before, .panel .btn_exit:before {
+  content: 'Закрити';
+}
+/* line 82, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header .btn_save, .panel .btn_save {
+  /* Кнопка сохранить */
+  background-color: #f0ad4e;
+  color: #fff;
+  border-color: #eea236;
+}
+/* line 84, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header .btn_save:hover:enabled, .panel .btn_save:hover:enabled {
+  background-color: #ec971f;
+  border-color: #d58512;
+}
+/* line 85, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header .btn_save:before, .panel .btn_save:before {
+  content: 'Зберегти та закрити';
+}
+/* line 88, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header .btn_default, .panel .btn_default {
+  /* Кнопка по умолчанию */
+  background-color: #5bc0de;
+  color: #fff;
+  border-color: #46b8da;
+}
+/* line 90, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header .btn_default:hover:enabled, .panel .btn_default:hover:enabled {
+  background-color: #39b3d7;
+  border-color: #269abc;
+}
+/* line 93, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header .align_right, .panel .align_right {
+  float: right;
+}
+/* line 96, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header .radio_button, .panel .radio_button {
+  display: inline-block;
+  position: relative;
+  width: 17px;
+}
+/* line 100, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header .radio_button:after, .panel .radio_button:after {
+  content: "\a0";
+}
+/* line 102, D:/ProjectRuby/portal/app/assets/stylesheets/header.scss */
+header .radio_button input[type='radio'], .panel .radio_button input[type='radio'] {
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  margin: 0;
+}

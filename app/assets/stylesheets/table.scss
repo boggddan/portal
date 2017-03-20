@@ -42,7 +42,7 @@ table.table {
   /* Выделение в таблички строку */
   tbody tr {
     cursor: pointer;
-    &:hover td { background-color: #c0def7; }
+    &:hover td, &:hover input  { background-color: #c0def7; }
 
     td {
       background-color: white;

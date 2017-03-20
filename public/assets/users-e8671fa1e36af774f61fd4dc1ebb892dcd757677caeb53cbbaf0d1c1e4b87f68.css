@@ -1,0 +1,33 @@
+/* line 3, D:/ProjectRuby/portal/app/assets/stylesheets/users.scss */
+#users #table_users {
+  height: 370px;
+}
+/* line 5, D:/ProjectRuby/portal/app/assets/stylesheets/users.scss */
+#users td:nth-of-type(1) {
+  width: 200px;
+  text-align: left;
+  padding-left: 3px;
+}
+/* line 6, D:/ProjectRuby/portal/app/assets/stylesheets/users.scss */
+#users td:nth-of-type(2) {
+  width: 40px;
+}
+/* line 7, D:/ProjectRuby/portal/app/assets/stylesheets/users.scss */
+#users td:nth-of-type(3) {
+  width: 400px;
+  text-align: left;
+  padding-left: 3px;
+}
+
+/* line 12, D:/ProjectRuby/portal/app/assets/stylesheets/users.scss */
+#user_new form > .panel {
+  width: 450px;
+}
+/* line 14, D:/ProjectRuby/portal/app/assets/stylesheets/users.scss */
+#user_new fieldset {
+  width: 450px;
+}
+/* line 16, D:/ProjectRuby/portal/app/assets/stylesheets/users.scss */
+#user_new fieldset select {
+  width: 300px;
+}

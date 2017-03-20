@@ -1,0 +1,181 @@
+@charset "UTF-8";
+/* line 1, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products {
+  /* Таблица категорий */
+  /* Таблица продуктов */
+}
+/* line 2, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products .menu_panel:nth-of-type(3) label:nth-of-type(3) {
+  margin-left: 45px;
+}
+/* line 5, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_children_categories {
+  height: 100%;
+  /* Шапка */
+  /* Таблица */
+  /* Граница */
+  /* Подвал */
+}
+/* line 7, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_children_categories table {
+  table-layout: fixed;
+  width: 100%;
+}
+/* line 9, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_children_categories col ~ col {
+  width: 100px;
+}
+/* line 12, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_children_categories thead tr {
+  /* I - строка Граница для конца плана в шапке */
+  /* II - строка Граница для конца плана в шапке */
+  /* III - строка Граница для конца плана в шапке */
+}
+/* line 14, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_children_categories thead tr:nth-child(1) th {
+  border-bottom: 3px solid #e7e7e7;
+}
+/* line 14, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_children_categories thead tr:nth-child(1) th:nth-child(1), #menu_requirement_products #table_menu_children_categories thead tr:nth-child(1) th:nth-child(2) {
+  border-right: 3px solid #e7e7e7;
+}
+/* line 17, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_children_categories thead tr:nth-child(2) th:nth-child(1), #menu_requirement_products #table_menu_children_categories thead tr:nth-child(2) th:nth-child(2), #menu_requirement_products #table_menu_children_categories thead tr:nth-child(2) th:nth-child(3), #menu_requirement_products #table_menu_children_categories thead tr:nth-child(2) th:nth-child(4) {
+  border-right: 3px solid #e7e7e7;
+}
+/* line 20, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_children_categories thead tr:nth-child(3) th:nth-child(2), #menu_requirement_products #table_menu_children_categories thead tr:nth-child(3) th:nth-child(4), #menu_requirement_products #table_menu_children_categories thead tr:nth-child(3) th:nth-child(6) {
+  border-right: 3px solid #e7e7e7;
+}
+/* line 24, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_children_categories tbody td {
+  /* Количество */
+  /* Колонка с наименованием продуктов */
+  /* Граница для конца плана в таблице */
+  /* колонка "Отклонение" */
+}
+/* line 25, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_children_categories tbody td input {
+  width: 100%;
+}
+/* line 26, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_children_categories tbody td:first-child {
+  padding-left: 3px;
+  text-align: left;
+}
+/* line 27, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_children_categories tbody td:nth-child(1), #menu_requirement_products #table_menu_children_categories tbody td:nth-child(3), #menu_requirement_products #table_menu_children_categories tbody td:nth-child(5), #menu_requirement_products #table_menu_children_categories tbody td:nth-child(6), #menu_requirement_products #table_menu_children_categories tbody td:nth-child(8) {
+  border-right: 3px solid #e7e7e7;
+}
+/* line 28, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_children_categories tbody td:nth-child(8), #menu_requirement_products #table_menu_children_categories tbody td:nth-child(10) {
+  font-weight: bold;
+}
+/* line 31, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_children_categories .selected td:nth-child(1), #menu_requirement_products #table_menu_children_categories .selected td:nth-child(3), #menu_requirement_products #table_menu_children_categories .selected td:nth-child(5), #menu_requirement_products #table_menu_children_categories .selected td:nth-child(6), #menu_requirement_products #table_menu_children_categories .selected td:nth-child(8) {
+  border-right-color: white;
+}
+/* line 34, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_children_categories tfoot td {
+  /* Колонка с наименованием продуктов */
+  /* Граница для конца плана */
+  /* Граница  где нет итогов */
+  /* Заливка подвала где не будет итогов */
+}
+/* line 35, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_children_categories tfoot td:first-child {
+  padding-right: 3px;
+  text-align: right;
+}
+/* line 36, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_children_categories tfoot td:nth-child(1), #menu_requirement_products #table_menu_children_categories tfoot td:nth-child(3) {
+  border-right: 3px solid white;
+}
+/* line 37, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_children_categories tfoot td:nth-child(6), #menu_requirement_products #table_menu_children_categories tfoot td:nth-child(8) {
+  border-right: 3px solid #e7e7e7;
+}
+/* line 38, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_children_categories tfoot td:nth-last-child(1), #menu_requirement_products #table_menu_children_categories tfoot td:nth-last-child(2), #menu_requirement_products #table_menu_children_categories tfoot td:nth-last-child(3), #menu_requirement_products #table_menu_children_categories tfoot td:nth-last-child(4), #menu_requirement_products #table_menu_children_categories tfoot td:nth-last-child(5) {
+  background-color: white;
+  border-bottom: 1px solid #e7e7e7;
+}
+/* line 39, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_children_categories tfoot td:nth-last-child(1) {
+  border-right: 1px solid #e7e7e7;
+}
+/* line 44, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_products {
+  width: 1065px;
+  /* Выравнивание слева для наименований категорий в шапке */
+  /* Колонка с наименованием продуктов */
+  /* Граница */
+}
+/* line 45, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_products.min_height {
+  max-height: 250px !important;
+}
+/* line 48, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_products table {
+  table-layout: fixed;
+  width: 100%;
+}
+/* line 50, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_products col:nth-child(1) {
+  width: 250px;
+}
+/* line 51, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_products col ~ col {
+  width: 75px;
+}
+/* line 54, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_products thead tr {
+  /* I строка - Граница для конца плана в шапке */
+  /* II - строка Граница для конца плана в шапке */
+  /* Нижняя граница для шапки */
+}
+/* line 56, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_products thead tr:nth-child(1) th {
+  border-bottom: 3px solid #e7e7e7;
+}
+/* line 56, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_products thead tr:nth-child(1) th:nth-child(1), #menu_requirement_products #table_menu_products thead tr:nth-child(1) th:nth-child(2), #menu_requirement_products #table_menu_products thead tr:nth-child(1) th:nth-child(3) {
+  border-right: 3px solid #e7e7e7;
+}
+/* line 60, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_products thead tr:nth-child(2) th:nth-last-child(1), #menu_requirement_products #table_menu_products thead tr:nth-child(2) th:nth-child(2):nth-last-child(3), #menu_requirement_products #table_menu_products thead tr:nth-child(2) th:nth-child(3):nth-last-child(4), #menu_requirement_products #table_menu_products thead tr:nth-child(2) th:nth-child(4):nth-last-child(5), #menu_requirement_products #table_menu_products thead tr:nth-child(2) th:nth-child(5):nth-last-child(6), #menu_requirement_products #table_menu_products thead tr:nth-child(2) th:nth-child(6):nth-last-child(7) {
+  border-right: 3px solid #e7e7e7;
+  border-left: 3px solid #e7e7e7;
+}
+/* line 69, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_products thead tr:nth-child(1) th[rowspan="3"], #menu_requirement_products #table_menu_products thead tr:nth-child(2) th[rowspan="2"], #menu_requirement_products #table_menu_products thead tr:nth-child(3) th {
+  border-bottom: 3px solid #e7e7e7;
+}
+/* line 75, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_products tbody td {
+  /* Граница */
+  /* Жирный текст для итоговых колонок */
+}
+/* line 76, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_products tbody td input {
+  width: 100%;
+}
+/* line 77, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_products tbody td:first-child {
+  padding-left: 3px;
+  text-align: left;
+}
+/* line 79, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_products tbody td:nth-child(1), #menu_requirement_products #table_menu_products tbody td:nth-child(2) {
+  border-right: 3px solid #e7e7e7;
+}
+/* line 82, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_products tbody td:nth-last-child(1), #menu_requirement_products #table_menu_products tbody td:nth-child(4):nth-last-child(6), #menu_requirement_products #table_menu_products tbody td:nth-child(5):nth-last-child(7), #menu_requirement_products #table_menu_products tbody td:nth-child(6):nth-last-child(8), #menu_requirement_products #table_menu_products tbody td:nth-child(7):nth-last-child(9), #menu_requirement_products #table_menu_products tbody td:nth-child(8):nth-last-child(10) {
+  font-weight: bold;
+  background-color: #e7e7e7;
+  border-bottom-color: white;
+}
+/* line 90, D:/ProjectRuby/portal/app/assets/stylesheets/menu_requirement_products.scss */
+#menu_requirement_products #table_menu_products .selected td:nth-child(1), #menu_requirement_products #table_menu_products .selected td:nth-child(2) {
+  border-right-color: white;
+}
