@@ -1,6 +1,6 @@
 <!-- Отображение документа табеля -->
 
-<%= content_tag :div, id: :timesheet_dates do %>
+<%= content_tag :main, id: :timesheet_dates do %>
 
   <%= content_tag :h1, '', data: { id: @timesheet.id, text: "Табель № #{ @timesheet.number } від" } %>
 
