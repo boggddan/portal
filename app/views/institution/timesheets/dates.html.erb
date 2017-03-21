@@ -6,16 +6,17 @@
 
   <%= content_tag :div, id: :panel_main do %>
     <%= content_tag :div, class: :panel do %>
-      <%= button_tag '', class: :btn_send, id: :send_sa, disabled: ( @timesheet.date_sa || !@timesheet.number ), data: {
-        ajax_path: "#{ institution_timesheets_send_sa_path }?id=#{ @timesheet.id }" } %>
+      <%= button_tag '', class: :btn_send, id: :send_sa, disabled: @timesheet.date_sa,
+                     data: { ajax_path: "#{ institution_timesheets_send_sa_path }?id=#{ @timesheet.id }" } %>
       <%= button_tag '', class: ( @timesheet.date_sa ? :btn_exit : :btn_save ),
-                     onclick: "location.href='#{ institution_timesheets_index_path }'" %>
+                     onclick: "window.location.href='#{ institution_timesheets_index_path }'" %>
       <% if @timesheet.date_sa %>
         <%= label_tag '', 'Надіслано:' %>
         <%= label_tag :number, 'документ' %>
         <%= content_tag :nav, class: :icon_number do text_field_tag( :number_sap, @timesheet.number_sa, disabled: true ) end %>
         <%= label_tag :date, 'від' %>
-        <%= content_tag :nav, class: :icon_сalendar do text_field_tag( :date, date_str( @timesheet.date_sa ), disabled: true ) end %>
+        <%= content_tag :nav, class: :icon_сalendar do text_field_tag( :date, date_str( @timesheet.date_sa ),
+                                                                       disabled: true ) end %>
       <% end %>
     <% end %>
 
@@ -26,29 +27,22 @@
       <%= label_tag :date, 'від' %>
       <%= content_tag :nav, class: :icon_сalendar do %>
         <%= text_field_tag :date, date_str( @timesheet.date ), disabled: @timesheet.date_sa, readonly: true,
-            data: { ajax_path: "#{institution_timesheets_update_path}?id=#{@timesheet.id}" } %>
+            data: { ajax_path: "#{institution_timesheets_update_path}?id=#{ @timesheet.id }" } %>
       <% end %>
 
       <%= label_tag :date_eb, 'З' %>
-      <%= content_tag :nav, class: :icon_сalendar do %>
-        <%= text_field_tag :date_eb, date_str( @timesheet.date_eb ), disabled: @timesheet.number, readonly: true %>
-      <% end %>
+      <%= content_tag :nav, class: :icon_сalendar do
+        text_field_tag( :date_eb, date_str( @timesheet.date_eb ), disabled: true ) end %>
 
       <%= label_tag :date_ee, 'ПО' %>
-      <%= content_tag :nav, class: :icon_сalendar do %>
-        <%= text_field_tag :date_ee, date_str( @timesheet.date_ee ), disabled: @timesheet.number, readonly: true %>
-      <% end %>
+      <%= content_tag :nav, class: :icon_сalendar do
+        text_field_tag( :date_ee, date_str( @timesheet.date_ee ), disabled: true ) end %>
 
-      <% if @timesheet.number.nil? %>
-        <%= button_tag '', class: :btn_create, id: :create, disabled: @timesheet.number,
-                       data: { ajax_path: institution_timesheets_create_path } %>
-      <% else %>
-        <%= content_tag :nav, '', class: :icon_filter do %>
-          <%= select_tag :group_timesheet, options_for_select( @group_timesheet ), prompt: 'Категорія / Група',
-              data: { param_name: :field, param_id: :field_id, ajax_path:
-                "#{ institution_timesheets_ajax_filter_timesheet_dates_path }?id=#{ @timesheet.id }&" } %>
-        <% end %>
-      <% end %>
+      <%= content_tag :nav, '', class: :icon_filter do
+        select_tag :group_timesheet, options_for_select( group_timesheet ), prompt: 'Категорія / Група',
+            data: { param_name: :field, param_id: :field_id, ajax_path:
+              "#{ institution_timesheets_ajax_filter_timesheet_dates_path }?id=#{ @timesheet.id }&" }
+      end %>
 
     <% end %>
   <% end %>

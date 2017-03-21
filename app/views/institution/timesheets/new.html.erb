@@ -1,0 +1,31 @@
+<!-- Отображение документа табеля -->
+<%= content_tag :main, id: :timesheet_new do %>
+  <%= content_tag :h1, 'Створення нового табелю' %>
+
+  <%= content_tag :div, id: :panel_main do %>
+
+    <%= content_tag :div, class: :panel do %>
+
+      <%= label_tag :date, ' Табель від' %>
+      <%= content_tag :nav, class: :icon_сalendar do %>
+        <%= text_field_tag :date, date_str( @timesheet.date ), readonly: true %>
+      <% end %>
+
+      <%= label_tag :date_eb, 'З' %>
+      <%= content_tag :nav, class: :icon_сalendar do %>
+        <%= text_field_tag :date_eb, date_str( @timesheet.date_eb ), readonly: true %>
+      <% end %>
+
+      <%= label_tag :date_ee, 'ПО' %>
+      <%= content_tag :nav, class: :icon_сalendar do %>
+        <%= text_field_tag :date_ee, date_str( @timesheet.date_ee ), readonly: true %>
+      <% end %>
+
+      <%= button_tag '', class: :btn_create, id: :create, disabled: @timesheet.number,
+                     data: { ajax_path: institution_timesheets_create_path } %>
+
+      <%= button_tag '', class: :btn_exit,
+                     onclick: "window.location.href='#{ institution_timesheets_index_path }'" %>
+    <% end %>
+  <% end %>
+<% end %>

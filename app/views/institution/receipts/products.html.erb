@@ -1,6 +1,6 @@
 <!-- Отображение продуктов поступления -->
 
-<%= content_tag :div, id: :receipt_products do %>
+<%= content_tag :main, id: :receipt_products do %>
   <%= content_tag :h1, '', data: { text: "Поставка № #{ @receipt.number } від" } %>
 
   <%= content_tag :div, id: :panel_main do %>

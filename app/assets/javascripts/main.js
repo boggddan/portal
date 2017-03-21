@@ -1,4 +1,16 @@
-$( document ).on('turbolinks:load', function() {
+var $dialogOptions = {
+  autoOpen: false,
+  resizable: false,
+  draggable: false,
+  height: "auto",
+  width: 400,
+  modal: true,
+  show: 'slide',
+  dialogClass: "dialog-no-close",
+  closeOnEscape: false };
+
+
+$( document ).on( 'turbolinks:load' , function() {
 
   // Проверка значения
   floatValue = function($value)  {
@@ -53,17 +65,7 @@ $( document ).on('turbolinks:load', function() {
 
   //-------------------------------------------------------------
   // Диалог ожидания
-  $( "#dialog_wait" ).dialog({
-    autoOpen: false,
-    resizable: false,
-    draggable: false,
-    height: "auto",
-    width: 400,
-    modal: true,
-    show: 'slide',
-    dialogClass: "dialog-no-close",
-    closeOnEscape: false
-  });
+  $( "#dialog_wait" ).dialog( $dialogOptions );
   //-------------------------------------------------------------
 
   // Диалог удаления

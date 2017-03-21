@@ -14,6 +14,5 @@ if ( $table.length ) {
     $( '#table_io_corrections tbody tr:nth-of-type('+
       sessionStorage.instituiton_orders_table_io_corrections_row +')' ).addClass( 'selected' ) };
 } else {
-  sessionStorage.removeItem( 'instituiton_orders_table_io_corrections_scroll' );
-  sessionStorage.removeItem( 'instituiton_orders_table_io_corrections_row' );
+  emptyIoCorrections();
 }

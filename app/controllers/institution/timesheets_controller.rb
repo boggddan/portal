@@ -1,4 +1,5 @@
 class Institution::TimesheetsController < Institution::BaseController
+  helper_method :group_timesheet
 
   def index
   end
@@ -6,7 +7,6 @@ class Institution::TimesheetsController < Institution::BaseController
   def new
     @timesheet = Timesheet.new( date: Date.today, date_eb: Date.today.beginning_of_month,
                                 date_ee: Date.today.end_of_month )
-    render :dates
   end
 
   # Веб-сервис загрузки графика
@@ -25,7 +25,7 @@ class Institution::TimesheetsController < Institution::BaseController
 
     if interface_state == 'OK'
       Timesheet.transaction do
-        timesheet = Timesheet.create( institution: current_institution, branch: current_branch,
+        @timesheet = Timesheet.create( institution: current_institution, branch: current_branch,
           date_vb: return_value[ :date_vb ], date_ve: return_value[ :date_ve ],
           date_eb: return_value[ :date_eb ], date_ee: return_value[ :date_ee ], date: params[ :date ].to_date )
 
@@ -36,7 +36,7 @@ class Institution::TimesheetsController < Institution::BaseController
 
           unless child[ :error ] || children_group[ :error ] || reasons_absence[ :error ]
             TimesheetDate.new( date: ts[ :date ] ) do | o |
-              o.timesheet_id = timesheet.id
+              o.timesheet_id = @timesheet.id
               o.child_id = child.id
               o.children_group_id = children_group.id
               o.reasons_absence_id = reasons_absence.id
@@ -45,7 +45,7 @@ class Institution::TimesheetsController < Institution::BaseController
           end
         end
 
-        redirect_to institution_timesheets_dates_path( id: timesheet.id )
+        redirect_to institution_timesheets_dates_path( id: @timesheet.id )
       end
     end
   end
@@ -95,31 +95,36 @@ class Institution::TimesheetsController < Institution::BaseController
     Timesheet.find_by( id: params[ :id ] ).destroy if params[ :id ]
   end
 
-  def dates # Отображение дней табеля
-    @timesheet = Timesheet.find_by( id: params[ :id ] )
-
-    @group_timesheet = []
+  def group_timesheet
+    group_timesheet = []
     children_category_id = 0
 
     @timesheet.timesheet_dates
       .select( 'DISTINCT ON ( children_groups.children_category_id, timesheet_dates.children_group_id )
         children_groups.children_category_id', :children_group_id,
-        'children_categories.name AS category_name', 'children_groups.name AS group_name' )
+               'children_categories.name AS category_name', 'children_groups.name AS group_name' )
       .joins( :children_category, :children_group )
       .each do | o |
-        if children_category_id != o.children_category_id
-          children_category_id = o.children_category_id
-          @group_timesheet << [ o.category_name, o.children_category_id,
-                                { class: :row_group, data: { field: :children_category_id } } ]
-        end
-
-        @group_timesheet << [ o.group_name, o.children_group_id, { data: { field: :children_group_id } } ]
+      if children_category_id != o.children_category_id
+        children_category_id = o.children_category_id
+        group_timesheet << [ o.category_name, o.children_category_id,
+                              { class: :row_group, data: { field: :children_category_id } } ]
       end
+
+      group_timesheet << [ o.group_name, o.children_group_id, { data: { field: :children_group_id } } ]
+    end
+
+    return group_timesheet
+  end
+
+  def dates # Отображение дней табеля
+    @timesheet = Timesheet.find_by( id: params[ :id ] )
   end
 
   def update # Обновление реквизитов документа
     update = params.permit( :id, :date ).to_h
     Timesheet.where( id: params[ :id ] ).update_all( update ) if params[ :id ] && update.any?
+    render body: nil
   end
 
   def dates_update # Обновление маркера

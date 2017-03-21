@@ -1,43 +1,43 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <title>Портал</title>
-  <%= csrf_meta_tags %>
+<%= content_tag :html do %>
+  <%= content_tag :head do %>
+    <%= content_tag :title, 'Портал' %>
+    <%= csrf_meta_tags %>
 
-  <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
-  <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
-</head>
-
-<body>
-
-<%= render( 'layouts/wait' ) %> <!-- Сообщение ожидания -->
-<%= render( 'layouts/delete' ) %> <!-- Сообщение при удалении -->
-
-<%= content_tag :div, id: :main_menu do %>
-  <%= content_tag :div %>
-  <%= content_tag :div %>
-
-  <%= content_tag :ul do %>
-    <%= content_tag :li, class: :active do link_to 'Початкова', admin_users_index_path end %>
-    <%= content_tag :li, id: :mm_instituiton_orders do link_to 'Користувачі', admin_users_index_path end %>
+    <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
   <% end %>
 
-  <%= content_tag :ul do %>
-    <%= content_tag :li do %>
-      <%= content_tag :div do %>
-        <%= content_tag :span %>
-        <%= content_tag :span, @current_user.username %>
+  <%= content_tag :body do %>
+
+    <%= render( 'layouts/wait' ) %> <!-- Сообщение ожидания -->
+    <%= render( 'layouts/delete' ) %> <!-- Сообщение при удалении -->
+
+      <%= content_tag :div, id: :main_menu do %>
+      <%= content_tag :div %>
+      <%= content_tag :div %>
+
+      <%= content_tag :ul do %>
+        <%= content_tag :li, class: :active do link_to 'Початкова', admin_users_index_path end %>
+        <%= content_tag :li, id: :mm_instituiton_orders do link_to 'Користувачі', admin_users_index_path end %>
       <% end %>
-      <%= content_tag :div do %>
-        <%= content_tag :span %>
-        <%= content_tag :span, 'Адміністратор' %>
+
+      <%= content_tag :ul do %>
+        <%= content_tag :li do %>
+          <%= content_tag :div do %>
+            <%= content_tag :span %>
+            <%= content_tag :span, @current_user.username %>
+          <% end %>
+          <%= content_tag :div do %>
+            <%= content_tag :span %>
+            <%= content_tag :span, 'Адміністратор' %>
+          <% end %>
+        <% end %>
+        <%= content_tag :li do link_to 'Вихід', log_out_path end %>
       <% end %>
     <% end %>
-    <%= content_tag :li do link_to 'Вихід', log_out_path end %>
+
+    <%= yield %>
+
   <% end %>
 <% end %>
-
-<%= yield %>
-
-</body>
-</html>

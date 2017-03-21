@@ -26,7 +26,7 @@ $( document ).on( 'turbolinks:load', function() {
       sessionStorage.instituiton_orders_date_end = $date_end_val;
 
       var $path_ajax = $date_start.data( 'ajax-path' ) + '?' + $date_start.attr( 'name' ) + '=' + $date_start_val + '&' + $date_end.attr( 'name' ) + '=' + $date_end_val;
-      $.ajax({ url: $path_ajax, type: 'GET', dataType: 'script' });
+      $.ajax( { url: $path_ajax, type: 'GET', dataType: 'script' } );
     };
 
     // Выбор заявки
@@ -44,8 +44,7 @@ $( document ).on( 'turbolinks:load', function() {
 
     // Очистка заявки
     emptyInstitutionOrder = function() {
-      var $h1 = $( '.clmn:nth-of-type(2) h1' );
-      $h1.text( $h1.data( 'text' ) );
+      emptyIoCorrections();
       sessionStorage.removeItem( 'instituiton_orders_table_instituiton_orders_row' );
       sessionStorage.removeItem( 'instituiton_orders_table_instituiton_orders_scroll' );
     };
@@ -57,7 +56,16 @@ $( document ).on( 'turbolinks:load', function() {
       $h1.text( $h1.data( 'text' ) + ' ' + $tr.children( 'td:nth-of-type(2)' ).html() );
 
       var $path_ajax = $h1.data('ajax-path') + $tr.data('id');
-      $.ajax({ url: $path_ajax, type: 'GET', dataType: "script" });
+      $.ajax( { url: $path_ajax, type: 'GET', dataType: "script" } );
+    };
+
+    // Очистка заявки
+    emptyIoCorrections = function() {
+      var $h1 = $( '.clmn:nth-of-type(2) h1' );
+      $h1.text( $h1.data( 'text' ) );
+      $( '#table_io_corrections' ).empty();
+      sessionStorage.removeItem( 'instituiton_orders_table_io_corrections_scroll' );
+      sessionStorage.removeItem( 'instituiton_orders_table_io_corrections_row' );
     };
 
     // Удаление заявки
@@ -94,13 +102,13 @@ $( document ).on( 'turbolinks:load', function() {
       var $path_ajax = $( this).data( 'ajax-path' ) + '?' + $date_start.attr( 'name' ) + '=' + $date_start.val() +
         '&' + $date_end.attr( 'name' ) + '=' + $date_end.val();
       $.ajax( { url: $path_ajax, type: 'POST', dataType: 'script' } );
-    });
+    } );
 
     // Нажатие на кнопочку создать корректировку заявки
     $( '#create_io_correction' ).click( function() {
       $( "#dialog_wait" ).dialog( 'open' );
       $.ajax( { url: $( this ).data( 'ajax-path' ) + $( '#table_institution_orders tbody tr.selected' ).data('id'), type: 'POST', dataType: 'script' } );
-    });
+    } );
 
     // Начальная дата фильтрации
     $( '#date_start' ).datepicker( {
@@ -137,7 +145,7 @@ $( document ).on( 'turbolinks:load', function() {
       dialogDelete.data( 'delete', 'deleteInstituitonOrder();' ); // Функция для удаления заявки
       dialogDelete.data( 'un-delete', 'unDeleteInstituitonOrder();' ); // Отмена удаления заявки
       dialogDelete.dialog( 'open' );
-    });
+    } );
 
     // Нажатие на кнопочку для перехода заполнения информации
     $( document ).on( 'click', '#table_institution_orders tbody tr', function() {
@@ -161,7 +169,7 @@ $( document ).on( 'turbolinks:load', function() {
       $dialogDelete.data( 'delete', 'deleteIoCorrection();' ); // Функция для удаления заявки
       $dialogDelete.data( 'un-delete', 'unDeleteIoCorrection();' ); // Отмена удаления заявки
       $dialogDelete.dialog( 'open' );
-    });
+    } );
 
     // Нажатие на кнопочку для перехода заполнения информации
     $( document ).on( 'click', '#table_io_corrections td .btn_view, #table_io_corrections td .btn_edit', function() {
@@ -173,4 +181,4 @@ $( document ).on( 'turbolinks:load', function() {
 
   };
 
-});
+} );
