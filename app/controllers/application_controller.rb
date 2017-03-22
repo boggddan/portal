@@ -111,9 +111,14 @@
     end
   end
 
-
-
-
+  def causes_deviation_code( code )
+    code = code.strip
+    if causes_deviation = CausesDeviation.find_by( code: code )
+      causes_deviation
+    else
+      { error: { causes_deviation: "Не знайдений код причини відхилення [#{ code }]" } }
+    end
+  end
 
 
 end

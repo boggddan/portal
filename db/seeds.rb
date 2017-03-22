@@ -5,4 +5,7 @@ User.create( username: 'admin', password: 'admin', userable_id: 0, userable_type
 User.create( username: 'user', password: '1', userable: Institution.find_by( code: '14' ) )
 
 # Создание для табеля Явки
-ReasonsAbsence.create_with( mark: '', name: 'Явка' ).find_or_create_by!( code: '' )
+ReasonsAbsence.create_with( mark: '', name: 'Явка' ).find_or_create_by( code: '' )
+
+# Пустая причина
+CausesDeviation.create_with( name: '' ).find_or_create_by( code: '' )

@@ -74,9 +74,11 @@ class Institution::ReceiptsController < Institution::BaseController
       Receipt.transaction do
         receipt = Receipt.create( institution: current_institution, supplier_order: supplier_order,
                                   contract_number: params[ :contract_number ] )
-        supplier_order.supplier_order_products.where( institution: current_institution, contract_number: params[ :contract_number ] )
+        supplier_order.supplier_order_products.where( institution: current_institution,
+                                                      contract_number: params[ :contract_number ] )
           .order( :date ).each do |sop|
-            ReceiptProduct.create( receipt: receipt, date: sop.date, product_id: sop.product_id, count: sop.count )
+            ReceiptProduct.create( receipt: receipt, date: sop.date, product_id: sop.product_id, count: sop.count,
+                                   count_invoice: sop.count, causes_deviation: causes_deviation_code( '' ) )
         end
 
         redirect_to institution_receipts_products_path( id: receipt.id )
