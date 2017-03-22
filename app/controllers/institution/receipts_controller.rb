@@ -49,7 +49,9 @@ class Institution::ReceiptsController < Institution::BaseController
                                     'ins0:Date' => receipt.date,
                                     'ins0:Goods' => receipt_products.map{ | o | {
                                       'ins0:CodeOfGoods' => o.product.code,
-                                      'ins0:Quantity' => o.count.to_s } } } }
+                                      'ins0:Quantity' => o.count.to_s,
+                                      'ins0:Count_invoice' => o.count_invoice.to_s,
+                                      'ins0:Cause_deviation_code' => o.causes_deviation.code } } } }
       response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces:  $ghSavon[ :namespaces ] )
                    .call( :create_doc_supply_goods, message: message )
 
@@ -59,7 +61,7 @@ class Institution::ReceiptsController < Institution::BaseController
         receipt.update( date_sa: Date.today, number_sa: return_value[ :respond ] )
         redirect_to institution_receipts_index_path
       else
-        render json: { interface_state: interface_state, message: message }
+        logger.info "interface_state: [#{ return_value[ :interface_state ] }], message: [#{ message }]"
       end
     else
       render text: 'Количество не проставлено'

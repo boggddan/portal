@@ -45,6 +45,15 @@ class SyncCatalogsController < ApplicationController
     end
   end
 
+  def causes_deviation_code( code )
+    code = code.strip
+    if causes_deviation = CausesDeviation.find_by( code: code )
+      causes_deviation
+    else
+      { error: { causes_deviation: "Не знайдений код причини відхилення [#{ code }]" } }
+    end
+  end
+
   def price_product_date( branch, institution, product, date )
     if price_product = PriceProduct.where( branch: branch, institution: institution, product: product )
                          .where( ' price_date <= ? ', date ).order( :price_date ).last
@@ -351,6 +360,47 @@ class SyncCatalogsController < ApplicationController
       include: { children_categories_type: { only: [ :code, :name ] } } )
   end
   ###############################################################################################
+
+  ###############################################################################################
+  # POST /api/cu_causes_deviation { "code": "000000002", "name": "Причина 2" }
+  def causes_deviation_update
+    error = { code: 'Не знайдений параметр [code]', name: 'Не знайдений параметр [name]' }
+              .stringify_keys!.except( *params.keys )
+    if error.empty?
+      code = params[ :code ].strip
+      update_fields = { name: params[ :name ] }
+      causes_deviation = CausesDeviation.create_with( update_fields ).find_or_create_by( code: code )
+      causes_deviation.update( update_fields )
+    end
+    render json: error.any? ? { result: false, error: [ error ]  } : { result: true, code: code, id: causes_deviation.id }
+  end
+
+  # GET /api/causes_deviation?code=000000002
+  def causes_deviation_view
+    error = { code: 'Не знайдений параметр [code]' }.stringify_keys!.except( *params.keys )
+
+    if error.size == 1
+      error = {}
+      causes_deviation = CausesDeviation.last
+    else
+      if error.empty?
+        causes_deviation = causes_deviation_code( params[ :code ].strip )
+        error = causes_deviation[ :error ]
+      end
+    end
+
+    render json: causes_deviation ? causes_deviation.to_json : { result: false, error: [ error ] }
+  end
+
+  # GET /api/causes_deviations
+  def causes_deviations_view
+    render json: CausesDeviation.all.order( :code ).to_json
+  end
+  ###############################################################################################
+
+
+
+
 
   ###############################################################################################
   # POST /api/cu_price_product { "branch_code": "0003", "institution_code": "14", "product_code": "000000079  ", "price_date": "1485296673", "price": 30.25  }

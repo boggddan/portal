@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170309093855) do
+ActiveRecord::Schema.define(version: 20170322113418) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -21,6 +21,14 @@ ActiveRecord::Schema.define(version: 20170309093855) do
     t.datetime "created_at",            null: false
     t.datetime "updated_at",            null: false
     t.index ["code"], name: "index_branches_on_code", using: :btree
+  end
+
+  create_table "causes_deviations", force: :cascade do |t|
+    t.string   "code",       limit: 9
+    t.string   "name",       limit: 40
+    t.datetime "created_at",            null: false
+    t.datetime "updated_at",            null: false
+    t.index ["code"], name: "index_causes_deviations_on_code", using: :btree
   end
 
   create_table "children", force: :cascade do |t|
@@ -215,9 +223,12 @@ ActiveRecord::Schema.define(version: 20170309093855) do
     t.integer  "receipt_id"
     t.integer  "product_id"
     t.date     "date"
-    t.decimal  "count",      precision: 8, scale: 2
-    t.datetime "created_at",                         null: false
-    t.datetime "updated_at",                         null: false
+    t.decimal  "count",               precision: 8, scale: 3, default: "0.0", null: false
+    t.datetime "created_at",                                                  null: false
+    t.datetime "updated_at",                                                  null: false
+    t.decimal  "count_invoice",       precision: 8, scale: 3, default: "0.0", null: false
+    t.integer  "causes_deviation_id"
+    t.index ["causes_deviation_id"], name: "index_receipt_products_on_causes_deviation_id", using: :btree
     t.index ["date"], name: "index_receipt_products_on_date", using: :btree
     t.index ["product_id"], name: "index_receipt_products_on_product_id", using: :btree
     t.index ["receipt_id"], name: "index_receipt_products_on_receipt_id", using: :btree

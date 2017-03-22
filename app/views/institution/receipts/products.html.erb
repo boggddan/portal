@@ -76,7 +76,7 @@
             <% end %>
 
             <%= content_tag :tr do %>
-              <%= content_tag :td, receipt_product.name %>
+              <%= content_tag :td, receipt_product.product.name %>
 
               <%= content_tag :td do %>
                 <% if @receipt.date_sa.nil? %>

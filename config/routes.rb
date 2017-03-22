@@ -31,6 +31,10 @@ Rails.application.routes.draw do
     get :children_category_view, path: :children_category
     get :children_categories_view, path: :children_categories
 
+    post :causes_deviation_update, path: :cu_causes_deviation
+    get :causes_deviation_view, path: :causes_deviation
+    get :causes_deviations_view, path: :causes_deviations
+
     post :price_product_update, path: :cu_price_product
     get :price_product_view, path: :price_product
     get :price_products_view, path: :price_products
