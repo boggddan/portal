@@ -167,7 +167,7 @@ class SyncCatalogsController < ApplicationController
     if error.empty?
       branch = branch_code( params[ :branch_code ].strip )
       unless error = branch[ :error ]
-        code = params[ :code ].strip
+        code = params[ :code ]
         update_fields = { name: params[ :name ], branch: branch }
         Institution.create_with( update_fields ).find_or_create_by( code: code ).update( update_fields )
       end
