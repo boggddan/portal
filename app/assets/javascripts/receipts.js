@@ -11,6 +11,7 @@ $( document ).on( 'turbolinks:load', function() {
     if ( sessionStorage.receipts_supplier_name_value ) {
       $( '#supplier_name' ).data( 'value', sessionStorage.receipts_supplier_name_value ) };
 
+
     $( '#dialog_delete' ).data( 'delete', 'deleteReceipt();' ); // Функция для удаления меню-требования
     $( '#dialog_delete' ).data( 'un-delete', 'unDeleteReceipt();' ); // Отмена удаления меню-требования
 
@@ -96,8 +97,10 @@ $( document ).on( 'turbolinks:load', function() {
     // Фильтрация таблицы поступлений
     filterTableReceipts = function() {
       var $contract_number = $( '#contract_number' );
+      var $sort = $( '#table_receipts th.sort' );
+      console.log($sort.data('name'));
       var $path_ajax = $contract_number.data( 'ajax-path' ) + $( '#table_supplier_orders tbody tr.selected' ).data( 'id' )
-        + '&' + $contract_number.attr( 'name' ) + '=' + $contract_number.val();
+        + '&' + $contract_number.attr( 'name' ) + '=' + $contract_number.val() + '&field_sort=date';
       $.ajax( { url: $path_ajax, type: 'GET', dataType: 'script' } );
     };
 
@@ -199,6 +202,12 @@ $( document ).on( 'turbolinks:load', function() {
       sessionStorage.receipts_table_receipts_scroll = $( '#table_receipts' ).scrollTop();
       window.location.replace($tr.data( 'path' ) );
     } );
+
+    // Нажатие на кнопочку для перехода заполнения информации
+    $( document ).on( 'click', 'th', function() {
+    } );
+
+
 
   };
 

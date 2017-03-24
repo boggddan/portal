@@ -16,7 +16,7 @@
 
     <%= content_tag :tbody do %>
       <% @institution_orders.each do | institution_order | %>
-        <%= content_tag :tr, '', data: { id: institution_order.id } do %>
+        <%= content_tag :tr, data: { id: institution_order.id } do %>
           <%= content_tag :td, date_str( institution_order.date ), class: :date_field %>
           <%= content_tag :td, institution_order.number, class: :number_field %>
           <%= content_tag :td, institution_order.number_sa, class: :number_field %>

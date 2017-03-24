@@ -389,10 +389,6 @@ class SyncCatalogsController < ApplicationController
   end
   ###############################################################################################
 
-
-
-
-
   ###############################################################################################
   # POST /api/cu_price_product { "branch_code": "0003", "institution_code": "14", "product_code": "000000079  ", "price_date": "1485296673", "price": 30.25  }
   def price_product_update
@@ -738,9 +734,9 @@ class SyncCatalogsController < ApplicationController
 
   ###############################################################################################
   # POST /api/cu_receipt
-  # { "institution_code': "14", "supplier_order_number": "000000000003", "contract_number": "BX-0000001", "number": "0000000000011", "invoice_number": "00000012", "date": "1485296673", "date_sa": "1485296673", "number_sa": "000000000001",
-  #   "products": [{"product_code": "000000079", "date": "1504224000", "count": 25},
-  #                {"product_code": "000000046  ", "date": "1504224000", "count": 19}]
+  # { "institution_code": "14", "supplier_order_number": "000000000002", "contract_number": "Ис-000000001", "number": "0000000000011", "invoice_number": "00000012", "date": "1485296673", "date_sa": "1485296673", "number_sa": "000000000001",
+  #   "products": [{"product_code": "000000079", "date": "1504224000", "count": 25, "count_invoice": 25, "causes_deviation_code": ""},
+  #                {"product_code": "000000046", "date": "1504224000", "count": 19, "count_invoice": 30, "causes_deviation_code": "000000002"}]
   # }
   def receipt_update
     error = { institution_code: 'Не знайдений параметр [institution_code]',
@@ -780,12 +776,21 @@ class SyncCatalogsController < ApplicationController
             params[ :products ].each_with_index do | product_par, index |
               error = { product_code: 'Не знайдений параметр [product_code]',
                         date: 'Не знайдений параметр [date]',
-                        count: 'Не знайдений параметр [count]' }.stringify_keys!.except( *product_par.keys )
+                        count: 'Не знайдений параметр [count]',
+                        count_invoice: 'Не знайдений параметр [count_invoice]',
+                        causes_deviation_code: 'Не знайдений параметр [causes_deviation_code]' }
+                .stringify_keys!.except( *product_par.keys )
+
               if error.empty?
                 product = product_code( product_par[ :product_code ].strip )
+                error.merge!( product[ :error ] ) if product[ :error ]
 
-                unless error = product[ :error ]
-                  update_fields = { count: product_par[ :count ] }
+                causes_deviation = causes_deviation_code( product_par[ :causes_deviation_code ].strip )
+                error.merge!( causes_deviation[ :error ] ) if causes_deviation[ :error ]
+
+                if error.empty?
+                  update_fields = { count: product_par[ :count ], count_invoice: product_par[ :count_invoice ],
+                                    causes_deviation: causes_deviation }
                   receipt_products.create_with( update_fields )
                     .find_or_create_by( date: date_int_to_str( product_par[ :date ] ), product: product )
                     .update( update_fields )
@@ -809,7 +814,7 @@ class SyncCatalogsController < ApplicationController
     render json: error && error.any? ? { result: false, error: [ error ] } : { result: true, number: number }
   end
 
-  # GET /api/receipt?institution_code=14&supplier_order_number=000000000003&contract_number=BX-0000001&number=000000000003
+  # GET /api/receipt?institution_code=14&supplier_order_number=000000000002&contract_number=Ис-000000001&number=000000000003
   def receipt_view
     error = { institution_code: 'Не знайдений параметр [institution_code]',
               supplier_order_number: 'Не знайдений параметр [supplier_order_number]',
@@ -834,7 +839,9 @@ class SyncCatalogsController < ApplicationController
 
     render json: receipt ? receipt.to_json( include: { supplier_order: { only: [:number, :date], include: {
         branch: { only: [ :code, :name ] }, supplier: { only: [ :code, :name ] } } },
-        institution: { only: [ :code, :name ] }, receipt_products: { include: { product: { only: [ :code, :name ] } } } } )
+        institution: { only: [ :code, :name ] },
+        receipt_products: { include: { product: { only: [ :code, :name ] },
+                                       causes_deviation: { only: [ :code, :name ] } } } } )
       : { result: false, error: [ error ] }
   end
   ###############################################################################################

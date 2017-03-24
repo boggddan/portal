@@ -23,10 +23,10 @@ class Institution::ReceiptsController < Institution::BaseController
 
   def ajax_filter_receipts # Фильтрация документов поставок
     if params[ :id ]
+      contract_number = params[ :contract_number ]
       @receipts = Receipt.where( supplier_order_id: params[ :id ])
-        .where( ( { contract_number: ( params[ :contract_number ] )
-          } if params[ :contract_number ] && !params[ :contract_number ].blank? ) )
-        .order( :date )
+        .where( ( { contract_number: ( contract_number ) } if contract_number && !contract_number.blank? ) )
+        .order( params[ :sort_field ] )
     end
   end
 
@@ -61,7 +61,7 @@ class Institution::ReceiptsController < Institution::BaseController
         receipt.update( date_sa: Date.today, number_sa: return_value[ :respond ] )
         redirect_to institution_receipts_index_path
       else
-        logger.info "interface_state: [#{ return_value[ :interface_state ] }], message: [#{ message }]"
+        logger.info "interface_state: [#{ return_value[ :interf1ace_state ] }], message: [#{ message }]"
       end
     else
       render text: 'Количество не проставлено'
@@ -99,16 +99,18 @@ class Institution::ReceiptsController < Institution::BaseController
 
   def products # Отображение товаров поступления
     @receipt = Receipt.find_by( id: params[ :id ] )
-    @receipt_products = @receipt.receipt_products.order( :date )
+    @receipt_products = @receipt.receipt_products.order( :date, :product_id )
   end
 
   def product_update # Обновление количества
-    update = params.permit( :count ).to_h
+    update = params.permit( :id,:count, :count_invoice, :causes_deviation_id ).to_h
     ReceiptProduct.where( id: params[ :id ] ).update_all( update ) if params[ :id ] && update.any?
+    render body: nil
   end
 
   def update # Обновление реквизитов документа поступления
-    update = params.permit( :date, :invoice_number ).to_h
+    update = params.permit( :id, :date, :invoice_number ).to_h
     Receipt.where( id: params[ :id ] ).update_all( update ) if params[ :id ] && update.any?
+    render body: nil
   end
 end

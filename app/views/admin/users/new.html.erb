@@ -1,4 +1,4 @@
-<%= content_tag :div, id: :user_new do %>
+<%= content_tag :main, id: :user_new do %>
   <%= content_tag :h1, "Створення користувача" %>
 
   <%= form_for( @user, url: admin_users_create_path, method: :post ) do | user | %>
@@ -48,6 +48,5 @@
       <% end %>
     <% end %>
   <% end %>
-
 
 <% end %>

@@ -5,10 +5,10 @@
                                                  path_del: "#{ institution_receipts_delete_path }?id=" }  do %>
     <%= content_tag :thead do %>
       <%= content_tag :tr do %>
-        <%= content_tag :th, 'Дата' %>
-        <%= content_tag :th, 'Договір' %>
-        <%= content_tag :th, '№ постачання' %>
-        <%= content_tag :th, 'Номер 1С' %>
+        <%= content_tag :th, 'Дата', class: :sort, data: { name: :date } %>
+        <%= content_tag :th, 'Договір', data: { name: :contract_number } %>
+        <%= content_tag :th, '№ постачання', data: { name: :invoice_number } %>
+        <%= content_tag :th, 'Номер 1С', data: { name: :number_sa } %>
         <%= content_tag :th, '', colspan: 3 %>
       <% end %>
     <% end %>

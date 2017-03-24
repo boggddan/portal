@@ -29,7 +29,7 @@ table.table {
   th, tr:not(:nth-last-child(1)) td { border-bottom: 1px dotted #e7e7e7; }
 
   /* Поле ввода */
-  input {
+  select, input {
     width: 100%;
     font-size: 13px;
     height: 26px;

@@ -12,13 +12,36 @@ var $dialogOptions = {
 
 $( document ).on( 'turbolinks:load' , function() {
 
+
+  function SetSession( $key, $param, $value ) { // Запись в сессию
+
+    //var $sessionObj = JSON.parse( sessionStorage.getItem( $key ) );//спарсим объект обратно
+
+    //if $sessionObj
+
+    //var serialObj = JSON.stringify(obj); //сериализуем его
+
+    //sessionStorage.setItem("myKey", serialObj); //запишем его в хранилище по ключу "myKey"
+
+  };
+
+  function GetSession() { // Чтение из сессии
+
+  };
+
+
+
   // Проверка значения
-  floatValue = function($value)  {
+  floatValue = function($value) {
     var $returnValue = '' ;
     if (typeof($value) != 'undefined') { $returnValue = $value.toString().replace(',','.').replace(' ','') };
     if ( $.isNumeric($returnValue) ) { $returnValue = parseFloat( $returnValue ) } else { $returnValue = 0 };
     return $returnValue
   };
+
+  float3Value = function( $value ) {
+    return Math.trunc( floatValue( $value ) * 1000 ) / 1000;
+  }
 
   f3_to_s = function($value) {
     return $value ? $value.toFixed(3) : ''
