@@ -32,7 +32,7 @@ class Institution::TimesheetsController < Institution::BaseController
         return_value[ :ts ].each do | ts |
           child = child_code( ts[ :child_code ].strip )
           children_group = children_group_code( ts[ :children_group_code ].strip )
-          reasons_absence = reasons_absence_code(  ( ts[ :reasons_absence_code ] || '' ).strip )
+          reasons_absence = reasons_absence_code( ( ts[ :reasons_absence_code ] || '' ).strip )
 
           unless child[ :error ] || children_group[ :error ] || reasons_absence[ :error ]
             TimesheetDate.new( date: ts[ :date ] ) do | o |
@@ -66,7 +66,7 @@ class Institution::TimesheetsController < Institution::BaseController
                                          'ins0:Children_group_code' => o.group_code,
                                          'ins0:Reasons_absence_code' => o.reason_code,
                                          'ins0:Date' => o.date  } } } }
-      puts message
+
       response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] )
         .call( :creation_time_sheet, message: message )
       interface_state = response.body[ :creation_time_sheet_response ][ :return ][ :interface_state ]
@@ -87,7 +87,9 @@ class Institution::TimesheetsController < Institution::BaseController
     if params[ :date_start ] && params[ :date_start ]
       date_start = params[ :date_start ] ? params[ :date_start ] : params[ :date_end ]
       date_end = params[ :date_end ] ? params[ :date_end ] : params[ :date_start ]
-      @timesheets = Timesheet.where( institution: current_institution, date: date_start..date_end )
+      @timesheets = Timesheet
+                      .where( institution: current_institution, date: date_start..date_end )
+                      .order( "#{ params[ :sort_field ] } #{ params[ :sort_order ] }" )
     end
   end
 

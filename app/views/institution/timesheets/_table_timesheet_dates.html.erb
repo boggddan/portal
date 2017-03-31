@@ -4,7 +4,9 @@
 
   <% date_ve = @timesheet.date_ve %>
   <% date_vb = @timesheet.date_vb %>
-  <% count_days = date_ve.day - date_vb.day + 1 %>
+  <% date_ee = @timesheet.date_ee %>
+  <% date_eb = @timesheet.date_eb %>
+  <% count_days = date_ee.day - date_eb.day + 1 %>
 
   <%= content_tag :table, class: :table, data: { param_name: :reasons_absence_id,
         path_update: "#{ institution_timesheets_dates_update_path }?id=" } do %>
@@ -16,7 +18,7 @@
     <%= content_tag :thead do %>
       <%= content_tag :tr do %>
         <%= content_tag :th, 'Дитина' %>
-        <% ( date_vb..date_ve ).each do | v | %>
+        <% ( date_eb..date_ee ).each do | v | %>
           <%= content_tag :th, "#{ v.day } #{ short_day_of_week( v.wday ) }" %>
         <% end %>
       <% end %>
@@ -50,10 +52,20 @@
 
              <%= content_tag :tr do %>
                <%= content_tag :td, v[ 0 ].child_name %>
-               <% v.each do | k1, v1 | %>
-                 <%= content_tag :td, k1.mark, disabled: @timesheet.date_sa || ( k1.mark.blank? && !k1.reason_code.blank? ),
-                   data: { id: k1.id, reasons_absence_id: k1.reasons_absence_id }, class: :tb_mark %>
-               <% end %>
+                 <% index = 0  %>
+                 <% ( date_eb..date_ee ).each do | v1 | %>
+                   <% if index < v.size && v[ index ].date == v1 %>
+                     <% v2 = v[ index ]  %>
+                       <%= content_tag :td, v2.mark,
+                         disabled: @timesheet.date_sa || ( v2.mark.blank? && !v2.reason_code.blank? ),
+                         data: { id: v2.id, reasons_absence_id: v2.reasons_absence_id }, class: :tb_mark %>
+                     <% index = index + 1 %>
+                   <% else %>
+                     <%= content_tag :td, '.'  %>
+                   <% end %>
+                 <% end %>
+
+
              <% end %>
            <% end %>
 

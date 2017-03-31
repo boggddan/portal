@@ -11,7 +11,7 @@ $( document ).on( 'turbolinks:load', function() {
       $.ajax( { url: $( this ).data( 'ajax-path' ), type: 'post', dataType: 'script' } );
     } );
 
-    $( '#date_eb, #date_ee' ).datepicker( );  // Дата
+    $( '#date, #date_eb, #date_ee' ).datepicker( );  // Дата
 
     // Нажатие на кнопочку создать
     $( '#create' ).click( function() {

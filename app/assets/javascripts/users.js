@@ -24,13 +24,13 @@ $( document ).on( 'turbolinks:load', function() {
     unDeleteUser = function() { $( 'tr.delete' ).removeClass( 'delete' ) };
 
     // Нажатие на кнопочку удалить поступление
-    $( document ).on( 'click', 'td .btn_del', function() {
+    $( '#users' ).on( 'click', 'td .btn_del', function() {
       $( this ).parents( 'tr' ).addClass( 'delete' );
       $( '#dialog_delete' ).dialog( 'open' );
     } );
 
     // Нажатие на кнопочку для перехода заполнения информации
-    $( document ).on( 'click', 'td .btn_view, td .btn_edit', function() {
+    $( '#users' ).on( 'click', 'td .btn_view, td .btn_edit', function() {
       window.location.replace( $( this ).parents( 'table' )
           .data( 'path-view' ) + $( this ).parents( 'tr' ).data( 'id' ) );
     } );

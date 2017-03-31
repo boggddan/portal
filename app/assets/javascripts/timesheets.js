@@ -1,86 +1,120 @@
-$( document ).on( 'turbolinks:load', function() {
+$( document ).on( 'turbolinks:load', function( ) {
 
   // Если объект существует
   if ( $( '#timesheets' ).length ) {
+    var $sessionKey = 'timesheets';
+    var $sessionTableKey = 'table_timesheets';
+
     $( '#main_menu li' ).removeClass( 'active' );
     $( '#mm_timesheets' ).addClass( 'active' );
 
-    if ( sessionStorage.timesheets_date_start ) { $('#date_start' ).val( sessionStorage.timesheets_date_start ) };
-    if ( sessionStorage.timesheets_date_end ) { $( '#date_end' ).val( sessionStorage.timesheets_date_end ) };
+    // Функция для удаления ( Отмена удаления) табеля )
+    $( '#dialog_delete' ).data( 'delete', 'deleteTimesheet( )' ).data( 'un-delete', 'unDeleteTimesheet( )' );
 
-    filterTableTimesheets(); // Фильтрация таблицы табелей
+    function filterTableTimesheets( ) { // Фильтрация таблицы табелей
+      var $dateStartKey = 'date_start';
+      var $dateEndKey = 'date_end';
+      var $sortFieldKey = 'sort_field';
+      var $sortOrderKey = 'sort_order';
 
-    $( '#dialog_delete' ).data( 'delete', 'deleteTimesheet();' ); // Функция для удаления табеля
-    $( '#dialog_delete' ).data( 'un-delete', 'unDeleteTimesheet();' ); // Отмена удаления табеля
+      var $dateStartValue = GetSession( $sessionKey, $dateStartKey );
+      var $dateEndValue = GetSession( $sessionKey, $dateEndKey );
+      var $sortFieldValue = GetSession( $sessionKey, $sortFieldKey );
+      var $sortOrderValue = GetSession( $sessionKey, $sortOrderKey );
 
-    // Фильтрация таблицы табелей
-    function filterTableTimesheets() {
-      var $date_start = $( '#date_start' );
-      var $date_end = $( '#date_end' );
-      var $date_start_val = $date_start.val();
-      var $date_end_val = $date_end.val();
-
-      sessionStorage.timesheets_date_start = $date_start_val;
-      sessionStorage.timesheets_date_end = $date_end_val;
-
-      var $path_ajax = $date_start.data( 'ajax-path' ) + '?' + $date_start.attr( 'name' ) + '=' + $date_start_val +
-        '&' + $date_end.attr( 'name' ) + '=' + $date_end_val;
-      $.ajax( { url: $path_ajax, type: 'GET', dataType: 'script' } );
+      var $path = $( '#timesheets' ).data( 'path-filter' )
+        + '?' + $dateStartKey + '=' + $dateStartValue + '&' + $dateEndKey + '=' + $dateEndValue
+        + '&' + $sortFieldKey + '=' + $sortFieldValue + '&' + $sortOrderKey + '=' + $sortOrderValue;
+      $.ajax( { url: $path, type: 'get', dataType: 'script' } );
     };
 
+    filterTableTimesheets( ); // Фильтрация таблицы табелей
 
-    // Удаление меню-требования
-    deleteTimesheet = function() {
-      $.ajax( { url: $( '.table' ).data( 'path-del' ) + $( 'tr.delete' ).data( 'id' ), type: 'delete', dataType: 'script' } );
-
+    deleteTimesheet = function( ) { // Удаление табеля
+      var $path =  $( 'table' ).data( 'path-del' ) + '?id=' + $( 'tr.delete' ).data( 'id' );
+      $.ajax( { url: $path, type: 'delete', dataType: 'script' } );
       // Если один одна строка, тогда удаляем всю табличку
-      if ( $( 'tbody' ).children().length == 1 ) { $( '#table_timesheets' ).empty() } else { $( 'tr.delete' ).remove() };
+      if ( $( 'tbody' ).children( ).length == 1 ) { $( 'table' ).remove( ) } else { $( 'tr.delete' ).remove( ) };
     };
 
-    // Отмена удаления меню-требования
-    unDeleteMenuRequirement = function() { $( 'tr.delete' ).removeClass( 'delete' ) };
+    unDeleteTimesheet = function( ) { $( 'tr.delete' ).removeClass( 'delete' ) }; // Отмена удаления табеля
 
     // Начальная дата фильтрации
-    $( '#date_start' ).datepicker( {
-      onSelect: function() {
-        var $this = $( this );
-        var $thisVal =  $this.val();
-        var $date_end = $( '#date_end' );
-
-        if ( $thisVal != $this.data( 'old-value' ) ) {
-          if ( $this.datepicker( 'getDate' ) > $date_end.datepicker( 'getDate' ) ) { $date_end.val( $this.val() ) };
-          filterTableTimesheets(); // Фильтрация таблицы табелей
-        };
-      }
-    } );
+    $( '#date_start' ).val( GetSession( $sessionKey, 'date_start' ) )
+      .datepicker( {
+        onSelect: function( ) {
+          var $this = $( this );
+          var $thisVal =  $this.val( );
+          var $dateEnd = $( '#date_end' );
+  
+          if ( $thisVal != $this.data( 'old-value' ) ) {
+            $this.data( 'old-value', $thisVal );
+            SetSession( $sessionKey, 'date_start', $thisVal );
+  
+            if ( !$dateEnd.val( ) || $this.datepicker( 'getDate' ) > $dateEnd.datepicker( 'getDate' ) ) {
+              $dateEnd.val( $thisVal ).data( 'old-value', $thisVal );
+              SetSession( $sessionKey, 'date_end', $thisVal );
+            };
+  
+            filterTableTimesheets( ); // Фильтрация таблицы табелей
+          };
+        }
+      } );
 
     // Конечная дата фильтрации
-    $( '#date_end' ).datepicker({
-      onSelect: function() {
-        var $this = $( this );
-        var $thisVal =  $this.val();
-        var $date_start = $( '#date_start' );
+    $( '#date_end' ).val( GetSession( $sessionKey, 'date_end' ) )
+      .datepicker( {
+        onSelect: function( ) {
+          var $this = $( this );
+          var $thisVal =  $this.val( );
+          var $dateStart = $( '#date_start' );
+  
+          if ( $thisVal != $this.data( 'old-value' ) ) {
+            $this.data( 'old-value', $thisVal );
+            SetSession( $sessionKey, 'date_end', $thisVal );
+  
+            if ( !$dateStart.val( ) || $this.datepicker( 'getDate' ) < $dateStart.datepicker( 'getDate' ) ) {
+              $dateStart.val( $thisVal ).data( 'old-value', $thisVal );
+              SetSession( $sessionKey, 'date_start', $thisVal );
+            };
+  
+            filterTableTimesheets( ); // Фильтрация таблицы табелей
+          };
+        }
+      } );
 
-        if ( $thisVal != $this.data( 'old-value' ) ) {
-          if ( $this.datepicker( 'getDate' ) < $date_start.datepicker( 'getDate' ) ) { $date_start.val( $thisVal ) };
-          filterTableTimesheets(); // Фильтрация таблицы табелей
-        };
-      }
-    });
-
-    // Нажатие на кнопочку удалить табель
-    $( document ).on( 'click', 'td .btn_del', function() {
+    $( '#timesheets' ).on( 'click', 'td .btn_del', function( ) { // Нажатие на кнопочку удалить табель
       $( this ).parents( 'tr' ).addClass( 'delete' );
       $( '#dialog_delete' ).dialog( 'open' );
-    });
+    } );
 
-    // Нажатие на кнопочку для перехода в документ
-    $( document ).on( 'click', 'td .btn_view, td .btn_edit', function() {
-      var $tr = $( this ).parents( 'tr' );
-      sessionStorage.timesheets_table_row = $tr.index() + 1;
-      sessionStorage.timesheets_table_scroll = $( '#table_timesheets' ).scrollTop();
-      window.location.replace( $tr.data( 'path-view' ) );
-    });
+    $( '#timesheets' ).on( 'click', 'td .btn_view, td .btn_edit', function( ) {  // Нажатие на кнопочку для перехода в документ
+      var $this = $( this );
+      var $trId = $this.parents( 'tr' ).data( 'id' );
+
+      SetSession( $sessionTableKey, 'scroll', $( '#table_timesheets' ).scrollTop( ) );
+      SetSession( $sessionTableKey, 'row_id', $trId );
+      window.location.replace( $this.parents( 'table' ).data( 'path-view' ) + '?id=' + $trId );
+    } );
+
+    // Создание документа
+    $( '.btn_create' ).click( function( ) { window.location.replace( $( '#timesheets' ).data( 'path-new' ) ) } );
+
+    $( document ).on( 'click', 'th[id]', function( ) { // Нажатие для сортировки
+      var $this = $( this );
+      var $sortOrder = 'asc';
+
+      if ( $this.hasClass( 'sort_asc' ) || $this.hasClass( 'sort_desc' ) ) {
+        if ( $this.hasClass( 'sort_asc' ) ) {
+          $this.removeClass( 'sort_asc' ).addClass( 'sort_desc' );
+          $sortOrder = 'desc';
+        } else { $this.removeClass( 'sort_desc' ).addClass( 'sort_desc' ) }
+      } else { $this.addClass( 'sort_asc' ) };
+
+      SetSession( $sessionKey, 'sort_field', $this.attr( 'id' ) );
+      SetSession( $sessionKey, 'sort_order', $sortOrder );
+      filterTableTimesheets( );
+    } );
 
   };
-});
+} );

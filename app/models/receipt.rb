@@ -9,13 +9,13 @@ class Receipt < ApplicationRecord
   def set_default_value
     receipt = Receipt.select(:number).where( institution_id: institution_id ).last
     if receipt
-      number = receipt.number.to_i + 1
+      number = receipt.number[ 4..-1 ].to_i + 1
     else
       number = 1
     end
 
     self.invoice_number ||= ''
-    self.number ||= number.to_s.rjust(12, '0')
+    self.number ||= "#{ institution.prefix }-#{ number.to_s.rjust(8, '0' ) }"
     self.date ||= Date.today
   end
 

@@ -1,28 +1,22 @@
 <!-- Отображение табелей  -->
-<%= content_tag :main, id: :timesheets do %>
+<%= content_tag :main, id: :timesheets, data: { path_filter: institution_timesheets_ajax_filter_timesheets_path,
+                                                path_new: institution_timesheets_new_path } do %>
 
   <%= content_tag :h1, "Табель" %>
 
   <%= content_tag :div, '', class: :panel do %>
     <%= label_tag :date_start, 'З' %>
-    <%= content_tag :nav, '', class: :icon_сalendar do %>
-      <%= text_field_tag :date_start, '', readonly: true, placeholder: 'Дата...',
-          data: { ajax_path: institution_timesheets_ajax_filter_timesheets_path } %>
-    <% end %>
+    <%= content_tag :nav, '', class: :icon_сalendar do
+      text_field_tag( :date_start, '', readonly: true, placeholder: 'Дата...' ) end %>
 
     <%= label_tag :date_end, 'ПО' %>
-    <%= content_tag :nav, '', class: :icon_сalendar do %>
-      <%= text_field_tag :date_end, '', readonly: true, placeholder: 'Дата...' %>
-    <% end %>
+    <%= content_tag :nav, '', class: :icon_сalendar do
+      text_field_tag( :date_end, '', readonly: true, placeholder: 'Дата...' ) end %>
 
-    <%= button_tag '', class: [ :btn_create, :align_right ],
-                   onclick: "location.href='#{ institution_timesheets_new_path }'" %>
+    <%= button_tag '', class: [ :btn_create, :align_right ] %>
   <% end %>
 
-  <%= content_tag :div, '', id: :table_timesheets do %>
-    <%= render("institution/timesheets/table_timesheets") %>
-  <% end %>
-
+  <%= content_tag :div, '', id: :table_timesheets %>
 <% end %>
 
 

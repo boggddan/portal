@@ -123,7 +123,7 @@
 
               <% [:plan, :fact].each do |value| %>
                 <% sum = @menu_products.sum{ |o| o["sum_#{value}_#{index}"].to_f }.round(2) %>
-                <% menu_children_category_count = menu_children_category["count_all_#{value}"] - menu_children_category["count_exemption_#{value}"] %>
+                <% menu_children_category_count = menu_children_category["count_all_#{value}"] %>
                 <% children_cost = (menu_children_category_count.zero? ? 0 : sum / menu_children_category_count ).round(2) %>
                 <% children_diff = children_cost - menu_children_category.cost.to_f %>
                 <%= content_tag :td, f2_to_s(children_cost), data: { sum: sum.nonzero? }, id: "children_cost_#{value}_#{menu_children_category.children_category_id}" %>

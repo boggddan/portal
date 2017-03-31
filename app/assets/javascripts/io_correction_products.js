@@ -55,15 +55,15 @@ $( document ).on( 'turbolinks:load', function() {
         var $name_arr = $this.attr('name').split("_");
 
         var $diff = $this, $diffVal = $thisValue;
-        var $countVal = floatValue( $( '#table_io_correction_products #count_' + $name_arr[1] ).html() );
+        var $countVal = floatValue( $( '#table_io_correction_products #count_' + $name_arr[1] + '_' + $name_arr[2] ).html() );
 
         switch ( $name_arr[0] ) {
           case 'diff':
-           $( '#table_io_correction_products #result_' + $name_arr[1] ).val( $countVal + $diffVal );
+           $( '#table_io_correction_products #result_' + $name_arr[1] + '_' + $name_arr[2] ).val( $countVal + $diffVal );
             break;
           case 'result':
             $diffVal = $thisValue - $countVal;
-            var $diff = $( '#table_io_correction_products #diff_' + $name_arr[1] );
+            var $diff = $( '#table_io_correction_products #diff_' + $name_arr[1] + '_' + $name_arr[2] );
             $diff.val( f3_to_s( $diffVal ) );
             break;
         }

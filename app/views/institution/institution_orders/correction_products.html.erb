@@ -68,7 +68,7 @@
             <%= content_tag :tr do %>
               <%= content_tag :td, io_correction_product.name %>
               <%= content_tag :td, f3_to_s( io_correction_product.count ),
-                              id: "count_#{ io_correction_product.product_id }" %>
+                              id: "count_#{date}_#{ io_correction_product.product_id }" %>
 
               <% [ :diff, :result ].each do | value | %>
                 <% value_count = f3_to_s( value == :diff ? io_correction_product.diff
@@ -76,7 +76,7 @@
 
                 <%= content_tag :td do %>
                   <% if @io_correction.date_sa.nil? %>
-                    <%= text_field_tag "#{value}_#{io_correction_product.product_id}", value_count,
+                    <%= text_field_tag "#{value}_#{date}_#{io_correction_product.product_id}", value_count,
                           data: { ajax_path: ("#{ institution_institution_orders_correction_product_update_path }?id=
                             #{ io_correction_product.id }" if value == :diff ) } %>
                   <% else %>

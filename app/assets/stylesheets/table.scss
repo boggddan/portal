@@ -28,6 +28,14 @@ table.table {
 
   th, tr:not(:nth-last-child(1)) td { border-bottom: 1px dotted #e7e7e7; }
 
+  th {
+    position: relative;
+    &[id] { cursor: pointer; }
+    &:after { font-family: 'Glyphicons Halflings'; top: 6px; right: 2px; position: absolute; color: gray; }
+    &.sort_asc:after { content: '\e093'; }
+    &.sort_desc:after { content: '\e094'; }
+  }
+
   /* Поле ввода */
   select, input {
     width: 100%;

@@ -9,14 +9,15 @@ class MenuRequirement < ApplicationRecord
   before_save :set_default_value
 
   def set_default_value
-    menu_requirement = MenuRequirement.select(:number).where( institution_id: institution_id ).last
+    institution = Institution.find( institution_id )
+    menu_requirement = MenuRequirement.select( :number ).where( institution: institution ).last
     if menu_requirement
-      number = menu_requirement.number.to_i + 1
+      number = menu_requirement.number[ 4..-1 ].to_i + 1
     else
       number = 1
     end
 
-    self.number ||= number.to_s.rjust(12, '0')
+    self.number ||= "#{ institution.prefix }-#{ number.to_s.rjust(8, '0' ) }"
     self.splendingdate ||= self.date ||= Date.today
   end
 

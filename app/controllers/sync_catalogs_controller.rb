@@ -160,20 +160,24 @@ class SyncCatalogsController < ApplicationController
   ###############################################################################################
 
   ###############################################################################################
-  # POST /api/cu_institution { "code": "14", "name": "18 (ДОУ)", "branch_code": "0003" }
+  # POST /api/cu_institution { "code": "14", "name": "18 (ДОУ)", "prefix": "Д18", "branch_code": "00000000003" }
   def institution_update
-    error = { code: 'Не знайдений параметр [code]', name: 'Не знайдений параметр [name]',
+    error = { code: 'Не знайдений параметр [code]',
+              name: 'Не знайдений параметр [name]',
+              prefix: 'Не знайдений параметр [prefix]',
               branch_code: 'Не знайдений параметр [branch_code]' }.stringify_keys!.except( *params.keys )
     if error.empty?
       branch = branch_code( params[ :branch_code ].strip )
       unless error = branch[ :error ]
         code = params[ :code ]
-        update_fields = { name: params[ :name ], branch: branch }
-        Institution.create_with( update_fields ).find_or_create_by( code: code ).update( update_fields )
+        update_fields = { name: params[ :name ], prefix: params[ :prefix ], branch: branch }
+        institution = Institution.create_with( update_fields ).find_or_create_by( code: code )
+        institution.update( update_fields )
       end
     end
 
-    render json: error && error.any? ? { result: false, error: [ error ] } : { result: true, code: code }
+    render json: error && error.any? ? { result: false, error: [ error ] }
+      : { result: true, code: code, id: institution.id }
   end
 
   # GET /api/institution?code=14

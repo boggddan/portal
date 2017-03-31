@@ -13,20 +13,17 @@ var $dialogOptions = {
 $( document ).on( 'turbolinks:load' , function() {
 
 
-  function SetSession( $key, $param, $value ) { // Запись в сессию
-
-    //var $sessionObj = JSON.parse( sessionStorage.getItem( $key ) );//спарсим объект обратно
-
-    //if $sessionObj
-
-    //var serialObj = JSON.stringify(obj); //сериализуем его
-
-    //sessionStorage.setItem("myKey", serialObj); //запишем его в хранилище по ключу "myKey"
-
+  SetSession = function ( $key, $param, $value ) { // Запись в сессию
+    var $sessionObj = JSON.parse( sessionStorage.getItem( $key ) ) || { } ;//спарсим объект обратно
+    var $paramObj = { };
+    $paramObj[ $param ] = $value;
+    $.extend( $sessionObj, $paramObj ); // Обьединие масивов
+    sessionStorage.setItem( $key, JSON.stringify( $sessionObj ) );
   };
 
-  function GetSession() { // Чтение из сессии
-
+  GetSession = function ( $key, $param ) { // Чтение из сессии
+    var $sessionObj = JSON.parse( sessionStorage.getItem( $key ) ) || { } ;//спарсим объект обратно
+    return $sessionObj[ $param ] || '' ;
   };
 
 

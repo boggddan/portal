@@ -1,15 +1,22 @@
-//  Фильтрация таблицы поступлений
+//
+var $tableName = '#table_timesheets';
+var $sessionKey = 'timesheets';
+var $sessionTableKey = 'table_timesheets';
 
-$( '#table_timesheets' ).empty().append( '<%= j render( "institution/timesheets/table_timesheets" ) %>' );
+$( $tableName ).empty().append( '<%= j render("institution/timesheets/table_timesheets") %>' );
 
-var $table = $( '#table_timesheets table' );
+var $table = $( $tableName + ' table' );
 
 /* Если существуют заявки по выбраному фильтру */
 if ( $table.length ) {
-  $table.tableHeadFixer();  // Фиксируем шапку таблицы
-  if ( sessionStorage.timesheets_table_scroll ) { $( '#table_timesheets' ).scrollTop( sessionStorage.timesheets_table_scroll ) };
-  if ( sessionStorage.timesheets_table_row ) { $( '#table_io_corrections tbody tr:nth-of-type('+ sessionStorage.timesheets_table_row +')' ).addClass( 'selected' ) };
-} else {
-  sessionStorage.removeItem( 'timesheets_table_scroll' );
-  sessionStorage.removeItem( 'timesheets_table_row' );
+  $table.tableHeadFixer( );  // Фиксируем шапку таблицы
+  var $sortField = GetSession( $sessionKey, 'sort_field' );
+  var $sortOrder = GetSession( $sessionKey, 'sort_order' );
+  var $scroll = GetSession( $sessionTableKey, 'scroll' );
+  var $rowId = GetSession( $sessionTableKey, 'row_id' );
+
+  if ( $sortField ) { $( $tableName + ' th#' + $sortField ).addClass( 'sort_' + $sortOrder ) };
+  if ( $scroll ) { $( $tableName ).scrollTop( $scroll ) };
+  if ( $rowId ) { $( $tableName + ' tbody tr[data-id="' + $rowId + '"]' ).addClass( 'selected' ) };
 }
+else { sessionStorage.removeItem( $sessionTableKey ) };
