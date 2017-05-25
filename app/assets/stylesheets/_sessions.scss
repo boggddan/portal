@@ -1,0 +1,63 @@
+$ffIcon: 'Glyphicons Halflings';
+
+#main_log_in {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #666666;
+
+  form {
+    display: inline-block;
+    width: 500px;
+    border-radius: 3px;
+    background-color: white;
+
+    // Заголовок
+    span {
+      display: block;
+      width: 100%;
+      padding-left: 15px;
+      line-height: 43px;
+      font-size: 16px;
+      background-color: #d9edf7;
+      color: #31708f;
+      border-radius: 3px 3px 0 0;
+    }
+
+    // Поля ввода с иконами
+    div {
+      position: relative;
+      margin: 20px 15px;
+      &:before { font-family: $ffIcon; position: absolute; top: 8px; left: 8px; color: #aaa; }
+
+      &:nth-of-type(1):before { content: "\e008"; } /* Иконка для пользователя */
+      &:nth-of-type(2):before { content: "\e139"; } /* Иконка для пароля */
+
+      // Поля ввода с иконами
+      input {
+        width: 100%;
+        height: 34px;
+        padding-left: 30px;
+        border-radius: 3px;
+        border: 1px solid #e7e7e7;
+        cursor: pointer;
+        &:hover:enabled { border-color: #aaa; }
+      }
+    }
+
+    // Базовая кнопка
+    button {
+      height: 34px;
+      border-radius: 3px;
+      margin: 0 0 20px 15px;
+      border: 1px solid #2e6da4;
+      background-color: #337ab7;
+      color: white;
+      cursor: pointer;
+      &:hover:enabled { background-color: #286090; border-color: #204d74; };
+      &:before { content: "Натисність для входу"; };
+    }
+  }
+}

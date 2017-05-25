@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<%= content_tag :html do %>
+  <%= content_tag :head do %>
+    <%= content_tag :title, 'Портал' %>
+    <%= csrf_meta_tags %>
+
+    <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+  <% end %>
+
+  <%= content_tag :body do %>
+    <%= yield %>
+  <% end %>
+
+<% end %>

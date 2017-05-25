@@ -1,0 +1,28 @@
+/ Табличка с заявками
+- if @timesheets.present?
+  table.table
+    - for i in 1..9 do
+      col
+
+    thead
+      tr
+        th#date Дата
+        th#number Номер
+        th#number_sa Номер 1С
+        th Період
+        th#date_eb З
+        th#date_ee ПО
+        th *{ colspan: 3 }
+
+    tbody
+      - @timesheets.each do | timesheet |
+        tr *{ data: { id: timesheet.id } }
+          td.date_field = date_str( timesheet.date )
+          td.number_field = timesheet.number
+          td.number_field = timesheet.number_sa
+          td = year_month_names( timesheet.date_eb )
+          td.date_field = date_str( timesheet.date_eb )
+          td.date_field = date_str( timesheet.date_ee )
+          td : button.btn_view *{ disabled: !timesheet.number_sa }
+          td : button.btn_edit *{ disabled: timesheet.number_sa }
+          td : button.btn_del *{ disabled: timesheet.number_sa }

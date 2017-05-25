@@ -1,0 +1,68 @@
+$mr: 4px;
+$bdrs: 3px;
+
+@mixin button-text ($bgc , $bdc, $hover-bgc, $hover-bdc, $cnt ) {
+  background-color: $bgc;
+  color: white;
+  margin-right: $mr;
+  border-radius: $bdrs;
+  border: 1px solid $bdc;
+  cursor: pointer;
+
+  &:before {
+    content: '#{$cnt}';
+  }
+
+  &:hover:enabled {
+    background-color: $hover-bgc;
+    border-color: $hover-bdc;
+  }
+
+  &:disabled {
+    color: #666;
+    background-color: #f5f4f4;
+    border-color: #dadada;
+    cursor: default;
+  }
+}
+
+// Иконки в текст-боксах
+@mixin label-icon( $w, $cnt, $ta ) {
+  $pl: 19px;
+  $pr: 3px;
+
+  position: relative;
+  margin-right: $mr;
+
+  &:after {
+    content: $cnt;
+    position: absolute;
+    right: if( $w == auto, $pr, $w - $pl + $pr ) ;
+    font-family: $ffIcon;
+    color: #aaa;
+  };
+
+  //---------------------------
+  // > input
+  input {
+    height: 100%;
+    width: $w;
+    border-radius: $bdrs;
+    border: 1px solid #e7e7e7;
+    cursor: pointer;
+    padding: if( $w == auto, 0 $pl 0 $pr * 2, 0 $pr 0 $pl );
+    text-align: $ta;
+    margin-left: 2px;
+
+    &:hover:enabled {
+      border-color: #aaa;
+    }
+  }
+  // < input
+  //---------------------------
+}
+
+@mixin ml-mr( $mr, $ml ) {
+  margin-left: $mr;
+  margin-right: $ml;
+}

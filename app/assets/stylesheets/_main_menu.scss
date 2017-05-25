@@ -1,0 +1,207 @@
+$ffIcon: 'Glyphicons Halflings';
+
+nav#main_menu {
+  white-space: nowrap;
+  $h: 32px;
+  margin: 5px 0;
+  z-index: 2;
+
+  ul {
+    display: inline-flex;
+    flex-basis: $h;
+    padding: 0 15px;
+    margin: 0;
+    list-style: none;
+    min-width: 100%;
+    background-color: #e7e7e7;
+
+    li {
+      position: relative;
+
+      &.item {
+        $ptb_item: 3px;
+        margin-right: 2px;
+        padding: $ptb_item 0;
+        line-height: $h - ($ptb_item * 2);
+
+        a {
+          display: block;
+          font-size: 14px;
+          border-radius: 4px;
+          padding: 0 10px 0 35px;
+          text-decoration: none;
+          color: #337ab7;
+
+          &:hover,
+          &:hover:before {
+            color: #333;
+          }
+
+          &:hover {
+            background-color: #eeeeee;
+          }
+
+          &:before {
+            $fz: 18px;
+            font: $fz $ffIcon;
+            margin-right: 3px;
+            position: absolute;
+            top: ($h - $fz) / 2;
+            left: 10px;
+            color: #aaa;
+            line-height: 1;
+          }
+        } // a
+
+        ul {
+          position: absolute;
+          display: flex;
+          padding: 0 2px;
+          min-width: 150px;
+          flex-direction: column;
+          background-color: #e7e7e7;
+          visibility: hidden;
+
+          li {
+            height: $h;
+
+            ul {
+              left: 100%;
+              top: 0;
+            }
+          }
+        }
+
+        &:hover > ul {
+          visibility: visible;
+        }
+
+        &.active { // Активна кнопка
+          cursor: default;
+          pointer-events: none;
+
+          a {
+            background-color: #337ab7;
+
+            &,
+            &:before {
+              color: white;
+            }
+          }
+        } //&.active
+      } // &.item
+
+      // Наименование
+      &.caption {
+        font-size: 15px;
+        color: #777;
+        padding: 0 10px 0 25px;
+        line-height: $h;
+
+        &:before {
+          $h_img: 20px;
+          position: absolute;
+          content: '';
+          left: 0;
+          top: ($h - $h_img) / 2;
+          height: $h_img;
+          width: $h_img;
+          background: image_url('food-ico.png') center / 100% 100%;
+        }
+      }
+
+      // Информация о пользователе
+      &.info {
+        height: $h;
+        width: 200px;
+        flex: 0 0 200px;
+        margin-left: auto;
+
+        span {
+          position: absolute;
+          padding-left: 80px;
+          line-height: 1;
+          font-size: 11px;
+
+          &:before {
+            font-family: $ffIcon;
+            left: 0;
+            position: absolute;
+            color: #aaa;
+          }
+
+          &:after {
+            left: 13px;
+            position: absolute;
+            color: #777;
+          }
+
+          &:nth-child(1) {
+            top: 2px;
+
+            &:before {
+              content: '\e008';
+            }
+
+            &:after {
+              content: 'Користувач:';
+            }
+          }
+
+          &:nth-child(2) {
+            bottom: 2px;
+
+            &:before {
+              content: '\e135';
+            }
+
+            &:after {
+              content: 'Організація:';
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+
+// Кнопки для детского сада
+#main_menu {
+  li[data-page=institution_index] > a:before {
+    content: '\e021';
+  }
+
+  li[data-page=institution_orders] > a:before {
+    content: '\e109';
+  }
+
+  li[data-page=receipts] > a:before {
+    content: '\e230';
+  }
+
+  li[data-page=timesheets] > a:before {
+    content: '\231b';
+  }
+
+  li[data-page=menu_requirements] > a:before {
+    content: '\e179';
+  }
+
+  li[data-page=institution_reports] > a:before {
+    content: '\e045';
+  }
+
+  li[data-page=exit] > a:before {
+    content: '\e163';
+  }
+
+  li[data-page=institution_reports_children_day_cost],
+  li[data-page=institution_reports_balances_in_warehouses],
+  li[data-page=institution_reports_attendance_of_children] {
+    > a:before {
+      content: '\e045';
+    }
+  }
+}

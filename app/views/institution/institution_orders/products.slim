@@ -1,0 +1,38 @@
+/ Отображение заявки
+- disabled = @institution_order.number_sa.present?
+- label_text = 'layouts/label_text'
+
+main#institution_order_products *{ data: { \
+  id: @institution_order.id,
+  path: { send: institution_institution_orders_send_sa_path,
+  exit: institution_institution_orders_index_path,
+  update: institution_institution_orders_update_path } } }
+
+  h1.icon
+
+  .panel_main.row_2
+    .panel_new
+      button.btn_send *{ disabled: disabled }
+      button *{ class: ( disabled ? :btn_exit : :btn_save ) }
+      - if disabled
+        = render label_text, label_attr: { class: :icon_number }, text: 'Надіслано документ:',
+          input_attr: { value: @institution_order.number_sa, disabled: true }
+
+        = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
+          input_attr: { value:  date_str( @institution_order.date_sa ), disabled: true }
+
+    .panel_new
+      = render label_text, label_attr: { class: :icon_number }, text: 'Заявка №',
+        input_attr: { id: :number, value: @institution_order.number, disabled: true }
+      = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
+        input_attr: { id: :date, name: :date, value:  date_str( @institution_order.date ), disabled: disabled, readonly: true }
+
+  .clmn_main
+    #col_iop.clmn *{ data: { path_update: institution_institution_orders_product_update_path } }
+      h2 Продукти харчування
+      .parent_table = render( 'table_institution_order_products', disabled: disabled ) if @institution_order_products.present?
+
+    #col_iopp.clmn *{ data: { captions: 'Упаковки до' } }
+      h2 Упаковки
+      .parent_table = render( 'table_io_product_packages' )
+

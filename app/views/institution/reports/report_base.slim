@@ -1,0 +1,16 @@
+main#report_base *{ data: { path_view: @path_view, path_exit: institution_reports_index_path } }
+
+  h1 = @h1_text
+  .panel_new
+    label.icon_сalendar
+      | З
+      &text#date_start *{ readonly: true }
+
+    label.icon_сalendar
+      | ПО
+      &text#date_end *{ readonly: true }
+
+    button.btn_create
+    button.btn_exit
+
+  #view

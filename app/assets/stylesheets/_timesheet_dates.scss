@@ -1,0 +1,47 @@
+#timesheet_dates {
+  flex: 1;
+
+  #table_timesheet_dates {
+    flex-grow: 1;
+
+    col:nth-child(1) { width: 250px; }
+    col ~ col { width: 60px; }
+
+   // Ширину таблицы вычесляем Первая колонка 250, все остальные 60
+   // view/timesheets/ajax_filter_timesheet_dates.coffee
+
+    th { font-weight: bold; }
+
+    /* Колонка с наименованием продуктов */
+    tbody td {
+      &:first-child
+      { cursor: default; padding-left: 27px; text-align: left; }
+    }
+
+    td { border-right-color: #aaa; }
+
+    tr:last-child td { border-bottom-color: #aaa; }
+
+    tr.category {
+      cursor: default;
+      &:hover, td:hover, td { background-color:  #dadada }
+      td:first-child { padding-left: 3px; }
+    }
+
+    tr.group {
+      cursor: default;
+      &:hover, td:hover, td { background-color:  #f1f1f1 }
+      td:first-child { padding-left: 15px; }
+    }
+
+    tr.all {
+      cursor: default;
+      &:hover, th:hover, th { background-color: #aaa; color: #fff; }
+      th:first-child { text-align: right; }
+    }
+
+    td.cell_sum {
+     font-weight: bold;
+    }
+  }
+}

@@ -1,0 +1,49 @@
+doctype html
+html
+  head
+    title Портал
+    = csrf_meta_tags
+
+    = stylesheet_link_tag    :application, media: :all, 'data-turbolinks-track' => :reload
+    = javascript_include_tag :application, 'data-turbolinks-track': :reload
+    = javascript_pack_tag 'bundle'
+  body
+    = render 'layouts/wait'
+    = render 'layouts/delete'
+
+    = render 'layouts/loader'
+    = render 'layouts/del_msg'
+    = render 'layouts/error_msg'
+
+
+    nav#main_menu
+      ul
+        li.caption Портал
+        li.item *{ data: { page: :institution_index } }
+          a *{ href: institution_index_path } Початкова
+        li.item *{ data: {page: :institution_orders } }
+          a *{ href: institution_institution_orders_index_path } Заявки
+        li.item *{ data: { page: :receipts } }
+          a *{ href: institution_receipts_index_path } Поставки
+        li.item *{ data: { page: :timesheets } }
+          a *{ href: institution_timesheets_index_path } Табелі
+        li.item *{ data: { page: :menu_requirements } }
+          a *{ href: institution_menu_requirements_index_path } Меню-вимоги
+        li.item *{ data: { page: :institution_reports } }
+          a Звіти
+          ul
+            li.item *{ data: { page: :institution_reports_children_day_cost } }
+              a *{ href: institution_reports_children_day_cost_path } Вартість дітодня за меню-вимогами
+            li.item *{ data: { page: :institution_reports_balances_in_warehouses } }
+              a *{ href: institution_reports_balances_in_warehouses_path } Залишки продуктів харчування
+            li.item *{data: {page: :institution_reports_attendance_of_children } }
+              a *{ href: institution_reports_attendance_of_children_path } Табель обліку відвідування дітей
+        li.info
+          span = @current_user.username
+          span = @current_user.institution.name
+        li.item *{ data: { page: :exit } }
+          a *{ href: log_out_path } Вихід
+
+
+
+    == yield

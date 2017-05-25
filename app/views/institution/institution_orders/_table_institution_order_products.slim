@@ -1,0 +1,32 @@
+- clmn_count = 3
+
+table.table_new
+  colgroup
+    col
+    col.number
+    col
+
+  thead
+    tr
+      th Продукт харчування
+      th Кількість
+      th Додаткова інформація
+
+  tbody
+    - date = ''
+    - type = ''
+    - @institution_order_products.each do | iop |
+
+      - if date != iop.date
+        - date = iop.date
+        - type = ''
+        tr.row_group.date : td *{ colspan: clmn_count, data: { value: date } }
+
+      - if type != iop.type
+        - type = iop.type
+        tr.row_group.type : td *{ colspan: clmn_count } = type
+
+      tr.row_data *{ data: { id: iop.id } }
+        td.name = iop.name
+        td.count : &text *{ name: :amount, value: iop.amount, data: { type: :n3 }, disabled: disabled }
+        td.name = iop.description

@@ -1,0 +1,20 @@
+main#attendance_of_children *{ data: { \
+  path_view: institution_reports_ajax_attendance_of_children_path,
+  path_exit: institution_reports_index_path } }
+
+  h1 Звіт "Табель обліку відвідування дітей"
+  .panel_new
+    label.icon_сalendar
+      | З
+      &text#date_start *{ readonly: true }
+
+    label.icon_сalendar
+      | ПО
+      &text#date_end *{ readonly: true }
+
+    = collection_select :children_group, :code, @children_groups, :code, :name , prompt: 'Всі групи'
+
+    button.btn_create
+    button.btn_exit
+
+  #view

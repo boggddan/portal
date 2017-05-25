@@ -1,0 +1,10 @@
+<%= content_tag :main, id: :users do %>
+
+  <%= content_tag :h1, 'Користувачі' %>
+
+  <%= content_tag :div, class: :panel do
+    button_tag '', class: [ :btn_create, :align_right ],
+               onclick: "location.href='#{ admin_users_new_path }'" end %>
+
+  <%= content_tag :div, id: :table_users do render( 'admin/users/table_users' ) end %>
+<% end %>

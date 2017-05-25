@@ -1,0 +1,20 @@
+/ Отображение табелей
+main#timesheets *{ data:{ \
+  path_filter: institution_timesheets_ajax_filter_timesheets_path,
+  path_new: institution_timesheets_new_path,
+  path_view: institution_timesheets_dates_path,
+  path_del: institution_timesheets_delete_path } }
+
+  h1 Табель
+  .panel_new
+    label.icon_сalendar
+      | З
+      &text#date_start *{ readonly: true, placeholder: 'Дата...' }
+
+    label.icon_сalendar
+      | ПО
+      &text#date_end *{ readonly: true, placeholder: 'Дата...' }
+
+    button.btn_create.right_first
+
+  #table_timesheets

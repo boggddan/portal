@@ -1,0 +1,24 @@
+@mixin row-group( $bgc, $pl ) {
+  cursor: default;
+
+  &:hover,
+  td:hover,
+  td { background-color: $bgc; }
+
+  :first-child { padding-left: $pl; text-align: left; }
+}
+
+#institution_order_products {
+  #col_iop {
+    flex-basis: 640px;
+    col:nth-child(3) { width: 150px; };
+
+    tr {
+      &.date { @include row-group( #dadada, 3px ); }
+      &.type { @include row-group( #f1f1f1, 15px ); }
+      &.row_data td:first-child { padding-left: 25px; };
+    }
+  }
+
+  #col_iopp { flex-basis: 400px; visibility: hidden; }
+}

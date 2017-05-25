@@ -1,0 +1,38 @@
+/ Отображение заявки
+- disabled = @io_correction.number_sa.present?
+- label_text = 'layouts/label_text'
+
+main#io_correction_products *{ data: { \
+  id: @io_correction.id,
+  path: { send: institution_institution_orders_correction_send_sa_path,
+  exit: institution_institution_orders_index_path,
+  update: institution_institution_orders_correction_update_path } } }
+
+  h1.icon
+
+  .panel_main.row_2
+    .panel_new
+      button.btn_send *{ disabled: disabled }
+      button *{ class: ( disabled ? :btn_exit : :btn_save ) }
+      - if disabled
+        = render label_text, label_attr: { class: :icon_number }, text: 'Надіслано документ:',
+          input_attr: { value: @io_correction.number_sa, disabled: true }
+
+        = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
+          input_attr: { value:  date_str( @io_correction.date_sa ), disabled: true }
+
+    .panel_new
+      = render label_text, label_attr: { class: :icon_number }, text: 'Коректування заявки №',
+        input_attr: { id: :number, value: @io_correction.number, disabled: true }
+      = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
+        input_attr: { id: :date, name: :date, value:  date_str( @io_correction.date ), disabled: disabled, readonly: true }
+
+      = render label_text, label_attr: {class: :icon_сalendar}, text: 'заявки №',
+        input_attr: { value:  date_str(@institutin_order.date), disabled: true }
+      = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
+        input_attr: { value:  date_str( @institutin_order.date ), disabled: true }
+
+
+  #col_iocp.clmn *{ data: { path_update: institution_institution_orders_correction_product_update_path } }
+    h2 Продукти харчування
+    .parent_table = render( 'table_io_correction_products', disabled: disabled ) if @io_correction_products.present?

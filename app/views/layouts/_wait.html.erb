@@ -1,0 +1,5 @@
+<!-- Сообщение ожидания -->
+<%= content_tag :div, id: :dialog_wait, title: 'Зачекайте' do %>
+  <%= content_tag :div, 'Обробка данних' %>
+  <%= content_tag :div do image_tag( 'wait.gif', size: '50x50' ) end %>
+<% end %>

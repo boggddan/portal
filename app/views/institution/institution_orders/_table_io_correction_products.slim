@@ -1,0 +1,37 @@
+- clmn_count = 5
+
+table.table_new
+  colgroup
+    col
+    col.number
+    col.number
+    col.number
+    col
+
+  thead
+    tr
+      th Продукт харчування
+      th Замовлено
+      th Коригування
+      th Після коригування
+      th Додаткова інформація
+  tbody
+    - date = ''
+    - type = ''
+    - @io_correction_products.each do | iocp |
+
+      - if date != iocp.date
+        - date = iocp.date
+        - type = ''
+        tr.row_group.date : td *{ colspan: clmn_count, data: { value: date } }
+
+      - if type != iocp.type
+        - type = iocp.type
+        tr.row_group.type : td *{ colspan: clmn_count } = type
+
+      tr.row_data *{ data: { id: iocp.id } }
+        td.name = iocp.name
+        td.count *{ name: :amount_order, data: { type: :n3 } } = iocp.amount_order
+        td.count : &text *{ name: :diff, data: { type: :n3 }, disabled: disabled }
+        td.count : &text *{ name: :amount, value: iocp.amount, data: { type: :n3 }, disabled: disabled }
+        td.name = iocp.description

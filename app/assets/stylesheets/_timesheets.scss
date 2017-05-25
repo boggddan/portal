@@ -1,0 +1,8 @@
+#timesheets {
+  width: 686px;
+
+  #table_timesheets {
+    height: 500px;
+    col:nth-of-type(4) {width: 150px;}
+  }
+}

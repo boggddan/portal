@@ -1,0 +1,32 @@
+/ Табличка с заявками
+table.table_new *{ data: { type: :list_doc }  }
+  colgroup
+    col.date
+    col.number
+    col.number
+    col.date
+    col.date
+    col.button
+    col.button
+    col.button
+
+  thead
+    tr
+      th *{ data: { sort: :date } } Дата
+      th *{ data: { sort: :number } } Номер
+      th *{ data: { sort: :number_sa } } Номер 1С
+      th *{ data: { sort: :date_start } } З
+      th *{ data: { sort: :date_end } } ПО
+      th *{ colspan: 3 }
+
+    tbody
+      - @institution_orders.each do | io |
+        tr *{ data:{ id: io.id } }
+          td *{ data: { field: :date } } = date_str( io.date )
+          td *{ data: { field: :number } } = io.number
+          td = io.number_sa
+          td = date_str( io.date_start )
+          td = date_str( io.date_end )
+          td : button.btn_view *{ disabled: !io.number_sa }
+          td : button.btn_edit *{ disabled: io.number_sa }
+          td : button.btn_del *{ disabled: io.number_sa }

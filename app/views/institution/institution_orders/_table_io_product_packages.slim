@@ -1,0 +1,16 @@
+table.table_new
+  colgroup
+    col
+    col.number
+
+  thead
+    tr
+      th Упаковка
+      th Кількість
+
+  tbody
+    - [ { id: 1, name: 'Сітка, 5кг', count: 0 }, { id: 2, name: 'Сітка, 7кг', count: 25 } ].each do | package |
+
+      tr.row_data *{ data: { id: package[ :id ] } }
+        td.name = package[:name]
+        td.count : &text  *{ id: package[:id], name: :count, value: package[:count] }

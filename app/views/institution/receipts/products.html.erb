@@ -1,0 +1,107 @@
+<!-- Отображение продуктов поступления -->
+
+<%= content_tag :main, id: :receipt_products, data: { id: @receipt.id,
+  path_update: institution_receipts_update_path } do %>
+
+  <%= content_tag :h1, '' %>
+
+  <%= content_tag :div, id: :panel_main do %>
+    <%= content_tag :div, class: :panel do %>
+      <%= button_tag '', class: :btn_send, id: :send_sa, data: { path_send: institution_receipts_send_sa_path } %>
+      <%= button_tag '', id: :exit, data: { path_redirect: institution_receipts_index_path } %>
+      <%= button_tag 'Друк акта невідповідності', class: :btn_default,
+                     data: { path_redirect: 'institution_receipts_print_path' } %>
+
+      <% if @receipt.date_sa %>
+        <%= label_tag :number_sa, 'Надіслано: документ' %>
+        <%= content_tag :nav, class: :icon_number do
+          text_field_tag( :number_sa, @receipt.number_sa, disabled: true ) end %>
+        <%= label_tag :date_sa, 'від' %>
+        <%= content_tag :nav, class: :icon_сalendar do
+          text_field_tag( :date_sa, date_str( @receipt.date_sa ), disabled: true ) end %>
+      <% end %>
+    <% end %>
+
+    <%= content_tag :div, class: :panel do %>
+      <%= label_tag :number, 'Поставка №' %>
+      <%= content_tag :nav, class: :icon_number do
+        text_field_tag( :number, @receipt.number, disabled: true ) end %>
+
+      <%= label_tag :date, 'від' %>
+      <%= content_tag :nav, class: :icon_сalendar do
+        text_field_tag :date, date_str( @receipt.date ), readonly: true end %>
+
+      <%= label_tag :invoice_number, 'Накладна №' %>
+      <%= content_tag :nav, class: :icon_number do
+        text_field_tag( :invoice_number, @receipt.invoice_number ) end %>
+
+      <%= label_tag :number, 'за замовленням №' %>
+      <%= content_tag :nav, class: :icon_number do
+        text_field_tag( :number, @receipt.supplier_order.number, disabled: true ) end %>
+    <% end %>
+
+    <%= content_tag :div, class: :panel do %>
+      <%= label_tag '', 'Постачальник' %>
+      <%= content_tag :nav, id: :supplier_name, class: :icon_number do
+        text_field_tag( '', @receipt.supplier_order.supplier.name, disabled: true ) end %>
+      <%= label_tag '', 'за договором №' %>
+      <%= content_tag :nav, id: :contract_number, class: :icon_number do
+        text_field_tag( '', @receipt.contract_number, disabled: true ) end %>
+    <% end %>
+  <% end %>
+
+  <% if @receipt_products %>
+    <%= content_tag :h2, 'Продукти харчування' %>
+
+    <%= content_tag :div, id: :table_receipt_products do %>
+
+    <%= content_tag :table, class: :table,
+          data: { path_update: institution_receipts_product_update_path } do %>
+
+        <% for i in 1..5 do %>
+          <%= content_tag :col %>
+        <% end %>
+
+        <%= content_tag :thead do %>
+          <%= content_tag :tr do %>
+            <%= content_tag :th, 'Продукт харчування' %>
+            <%= content_tag :th, 'Кількість за накладною' %>
+            <%= content_tag :th, 'Кількість прийнято' %>
+            <%= content_tag :th, 'Відхилення' %>
+            <%= content_tag :th, 'Причина відхилення' %>
+          <% end %>
+        <% end %>
+
+        <%= content_tag :tbody do %>
+          <% date = '' %>
+          <% @receipt_products.each do | receipt_product | %>
+            <% if date != receipt_product.date %>
+              <% date = receipt_product.date %>
+              <%= content_tag :tr do content_tag( :td, "#{ day_of_week( date.wday ) } #{ date_str( date ) }",
+                                                  colspan: 5, class: :row_group ) end %>
+            <% end %>
+
+            <%= content_tag :tr, data: { id: receipt_product.id }, class: :row_data do %>
+              <%= content_tag :td, receipt_product.product.name %>
+
+              <% [ :count_invoice, :count ].each do | v | %>
+                <%= content_tag :td do text_field_tag( v, receipt_product[ v ] ) end %>
+              <% end %>
+
+              <%= content_tag :td, '', class: :count_diff %>
+
+              <%= content_tag :td do %>
+                <%= select_tag :causes_deviation_id,
+                    options_from_collection_for_select( CausesDeviation.select( :id, :name ), :id, :name,
+                                                        receipt_product.causes_deviation_id ) %>
+              <% end %>
+
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+
+    <% end %>
+  <% end %>
+
+<% end %>

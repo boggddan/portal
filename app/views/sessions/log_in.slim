@@ -1,0 +1,7 @@
+/ Вход пользователя
+#main_log_in
+  form *{ action: sessions_create_path, method: :post }
+    span Вхід в портал
+    div : &text *{ name: :username, placeholder: 'Користувач...' }
+    div : &password *{ name: :password, placeholder: 'Пароль...' }
+    button

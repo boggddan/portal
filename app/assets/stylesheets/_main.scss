@@ -1,0 +1,58 @@
+$ffIcon: 'Glyphicons Halflings';
+
+@font-face {
+  font-family: 'Glyphicons Halflings';
+  src: font_url("glyphicons-halflings-regular.eot");
+  src: font_url("glyphicons-halflings-regular.eot?#iefix") format("embedded-opentype"),
+  font_url("glyphicons-halflings-regular.woff") format("woff"),
+  font_url("glyphicons-halflings-regular.ttf") format("truetype"),
+  font_url("glyphicons-halflings-regular.svg#glyphicons_halflingsregular") format("svg");
+}
+
+* { box-sizing: border-box; }
+
+/* Для холера */
+input::-webkit-input-placeholder { color: #e7e7e7; text-align: left; }
+input::-moz-placeholder          { color: #e7e7e7; text-align: left; }
+input:-ms-input-placeholder      { color: #e7e7e7; text-align: left; }
+input:focus { outline: none; }
+
+body { /* Главний блок */
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  > main {
+    padding: 0 15px;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+@import 'mixin';
+@import 'header_new';
+@import 'table_new';
+@import 'loader';
+@import 'error_msg';
+@import 'del_msg';
+
+@import 'application2';
+@import 'header';
+@import 'institution_orders';
+@import 'institution_order_products';
+@import 'io_correction_products';
+@import 'main_menu';
+@import 'menu_requirement_products';
+@import 'menu_requirements';
+@import 'receipt_products';
+@import 'receipts';
+@import 'sessions';
+@import 'table';
+@import 'timesheet_dates';
+@import 'timesheets';
+@import 'users';
+

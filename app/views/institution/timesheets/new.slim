@@ -1,0 +1,19 @@
+main#timesheet_new *{data: { path_create: institution_timesheets_create_path,
+  path_exit: institution_timesheets_index_path }}
+  
+  h1 Створення нового табелю
+  .panel_new
+    label.icon_сalendar
+      | Табель від
+      = text_field_tag :date, date_str( @timesheet.date ), readonly: true
+
+    label.icon_сalendar
+      | З
+      = text_field_tag :date_eb, date_str( @timesheet.date_eb ), readonly: true
+
+    label.icon_сalendar
+      | ПО
+      = text_field_tag :date_ee, date_str( @timesheet.date_ee ), readonly: true
+
+    = button_tag '', class: :btn_create
+    = button_tag '', class: :btn_exit

@@ -1,0 +1,30 @@
+/ Отображение заявок
+main#institution_orders
+
+  / Отображение заявок
+  #col_io.clmn *{ data: { caption: 'Заявка',
+    path: { filter: institution_institution_orders_ajax_filter_institution_orders_path,
+    create: institution_institution_orders_create_path,
+    view: institution_institution_orders_products_path,
+    del: institution_institution_orders_delete_path } } }
+
+    h1 Заявки
+
+    .panel_new
+      = render 'layouts/label_text', label_attr: { class: :icon_сalendar }, text: 'З', input_attr: { id: :date_start }
+      = render 'layouts/label_text', label_attr: { class: :icon_сalendar }, text: 'ПО', input_attr: { id: :date_end }
+      button.btn_create.right_first *{ disabled: true }
+
+    .parent_table
+
+  / Отображение коректировки
+  #col_ioc.clmn *{ data: { captions: 'Коригування заявки', caption: 'Коригування заявки',
+    path: { filter: institution_institution_orders_ajax_filter_corrections_path,
+    create: institution_institution_orders_correction_create_path,
+    view: institution_institution_orders_correction_products_path,
+    del: institution_institution_orders_correction_delete_path } } }
+
+    h1
+    .panel_new : button.btn_create.right_first
+
+    .parent_table

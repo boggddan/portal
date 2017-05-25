@@ -1,0 +1,27 @@
+/ Табличка со списком меню требований
+-if @menu_requirements.present?
+  table.table
+
+    - for i in 1..8 do
+      col
+
+    thead
+      tr
+        th#number_sap План
+        th#number_saf Факт
+        th#number Номер
+        th#date Дата створення
+        th#splendingdate Дата списання
+        th *{ colspan: 3 }
+
+    tbody
+      - @menu_requirements.each do | menu_requirement |
+        tr *{ data:{ id: menu_requirement.id } }
+          td.number_field = menu_requirement.number_sap
+          td.number_field = menu_requirement.number_saf
+          td.number_field = menu_requirement.number
+          td.date_field = date_str( menu_requirement.date )
+          td.date_field = date_str( menu_requirement.splendingdate )
+          td : button.btn_view *{ disabled: !menu_requirement.number_saf }
+          td : button.btn_edit *{ disabled: menu_requirement.number_saf }
+          td : button.btn_del *{ disabled: menu_requirement.number_sap }

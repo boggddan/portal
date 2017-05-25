@@ -1,0 +1,2 @@
+module MenuRequirementsHelper
+end
