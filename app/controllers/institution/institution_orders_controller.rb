@@ -3,15 +3,15 @@ class Institution::InstitutionOrdersController < Institution::BaseController
   end
 
   def get_schedule_of_food_supply( date_start, date_end ) # Веб-сервис на заявку
-    message = { 'GetRequest' => { 'ins0:StartDate' => date_start,
-                                  'ins0:EndDate' => date_end,
-                                  'ins0:DepartmentsCode' => current_institution.code } }
+    message = { 'GetRequest' => { 'StartDate' => date_start,
+                                  'EndDate' => date_end,
+                                  'DepartmentsCode' => current_institution.code } }
     method_name = :get_schedule_of_food_supply
-    response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] )
+    response = Savon.client( SAVON )
                  .call( method_name, message: message )
                  .body[ "#{ method_name }_response".to_sym ][ :return ]
 
-    web_service = { call: { wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ],
+    web_service = { call: { savon: SAVON,
                             method: method_name.to_s.camelize, message: message } }
 
     { response: response, web_service: web_service }
@@ -178,21 +178,21 @@ class Institution::InstitutionOrdersController < Institution::BaseController
 
     result = { }
     if institution_order_products.present?
-      message = { 'CreateRequest' => { 'ins0:Institutions_id' => current_institution.code,
-                                       'ins0:DateStart' => institution_order.date_start.strftime( '%Y-%m-%d' ),
-                                       'ins0:DateFinish' => institution_order.date_end.strftime( '%Y-%m-%d' ),
-                                       'ins0:NumberFromWebPortal' => institution_order.number,
-                                       'ins0:TMC' => institution_order_products.map{ | o | {
-                                         'ins0:Product_id' => o.product.code,
-                                         'ins0:Date' => o.date,
-                                         'ins0:Count_po' => o.amount.to_s } },
-                                       'ins0:User' => current_user.username } }
+      message = { 'CreateRequest' => { 'Institutions_id' => current_institution.code,
+                                       'DateStart' => institution_order.date_start.strftime( '%Y-%m-%d' ),
+                                       'DateFinish' => institution_order.date_end.strftime( '%Y-%m-%d' ),
+                                       'NumberFromWebPortal' => institution_order.number,
+                                       'TMC' => institution_order_products.map{ | o | {
+                                         'Product_id' => o.product.code,
+                                         'Date' => o.date,
+                                         'Count_po' => o.amount.to_s } },
+                                       'User' => current_user.username } }
       method_name = :creation_application_units
-      response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] )
+      response = Savon.client( SAVON )
                    .call( method_name, message: message )
                    .body[ "#{ method_name }_response".to_sym ][ :return ]
 
-      web_service = { call: { wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ],
+      web_service = { call: { savon: SAVON,
                               method: method_name.to_s.camelize, message: message } }
 
       if response[ :interface_state ] == 'OK'
@@ -240,16 +240,16 @@ class Institution::InstitutionOrdersController < Institution::BaseController
     result = { }
     if io_correction_products.present?
       institution_order = io_correction.institution_order
-      message = { 'CreateRequest' => { 'ins0:Institutions_id' => current_institution.code,
-                                       'ins0:NumberFromWebPortal' => io_correction.number,
-                                       'ins0:ApplicationNumber' => institution_order.number,
-                                       'ins0:TMC' => io_correction_products.map{ | o | {
-                                         'ins0:Product_id' => o.product.code,
-                                         'ins0:Date' => o.date,
-                                         'ins0:Count_po' => (o.amount - o.amount_order).to_s } },
-                                       'ins0:User' => current_user.username } }
+      message = { 'CreateRequest' => { 'Institutions_id' => current_institution.code,
+                                       'NumberFromWebPortal' => io_correction.number,
+                                       'ApplicationNumber' => institution_order.number,
+                                       'TMC' => io_correction_products.map{ | o | {
+                                         'Product_id' => o.product.code,
+                                         'Date' => o.date,
+                                         'Count_po' => (o.amount - o.amount_order).to_s } },
+                                       'User' => current_user.username } }
       method_name = :creation_correction_application_units
-      response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] )
+      response = Savon.client( SAVON )
                    .call( method_name, message: message )
                    .body[ "#{ method_name }_response".to_sym ][ :return ]
 
