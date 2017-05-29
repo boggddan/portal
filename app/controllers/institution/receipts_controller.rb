@@ -41,20 +41,20 @@ class Institution::ReceiptsController < Institution::BaseController
     receipt_products = receipt.receipt_products.where.not( count: 0 )
 
     if receipt_products.present?
-      message = { 'GetRequest' => { 'ins0:Institutions_id' => receipt.institution.code,
-                                    'ins0:InvoiceNumber' => receipt.invoice_number,
-                                    'ins0:ContractNumber' => receipt.contract_number,
-                                    'ins0:OrderNumber' => receipt.supplier_order.number,
-                                    'ins0:NumberFromWebPortal' => receipt.number,
-                                    'ins0:Date' => receipt.date,
-                                    'ins0:Goods' => receipt_products.map{ | o | {
-                                      'ins0:CodeOfGoods' => o.product.code,
-                                      'ins0:Quantity' => o.count.to_s,
-                                      'ins0:Count_invoice' => o.count_invoice.to_s,
-                                      'ins0:Cause_deviation_code' => o.causes_deviation.code } },
-                                    'ins0:User' => current_user.username } }
+      message = { 'GetRequest' => { 'Institutions_id' => receipt.institution.code,
+                                    'InvoiceNumber' => receipt.invoice_number,
+                                    'ContractNumber' => receipt.contract_number,
+                                    'OrderNumber' => receipt.supplier_order.number,
+                                    'NumberFromWebPortal' => receipt.number,
+                                    'Date' => receipt.date,
+                                    'Goods' => receipt_products.map{ | o | {
+                                      'CodeOfGoods' => o.product.code,
+                                      'Quantity' => o.count.to_s,
+                                      'Count_invoice' => o.count_invoice.to_s,
+                                      'Cause_deviation_code' => o.causes_deviation.code } },
+                                    'User' => current_user.username } }
 
-      response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces:  $ghSavon[ :namespaces ] )
+      response = Savon.client( SAVON )
                    .call( :create_doc_supply_goods, message: message )
 
       return_value = response.body[ :create_doc_supply_goods_response ][ :return ]

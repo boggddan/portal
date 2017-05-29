@@ -13,10 +13,10 @@ class Institution::TimesheetsController < Institution::BaseController
     date_ee = params[ :date_ee ].to_date
     date_eb = params[ :date_eb ].to_date
 
-    message = { 'CreateRequest' => { 'ins0:StartDate' => date_eb,
-                                     'ins0:EndDate' => date_ee,
-                                     'ins0:Institutions_id' => current_institution.code } }
-    response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] )
+    message = { 'CreateRequest' => { 'StartDate' => date_eb,
+                                     'EndDate' => date_ee,
+                                     'Institutions_id' => current_institution.code } }
+    response = Savon.client( SAVON )
                  .call( :get_data_time_sheet, message: message )
 
     interface_state = response.body[ :get_data_time_sheet_response ][ :return ][ :interface_state ]
@@ -54,20 +54,20 @@ class Institution::TimesheetsController < Institution::BaseController
     timesheet_dates = timesheet.timesheet_dates_join
 
     if timesheet_dates
-      message = { 'CreateRequest' => { 'ins0:Institutions_id' => timesheet.institution.code,
-                                       'ins0:NumberFromWebPortal' => timesheet.number,
-                                       'ins0:StartDate' => timesheet.date_vb,
-                                       'ins0:EndDate' => timesheet.date_ve,
-                                       'ins0:StartDateOfTheFill' => timesheet.date_eb,
-                                       'ins0:EndDateOfTheFill' => timesheet.date_ee,
-                                       'ins0:TS' => timesheet_dates.map{ | o | {
-                                         'ins0:Child_code' => o.child_code,
-                                         'ins0:Children_group_code' => o.group_code,
-                                         'ins0:Reasons_absence_code' => o.reason_code,
-                                         'ins0:Date' => o.date  } },
-                                       'ins0:User' => current_user.username } }
+      message = { 'CreateRequest' => { 'Institutions_id' => timesheet.institution.code,
+                                       'NumberFromWebPortal' => timesheet.number,
+                                       'StartDate' => timesheet.date_vb,
+                                       'EndDate' => timesheet.date_ve,
+                                       'StartDateOfTheFill' => timesheet.date_eb,
+                                       'EndDateOfTheFill' => timesheet.date_ee,
+                                       'TS' => timesheet_dates.map{ | o | {
+                                         'Child_code' => o.child_code,
+                                         'Children_group_code' => o.group_code,
+                                         'Reasons_absence_code' => o.reason_code,
+                                         'Date' => o.date  } },
+                                       'User' => current_user.username } }
 
-      response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] )
+      response = Savon.client( SAVON )
         .call( :creation_time_sheet, message: message )
       interface_state = response.body[ :creation_time_sheet_response ][ :return ][ :interface_state ]
       number = response.body[ :creation_time_sheet_response ][ :return ][ :respond ]

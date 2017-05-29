@@ -11,10 +11,10 @@ class Institution::ReportsController < Institution::BaseController
   end
 
   def ajax_children_day_cost
-    message = { 'CreateRequest' => { 'ins0:Institutions_id' => current_institution.code,
-                                     'ins0:StartDate' => params[ :date_start ].to_date,
-                                     'ins0:EndDate' => params[ :date_end ].to_date } }
-    response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] )
+    message = { 'CreateRequest' => { 'Institutions_id' => current_institution.code,
+                                     'StartDate' => params[ :date_start ].to_date,
+                                     'EndDate' => params[ :date_end ].to_date } }
+    response = Savon.client( SAVON )
                  .call( :get_report_the_cost_of_the_child_day_according_to_the_menu_requirements, message: message )
 
     body = response.body[ :get_report_the_cost_of_the_child_day_according_to_the_menu_requirements_response ][ :return ]
@@ -38,7 +38,7 @@ class Institution::ReportsController < Institution::BaseController
     message = { 'CreateRequest' => { 'ins0:Institutions_id' => current_institution.code,
                                      'ins0:StartDate' => params[ :date_start ].to_date,
                                      'ins0:EndDate' => params[ :date_end ].to_date } }
-    response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] )
+    response = Savon.client( SAVON )
                  .call( :get_report_statement_on_balances_in_warehouses, message: message )
 
     body = response.body[ :get_report_statement_on_balances_in_warehouses_response ][ :return ]
@@ -57,10 +57,10 @@ class Institution::ReportsController < Institution::BaseController
   end
 
   def ajax_attendance_of_children
-    message = { 'CreateRequest' => { 'ins0:StartDate' => params[ :date_start ].to_date,
-                                     'ins0:EndDate' => params[ :date_end ].to_date,
-                                     'ins0:Institutions_id' => current_institution.code,
-                                     'ins0:Children_group_id' => params[ :children_group_code ] } }
+    message = { 'CreateRequest' => { 'StartDate' => params[ :date_start ].to_date,
+                                     'EndDate' => params[ :date_end ].to_date,
+                                     'Institutions_id' => current_institution.code,
+                                     'Children_group_id' => params[ :children_group_code ] } }
 
     response = Savon.client( wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ] )
                  .call( :get_report_the_record_of_attendance_of_children, message: message )

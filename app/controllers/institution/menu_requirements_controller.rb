@@ -116,22 +116,23 @@ class Institution::MenuRequirementsController < Institution::BaseController
     menu_requirement_products = menu_requirement.menu_products.where.not( count_plan: 0 )
 
     if menu_requirement_products.present? && menu_requirement_products.present?
-      message = { 'CreateRequest' => { 'ins0:Branch_id' => menu_requirement.institution.branch.code,
-                                       'ins0:Institutions_id' =>  menu_requirement.institution.code,
-                                       'ins0:SplendingDate' =>menu_requirement.splendingdate,
-                                       'ins0:Date' => menu_requirement.date,
-                                       'ins0:Goods' => menu_requirement_products.map{ |o| {
-                                         'ins0:CodeOfCategory' => o.children_category.code,
-                                         'ins0:CodeOfGoods' => o.product.code,
-                                         'ins0:Quantity' => o.count_plan.to_s } },
-                                       'ins0:Categories' => menu_children_categories.map{ |o| {
-                                         'ins0:CodeOfCategory' => o.children_category.code,
-                                         'ins0:QuantityAll' => o.count_all_plan,
-                                         'ins0:QuantityExemption' => o.count_exemption_plan } },
-                                       'ins0:NumberFromWebPortal' => menu_requirement.number,
-                                       'ins0:User' => current_user.username } }
+      message = { 'CreateRequest' => { 'Branch_id' => menu_requirement.institution.branch.code,
+                                       'Institutions_id' =>  menu_requirement.institution.code,
+                                       'SplendingDate' =>menu_requirement.splendingdate,
+                                       'Date' => menu_requirement.date,
+                                       'Goods' => menu_requirement_products.map{ |o| {
+                                         'CodeOfCategory' => o.children_category.code,
+                                         'CodeOfGoods' => o.product.code,
+                                         'Quantity' => o.count_plan.to_s } },
+                                       'Categories' => menu_children_categories.map{ |o| {
+                                         'CodeOfCategory' => o.children_category.code,
+                                         'QuantityAll' => o.count_all_plan,
+                                         'QuantityExemption' => o.count_exemption_plan } },
+                                       'NumberFromWebPortal' => menu_requirement.number,
+                                       'User' => current_user.username } }
 
-      response = Savon.client( wsdl: $ghSavon[:wsdl], namespaces:  $ghSavon[:namespaces] ).call( :create_menu_requirement_plan, message: message )
+      response = Savon.client( SAVON )
+                     .call( :create_menu_requirement_plan, message: message )
       return_value = response.body[ :create_menu_requirement_plan_response ][ :return ]
 
       if return_value[ :interface_state ] && return_value[ :interface_state ] == 'OK'
@@ -150,22 +151,22 @@ class Institution::MenuRequirementsController < Institution::BaseController
     menu_requirement_products = menu_requirement.menu_products.where.not( count_fact: 0 )
 
     if menu_children_categories && menu_requirement_products
-      message = { 'CreateRequest' => { 'ins0:Branch_id' => menu_requirement.institution.branch.code,
-                                       'ins0:Institutions_id' =>  menu_requirement.institution.code,
-                                       'ins0:SplendingDate' =>menu_requirement.splendingdate,
-                                       'ins0:Date' => menu_requirement.date,
-                                       'ins0:Goods' => menu_requirement_products.map{|o| {
-                                         'ins0:CodeOfCategory' => o.children_category.code,
-                                         'ins0:CodeOfGoods' => o.product.code,
-                                         'ins0:Quantity' => o.count_fact.to_s }},
-                                       'ins0:Categories' => menu_children_categories.map{|o| {
-                                         'ins0:CodeOfCategory' => o.children_category.code,
-                                         'ins0:QuantityAll' => o.count_all_fact,
-                                         'ins0:QuantityExemption' => o.count_exemption_fact }},
-                                       'ins0:NumberFromWebPortal' => menu_requirement.number,
-                                       'ins0:User' => current_user.username } }
+      message = { 'CreateRequest' => { 'Branch_id' => menu_requirement.institution.branch.code,
+                                       'Institutions_id' =>  menu_requirement.institution.code,
+                                       'SplendingDate' =>menu_requirement.splendingdate,
+                                       'Date' => menu_requirement.date,
+                                       'Goods' => menu_requirement_products.map{|o| {
+                                         'CodeOfCategory' => o.children_category.code,
+                                         'CodeOfGoods' => o.product.code,
+                                         'Quantity' => o.count_fact.to_s }},
+                                       'Categories' => menu_children_categories.map{|o| {
+                                         'CodeOfCategory' => o.children_category.code,
+                                         'QuantityAll' => o.count_all_fact,
+                                         'QuantityExemption' => o.count_exemption_fact }},
+                                       'NumberFromWebPortal' => menu_requirement.number,
+                                       'User' => current_user.username } }
 
-      response = Savon.client( wsdl: $ghSavon[:wsdl], namespaces:  $ghSavon[:namespaces] ).call( :create_menu_requirement_fact, message: message )
+      response = Savon.client( SAVON ).call( :create_menu_requirement_fact, message: message )
       return_value = response.body[:create_menu_requirement_fact_response][:return]
 
       if return_value[:interface_state] && return_value[:interface_state] == 'OK' then

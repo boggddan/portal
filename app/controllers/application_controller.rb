@@ -3,11 +3,6 @@
   helper_method :day_of_week, :year_month_names, :short_day_of_week
   helper_method :current_user, :date_str, :f3_to_s, :f2_to_s
 
-  $ghSavon = { wsdl: Rails.env.production? ?
-    'http://192.168.1.2:8080/gos_release/ws/createsd.1cws?wsdl' :
-    'http://192.168.1.2:8080/Gos1_New/ws/Integration/?wsdl',
-      namespaces: { 'xmlns:ins0' => 'http://www.reality.sh' } }
-
   def verify_log_in # Переход на страничку ввод логина и пароля, если не был произведен вход
     redirect_to log_in_path unless current_user
   end
