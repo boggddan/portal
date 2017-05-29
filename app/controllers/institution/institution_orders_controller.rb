@@ -77,26 +77,6 @@ class Institution::InstitutionOrdersController < Institution::BaseController
     @io_corrections = @institution_order.io_corrections.order( "#{ params[ :sort_field ] } #{ params[ :sort_order ] }" )
   end
 
-  def correction_create1211
-    #pdf = WickedPdf.new.pdf_from_string(header:{ content: '<h1>Hello There!</h1>'})
-
-    pdf = WickedPdf.new.pdf_from_string(
-    ('<h1>Hello There!</h1>'),
-      footer: {
-      content: '<h1>Hello There!</h1>'
-    	 })
-    # pdf = WickedPdf.new.pdf_from_string(
-      # pdf: "some_file_name",
-      # template: "templates/pdf",
-      # encoding: "UTF-8",
-      # header:{ content: '<h1>Hello There!</h1>'},
-      # save_to_file: Rails.root.join('pdfs', "1111.pdf"))
-      save_path = Rails.root.join('pdfs','filename.pdf')
-      File.open(save_path, 'wb') do |file|
-        file << pdf
-      end
-  end
-
   def correction_create # Создание корректировки заявки
     institution_order = InstitutionOrder.find( params[ :institution_order_id ] )
 
