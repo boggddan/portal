@@ -22,6 +22,9 @@ $( document ).on 'turbolinks:load', ( ) ->
     .find( '.btn_exit, .btn_save' )
       .click -> window.btnExitClick $( @ )
     .end( )
+    .find( '.btn_print' )
+      .click -> window.btnPrintClick $( @ )
+    .end( )
     .find( '#date' )   # Дата
       .data 'old-value', $( '#date' ).val( )
       .datepicker( onSelect: -> сhangeValue( $( @ ), 'main', headerText ) )

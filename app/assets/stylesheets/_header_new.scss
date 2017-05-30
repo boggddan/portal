@@ -50,8 +50,12 @@ $ffIcon: 'Glyphicons Halflings';
     @include button-text( #f0ad4e, #eea236, #ec971f, #d58512, 'Закрити' );
   }
 
-  .btn_save { /* Кнопка сохранить */
+  .btn_save { // Кнопка сохранить
     @include button-text( #f0ad4e, #eea236, #ec971f, #d58512, 'Зберегти та закрити' );
+  }
+
+  .btn_print { // Button print
+    @include button-text( #5bc0de, #46b8da, #39b3d7, #269abc, 'Друк' );
   }
 
   .btn_default { // Кнопка по умолчанию

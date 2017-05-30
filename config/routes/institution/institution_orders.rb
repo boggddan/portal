@@ -9,6 +9,7 @@ namespace :institution_orders do
   post :product_update # Обновление количества
   post :update # Обновление реквизитов документа заявки
   post :send_sa # Веб-сервис отправки
+  post :print # Веб-сервис отправки
   delete :delete # Удаление
 
   post :correction_create # Создания корректировки заявки

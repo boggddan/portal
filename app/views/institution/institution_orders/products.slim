@@ -4,7 +4,9 @@
 
 main#institution_order_products *{ data: { \
   id: @institution_order.id,
-  path: { send: institution_institution_orders_send_sa_path,
+  path: { \
+  send: institution_institution_orders_send_sa_path,
+  print: institution_institution_orders_print_path,
   exit: institution_institution_orders_index_path,
   update: institution_institution_orders_update_path } } }
 
@@ -14,7 +16,10 @@ main#institution_order_products *{ data: { \
     .panel_new
       button.btn_send *{ disabled: disabled }
       button *{ class: ( disabled ? :btn_exit : :btn_save ) }
+
       - if disabled
+        button.btn_print
+
         = render label_text, label_attr: { class: :icon_number }, text: 'Надіслано документ:',
           input_attr: { value: @institution_order.number_sa, disabled: true }
 

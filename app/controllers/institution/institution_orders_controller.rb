@@ -190,6 +190,35 @@ class Institution::InstitutionOrdersController < Institution::BaseController
     render json: result
   end
 
+  def print # Веб-сервис отправки
+    institution_order = InstitutionOrder.find( params[ :id ] )
+    institution_order_products = institution_order.institution_order_products.where.not( amount: 0 )
+
+    result = { }
+    if institution_order_products.present?
+      message = { 'CreateRequest' => { 'Date' => institution_order.date_sa,
+                                       'NumberFromWebPortal' => institution_order.number } }
+      method_name = :get_print_form_of_order_of_devision
+
+      response = Savon.client( SAVON )
+                     .call( method_name, message: message )
+                     .body[ "#{ method_name }_response".to_sym ][ :return ]
+
+      web_service = { call: { savon: SAVON, method: method_name.to_s.camelize, message: message } }
+
+      if response[ :interface_state ] == 'OK'
+        result = { status: true, href: response[ :respond ] }
+      else
+        result = { status: false, caption: 'Неуспішна сихронізація з 1С',
+                   message: web_service.merge!( response: response ) }
+      end
+    else
+      result = { status: false, caption: 'Кількість не проставлена' }
+    end
+
+    render json: result
+  end
+
   def correction_products # Отображение товаров корректировки заявки
     @io_correction = IoCorrection.find( params[ :id ] )
     @institutin_order = @io_correction.institution_order

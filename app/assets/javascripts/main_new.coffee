@@ -81,6 +81,7 @@ window.ajax = ( $caption, $url, $type, $data, $dataType, $urlAssing, $success, $
       if $dataType is 'json'
         if data.status is true
           assignLocation $urlAssing, data.urlParams if $urlAssing
+          window.open( data.href ) if data.href
           $success( ) if $success
           pageLoader false if $loader
         else
@@ -288,6 +289,20 @@ window.btnSendClick = ( $elem ) ->
     'json',
     false,
     ( ) -> window.location.reload( ) )
+
+window.btnPrintClick = ( $elem ) ->
+  pageLoader true
+  $main = $elem.closest( 'main' )
+  $id = $main.data 'id'
+
+  ajax(
+    "Відправка данних в 1С [id: #{ $id }]"
+    $main.data( 'path-print' )
+    'post',
+    { id: $id }
+    'json',
+    false )
+    #( ) -> window.location.reload( ) )
 
 window.btnExitClick = ( $elem ) -> # Нажатие на кнопочку выход
   pageLoader true
