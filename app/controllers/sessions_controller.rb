@@ -8,10 +8,13 @@ class SessionsController < ApplicationController
     user = User.find_by_username( params[ :username ] )
     if user && user.authenticate( params[ :password ] )
       session[ :user_id ] = user.id
-      redirect_to root_url
+      result = { status: true, href: root_url }
     else
-      render :log_in
+      result = { status: false, caption: "Неправильне ім'я користувача чи пароль",
+                 message: { username: params[ :username ], password: params[ :password ] } }
     end
+
+    render json: result
   end
 
   def log_out # Выход пользователя

@@ -159,8 +159,8 @@ class Institution::InstitutionOrdersController < Institution::BaseController
     result = { }
     if institution_order_products.present?
       message = { 'CreateRequest' => { 'Institutions_id' => current_institution.code,
-                                       'DateStart' => institution_order.date_start.strftime( '%Y-%m-%d' ),
-                                       'DateFinish' => institution_order.date_end.strftime( '%Y-%m-%d' ),
+                                       'DateStart' => institution_order.date_start,
+                                       'DateFinish' => institution_order.date_end,
                                        'NumberFromWebPortal' => institution_order.number,
                                        'TMC' => institution_order_products.map{ | o | {
                                          'Product_id' => o.product.code,

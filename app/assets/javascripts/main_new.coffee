@@ -59,7 +59,7 @@ window.pageLoader = ( $show ) ->
 
 window.capitalize = ( $str ) -> "#{ $str.charAt( 0 ).toUpperCase( ) }#{ $str.slice( 1 ) }"
 
-window.assignLocation = (siteUrl, urlParams) ->
+window.assignLocation = (siteUrl, urlParams = {} ) ->
   pageLoader true
 
   serializeParams = (params) ->
@@ -81,7 +81,9 @@ window.ajax = ( $caption, $url, $type, $data, $dataType, $urlAssing, $success, $
       if $dataType is 'json'
         if data.status is true
           assignLocation $urlAssing, data.urlParams if $urlAssing
-          window.open( data.href ) if data.href
+          $href = data.href
+          ( if $href.search(/.pdf$/i) is -1 then assignLocation( $href ) else window.open( $href ) ) if $href
+
           $success( ) if $success
           pageLoader false if $loader
         else
@@ -302,7 +304,6 @@ window.btnPrintClick = ( $elem ) ->
     { id: $id }
     'json',
     false )
-    #( ) -> window.location.reload( ) )
 
 window.btnExitClick = ( $elem ) -> # Нажатие на кнопочку выход
   pageLoader true

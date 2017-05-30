@@ -1,6 +1,6 @@
 $ffIcon: 'Glyphicons Halflings';
 
-#main_log_in {
+main#log_in {
   height: 100vh;
   width: 100vw;
   display: flex;
@@ -8,7 +8,7 @@ $ffIcon: 'Glyphicons Halflings';
   align-items: center;
   background-color: #666666;
 
-  form {
+  .form {
     display: inline-block;
     width: 500px;
     border-radius: 3px;

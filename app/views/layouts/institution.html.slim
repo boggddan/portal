@@ -15,7 +15,6 @@ html
     = render 'layouts/del_msg'
     = render 'layouts/error_msg'
 
-
     nav#main_menu
       ul
         li.caption Портал
@@ -43,7 +42,5 @@ html
           span = @current_user.institution.name
         li.item *{ data: { page: :exit } }
           a *{ href: log_out_path } Вихід
-
-
 
     == yield
