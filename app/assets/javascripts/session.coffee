@@ -7,22 +7,23 @@ $( document ).on 'turbolinks:load', ( ) ->
     ########
     $parentElem
       .find( 'button' )
-        .click -> # Нажатие на кнопочку создать
+        .click ->  # Нажатие на кнопочку создать
           $elem = $( @ )
           pageLoader true
           $main = $elem.closest( 'main' )
-          $usernameVal = $( '#username' ).val( )
+          $usernameVal = $( '#username' ).val()
           $password = $( '#password' )
-          $passwordVal = $password.val( )
+          $passwordVal = $password.val()
 
           if $usernameVal and $passwordVal
-            $password.val('')
+            $password.attr( 'value', '' ).val('')
+
             window.ajax(
               "Авторизація [#{ $usernameVal }]"
               $main.data( 'path-send' )
-              'post',
+              'post'
               { username: $usernameVal, password: $passwordVal }
-              'json',
+              'json'
               false )
           else
             switch
@@ -30,4 +31,4 @@ $( document ).on 'turbolinks:load', ( ) ->
               when not $usernameVal then $header = 'Не введене ім\'я користувача'
               when not $passwordVal then $header = 'Не введений пароль'
 
-            window.window.errorMsg( $header )
+            window.errorMsg( $header )

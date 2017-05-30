@@ -93,7 +93,7 @@ window.ajax = ( $caption, $url, $type, $data, $dataType, $urlAssing, $success, $
 
     error: ( xhr ) ->  errorMsg $caption, xhr.responseText
 
-window.errorMsg = ( $header, $message ) -> # Сообщение об ошибке
+window.errorMsg = ( $header = '', $message = '' ) -> # Сообщение об ошибке
   pageLoader false
   $( '#error_msg' )
     .removeClass 'hide'
