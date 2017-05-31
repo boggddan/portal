@@ -1,0 +1,47 @@
+/
+- disabled = @receipt.number_sa.present?
+- label_text = 'layouts/label_text'
+
+main#receipt_products *{data: {\
+  id: @receipt.id,
+  path: { \
+  send: institution_receipts_send_sa_path,
+  print: institution_receipts_print_path,
+  exit: institution_receipts_index_path,
+  update: institution_receipts_update_path } } }
+
+  h1.icon
+
+  .panel_main.row_3
+    .panel_new
+      button.btn_send *{disabled: disabled}
+      button *{class: (disabled ? :btn_exit : :btn_save)}
+
+      - if disabled
+        button.btn_print
+
+        = render label_text, label_attr: {class: :icon_number}, text: 'Надіслано: документ',
+          input_attr: {value: @receipt.number_sa, disabled: true}
+
+        = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
+          input_attr: {value:  date_str(@receipt.date_sa), disabled: true}
+
+    .panel_new
+      = render label_text, label_attr: {class: :icon_number}, text: 'Поставка №',
+        input_attr: {id: :number, value: @receipt.number, disabled: true}
+      = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
+        input_attr: {id: :date, name: :date, value:  date_str(@receipt.date), disabled: disabled, readonly: true}
+      = render label_text, label_attr: {class: :icon_number}, text: 'Накладна №',
+        input_attr: {id: :invoice_number, name: :invoice_number, value: @receipt.invoice_number, disabled: disabled}
+      = render label_text, label_attr: {class: :icon_number}, text: 'за замовленням №',
+        input_attr: {value: @receipt.supplier_order.number, disabled: true}
+
+    .panel_new
+      = render label_text, label_attr: {class: :icon_filter}, text: 'Постачальник',
+        input_attr: {id: :supplier_name, value: @receipt.supplier_order.supplier.name, disabled: true}
+      = render label_text, label_attr: {class: :icon_filter}, text: 'за договором №',
+        input_attr: {id: :contract_number, value: @receipt.contract_number, disabled: true}
+
+  .clmn *{data: {path_update: institution_receipts_product_update_path}}
+    h2 Продукти харчування
+    .parent_table = render('table_receipt_products', disabled: disabled) if @receipt_products.present?

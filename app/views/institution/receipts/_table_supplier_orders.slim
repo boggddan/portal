@@ -1,0 +1,19 @@
+/ Табличка с заявками
+table.table_new *{ data: { type: :list_doc }  }
+  colgroup
+    col.date
+    col.number
+    col
+
+  thead
+    tr
+      th *{ data: { sort: :date } } Дата
+      th *{ data: { sort: :number } } Замовлення
+      th *{ data: { sort: :name } } Постачальник
+
+    tbody
+      - @supplier_orders.each do | so |
+        tr *{ data:{ id: so.id } }
+          td *{ data: { field: :date } } = date_str( so.date )
+          td *{ data: { field: :number } } = so.number
+          td *{ data: { field: :number } } = so.name

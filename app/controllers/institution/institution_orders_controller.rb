@@ -92,7 +92,6 @@ class Institution::InstitutionOrdersController < Institution::BaseController
     if response[ :interface_state ] == 'OK' && foods
       ActiveRecord::Base.transaction do
         ioc_last_id = institution_order.io_corrections.last.try( :id )
-        puts ioc_last_id
         io_correction = IoCorrection.create( institution_order: institution_order )
 
         foods.each do | food |
@@ -168,12 +167,10 @@ class Institution::InstitutionOrdersController < Institution::BaseController
                                          'Count_po' => o.amount.to_s } },
                                        'User' => current_user.username } }
       method_name = :creation_application_units
-      response = Savon.client( SAVON )
-                   .call( method_name, message: message )
+      response = Savon.client( SAVON ).call( method_name, message: message )
                    .body[ "#{ method_name }_response".to_sym ][ :return ]
 
-      web_service = { call: { savon: SAVON,
-                              method: method_name.to_s.camelize, message: message } }
+      web_service = { call: { savon: SAVON, method: method_name.to_s.camelize, message: message } }
 
       if response[ :interface_state ] == 'OK'
         institution_order.update( date_sa: Date.today, number_sa: response[ :respond ] )
@@ -192,28 +189,22 @@ class Institution::InstitutionOrdersController < Institution::BaseController
 
   def print # Веб-сервис отправки
     institution_order = InstitutionOrder.find( params[ :id ] )
-    institution_order_products = institution_order.institution_order_products.where.not( amount: 0 )
 
     result = { }
-    if institution_order_products.present?
-      message = { 'CreateRequest' => { 'Date' => institution_order.date_sa,
-                                       'NumberFromWebPortal' => institution_order.number } }
-      method_name = :get_print_form_of_order_of_devision
+    message = { 'CreateRequest' => { 'Date' => institution_order.date_sa,
+                                     'NumberFromWebPortal' => institution_order.number } }
+    method_name = :get_print_form_of_order_of_devision
 
-      response = Savon.client( SAVON )
-                     .call( method_name, message: message )
-                     .body[ "#{ method_name }_response".to_sym ][ :return ]
+    response = Savon.client( SAVON ).call( method_name, message: message )
+                   .body[ "#{ method_name }_response".to_sym ][ :return ]
 
-      web_service = { call: { savon: SAVON, method: method_name.to_s.camelize, message: message } }
+    web_service = { call: { savon: SAVON, method: method_name.to_s.camelize, message: message } }
 
-      if response[ :interface_state ] == 'OK'
-        result = { status: true, href: response[ :respond ] }
-      else
-        result = { status: false, caption: 'Неуспішна сихронізація з 1С',
-                   message: web_service.merge!( response: response ) }
-      end
+    if response[ :interface_state ] == 'OK'
+      result = { status: true, href: response[ :respond ] }
     else
-      result = { status: false, caption: 'Кількість не проставлена' }
+      result = { status: false, caption: 'Неуспішна сихронізація з 1С',
+                 message: web_service.merge!( response: response ) }
     end
 
     render json: result
@@ -262,8 +253,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
                    .call( method_name, message: message )
                    .body[ "#{ method_name }_response".to_sym ][ :return ]
 
-      web_service = { call: { wsdl: $ghSavon[ :wsdl ], namespaces: $ghSavon[ :namespaces ],
-                              method: method_name.to_s.camelize, message: message } }
+      web_service = { call: { savon: SAVON, method: method_name.to_s.camelize, message: message } }
 
       if response[ :interface_state ] == 'OK'
         io_correction.update( date_sa: Date.today, number_sa: response[ :respond ] )

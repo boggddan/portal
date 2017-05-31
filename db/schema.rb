@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170525102010) do
+ActiveRecord::Schema.define(version: 20170530183241) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -264,6 +264,7 @@ ActiveRecord::Schema.define(version: 20170525102010) do
     t.decimal "count_invoice", precision: 8, scale: 3, default: "0.0", null: false
     t.integer "causes_deviation_id"
     t.decimal "price", precision: 15, scale: 5, default: "0.0"
+    t.decimal "count_order", precision: 8, scale: 3, default: "0.0"
     t.index ["causes_deviation_id"], name: "index_receipt_products_on_causes_deviation_id"
     t.index ["date"], name: "index_receipt_products_on_date"
     t.index ["product_id"], name: "index_receipt_products_on_product_id"
@@ -292,7 +293,7 @@ ActiveRecord::Schema.define(version: 20170525102010) do
     t.integer "supplier_order_id"
     t.integer "institution_id"
     t.integer "product_id"
-    t.string "contract_number", limit: 12
+    t.string "contract_number", limit: 12, comment: "Номер договора"
     t.date "date"
     t.decimal "count", precision: 8, scale: 3
     t.datetime "created_at", null: false

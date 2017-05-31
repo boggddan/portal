@@ -47,6 +47,12 @@ window.setClearTableSession = ( $key, $keyTable ) -> # Запись в сесс�
     delete $sessionObj[ $keyTable ].scroll_top
     sessionStorage.setItem( $key, JSON.stringify( $sessionObj ) )
 
+window.setDeleteElemSession = ( $key, $elem ) -> # Запись в сессию
+  $sessionObj = JSON.parse( sessionStorage.getItem( $key ) ) || { } # спарсим объект обратно
+  if $sessionObj
+    delete $sessionObj[ $elem ]
+    sessionStorage.setItem( $key, JSON.stringify( $sessionObj ) )
+
 window.getSession = ( $key ) -> # Чтение из сессии
   $sessionObj = JSON.parse( sessionStorage.getItem( $key ) ) || { } #
 
@@ -72,7 +78,7 @@ window.assignLocation = (siteUrl, urlParams = {} ) ->
 window.ajax = ( $caption, $url, $type, $data, $dataType, $urlAssing, $success, $loader = true ) ->
   pageLoader $loader
 
-  $.ajax
+  $.ajax(
     url: $url
     type: $type
     data: $data
@@ -92,6 +98,7 @@ window.ajax = ( $caption, $url, $type, $data, $dataType, $urlAssing, $success, $
         pageLoader false if $loader
 
     error: ( xhr ) ->  errorMsg $caption, xhr.responseText
+  )
 
 window.errorMsg = ( $header = '', $message = '' ) -> # Сообщение об ошибке
   pageLoader false
@@ -286,11 +293,13 @@ window.btnSendClick = ( $elem ) ->
   ajax(
     "Відправка данних в 1С [id: #{ $id }]"
     $main.data( 'path-send' )
-    'post',
-    { id: $id }
-    'json',
-    false,
-    ( ) -> window.location.reload( ) )
+    'post'
+       id:  $id, bug: ''
+    'json'
+    false
+    ( ) -> window.location.reload( )
+    true )
+
 
 window.btnPrintClick = ( $elem ) ->
   pageLoader true
@@ -300,10 +309,12 @@ window.btnPrintClick = ( $elem ) ->
   ajax(
     "Відправка данних в 1С [id: #{ $id }]"
     $main.data( 'path-print' )
-    'post',
-    { id: $id }
-    'json',
-    false )
+    'post'
+       id: $id, bug: ''
+    'json'
+    false
+    false
+    true )
 
 window.btnExitClick = ( $elem ) -> # Нажатие на кнопочку выход
   pageLoader true

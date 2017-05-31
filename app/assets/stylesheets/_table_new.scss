@@ -137,12 +137,14 @@ table.table_new {
 
       &:hover {
         td,
+        select:not(:focus),
         input:not(:focus) {
           background-color: #c0def7;
         }
       }
 
       td:hover,
+      select:hover:not(:focus),
       input:hover:not(:focus) {
         background-color: #a1caec;
       }
@@ -153,6 +155,7 @@ table.table_new {
         cursor: default;
 
         &,
+        select:not(:focus):not(:hover),
         input:not(:focus):not(:hover) {
           background-color: #e7e7e7;
         }
@@ -181,7 +184,7 @@ table.table_new {
     }
   }
 
-  input {
+  select, input {
     height: $h_td - 1;
     width: 100%;
     padding: 0;

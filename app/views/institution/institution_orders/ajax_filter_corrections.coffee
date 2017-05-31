@@ -3,13 +3,13 @@
 $clmn = $( '#col_ioc' )
 $blockTable = $clmn.children( '.parent_table' ).empty( )
 
-$io_id = ''
-$io_number = ''
+$id = ''
+$number = ''
 $disabled = true
 
 <% if @institution_order.present? %>
-$io_id = '<%= @institution_order.id %> '
-$io_number = '<%= @institution_order.number %>'
+$id = '<%= @institution_order.id %> '
+$number = '<%= @institution_order.number %>'
 $disabled = not '<%= @institution_order.number_sa %>'
 
 <% if @io_corrections.present? %>
@@ -21,7 +21,7 @@ $disabled = not '<%= @io_corrections.last.number_sa %>'
 <% end %>
 
 $clmn
-  .data( institution_order_id: $io_id )
-  .children( 'h1' ).text( "#{ $clmn.data 'captions' } #{ $io_number }" )
+  .data( institution_order_id: $id )
+  .children( 'h1' ).text( "#{ $clmn.data 'captions' } #{ $number }" )
   .end( )
   .find( '.btn_create' ).prop 'disabled', $disabled

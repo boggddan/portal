@@ -1,0 +1,35 @@
+/ ПОСТУПЛЕНИЯ
+main#receipts
+
+  / Отображение заявок поставщика
+  #col_so.clmn *{ data: { caption: 'Замовлення постачальникам',
+    path_filter: institution_receipts_ajax_filter_supplier_orders_path } }
+
+    h1 Замовлення постачальникам
+
+    .panel_new
+      = render 'layouts/label_text', label_attr: { class: :icon_сalendar }, text: 'З', input_attr: { id: :date_start }
+      = render 'layouts/label_text', label_attr: { class: :icon_сalendar }, text: 'ПО', input_attr: { id: :date_end }
+
+      /text_field_tag :supplier_name, '', placeholder: 'Постачальник...', spellcheck: :false, data: { value: '',
+        ajax_source: institution_receipts_ajax_suppliers_autocomplete_source_path, ajax_param: :supplier_id } end %>
+
+    .parent_table
+
+  / Отображение поступлений
+  #col_r.clmn *{ data: { captions: 'Поставки за замовленням', caption: 'Поставки за замовленням',
+    path: { filter_contracts: institution_receipts_ajax_filter_contracts_path,
+    filter: institution_receipts_ajax_filter_receipts_path,
+    create: institution_receipts_create_path,
+    view: institution_receipts_products_path,
+    del: institution_receipts_delete_path } } }
+
+    h1
+    .panel_new
+      select#contract_number
+      /select_tag :contract_number, '', prompt: "Договір", data: {
+        ajax_path: "#{ institution_receipts_ajax_filter_receipts_path }?id=" } %>
+
+      button.btn_create.right_first
+
+    .parent_table

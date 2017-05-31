@@ -1,0 +1,38 @@
+- clmn_count = 6
+
+table.table_new
+  colgroup
+    col
+    col.number
+    col.number
+    col.number
+    col.number
+    col      
+
+  thead
+    tr
+      th Продукт харчування
+      th К-сть замовлено
+      th К-ть за накладною
+      th К-ть прийнято
+      th Відхилення
+      th Причина відхилення
+
+  tbody
+    - date = ''
+    - @receipt_products.each do | rp |
+
+      - if date != rp.date
+        - date = rp.date
+        tr.row_group.date : td *{ colspan: clmn_count, data: { value: date } }
+
+      tr.row_data *{ data: { id: rp.id } }
+        td.name = rp.name
+        td.count *{ data: { type: :n3 } } = rp.count_order
+        td.count : &text *{ name: :count_invoice, value: rp.count_invoice, data: { type: :n3 }, disabled: disabled }
+        td.count : &text *{ name: :count, value: rp.count, data: { type: :n3 }, disabled: disabled }
+        td.count *{ data: { name: :diff, type: :n3 } }
+        td
+          = select_tag( :causes_deviation_id,
+            options_from_collection_for_select( CausesDeviation.select( :id, :name ), :id, :name, rp.causes_deviation_id ),
+            disabled: disabled )
