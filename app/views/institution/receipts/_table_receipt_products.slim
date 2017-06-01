@@ -1,8 +1,9 @@
-- clmn_count = 6
+- clmn_count = 7
 
 table.table_new
   colgroup
     col
+    col.number
     col.number
     col.number
     col.number
@@ -12,6 +13,7 @@ table.table_new
   thead
     tr
       th Продукт харчування
+      th Ціна
       th К-сть замовлено
       th К-ть за накладною
       th К-ть прийнято
@@ -28,6 +30,7 @@ table.table_new
 
       tr.row_data *{ data: { id: rp.id } }
         td.name = rp.name
+        td.count *{ data: { type: :n5 } } = rp.price
         td.count *{ data: { type: :n3 } } = rp.count_order
         td.count : &text *{ name: :count_invoice, value: rp.count_invoice, data: { type: :n3 }, disabled: disabled }
         td.count : &text *{ name: :count, value: rp.count, data: { type: :n3 }, disabled: disabled }

@@ -75,8 +75,6 @@ class Institution::ReceiptsController < Institution::BaseController
     render json: result
   end
 
-
-
   def create # создание поступления
     contract_number = params[ :contract_number ]
     supplier_order = SupplierOrder.find( params[ :supplier_order_id ] )
@@ -96,13 +94,6 @@ class Institution::ReceiptsController < Institution::BaseController
     render json: result
   end
 
-  # def ajax_select_supplier_order # Выбор заявки: - Фильтрация списка выбора с договорами
-  #   @contracts = SupplierOrderProduct.select( :contract_number ).distinct( :contract_number ).
-  #         where( institution: current_institution,
-  #           supplier_order_id: params[ :supplier_order_id ].present? ? params[ :supplier_order_id ]
-  #             : ( @supplier_order.present? ? @supplier_order.id : 0 )  )
-  # end
-
   def delete # Удаление поступления
     Receipt.find( params[ :id ] ).destroy
     render json: { status: true }
@@ -111,7 +102,7 @@ class Institution::ReceiptsController < Institution::BaseController
   def products # Отображение товаров поступления
     @receipt = Receipt.find( params[ :id ] )
     @receipt_products = @receipt.receipt_products
-      .select( :id, :product_id, :causes_deviation_id, :date, :count_order, :count_invoice, :count, 'products.name AS name' )
+      .select( :id, :product_id, :causes_deviation_id, :date, :price, :count_order, :count_invoice, :count, 'products.name AS name' )
       .joins( :product )
       .order( :date, 'products.name' )
   end
