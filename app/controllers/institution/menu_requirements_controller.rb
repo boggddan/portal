@@ -53,7 +53,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       select_column << [ "MAX(b#{ index }.id) AS id_#{index}",
                         "MAX(b#{ index }.count_fact) AS count_fact_#{ index }",
                         "MAX(b#{ index }.count_plan) AS count_plan_#{ index }",
-                        "MAX(COALESCE(b#{ index }.count_fact, 0) - COALESCE(b#{ index }.count_plan, 0)) AS count_diff_#{ index }",
+                        "#{ @menu_requirement.number_sap ? "MAX(COALESCE(b#{ index }.count_fact, 0) - COALESCE(b#{ index }.count_plan, 0))" : "0" } AS count_diff_#{ index }",
                         "MAX(ROUND(COALESCE(b#{ index }.count_fact, 0) * COALESCE(aa.price, 0), 2)) AS sum_fact_#{ index }",
                         "MAX(ROUND(COALESCE(b#{ index }.count_plan, 0) * COALESCE(aa.price, 0), 2)) AS sum_plan_#{ index }" ]
 

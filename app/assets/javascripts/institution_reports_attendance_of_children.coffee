@@ -7,12 +7,11 @@ $( document ).on 'turbolinks:load', ->
     $sessionKey = $parentElem.attr 'id'
     $dateStartSession = window.getSession( $sessionKey )?.date_start
     $dateEndSession = window.getSession( $sessionKey )?.date_end
-
-    $( "#main_menu li[data-page=institution_reports]" ).addClass( 'active' ).siblings(  ).removeClass 'active'
+    $childrenGroupSession = window.getSession( $sessionKey )?.children_group
 
     ########
     $parentElem
-      .find( '.btn_create' )
+      .find( '.btn_create, .btn_print' )
         .click -> # Нажатие на кнопочку создать
           $dateStart = $( '#date_start' )
           $dateEnd = $( '#date_end' )
@@ -24,7 +23,8 @@ $( document ).on 'turbolinks:load', ->
               date_start: $dateStart.val( )
               date_end: $dateEnd.val( )
               children_group: $childrenGroupCode.val( )
-            'script'
+              is_pdf: $( @ ).hasClass( 'btn_print' )
+            'json'
             false
             false
             true )
@@ -41,53 +41,7 @@ $( document ).on 'turbolinks:load', ->
         .attr readonly: true, placeholder: 'Дата...'
         .datepicker( onSelect: -> window.selectDateEnd $( @ ), '#date_start', false )
       .end( )
-
-    ########
-
-
-
-
-#    #  Начальная дата фильтрации
-#    $( '#date_start' )
-#      .val( moment( ).startOf('month').format( $formatDate ) )
-#      .data( 'old-value', moment( ).startOf('month').format( $formatDate ) )
-#      .datepicker onSelect: ->
-#        $this = $( @ )
-#        $thisVal =  $this.val( )
-#
-#        if $thisVal isnt $this.data 'old-value'
-#          $this.data 'old-value', $thisVal
-#          $dateEnd = $( '#date_end' )
-#
-#          if moment( $thisVal, $formatDate ).isAfter( moment( $dateEnd.val( ), $formatDate ) )
-#            $dateEnd.val( $thisVal ).data 'old-value', $thisVal
-#
-#    #  Конечная дата фильтрации
-#    $( '#date_end' )
-#      .val( moment( ).endOf('month').format( $formatDate ) )
-#      .data( 'old-value', moment( ).endOf('month').format( $formatDate ) )
-#      .datepicker onSelect: ->
-#        $this = $( @ )
-#        $thisVal =  $this.val( )
-#
-#        if $thisVal isnt $this.data 'old-value'
-#          $this.data 'old-value', $thisVal
-#          $dateStart = $( '#date_start' )
-#
-#          if moment( $thisVal, $formatDate ).isBefore( moment( $dateStart.val( ), $formatDate ) )
-#            $dateStart.val( $thisVal ).data 'old-value', $thisVal
-#
-#    # Нажатие на кнопочку создать
-#    $( '.btn_create' ).click ->
-#      $( '#dialog_wait' ).dialog 'open'
-#      $dateStart = $( '#date_start' )
-#      $dateEnd = $( '#date_end' )
-#      $childrenGroupCode = $( '#children_group_code' )
-#
-#      $path = "#{ $parentElem.data( 'path-view' ) }?#{ $dateStart.attr 'id'  }=#{ $dateStart.val( ) }\
-#        &#{ $dateEnd.attr 'id' }=#{ $dateEnd.val( ) }&#{ $childrenGroupCode.attr 'id' }=#{ $childrenGroupCode.val( ) }"
-#      $.ajax url: $path, type: 'post', dataType: 'script'
-#
-#    # Нажатие на кнопочку выход
-#    $( '.btn_exit' ).click ->
-#      window.location.replace $parentElem.data 'path-exit'
+      .find( '#children_group_code' ) # Конечная дата фильтрации
+        .val $childrenGroupSession
+        .change -> setSession( $sessionKey, { children_group: $( @ ).val( ) } )
+      .end( )

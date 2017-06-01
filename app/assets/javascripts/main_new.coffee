@@ -88,8 +88,9 @@ window.ajax = ( $caption, $url, $type, $data, $dataType, $urlAssing, $success, $
         if data.status is true
           assignLocation $urlAssing, data.urlParams if $urlAssing
           $href = data.href
+          $view = data.view
           ( if $href.search(/.pdf$/i) is -1 then assignLocation( $href ) else window.open( $href ) ) if $href
-
+          ( $('#view').html( $view ) ) if $view
           $success( ) if $success
           pageLoader false if $loader
         else
@@ -157,7 +158,7 @@ window.selectDateEnd = ( $this, $dateStartId, $func ) -> # Конечная да
     if not $dateStartVal || moment( $thisVal, $formatDate ).isBefore( moment( $dateStartVal, $formatDate ) )
       setSession $sessionKey, { date_start: $thisVal }
       $dateStart.val( $thisVal ).data 'old-value', $thisVal
-    $func( )
+    $func( ) if $func
 
 window.rowSelect = ( $tr, $func ) -> # Нажатие на строку в табичке
   $tr.addClass( 'selected' ).siblings().removeClass 'selected'

@@ -33,6 +33,10 @@ body { /* Главний блок */
   }
 }
 
+#view {
+  margin-bottom: 15px;
+}
+
 @import 'mixin';
 @import 'header_new';
 @import 'table_new';

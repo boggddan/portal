@@ -1,10 +1,12 @@
-main#report_base *{ data: { path_view: @path_view, path_exit: institution_reports_index_path } }
+main#report_base *{ data: { path_view: @main_params[ :path_view ] } }
 
-  h1 = @h1_text
+  h1 = @main_params[ :h1_text ]
   .panel_new
     = render 'layouts/label_text', label_attr: {class: :icon_сalendar}, text: 'З', input_attr: {id: :date_start}
     = render 'layouts/label_text', label_attr: {class: :icon_сalendar}, text: 'ПО', input_attr: {id: :date_end}
 
     button.btn_create
+    - if @main_params[ :is_pdf ]
+      button.btn_print
 
   #view
