@@ -1,10 +1,4 @@
 class Institution::ReceiptsController < Institution::BaseController
-
-  # def ffff # Веб-сервис отправки поступления
-  #   puts 'dfdfdfd'
-  #   render json: { status: false }
-  # end
-
   def index
   end
 
@@ -14,8 +8,6 @@ class Institution::ReceiptsController < Institution::BaseController
       .joins( :supplier )
       .where( branch: current_branch, date: params[ :date_start ]..params[ :date_end ] )
       .order( "#{ params[ :sort_field ] } #{ params[ :sort_order ] }" )
-
-    #.where( ( { supplier_id: params[ :supplier_id ] } if params[ :supplier_id ] && !params[ :supplier_id ].blank? ) )
   end
 
   def ajax_filter_contracts # Фильтрация списка договоров
@@ -33,28 +25,33 @@ class Institution::ReceiptsController < Institution::BaseController
       .order( "#{ params[ :sort_field ] } #{ params[ :sort_order ] }" )
   end
 
-  # def ajax_suppliers_autocomplete_source # Источник для автозаполнение для фильтрации поставщиков
-  #   render json: Supplier.select( 'name AS label', 'id as value' )
-  #                  .where( 'lower(name) LIKE ?', "%#{ params[ :term.downcase ] }%")
-  #                  .order( :name ).limit( 15 ).as_json( only: [ :label, :value ] )
-  # end
-
   def send_sa # Веб-сервис отправки поступления
     receipt = Receipt.find( params[ :id ] )
-    receipt_products = receipt.receipt_products.where.not( count: 0 )
+    receipt_products = receipt.receipt_products
+      .joins( :causes_deviation, :product )
+      .select(:id, :count, :count_invoice, :date, :product_id,
+              'causes_deviations.code AS deviation_code', 'products.code AS product_code')
+      .where.not( count: 0 )
+      .or( receipt.receipt_products
+          .joins( :causes_deviation, :product )
+          .select(:id, :count, :count_invoice, :date, :product_id,
+              'causes_deviations.code AS deviation_code', 'products.code AS product_code')
+          .where.not( count_invoice: 0 )
+      )
+
     result = { }
     if receipt_products.present?
-      message = { 'GetRequest' => { 'Institutions_id' => receipt.institution.code,
+      message = { 'GetRequest' => { 'Institutions_id' => current_institution.code,
                                     'InvoiceNumber' => receipt.invoice_number,
                                     'ContractNumber' => receipt.contract_number,
                                     'OrderNumber' => receipt.supplier_order.number,
                                     'NumberFromWebPortal' => receipt.number,
                                     'Date' => receipt.date,
                                     'Goods' => receipt_products.map{ | o | {
-                                      'CodeOfGoods' => o.product.code,
+                                      'CodeOfGoods' => o.product_code,
                                       'Quantity' => o.count.to_s,
                                       'Count_invoice' => o.count_invoice.to_s,
-                                      'Cause_deviation_code' => o.causes_deviation.code } },
+                                      'Cause_deviation_code' => o.deviation_code } },
                                     'User' => current_user.username } }
 
       method_name = :create_doc_supply_goods
@@ -65,7 +62,7 @@ class Institution::ReceiptsController < Institution::BaseController
 
       if response[ :interface_state ] == 'OK'
         receipt.update( date_sa: Date.today, number_sa: response[ :respond ] )
-        receipt.receipt_products.where.not( count: 0 ).destroy_all
+        receipt.receipt_products.where( count: 0, count_invoice: 0 ).destroy_all
         result = { status: true }
       else
         result = { status: false, caption: 'Неуспішна сихронізація з 1С',

@@ -2,15 +2,9 @@ main#report_base *{ data: { path_view: @path_view, path_exit: institution_report
 
   h1 = @h1_text
   .panel_new
-    label.icon_сalendar
-      | З
-      &text#date_start *{ readonly: true }
-
-    label.icon_сalendar
-      | ПО
-      &text#date_end *{ readonly: true }
+    = render 'layouts/label_text', label_attr: {class: :icon_сalendar}, text: 'З', input_attr: {id: :date_start}
+    = render 'layouts/label_text', label_attr: {class: :icon_сalendar}, text: 'ПО', input_attr: {id: :date_end}
 
     button.btn_create
-    button.btn_exit
 
   #view

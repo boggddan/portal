@@ -23,7 +23,7 @@ $( document ).on 'turbolinks:load', ( ) ->
         сhangeValue( $countElem.val( $countInvoice ), 'tr', false )
         $diffElem.text( '' )
       else
-        initValue( $diffElem.text( $count - $countInvoice ) )
+        initValue( $diffElem.text( ($count*1000 - $countInvoice*1000)/1000 ) )
 
     $parentElem
       .find( 'h1' )

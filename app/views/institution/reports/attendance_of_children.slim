@@ -4,17 +4,11 @@ main#attendance_of_children *{ data: { \
 
   h1 Звіт "Табель обліку відвідування дітей"
   .panel_new
-    label.icon_сalendar
-      | З
-      &text#date_start *{ readonly: true }
-
-    label.icon_сalendar
-      | ПО
-      &text#date_end *{ readonly: true }
-
+    = render 'layouts/label_text', label_attr: {class: :icon_сalendar}, text: 'З', input_attr: {id: :date_start}
+    = render 'layouts/label_text', label_attr: {class: :icon_сalendar}, text: 'ПО', input_attr: {id: :date_end}
     = collection_select :children_group, :code, @children_groups, :code, :name , prompt: 'Всі групи'
 
     button.btn_create
-    button.btn_exit
+    button.btn_print
 
   #view

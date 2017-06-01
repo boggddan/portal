@@ -142,7 +142,7 @@ window.selectDateStart = ( $this, $dateEndId, $func ) -> # Начальная д
     if not $dateEndVal || moment( $thisVal, $formatDate ).isAfter( moment( $dateEndVal, $formatDate ) )
       setSession $sessionKey, { date_end: $thisVal }
       $dateEnd.val( $thisVal ).data 'old-value', $thisVal
-    $func( )
+    $func( ) if $func
 
 window.selectDateEnd = ( $this, $dateStartId, $func ) -> # Конечная дата фильтрации
   $thisVal =  $this.val( )
@@ -275,7 +275,7 @@ window.initValue = ( $elem ) ->
 
   $elemVal = if $tagName is 'INPUT' then $elem.val( ) else $elem.text( )
 
-  if $dataType?.charAt(0) is 'n'
+  if $dataType?.charAt( 0 ) is 'n'
     $scale = +$dataType.slice(1) or -1
     $val = window.toDecimal $elemVal, $scale
     $valFmt = window.floatToString( $val )
@@ -307,7 +307,7 @@ window.btnPrintClick = ( $elem ) ->
   $id = $main.data 'id'
 
   ajax(
-    "Відправка данних в 1С [id: #{ $id }]"
+    "Формування звіта в 1С [id: #{ $id }]"
     $main.data( 'path-print' )
     'post'
        id: $id, bug: ''

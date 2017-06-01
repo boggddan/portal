@@ -9,12 +9,12 @@
 }
 
 #receipt_products {
-  min-width: 1000px;
+  width: 1100px;
   #supplier_name { width: 224px;}
   #contract_number { width: 139px; }
 
   .clmn {
-    col:nth-child(6) { width: 365px; };
+    col:nth-child(6) { width: 300px; };
 
     tr {
       &.date { @include row-group( #dadada, 3px ); }

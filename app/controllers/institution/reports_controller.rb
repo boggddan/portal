@@ -35,9 +35,9 @@ class Institution::ReportsController < Institution::BaseController
   end
 
   def ajax_balances_in_warehouses
-    message = { 'CreateRequest' => { 'ins0:Institutions_id' => current_institution.code,
-                                     'ins0:StartDate' => params[ :date_start ].to_date,
-                                     'ins0:EndDate' => params[ :date_end ].to_date } }
+    message = { 'CreateRequest' => { 'Institutions_id' => current_institution.code,
+                                     'StartDate' => params[ :date_start ].to_date,
+                                     'EndDate' => params[ :date_end ].to_date } }
     response = Savon.client( SAVON )
                  .call( :get_report_statement_on_balances_in_warehouses, message: message )
 
