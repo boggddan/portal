@@ -11,8 +11,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
                  .call( method_name, message: message )
                  .body[ "#{ method_name }_response".to_sym ][ :return ]
 
-    web_service = { call: { savon: SAVON,
-                            method: method_name.to_s.camelize, message: message } }
+    web_service = { call: { savon: SAVON, method: method_name.to_s.camelize, message: message } }
 
     { response: response, web_service: web_service }
   end

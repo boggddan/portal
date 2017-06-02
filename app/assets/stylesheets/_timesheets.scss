@@ -1,8 +1,5 @@
 #timesheets {
-  width: 686px;
+  flex-direction: row;
 
-  #table_timesheets {
-    height: 500px;
-    col:nth-of-type(4) {width: 150px;}
-  }
+  #col_t { flex-basis: 686px; }
 }

@@ -517,13 +517,13 @@ class SyncCatalogsController < ApplicationController
               price_date: 'Не знайдений параметр [price_date]',
               price: 'Не знайдений параметр [price]' }.stringify_keys!.except( *params.keys )
     if error.empty?
-      branch = branch_code( params[ :branch_code ].strip )
+      branch = branch_code( params[ :branch_code ] )
       error.merge!( branch[ :error ] ) if branch[ :error ]
 
       institution = institution_code( params[ :institution_code ] )
       error.merge!( institution[ :error ] ) if institution[ :error ]
 
-      product = product_code( params[ :product_code ].strip )
+      product = product_code( params[ :product_code ] )
       error.merge!( product[ :error ] ) if product[ :error ]
 
       if error.empty?

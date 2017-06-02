@@ -65,7 +65,7 @@ window.pageLoader = ( $show ) ->
 
 window.capitalize = ( $str ) -> "#{ $str.charAt( 0 ).toUpperCase( ) }#{ $str.slice( 1 ) }"
 
-window.assignLocation = (siteUrl, urlParams = {} ) ->
+window.assignLocation = ( siteUrl, urlParams = {} ) ->
   pageLoader true
 
   serializeParams = (params) ->
@@ -300,7 +300,6 @@ window.btnSendClick = ( $elem ) ->
     false
     ( ) -> window.location.reload( )
     true )
-
 
 window.btnPrintClick = ( $elem ) ->
   pageLoader true

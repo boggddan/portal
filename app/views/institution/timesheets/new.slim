@@ -1,19 +1,13 @@
-main#timesheet_new *{data: { path_create: institution_timesheets_create_path,
-  path_exit: institution_timesheets_index_path }}
-  
-  h1 Створення нового табелю
-  .panel_new
-    label.icon_сalendar
-      | Табель від
-      = text_field_tag :date, date_str( @timesheet.date ), readonly: true
+main#timesheet_new
 
-    label.icon_сalendar
-      | З
-      = text_field_tag :date_eb, date_str( @timesheet.date_eb ), readonly: true
+  #col_t.clmn *{ data: { caption: 'Створення нового табелю',
+    path_create: institution_timesheets_create_path,
+    path_view: institution_timesheets_dates_path,
+    path_exit: institution_timesheets_index_path } }
 
-    label.icon_сalendar
-      | ПО
-      = text_field_tag :date_ee, date_str( @timesheet.date_ee ), readonly: true
-
-    = button_tag '', class: :btn_create
-    = button_tag '', class: :btn_exit
+    h1 Створення нового табелю
+    .panel_new
+      = render 'layouts/label_text', label_attr: {class: :icon_сalendar}, text: 'З', input_attr: {id: :date_start}
+      = render 'layouts/label_text', label_attr: {class: :icon_сalendar}, text: 'ПО', input_attr: {id: :date_end}
+      button.btn_create
+      button.btn_exit

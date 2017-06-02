@@ -4,50 +4,95 @@ class Institution::TimesheetsController < Institution::BaseController
   def index
   end
 
-  def new
-    @timesheet = Timesheet.new( date: Date.today, date_eb: Date.today.beginning_of_month, date_ee: Date.today.end_of_month )
+  def ajax_filter_timesheets # Фильтрация документов
+    @timesheets = Timesheet
+      .where( institution: current_institution, date: params[ :date_start ]..params[ :date_end ] )
+      .order( "#{ params[ :sort_field ] } #{ params[ :sort_order ] }" )
   end
 
-  # Веб-сервис загрузки графика
+  def delete # Удаление документа
+    Timesheet.find( params[ :id ] ).destroy
+    render json: { status: true }
+  end
+
+  def new
+  end
+
   def create
-    date_ee = params[ :date_ee ].to_date
-    date_eb = params[ :date_eb ].to_date
+    date_start = params[ :date_start ].to_date
+    date_end = params[ :date_end ].to_date
 
-    message = { 'CreateRequest' => { 'StartDate' => date_eb,
-                                     'EndDate' => date_ee,
-                                     'Institutions_id' => current_institution.code } }
-    response = Savon.client( SAVON )
-                 .call( :get_data_time_sheet, message: message )
+    timesheet_exists = current_institution.timesheets.select( :id, :number, :date, :date_eb, :date_ee )
+                           .where( date_eb: date_start..date_end )
+      .or( current_institution.timesheets.select( :id, :number, :date, :date_eb, :date_ee ).where( date_ee: date_start..date_end ) )
+      .order( :number )
+    if timesheet_exists.present?
+      result = { status: false, caption: 'За выбраний період уже створений табель',
+                 message: timesheet_exists.map{ |v| {
+                     id: v[:id], 'Номер': v[ :number ], 'Дата:': date_str( v[ :date ]),
+                     'З': date_str( v[ :date_eb ] ), 'ПО': date_str( v[ :date_ee ] ) } }  }
+    else
+      message = { 'CreateRequest' => { 'StartDate' => date_start,
+                                       'EndDate' => date_end,
+                                       'Institutions_id' => current_institution.code } }
+      method_name = :get_data_time_sheet
+      response = Savon.client( SAVON )
+                   .call( method_name, message: message )
+                   .body[ "#{ method_name }_response".to_sym ][ :return ]
 
-    interface_state = response.body[ :get_data_time_sheet_response ][ :return ][ :interface_state ]
-    return_value = response.body[ :get_data_time_sheet_response ][ :return ]
+      web_service = { call: { savon: SAVON, method: method_name.to_s.camelize, message: message } }
 
-    if interface_state == 'OK'
-      Timesheet.transaction do
-        @timesheet = Timesheet.create( institution: current_institution, branch: current_branch,
-          date_vb: return_value[ :date_vb ], date_ve: return_value[ :date_ve ],
-          date_eb: return_value[ :date_eb ], date_ee: return_value[ :date_ee ], date: params[ :date ].to_date )
+      result = { }
+      ts_data = response[ :ts ]
 
-        return_value[ :ts ].each do | ts |
-          child = child_code( ts[ :child_code ].strip )
-          children_group = children_group_code( ts[ :children_group_code ].strip )
-          reasons_absence = reasons_absence_code( ( ts[ :reasons_absence_code ] || '' ).strip )
+      if response[ :interface_state ] == 'OK' && ts_data
+        ActiveRecord::Base.transaction do
+          timesheet = Timesheet.create( institution: current_institution, branch: current_branch,
+            date_vb: response[ :date_vb ], date_ve: response[ :date_ve ],
+            date_eb: response[ :date_eb ], date_ee: response[ :date_ee ], date: Date.today )
 
-          unless child[ :error ] || children_group[ :error ] || reasons_absence[ :error ]
-            TimesheetDate.new( date: ts[ :date ] ) do | o |
-              o.timesheet_id = @timesheet.id
-              o.child_id = child.id
-              o.children_group_id = children_group.id
-              o.reasons_absence_id = reasons_absence.id
-              o.save( validate: false )
+          ts_data.each do | ts |
+            error = {}
+            child = child_code( ts[ :child_code ] )
+            error.merge!( child[ :error ] ) if child[ :error ]
+
+            children_group = children_group_code( ts[ :children_group_code ] )
+            error.merge!( children_group[ :error ] ) if children_group[ :error ]
+
+            reasons_absence = reasons_absence_code( ( ts[ :reasons_absence_code ] || '' ) )
+            error.merge!( reasons_absence[ :error ] ) if reasons_absence[ :error ]
+
+            if error.empty?
+              TimesheetDate.new do | o |
+                o.date = ts[ :date ]
+                o.timesheet_id = timesheet.id
+                o.child_id = child.id
+                o.children_group_id = children_group.id
+                o.reasons_absence_id = reasons_absence.id
+                o.save( validate: false )
+              end
+            else
+              result = { status: false, caption: 'Неможливо створити документ',
+                         message: { error: error }.merge!( web_service ) }
+              raise ActiveRecord::Rollback
             end
           end
-        end
 
-        redirect_to institution_timesheets_dates_path( id: @timesheet.id )
+          result = { status: true, urlParams: { id: timesheet.id } }
+        end
+      else
+        result = { status: false, caption: 'За вибраний період даних немає в 1С',
+                   message: web_service.merge!( response: response ) }
       end
     end
+
+    render json: result
   end
+
+
+  #############################
+  #############################
+  #############################
 
   def send_sa
     timesheet = Timesheet.find_by( id: params[ :id ] )
@@ -81,16 +126,6 @@ class Institution::TimesheetsController < Institution::BaseController
     else
       render text: 'Пустая таблица не проставлено'
     end
-  end
-
-  def ajax_filter_timesheets # Фильтрация документов
-    @timesheets = Timesheet
-                    .where( institution: current_institution, date: params[ :date_start ]..params[ :date_end ] )
-                    .order( "#{ params[ :sort_field ] } #{ params[ :sort_order ] }" )
-  end
-
-  def delete # Удаление документа
-    Timesheet.find_by( id: params[ :id ] ).destroy if params[ :id ]
   end
 
   def group_timesheet
