@@ -61,23 +61,29 @@ scope :api, controller: :sync_catalogs do
   get :children_group_view, path: :children_group
   get :children_groups_view, path: :children_groups
 
-  #   Обновление документов
+  # Обновление документов
   post :supplier_order_update, path: :cu_supplier_order
   get :supplier_order_view, path: :supplier_order
+  delete :supplier_order_delete, path: :supplier_order
 
   post :receipt_update, path: :cu_receipt
   get :receipt_view, path: :receipt
+  delete :receipt_delete, path: :receipt
 
   post :institution_order_update, path: :cu_institution_order
   get :institution_order_view, path: :institution_order
+  delete :institution_order_delete, path: :institution_order
 
   post :io_correction_update, path: :cu_institution_order_correction
   get :io_correction_view, path: :institution_order_correction
+  delete :io_correction_delete, path: :institution_order_correction
 
   post :menu_requirement_plan_update, path: :cu_menu_requirement_plan
   post :menu_requirement_fact_update, path: :cu_menu_requirement_fact
   get :menu_requirement_view, path: :menu_requirement
+  delete :menu_requirement_delete, path: :menu_requirement
 
   post :timesheet_update, path: :cu_timesheet
   get :timesheet_view, path: :timesheet
+  delete :timesheet_delete, path: :timesheet
 end

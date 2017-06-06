@@ -100,10 +100,9 @@ class SyncCatalogsController < ApplicationController
     end
   end
 
-  def receipt_number( supplier_order, contract_number, number )
-    contract_number = contract_number.strip
+  def receipt_number( institution, number )
     number = number.strip
-    if receipt = Receipt.find_by( supplier_order: supplier_order, contract_number: contract_number, number: number )
+    if receipt = Receipt.find_by( institution: institution, number: number )
       receipt
     else
       { error: { receipt: "Не знайдений номер поставки [#{ number }]" } }
@@ -949,6 +948,28 @@ class SyncCatalogsController < ApplicationController
                                             product: { only: [:code, :name ] } } } } )
       : { result: false, error: [ error ] }
   end
+
+
+  # DELETE api/supplier_order { "branch_code": "00000000003", "number": "000000000002" }
+  def supplier_order_delete
+    error = { branch_code: 'Не знайдений параметр [branch_code]',
+              number: 'Не знайдений параметр [number]' }.stringify_keys!.except( *params.keys )
+
+      if error.empty?
+        branch = branch_code( params[ :branch_code ].strip )
+
+        unless error = branch[ :error ]
+          number = params[ :number ]
+          supplier_order = supplier_order_number( branch, number )
+          unless error = supplier_order[ :error ]
+            supplier_order.destroy
+          end
+        end
+      end
+
+    render json: error && error.any? ? { result: false, error: [ error ] }
+                     : { result: true, number: number, id: supplier_order.id }
+  end
   ###############################################################################################
 
   ###############################################################################################
@@ -1033,24 +1054,20 @@ class SyncCatalogsController < ApplicationController
     render json: error && error.any? ? { result: false, error: [ error ] } : { result: true, number: number }
   end
 
-  # GET /api/receipt?institution_code=14&supplier_order_number=000000000002&contract_number=Ис-000000001&number=000000000003
+  # GET /api/receipt?/receipt?institution_code=14&number=KL-000000005
   def receipt_view
     error = { institution_code: 'Не знайдений параметр [institution_code]',
-              supplier_order_number: 'Не знайдений параметр [supplier_order_number]',
-              contract_number: 'Не знайдений параметр [contract_number]',
-              number: 'Не знайдений параметр [invoice_number]', }.stringify_keys!.except( *params.keys )
+              number: 'Не знайдений параметр [number]' }.stringify_keys!.except( *params.keys )
 
-    if error.size == 4
+    if error.size == 2
       error = {}
       receipt = Receipt.last
     else
-      institution = institution_code( params[ :institution_code ] )
+      if error.empty?
+        institution = institution_code( params[ :institution_code ] )
 
-      unless error = institution[ :error ]
-        supplier_order = supplier_order_number( institution.branch, params[ :supplier_order_number ].strip )
-
-        unless error = supplier_order[ :error ]
-          receipt = receipt_number( supplier_order, params[ :contract_number ].strip, params[ :number ].strip )
+        unless error = institution[ :error ]
+          receipt = receipt_number( institution, params[ :number ] )
           error = receipt[ :error ]
         end
       end
@@ -1062,6 +1079,27 @@ class SyncCatalogsController < ApplicationController
         receipt_products: { include: { product: { only: [ :code, :name ] },
                                        causes_deviation: { only: [ :code, :name ] } } } } )
       : { result: false, error: [ error ] }
+  end
+
+  # DELETE /api/receipt { "institution_code": "14", "number": "000000000002" }
+  def receipt_delete
+    error = { institution_code: 'Не знайдений параметр [institution_code]',
+              number: 'Не знайдений параметр [number]' }.stringify_keys!.except( *params.keys )
+
+    if error.empty?
+      institution = institution_code( params[ :institution_code ] )
+
+      unless error = institution[ :error ]
+        number = params[ :number ]
+        receipt = receipt_number( institution, params[ :number ] )
+        unless error = receipt[ :error ]
+          receipt.destroy
+        end
+      end
+    end
+
+    render json: error && error.any? ? { result: false, error: [ error ] }
+                     : { result: true, number: number, id: receipt.id }
   end
   ###############################################################################################
 
@@ -1158,6 +1196,31 @@ class SyncCatalogsController < ApplicationController
         institution_order_products: { include: { product: { only: [ :code, :name ] } } } } )
       : { result: false, error: [ error ] }
   end
+
+  # DELETE api/institution_order { "institution_code": "14", "number": "000000000002" }
+  def institution_order_delete
+    error = { institution_code: 'Не знайдений параметр [institution_code]',
+              number: 'Не знайдений параметр [number]' }.stringify_keys!.except( *params.keys )
+
+    if error.empty?
+      institution = institution_code( params[ :institution_code ] )
+
+      unless error = institution[ :error ]
+        number = params[ :number ]
+        institution_order = institution_order_number( institution, number )
+        unless error = institution_order[ :error ]
+          institution_order.destroy
+        end
+      end
+    end
+
+    render json: error && error.any? ? { result: false, error: [ error ] }
+                     : { result: true, number: number, id: institution_order.id }
+  end
+
+
+
+
   ###############################################################################################
 
   ###############################################################################################
@@ -1258,6 +1321,32 @@ class SyncCatalogsController < ApplicationController
     render json: io_correction ? io_correction.to_json( include: { institution_order: { only: [ :number, :date ] },
         io_correction_products: { include: { product: { only: [ :code, :name ] } } } } )
       : { result: false, error: [ error ] }
+  end
+
+  # DELETE /api/institution_order_correction { "institution_code": "14", "institution_order_number": "KL-000000024", "number": "KL-000000011" }
+  def io_correction_delete
+    error = { institution_code: 'Не знайдений параметр [institution_code]',
+              institution_order_number: 'Не знайдений параметр [institution_order_number]',
+              number: 'Не знайдений параметр [number]' }.stringify_keys!.except( *params.keys )
+
+    if error.empty?
+      institution = institution_code( params[ :institution_code ] )
+
+      unless error = institution[ :error ]
+        institution_order = institution_order_number( institution, params[ :institution_order_number ].strip )
+
+        unless error = institution_order[ :error ]
+          number = params[ :number ]
+          io_correction = io_correction_number( institution_order, number )
+          unless error = io_correction[ :error ]
+            io_correction.destroy
+          end
+        end
+      end
+    end
+
+    render json: error && error.any? ? { result: false, error: [ error ] }
+                     : { result: true, number: number, id: io_correction.id }
   end
   ###############################################################################################
 
@@ -1506,6 +1595,28 @@ class SyncCatalogsController < ApplicationController
         menu_products: { include: { children_category: { only: [ :code, :name ] },  product: { only: [ :code, :name ] } } } } )
       : { result: false, error: [ error ] }
   end
+
+  # DELETE api/menu_requirement { "institution_code": "14", "number": "000000000002" }
+  def menu_requirement_delete
+    error = { institution_code: 'Не знайдений параметр [institution_code]',
+              number: 'Не знайдений параметр [number]' }.stringify_keys!.except( *params.keys )
+
+    if error.empty?
+      institution = institution_code( params[ :institution_code ] )
+
+      unless error = institution[ :error ]
+        number = params[ :number ]
+        menu_requirement = menu_requirement_number( institution, number )
+        error = menu_requirement[ :error ]
+        unless error = menu_requirement[ :error ]
+          menu_requirement.destroy
+        end
+      end
+    end
+
+    render json: error && error.any? ? { result: false, error: [ error ] }
+                     : { result: true, number: number, id: menu_requirement.id }
+  end
   ###############################################################################################
 
   ###############################################################################################
@@ -1612,6 +1723,28 @@ class SyncCatalogsController < ApplicationController
         institution: { only: [ :code, :name ] }, timesheet_dates: { include: { child: { only: [ :code, :name ] },
         children_group: { only: [ :code, :name ] }, reasons_absence: { only: [ :code, :mark, :name ] } } } } )
       : { result: false, error: [ error ] }
+  end
+  ###############################################################################################
+
+  # DELETE api/timesheet { "institution_code": "14", "number": "000000000002" }
+  def timesheet_delete
+    error = { institution_code: 'Не знайдений параметр [institution_code]',
+              number: 'Не знайдений параметр [number]' }.stringify_keys!.except( *params.keys )
+
+    if error.empty?
+      institution = institution_code( params[ :institution_code ] )
+
+      unless error = institution[ :error ]
+        number = params[ :number ]
+        timesheet = timesheet_number( institution, number )
+        unless error = timesheet[ :error ]
+          timesheet.destroy
+        end
+      end
+    end
+
+    render json: error && error.any? ? { result: false, error: [ error ] }
+                     : { result: true, number: number, id: timesheet.id }
   end
   ###############################################################################################
 
