@@ -949,7 +949,6 @@ class SyncCatalogsController < ApplicationController
       : { result: false, error: [ error ] }
   end
 
-
   # DELETE api/supplier_order { "branch_code": "00000000003", "number": "000000000002" }
   def supplier_order_delete
     error = { branch_code: 'Не знайдений параметр [branch_code]',
