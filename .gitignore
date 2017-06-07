@@ -23,3 +23,6 @@
 
 /config/database.yml
 /config/savon.yml
+/public/packs
+/public/packs-test
+/node_modules
