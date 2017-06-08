@@ -117,7 +117,6 @@ window.delMsg = ( $header, $func ) -> # Сообщение об ошибке
     .find( '.success' ).one 'click', ->
       $('#del_msg').addClass 'hide'
       $func( )
-      pageLoader false
 
 window.createDoc = ( $elem, $data ) -> # Нажатие на кнопочку создать
   $dataAttr = $( $elem ).closest( '.clmn' ).data( )
@@ -182,6 +181,7 @@ window.tableButtonClick = ( $button, $funcDel ) -> # Нажатие на кно�
 
   switch
     when $button.hasClass 'btn_del' # удалить
+
       delMsg(
         $msgDelCaption
         ( ) ->
@@ -189,13 +189,14 @@ window.tableButtonClick = ( $button, $funcDel ) -> # Нажатие на кно�
             "Видалення: #{ $msgDelCaption } [id: #{ $trId }]"
             $dataAttr.pathDel
             'delete'
-            id: $trId
+            { id: $trId, bug: '' }
             'json'
             ''
             ( ) ->
               if $table.find( 'tbody tr' ).length is 1 then $table.remove( ) else $tr.remove( )
               setClearTableSession( getSessionKey( $clmn ), $clmn.attr 'id' )
-              $funcDel( )
+              $funcDel( ) if $funcDel
+            true
           )
       )
 
