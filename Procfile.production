@@ -1,0 +1,1 @@
+web: rails log:clear assets:clobber assets:precompile tmp:clear && rails server puma

@@ -1,11 +1,10 @@
-//= require jquery/dist/jquery.min
-//= require jquery-ui-dist/jquery-ui.min
-//= require jquery-ui/ui/widgets/dialog
+//= require lib/jquery.min
+//= require lib/jquery-ui.min
+//= require lib/dialog
 
-//= require jquery-ui/ui/i18n/datepicker-uk
-//= require moment/min/moment-with-locales.min
+//= require lib/datepicker-uk
+//= require lib/moment-with-locales.min
 
 //= require turbolinks
-
 //= require main
 //= require_tree .

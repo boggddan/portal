@@ -6,6 +6,12 @@ $ffIcon: 'Glyphicons Halflings';
 }
 
 
+// ХАК для JQUERY
+.ui-widget-header .ui-icon {
+    background-image: image_url('lib/ui-icons_444444_256x240.png');
+}
+
+
 /* Заголовоки */
 h1, h2 {
   width: 100%;
@@ -47,6 +53,3 @@ h2 { @include h-fz( 20px ); }
 #dialog_wait {
   div { text-align: center; margin-bottom: 15px; }
 }
-
-
-
