@@ -21,6 +21,7 @@ $bdrs: 3px;
   &:disabled {
     color: #666;
     background-color: #f5f4f4;
+    background-image: none;
     border-color: #dadada;
     cursor: default;
   }

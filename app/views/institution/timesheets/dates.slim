@@ -45,6 +45,7 @@ main#timesheet_dates *{ data: { \
       label Заміна виділений позначень&nbsp;
       - @reasons_absences.each_with_index do | v, i |
         - next_v = @reasons_absences[ @reasons_absences.last == v ? 0 : i + 1 ]
-        button.btn_gradient.reasons_absence *{ data: { id: v[ 0 ], next_id: next_v[ 0 ], next_val: next_v[ 2 ]  } } = v[ 2 ]
+        button.btn_gradient.reasons_absence *{ disabled: disabled,
+          data: { id: v[ 0 ], next_id: next_v[ 0 ], next_val: next_v[ 2 ]  } } = v[ 2 ]
 
     .parent_table
