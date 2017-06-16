@@ -4,14 +4,16 @@
 
   &:hover,
   #{ $el }:hover,
-  #{ $el }:not(.hover) { background-color: $bgc; color: #fff; }
+  #{ $el }:not(.hover) { background-color: $bgc; color: $c; }
 
   :first-child { padding-left: $pl; text-align: $ta; }
 }
 
 #timesheet_dates {
   .reasons_absence {
-     width: 40px;
+    width: 40px;
+    background-image: linear-gradient(to right, #EDE574 0%, #E1F5C4 51%, #EDE574 100%);
+    border-color: #EDE574;
   }
 
   .parent_table {
