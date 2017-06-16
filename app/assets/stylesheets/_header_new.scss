@@ -62,6 +62,14 @@ $ffIcon: 'Glyphicons Halflings';
     @include button-text( #5bc0de, #46b8da, #39b3d7, #269abc, '' );
   }
 
+  .btn_gradient {
+     @include button-text( #fff, #46b8da, #fff, #269abc, '' );
+     background-image: linear-gradient(to right, #CC95C0 0%, #DBD4B4 51%, #CC95C0 100%);
+     background-size: 200% auto;
+     &:hover { background-position: right center; };
+     transition: 0.5s;
+  }
+
   //---------------------------
   // < select
   %row_group.row_group {

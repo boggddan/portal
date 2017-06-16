@@ -13,21 +13,21 @@ $( document ).on 'turbolinks:load', ( ) ->
     window.tableSetSession( $( '#col_iop .parent_table' ) )
 
     $parentElem
-    .find( 'h1' )
-      .click -> window.clickHeader( $( @ ) )
-    .end( )
-    .find( '.btn_send' )
-      .click -> window.btnSendClick $( @ )  # Нажатие на кнопочку создать
-    .end( )
-    .find( '.btn_exit, .btn_save' )
-      .click -> window.btnExitClick $( @ )
-    .end( )
-    .find( '.btn_print' )
-      .click -> window.btnPrintClick $( @ )
-    .end( )
-    .find( '#date' )   # Дата
-      .data 'old-value', $( '#date' ).val( )
-      .datepicker( onSelect: -> сhangeValue( $( @ ), 'main', headerText ) )
+      .find( 'h1' )
+        .click -> window.clickHeader( $( @ ) )
+      .end( )
+      .find( '.btn_send' )
+        .click -> window.btnSendClick $( @ )  # Нажатие на кнопочку создать
+      .end( )
+      .find( '.btn_exit, .btn_save' )
+        .click -> window.btnExitClick $( @ )
+      .end( )
+      .find( '.btn_print' )
+        .click -> window.btnPrintClick $( @ )
+      .end( )
+      .find( '#date' )   # Дата
+        .data 'old-value', $( '#date' ).val( )
+        .datepicker( onSelect: -> сhangeValue( $( @ ), 'main', headerText ) )
 
     $( '#col_iop' )
       .find( 'tr.row_data' )

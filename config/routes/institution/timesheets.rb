@@ -4,11 +4,12 @@ namespace :timesheets do
   post :ajax_filter_timesheets # Фильтрация документов
   delete :delete # Удаление документа
   get :new #
+  post :create # Создание документа
 
   get :dates # Отображение дней табеля
-  get :ajax_filter_timesheet_dates # Фильтрация таблицы
-  post :create # Создание документа
+  post :ajax_filter_timesheet_dates # Фильтрация таблицы
   post :update # Обновление реквизитов документа
   post :dates_update # Обновление маркера
+  post :dates_group_update # Обновление группы маркеров
   post :send_sa # Веб-сервис отправки табеля
 end

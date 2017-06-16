@@ -119,6 +119,7 @@ window.delMsg = ( $header, $func ) -> # Сообщение об ошибке
       $func( )
 
 window.createDoc = ( $elem, $data ) -> # Нажатие на кнопочку создать
+  $elem = $( $elem ) unless $elem instanceof $
   $dataAttr = $( $elem ).closest( '.clmn' ).data( )
   window.ajax(
     "Сторення: #{ $dataAttr.caption } "
@@ -129,6 +130,7 @@ window.createDoc = ( $elem, $data ) -> # Нажатие на кнопочку с
     $dataAttr.pathView )
 
 window.selectDateStart = ( $this, $dateEndId, $func ) -> # Начальная дата фильтрации
+  $this = $( $this ) unless $this instanceof $
   $sessionKey = $this.closest( 'main' ).attr( 'id' )
   $thisVal =  $this.val( )
 
@@ -145,6 +147,7 @@ window.selectDateStart = ( $this, $dateEndId, $func ) -> # Начальная д
     $func( ) if $func
 
 window.selectDateEnd = ( $this, $dateStartId, $func ) -> # Конечная дата фильтрации
+  $this = $( $this ) unless $this instanceof $
   $thisVal =  $this.val( )
 
   if $thisVal isnt $this.data 'old-value'
@@ -160,6 +163,7 @@ window.selectDateEnd = ( $this, $dateStartId, $func ) -> # Конечная да
     $func( ) if $func
 
 window.rowSelect = ( $tr, $func ) -> # Нажатие на строку в табичке
+  $tr = $( $tr ) unless $tr instanceof $
   $tr.addClass( 'selected' ).siblings().removeClass 'selected'
   setSession(
     getSessionKey( $tr )
@@ -167,6 +171,7 @@ window.rowSelect = ( $tr, $func ) -> # Нажатие на строку в та�
   $func( ) if $func
 
 window.tableButtonClick = ( $button, $funcDel ) -> # Нажатие на кнопочку в табичке
+  $button = $( $button ) unless $button instanceof $
   $clmn = $( $button ).closest( '.clmn' )
   $dataAttr =  $clmn.data( )
   $table = $button.closest 'table'
@@ -204,6 +209,7 @@ window.tableButtonClick = ( $button, $funcDel ) -> # Нажатие на кно�
       assignLocation $dataAttr.pathView, id: $trId
 
 window.tableHeaderClick = ( $th, $func ) -> # Нажатие для сортировки
+  $th = $( $th ) unless $th instanceof $
   $class = add: 'desc', remove: 'asc'
 
   [ $class.add, $class.remove ] = [ $class.remove,  $class.add ] if $th.hasClass $class.add
@@ -215,6 +221,7 @@ window.tableHeaderClick = ( $th, $func ) -> # Нажатие для сортир
   $func( ) # Фильтрация таблицы документов
 
 window.tableSetSession = ( $blockTable ) ->
+  $blockTable = $( $blockTable ) unless $blockTable instanceof $
   $sesionKey = getSessionKey $blockTable
   $clmn =  $( $blockTable ).closest( '.clmn' )
   $clmnKey = $clmn.attr 'id'
@@ -231,11 +238,18 @@ window.tableSetSession = ( $blockTable ) ->
       $row = $blockTable.find( "tr[data-id=#{ $sessionObj.row_id } ]" )
       if $row then $row.addClass 'selected'  else setSession $sesionKey, { "#{ $clmnKey }": { row_id: 0 } }
 
-window.clickHeader = ( $h ) ->
-  $h.toggleClass 'hide'
+window.clickHeader = ( $elem ) ->
+  $elem = $( $elem ) unless $elem instanceof $
+  $elem.toggleClass 'hide'
   $( '.panel_main' ).toggleClass 'hide'
 
+  # const clickHeader = elem => {
+  #   elem.classList.toggle( 'hide' );
+  #   document.querySelector( '.panel_main' ).classList.toggle( 'hide' );
+  # };
+
 window.сhangeValue = ( $elem, $parentName, $func ) -> # Изминение значение на панели
+  $elem = $( $elem ) unless $elem instanceof $
   $name = $elem.attr 'name'
   $dataType = $elem.data( 'type' )
 
@@ -272,6 +286,7 @@ window.сhangeValue = ( $elem, $parentName, $func ) -> # Изминение зн
       false ) if $id isnt -1
 
 window.initValue = ( $elem ) ->
+  $elem = $( $elem ) unless $elem instanceof $
   $tagName = $elem.prop( 'tagName' )
   $dataType = $elem.data( 'type' )
 
@@ -288,6 +303,8 @@ window.initValue = ( $elem ) ->
   $elem.data( 'old-value', $val )
 
 window.btnSendClick = ( $elem ) ->
+  $elem = $( $elem ) unless $elem instanceof $
+
   pageLoader true
   $main = $elem.closest( 'main' )
   $id = $main.data 'id'
@@ -303,6 +320,7 @@ window.btnSendClick = ( $elem ) ->
     true )
 
 window.btnPrintClick = ( $elem ) ->
+  $elem = $( $elem ) unless $elem instanceof $
   pageLoader true
   $main = $elem.closest( 'main' )
   $id = $main.data 'id'
@@ -318,6 +336,7 @@ window.btnPrintClick = ( $elem ) ->
     true )
 
 window.btnExitClick = ( $elem ) -> # Нажатие на кнопочку выход
+  $elem = $( $elem ) unless $elem instanceof $
   pageLoader true
   window.location.replace $elem.closest( 'main' ).data 'path-exit'
 

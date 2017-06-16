@@ -15,14 +15,10 @@
 !/tmp/.keep
 
 /node_modules
-/yarn-error.log
 
 .byebug_history
-/public/assets
 
+/public/assets
 /config/database.yml
 /config/savon.yml
-/public/packs
-/public/packs-test
-/node_modules
 start.bat

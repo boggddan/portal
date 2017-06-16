@@ -1,9 +1,5 @@
 $ffIcon: 'Glyphicons Halflings';
 
-.parent_table {
-  flex-grow: 1;
-}
-
 @mixin tbl-btn($cnt, $c, $c_hover) {
   &:before {
     content: $cnt;
@@ -16,6 +12,10 @@ $ffIcon: 'Glyphicons Halflings';
   &:hover:enabled {
     color: $c_hover;
   }
+}
+
+.parent_table {
+  flex-grow: 1;
 }
 
 @mixin tbl-border($tag, $style, $color) {
@@ -46,7 +46,8 @@ $bdrs: 5px;
 // Табличка
 table.table_new {
   table-layout: fixed;
-  width: 100%;
+  max-width: 100%;
+  width: 0;
   font-size: 13px;
   text-align: center;
   word-wrap: break-word;
@@ -79,6 +80,10 @@ table.table_new {
     td {
       height: $h_td;
       padding: 0;
+
+      &.hover:not(.active) {
+        background-color: #c0def7;
+      }
     }
   }
 
@@ -136,19 +141,29 @@ table.table_new {
       cursor: pointer;
 
       &:hover {
-        td,
+        td:not(.active),
         select:not(:focus),
         input:not(:focus) {
           background-color: #c0def7;
         }
+
+        td.active {
+          background-color: #FFE419;
+        }
       }
 
-      td:hover,
+      td {
+        background-color: #fff;
+      }
+      .hover.active {
+        background-color: #FFE419;
+      }
+
+      td:hover:not(.active),
       select:hover:not(:focus),
       input:hover:not(:focus) {
         background-color: #a1caec;
       }
-
 
       // Нажатие в таблички строку для JQUERY
       &.selected {
@@ -159,6 +174,10 @@ table.table_new {
         input:not(:focus):not(:hover) {
           background-color: #e7e7e7;
         }
+      }
+
+      .active {
+        background-color: yellow;
       }
     }
   }
@@ -193,7 +212,7 @@ table.table_new {
     border: none;
     outline: none;
     background-color: white;
-    
+
     &:hover:not(:focus) {
       background-color: #a1caec;
     }

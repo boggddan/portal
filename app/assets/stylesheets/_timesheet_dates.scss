@@ -1,47 +1,51 @@
+@mixin row-group( $el, $bgc, $c, $pl, $ta ) {
+  cursor: default;
+  text-align: center;
+
+  &:hover,
+  #{ $el }:hover,
+  #{ $el }:not(.hover) { background-color: $bgc; color: #fff; }
+
+  :first-child { padding-left: $pl; text-align: $ta; }
+}
+
 #timesheet_dates {
-  flex: 1;
+  .reasons_absence {
+     width: 150px;
+  }
 
-  #table_timesheet_dates {
-    flex-grow: 1;
-
-    col:nth-child(1) { width: 250px; }
-    col ~ col { width: 60px; }
-
+  .parent_table {
+    th:nth-child( 1 ) { width: 250px; }
+    th ~ th { width: 60px; }
    // Ширину таблицы вычесляем Первая колонка 250, все остальные 60
    // view/timesheets/ajax_filter_timesheet_dates.coffee
 
-    th { font-weight: bold; }
+    tr {
+      &.all { @include row-group( 'th', #aaa, #fff, 3px, right ); }
+      &.category { @include row-group( 'td', #dadada, #333, 3px, left ); }
+      &.group { @include row-group( 'td', #f1f1f1, #333, 15px, left ); }
 
-    /* Колонка с наименованием продуктов */
-    tbody td {
-      &:first-child
-      { cursor: default; padding-left: 27px; text-align: left; }
-    }
+      &.row_data {
+        & :first-child {
+          cursor: default;
+          padding-left: 27px;
+          text-align: left;
+        }
+      }
 
-    td { border-right-color: #aaa; }
+      .cell_mark:not([disabled]) {
+        color: transparent;
+        text-shadow: 0 0 0 #333;
 
-    tr:last-child td { border-bottom-color: #aaa; }
+        &:focus {
+          outline: none;
+        }
+      }
 
-    tr.category {
-      cursor: default;
-      &:hover, td:hover, td { background-color:  #dadada }
-      td:first-child { padding-left: 3px; }
-    }
 
-    tr.group {
-      cursor: default;
-      &:hover, td:hover, td { background-color:  #f1f1f1 }
-      td:first-child { padding-left: 15px; }
-    }
-
-    tr.all {
-      cursor: default;
-      &:hover, th:hover, th { background-color: #aaa; color: #fff; }
-      th:first-child { text-align: right; }
-    }
-
-    td.cell_sum {
-     font-weight: bold;
+      .cell_sum {
+       font-weight: bold;
+      }
     }
   }
 }

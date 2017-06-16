@@ -57,7 +57,7 @@
 
                             tr.each(function (k, row) {
                                 solverLeftColspan(row, function (cell) {
-                                    $(cell).css("z-index", settings['z-index'] + 1);
+                                    $(cell).css("z-index", settings['z-index'] + 2);
                                 });
                             });
                         }
@@ -67,7 +67,7 @@
 
                             tr.each(function (k, row) {
                                 solveRightColspan(row, function (cell) {
-                                    $(cell).css("z-index", settings['z-index'] + 1);
+                                    $(cell).css("z-index", settings['z-index'] + 2);
                                 });
                             });
                         }
@@ -189,7 +189,7 @@
 
                         setBackground(cell);
                         cell.css({
-                            'position': 'relative'
+                            'position': 'relative', 'z-index': '1'
                         });
                     });
                 }

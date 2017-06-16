@@ -1,0 +1,15 @@
+//  Фильтрация таблицы содержимого документа табеля
+( function( ) {
+  const blockTable = document.querySelector( '.parent_table' );
+
+  <% if @timesheet_dates.present? %>
+    blockTable.innerHTML = '<%= j render( "table_timesheet_dates" ) %>';
+
+    const table = blockTable.querySelector('table');
+    $( 'table' ).tableHeadFixer( { 'left': 3 } ); // Фиксируем шапку таблицы
+
+    timesheetSumAll( );
+  <% else %>
+    blockTable.innerHTML = '';
+  <% end %>
+} ).call( this );

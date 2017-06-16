@@ -38,7 +38,14 @@ h2 { @include h-fz( 20px ); }
 }
 
 // Для колонок на страничке
-.clmn { margin-right: 15px; display: flex; flex-direction: column; flex-shrink: 0; }
+.clmn {
+  max-width: 100%;
+  margin-right: 15px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  margin-bottom: 15px;
+}
 
 
 .dialog-no-close .ui-dialog-titlebar-close { display: none; } /* Скрыть кнопку кнопки */

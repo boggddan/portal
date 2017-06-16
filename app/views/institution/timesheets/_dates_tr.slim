@@ -1,7 +1,7 @@
 - data = { }
 - prefix_id = type
 
-- if type != :all
+- unless type == :all
   - data = { category_id: category_id }
   - prefix_id = "#{ prefix_id }_#{ category_id }" if type != :all
   - tag = :td

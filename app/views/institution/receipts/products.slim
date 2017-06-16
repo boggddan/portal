@@ -42,6 +42,6 @@ main#receipt_products *{data: {\
       = render label_text, label_attr: {class: :icon_filter}, text: 'за договором №',
         input_attr: {id: :contract_number, value: @receipt.contract_number, disabled: true}
 
-  .clmn *{data: {path_update: institution_receipts_product_update_path}}
+  .clmn *{data: { path_update: institution_receipts_product_update_path}}
     h2 Продукти харчування
     .parent_table = render('table_receipt_products', disabled: disabled) if @receipt_products.present?

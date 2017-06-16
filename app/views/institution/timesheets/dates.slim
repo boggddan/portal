@@ -1,47 +1,50 @@
 / Отображение документа табеля
+/ Отображение заявки
+- disabled = @timesheet.number_sa.present?
+- label_text = 'layouts/label_text'
+
 main#timesheet_dates *{ data: { \
   id: @timesheet.id,
-  path_exit: institution_timesheets_index_path,
-  path_send: institution_timesheets_send_sa_path,
-  path_update: institution_timesheets_update_path,
-  path_filter: institution_timesheets_ajax_filter_timesheet_dates_path,
-  path_update_dates: institution_timesheets_dates_update_path } }
+  path: { \
+  send: institution_timesheets_send_sa_path,
+  exit: institution_timesheets_index_path,
+  update: institution_timesheets_update_path } } }
 
-  h1
-  .panel_new
-    button.btn_send *{ disabled: @timesheet.date_sa }
-    button *{ class: ( @timesheet.date_sa ? :btn_exit : :btn_save ) }
-    - if @timesheet.date_sa
-      label.icon_number
-        | Надіслано документ:
-        &text *{ value: @timesheet.number_sa, disabled: true }
+  h1.icon
+  .panel_main.row_2
+    .panel_new
+      button.btn_send *{ disabled: disabled }
+      button *{ class: ( disabled ? :btn_exit : :btn_save ) }
+      - if disabled
+        = render label_text, label_attr: { class: :icon_number }, text: 'Надіслано документ:',
+          input_attr: { value: @timesheet.number_sa, disabled: true }
 
-      label.icon_сalendar
-        | від
-        &text#date_sa *{ value: date_str( @timesheet.date_sa ), disabled: true }
+        = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
+          input_attr: { value:  date_str( @timesheet.date_sa ), disabled: true }
 
-  .panel_new
-    label.icon_number
-      | Табель №:
-      &text#number *{ value: @timesheet.number, disabled: true }
+    .panel_new
+      = render label_text, label_attr: { class: :icon_number }, text: 'Табель №',
+        input_attr: { id: :number, value: @timesheet.number, disabled: true }
+      = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
+        input_attr: { id: :date, name: :date, value:  date_str( @timesheet.date ), disabled: disabled, readonly: true }
 
-    label.icon_сalendar
-      | від
-      &text#date *{ value: date_str( @timesheet.date ), disabled: @timesheet.date_sa, readonly: true }
+      = render label_text, label_attr: { class: :icon_сalendar }, text: 'З',
+        input_attr: { value:  date_str( @timesheet.date_eb ), disabled: true }
+      = render label_text, label_attr: { class: :icon_сalendar }, text: 'по',
+        input_attr: { value:  date_str( @timesheet.date_ee ), disabled: true }
 
-    label.icon_сalendar
-      | З
-      &text#date_eb *{ value: date_str( @timesheet.date_eb ), disabled: true }
+      = select_tag :group_timesheet, options_for_select( @group_timesheet ), prompt: 'Категорія / Група'
 
-    label.icon_сalendar
-      | ПО
-      &text#date_ee *{ value: date_str( @timesheet.date_ee ), disabled: true }
 
-    = select_tag :group_timesheet, options_for_select( group_timesheet ), prompt: 'Категорія / Група'
+  .clmn_main: .clmn *{ data: { path: { \
+    filter: institution_timesheets_ajax_filter_timesheet_dates_path,
+    update: institution_timesheets_dates_update_path,
+    group_update: institution_timesheets_dates_group_update_path } } }
 
-  ul#reasons_absences *{ style: 'display: none;' }
-    - @reasons_absences.each_with_index do | v, i |
-      - next_v = @reasons_absences[ @reasons_absences.last == v ? 0 : i + 1 ]
-      li *{ data: { id: v[ 0 ], next_id: next_v[ 0 ], next_val: next_v[ 2 ]  } } = v[ 2 ]
+    .panel_new
+      label Заміна виділений позначень&nbsp;
+      - @reasons_absences.each_with_index do | v, i |
+        - next_v = @reasons_absences[ @reasons_absences.last == v ? 0 : i + 1 ]
+        button.btn_gradient.reasons_absence *{ data: { id: v[ 0 ], next_id: next_v[ 0 ], next_val: next_v[ 2 ]  } } = v[ 2 ]
 
-  #table_timesheet_dates
+    .parent_table
