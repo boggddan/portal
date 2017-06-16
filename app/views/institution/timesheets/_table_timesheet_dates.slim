@@ -3,7 +3,7 @@ ruby:
   date_ee = @timesheet.date_ee
   date_eb = @timesheet.date_eb
   @sum_names = [ 'appearance', 'absence' ]
-  @count_days = date_ee.day - date_eb.day + 1
+  @count_days = ( date_ee - date_eb).to_i + 1
 
 table.table_new
   colgroup
