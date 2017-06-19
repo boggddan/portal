@@ -98,28 +98,4 @@ $( document ).on( 'turbolinks:load' , function() {
   $( "#dialog_wait" ).dialog( $dialogOptions );
   //-------------------------------------------------------------
 
-  // Диалог удаления
-   $( '#dialog_delete' ).dialog( {
-   autoOpen: false,
-   resizable: false,
-   height: 'auto',
-   width: 400,
-   modal: true,
-   buttons: {
-     'Так': function() {
-       var $this = $( this );
-         if ( $( '#menu_requirements' ).length == 0 ) { eval( $this.data( 'delete' ) ) }
-         else { $this.trigger( 'delete' ) }
-       $this.dialog( 'close' );
-     },
-      'Hі': function() {
-       var $this = $( this );
-
-       if ( $( '#menu_requirements' ).length == 0 && $( '#timesheets' ).length ) { eval( $this.data( 'un-delete' )) }
-       else { $this.trigger( 'un_delete' ) }
-
-       $this.dialog( 'close' );
-     }
-   }});
-
 });

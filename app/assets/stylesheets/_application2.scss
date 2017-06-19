@@ -6,7 +6,7 @@ $ffIcon: 'Glyphicons Halflings';
 }
 
 
-// ХАК для JQUERY
+// ХАК для JQUERY  -- НУЖНО ДЛЯ Datapicker
 .ui-widget-header .ui-icon {
     background-image: image_url('lib/ui-icons_444444_256x240.png');
 }
@@ -49,12 +49,6 @@ h2 { @include h-fz( 20px ); }
 
 
 .dialog-no-close .ui-dialog-titlebar-close { display: none; } /* Скрыть кнопку кнопки */
-
-/* Для удаления записи */
-#dialog_delete {
-  div:after { content: 'Ви дійсно бажаєте видалити цей документ?'; }
-  div:before { content: "\e014"; font-family: 'Glyphicons Halflings'; margin-right: 3px; top: 2px; position: relative; color: #d9534f; }
-}
 
 /* Диалог ожидания */
 #dialog_wait {
