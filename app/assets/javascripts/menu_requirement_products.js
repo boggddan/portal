@@ -90,7 +90,9 @@ $( document ).on( 'turbolinks:load', function() {
     $( '#table_menu_products input' ).change( function() {
       var $this = $( this );
       var $thisOldValue = floatValue( $this.data( 'old-value' ) );
-      var $thisValue = Math.trunc( floatValue( $this.val() ) * 1000 ) / 1000;
+      //var $thisValue = Math.trunc( (floatValue( $this.val() ) * 1000 )  / 1000  ;
+
+      var $thisValue = +`${ floatValue( $this.val() ) }`.match(/\d+.\d{1,3}/)[0];
 
       $this.val( f3_to_s( $thisValue ) );
 

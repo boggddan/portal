@@ -1,7 +1,5 @@
 #menu_requirements {
-  width: 550px;
+  flex-direction: row;
 
-  #table_menu_requirements {
-    height: 500px;
-  }
+  #col_mr { flex-basis: 550px; }
 }

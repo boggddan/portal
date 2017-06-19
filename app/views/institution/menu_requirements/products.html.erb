@@ -206,8 +206,16 @@
                     <%= content_tag :td do %>
                       <% if menu_product_id  %>
                         <% count_value = menu_product["count_#{value2}_#{index}"] %>
+
+                        <% count_value = value2 == :diff ?
+                          date_sap ?
+                            menu_product["count_fact_#{index}"] - menu_product["count_plan_#{index}"]
+                            : 0
+                          : menu_product["count_#{value2}_#{index}"] %>
+
                         <% if (!date_sap && value1 == :plan) || (date_sap && !date_saf && value1 == :fact) %>
-                          <%= text_field_tag "count_#{value2}_#{menu_product.product_id}_#{children_category[:id]}_#{menu_product_id}", f3_to_s(count_value),
+                          <%= text_field_tag "count_#{value2}_#{menu_product.product_id}_#{children_category[:id]}_#{menu_product_id}",
+                            f3_to_s(count_value),
                             class: ((count_value.positive? ? :positive : :negative) if value2 == :diff),
                             data: ( { sum: menu_product["sum_#{value1}_#{index}"],
                                       ajax_path: "#{ institution_menu_requirements_product_update_path }?id=#{ menu_product_id }" } unless value2 == :diff ) %>
@@ -229,12 +237,3 @@
   <% end %>
 
 <% end %>
-
-
-
-
-
-
-
-
-

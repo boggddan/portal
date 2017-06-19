@@ -1,19 +1,15 @@
-main#menu_requirements *{ data: { \
-  path_filter: institution_menu_requirements_ajax_filter_menu_requirements_path,
-  path_create: institution_menu_requirements_create_path,
-  path_view: institution_menu_requirements_products_path,
-  path_del: institution_menu_requirements_delete_path } }
+main#menu_requirements
 
-  h1 Меню-вимоги
-  .panel_new
-    label.icon_сalendar
-      | З
-      &text#date_start *{ readonly: true, placeholder: 'Дата...' }
+  #col_mr.clmn *{ data: { caption: 'Меню-вимоги',
+    path_filter: institution_menu_requirements_ajax_filter_menu_requirements_path,
+    path_create: institution_menu_requirements_create_path,
+    path_view: institution_menu_requirements_products_path,
+    path_del: institution_menu_requirements_delete_path } }
 
-    label.icon_сalendar
-      | ПО
-      &text#date_end *{ readonly: true, placeholder: 'Дата...' }
+    h1 Меню-вимоги
+    .panel_new
+      = render 'layouts/label_text', label_attr: {class: :icon_сalendar}, text: 'З', input_attr: {id: :date_start}
+      = render 'layouts/label_text', label_attr: {class: :icon_сalendar}, text: 'ПО', input_attr: {id: :date_end}
+      button.btn_create.right_first
 
-    button.btn_create.right_first
-
-  #table_menu_requirements
+    .parent_table

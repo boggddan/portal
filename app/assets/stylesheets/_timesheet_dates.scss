@@ -19,6 +19,7 @@
   }
 
   .parent_table {
+    table { width: 0 };
     th:nth-child( 1 ) { width: 250px; }
     th ~ th { width: 60px; }
    // Ширину таблицы вычесляем Первая колонка 250, все остальные 60

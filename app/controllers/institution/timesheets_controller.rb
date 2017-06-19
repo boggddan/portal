@@ -10,7 +10,13 @@ class Institution::TimesheetsController < Institution::BaseController
   end
 
   def delete # Удаление документа
-    Timesheet.find( params[ :id ] ).destroy
+    id = params[ :id ]
+
+    ActiveRecord::Base.transaction do
+      TimesheetDate.where( timesheet_id: id ).delete_all
+      Timesheet.where( id: id ).delete_all
+    end
+
     render json: { status: true }
   end
 

@@ -121,6 +121,7 @@ window.delMsg = ( $header, $func ) -> # Сообщение об ошибке
 window.createDoc = ( $elem, $data ) -> # Нажатие на кнопочку создать
   $elem = $( $elem ) unless $elem instanceof $
   $dataAttr = $( $elem ).closest( '.clmn' ).data( )
+  console.log($dataAttr.pathCreate)
   window.ajax(
     "Сторення: #{ $dataAttr.caption } "
     $dataAttr.pathCreate

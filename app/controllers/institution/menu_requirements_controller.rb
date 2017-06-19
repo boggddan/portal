@@ -4,19 +4,25 @@ class Institution::MenuRequirementsController < Institution::BaseController
   end
 
   def ajax_filter_menu_requirements # Фильтрация документов
-    sort = "#{ params[ :sort_field ] } #{ params[ :sort_order ] }"
-
     @menu_requirements = MenuRequirement
       .where( institution: current_institution, date: params[ :date_start ]..params[ :date_end ] )
-      .order( sort )
+      .order( "#{ params[ :sort_field ] } #{ params[ :sort_order ] }" )
   end
 
   def delete # Удаление документа
-    MenuRequirement.find_by( id: params[ :id ] ).destroy if params[ :id ]
+    id = params[ :id ]
+    
+    ActiveRecord::Base.transaction do
+      MenuProduct.where( menu_requirement_id: id ).delete_all
+      MenuChildrenCategory.where( menu_requirement_id: id ).delete_all
+      MenuRequirement.where( id: id ).delete_all
+    end
+
+    render json: { status: true }
   end
 
   def products # Отображение товаров
-    @menu_requirement = MenuRequirement.find_by( id: params[ :id ] )
+    @menu_requirement = MenuRequirement.find( params[ :id ] )
 
     date = @menu_requirement.date
     institution_id = @menu_requirement.institution_id
@@ -79,24 +85,27 @@ class Institution::MenuRequirementsController < Institution::BaseController
   end
 
   def create # Создание документа
+    result = { }
+
     ActiveRecord::Base.transaction do
-      menu_requirement = MenuRequirement.create!(institution: current_institution, branch: current_branch)
+      menu_requirement = MenuRequirement.create!( institution: current_institution, branch: current_branch )
 
       current_institution.children_categories.each do | children_category |
-        MenuChildrenCategory.create!(menu_requirement: menu_requirement, children_category: children_category)
+        MenuChildrenCategory.create!( menu_requirement: menu_requirement, children_category: children_category )
 
-        Product.all.order(:name).each do |product|
-          MenuProduct.create!(menu_requirement: menu_requirement, children_category: children_category, product: product)
+        Product.all.order( :name ).each do | product |
+          MenuProduct.create!( menu_requirement: menu_requirement, children_category: children_category, product: product )
         end
       end
 
-      redirect_to institution_menu_requirements_products_path( id: menu_requirement.id )
+      result = { status: true, urlParams: { id: menu_requirement.id } }  
     end
 
+    render json: result
   end
 
   def children_category_update # Обновление количества по категориям
-    update = params.permit(:count_all_plan, :count_exemption_plan, :count_all_fact, :count_exemption_fact).to_h
+    update = params.permit( :count_all_plan, :count_exemption_plan, :count_all_fact, :count_exemption_fact ).to_h
     MenuChildrenCategory.where(id: params[:id]).update_all(update) if params[:id] && update.present?
   end
 

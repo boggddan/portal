@@ -1,7 +1,7 @@
 $( document ).on 'turbolinks:load', ->
 
   # Если объект существует
-  $menuRequirements = $( '#menu_requirements' )
+  $menuRequirements = $( '#menu_requirements11' )
   if $menuRequirements.length
     $parentElem = $menuRequirements
 

@@ -43,18 +43,16 @@ $( document ).on( 'turbolinks:load' , function() {
   };
 
   float3Value = function( $value ) {
-    return Math.trunc( floatValue( $value ) * 1000 ) / 1000;1
+    return Math.trunc( (floatValue( $value ) + 0.0001) * 1000 ) / 1000;
   }
 
   f3_to_s = function($value) {
-    return $value ? $value.toFixed(3) : ''
+    return $value ? float3Value( $value ).toFixed(3) : ''
   }
 
   f_to_s = function($value) {
     return $value ? $value : ''
   }
-
-
 
     f2_to_s = function($value) {
     return $value ? $value.toFixed(2) : ''
