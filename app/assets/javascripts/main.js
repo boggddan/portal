@@ -47,7 +47,7 @@ $( document ).on( 'turbolinks:load' , function() {
   }
 
   f3_to_s = function($value) {
-    return $value ? float3Value( $value ).toFixed(3) : ''
+    return $value ? `${ floatValue( $value ) }`.match(/-?\d+(\.\d{1,3})?/)[0] : ''
   }
 
   f_to_s = function($value) {
