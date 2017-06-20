@@ -6,6 +6,8 @@
 
 <%= content_tag :main, id: :menu_requirement_products, data: {
   id: @menu_requirement.id,
+  path_send: '',
+  path_exit: institution_menu_requirements_index_path,
   path_update: institution_menu_requirements_update_path } do %>
 
   <%= content_tag :h1, "Меню-вимога № #{ @menu_requirement.number } від #{ date_str( @menu_requirement.date ) }", class: :icon_hide %>
@@ -16,8 +18,7 @@
                      data: { ajax_path: "#{ institution_menu_requirements_send_sap_path }?id=#{ @menu_requirement.id }" } %>
       <%= button_tag ' факт', class: :btn_send, id: :send_saf, disabled: !date_sap || date_saf,
                      data: { ajax_path: "#{ institution_menu_requirements_send_saf_path }?id=#{ @menu_requirement.id }" } %>
-      <%= button_tag '', class: (date_saf ? :btn_exit : :btn_save),
-                     onclick: "location.href='#{ institution_menu_requirements_index_path }'" %>
+      <%= button_tag '', class: (date_saf ? :btn_exit : :btn_save) %>
 
       <% if date_sap %>
         <%= label_tag '', 'Надіслано план:' %>

@@ -11,6 +11,15 @@ $( document ).on( 'turbolinks:load', ( ) => {
     $( '#table_menu_products table' ).tableHeadFixer( { 'left' : 2 } ); // Фиксируем шапку таблицы
 
     $parentElem
+      // .find( 'h1' )
+      //   .on( 'click', function( ) { window.clickHeader( $( this ) ); } )
+      // .end( )
+      // .find( '.btn_send' )
+      //   .on( 'click', function( ) { window.btnSendClick( $( this ) ); } )  // Нажатие на кнопочку создать
+      // .end( )
+      .find( '.btn_exit, .btn_save' )
+        .on( 'click', function( ) { window.btnExitClick( $( this ) ); } )
+      .end( )
       .find( '#splendingdate' ) // Дата
         .data( 'old-value', $( '#splendingdate' ).val( ) )
         .datepicker( { onSelect: function( ) { сhangeValue( $( this ), 'main', false ); } } )

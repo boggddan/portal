@@ -340,6 +340,7 @@ window.btnExitClick = ( $elem ) -> # Нажатие на кнопочку вых
 #####################
 
 $( document ).on 'turbolinks:load', ( ) ->
-  $( '#error_msg .close' ).click -> $( '#error_msg' ).addClass 'hide'
+  $( '#error_msg .close' ).click -> $( '#error_msg' ).addClass( 'hide' )
 
-  $( '#del_msg button:not( success )' ).click -> $( '#del_msg' ).addClass( 'hide' ).find( '.success' ).off 'click'
+  $( '#del_msg button:not( success )' ).click ->
+    $( '#del_msg' ).addClass( 'hide' ).find( '.success' ).off( 'click' )
