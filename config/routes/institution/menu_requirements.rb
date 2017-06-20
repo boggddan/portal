@@ -7,6 +7,7 @@ namespace :menu_requirements do
   post :create # Создание документа
   post :children_category_update # Обновление количества по категориям
   post :product_update # Обновление количества по продуктам
+
   post :update # Обновление реквизитов документа
   post :send_sap # Веб-сервис отправки плана меню-требования
   post :send_saf # Веб-сервис отправки факта меню-требования

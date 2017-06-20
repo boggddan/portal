@@ -4,7 +4,9 @@
 <% date_saf = @menu_requirement.date_saf %>
 <% children_categories_array = [] %>
 
-<%= content_tag :main, id: :menu_requirement_products do %>
+<%= content_tag :main, id: :menu_requirement_products, data: {
+  id: @menu_requirement.id,
+  path_update: institution_menu_requirements_update_path } do %>
 
   <%= content_tag :h1, "Меню-вимога № #{ @menu_requirement.number } від #{ date_str( @menu_requirement.date ) }", class: :icon_hide %>
 
@@ -53,8 +55,7 @@
 
       <%= label_tag :date, 'від' %>
       <%= content_tag :nav, class: :icon_сalendar do %>
-        <%= text_field_tag :date, date_str(@menu_requirement.date), disabled: true, data: {
-          ajax_path: "#{ institution_menu_requirements_update_path }?id=#{ @menu_requirement.id }" } %>
+        <%= text_field_tag :date, date_str(@menu_requirement.date), disabled: true %>
       <% end %>
 
       <%= label_tag :splendingdate, 'Дата списання' %>

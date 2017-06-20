@@ -1,20 +1,20 @@
-$( document ).on( 'turbolinks:load', function() {
+$( document ).on( 'turbolinks:load', ( ) => {
   var scrollbarWidth = getScrollbarWidth();
 
   // Если объект существует
-  if ( $( '#menu_requirement_products' ).length ) {
-    $( '#main_menu li' ).removeClass( 'active' );
-    $( '#mm_menu_requirements' ).addClass( 'active' );
+  const $menuRequirementProducts = $( '#menu_requirement_products' );
+  if ( $menuRequirementProducts.length ) {
+    const $parentElem = $menuRequirementProducts;
+
+    $( '#main_menu li[data-page=menu_requirements]' ).addClass( 'active' ).siblings(  ).removeClass( 'active' );
 
     $( '#table_menu_products table' ).tableHeadFixer( { 'left' : 2 } ); // Фиксируем шапку таблицы
 
-    // Обновление реквизитов и заголовок формы
-    function MenuRequirementUpdate() {
-      var $splendingdate = $( '#splendingdate' );
-      var $path_ajax = $date.data( 'ajax-path' ) + '&' + $splendingdate.attr( 'name' ) + '=' + $splendingdate.val();
+    $parentElem
+      .find( '#splendingdate' ) // Дата
+        .data( 'old-value', $( '#splendingdate' ).val( ) )
+        .datepicker( { onSelect: function( ) { сhangeValue( $( this ), 'main', false ); } } )
 
-      $.ajax( { url: $path_ajax, type: 'POST', dataType: 'script' } );
-    };
 
     // Нажатие на кнопочку отправить
     $( '#send_sap, #send_saf' ).click( function() {
@@ -22,12 +22,8 @@ $( document ).on( 'turbolinks:load', function() {
       $.ajax( { url: $( this ).data( 'ajax-path' ), type: 'POST', dataType: 'script' } );
     } );
 
-    // Дата - при выборе сохраняем значение
-    $( ' #splendingdate' ).datepicker( {
-      onSelect: function() {
-        var $this = $( this );
-        if ( $this.data( 'old-value' ) != $this.val() ) { MenuRequirementUpdate() };  // Обновление реквизитов и заголовок формы
-    } } );
+
+
 
     // При получении фокуса выделяем весь текст и сохраянем старое значение
     $( '#table_menu_children_categories input' ).focus( function() {

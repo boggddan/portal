@@ -11,7 +11,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
 
   def delete # Удаление документа
     id = params[ :id ]
-    
+
     ActiveRecord::Base.transaction do
       MenuProduct.where( menu_requirement_id: id ).delete_all
       MenuChildrenCategory.where( menu_requirement_id: id ).delete_all
@@ -98,7 +98,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
         end
       end
 
-      result = { status: true, urlParams: { id: menu_requirement.id } }  
+      result = { status: true, urlParams: { id: menu_requirement.id } }
     end
 
     render json: result
@@ -115,8 +115,8 @@ class Institution::MenuRequirementsController < Institution::BaseController
   end
 
   def update # Обновление реквизитов документа
-    update = params.permit( :date, :splendingdate ).to_h
-    MenuRequirement.where(id: params[:id]).update_all(update) if params[:id] && update.any?
+    update = params.permit( :splendingdate ).to_h
+    MenuRequirement.where( id: params[:id]).update_all( update ) if params[:id] && update.any?
   end
 
   def send_sap # Веб-сервис отправки плана меню-требования
