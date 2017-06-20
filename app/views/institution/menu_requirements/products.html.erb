@@ -6,8 +6,7 @@
 
 <%= content_tag :main, id: :menu_requirement_products do %>
 
-  <%= content_tag :h1, "Меню-вимога № #{ @menu_requirement.number } від #{ date_str( @menu_requirement.date ) }",
-      data: { text: "Меню-вимога № #{ @menu_requirement.number } від" }, class: :icon_hide %>
+  <%= content_tag :h1, "Меню-вимога № #{ @menu_requirement.number } від #{ date_str( @menu_requirement.date ) }", class: :icon_hide %>
 
   <%= content_tag :div, id: :panel_main do %>
     <%= content_tag :div, class: :panel do %>
@@ -54,13 +53,13 @@
 
       <%= label_tag :date, 'від' %>
       <%= content_tag :nav, class: :icon_сalendar do %>
-        <%= text_field_tag :date, date_str(@menu_requirement.date), disabled: date_sap, readonly: true, data: {
+        <%= text_field_tag :date, date_str(@menu_requirement.date), disabled: true, data: {
           ajax_path: "#{ institution_menu_requirements_update_path }?id=#{ @menu_requirement.id }" } %>
       <% end %>
 
       <%= label_tag :splendingdate, 'Дата списання' %>
       <%= content_tag :nav, class: :icon_сalendar do %>
-        <%= text_field_tag :splendingdate, date_str( @menu_requirement.splendingdate ), disabled: date_saf, readonly: true  %>
+        <%= text_field_tag :splendingdate, date_str( @menu_requirement.splendingdate ), disabled: date_sap, readonly: true  %>
       <% end %>
     <% end %>
   <% end %>

@@ -170,6 +170,7 @@ table.table_new {
         cursor: default;
 
         &,
+        td,
         select:not(:focus):not(:hover),
         input:not(:focus):not(:hover) {
           background-color: #e7e7e7;

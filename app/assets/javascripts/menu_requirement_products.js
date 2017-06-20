@@ -10,13 +10,9 @@ $( document ).on( 'turbolinks:load', function() {
 
     // Обновление реквизитов и заголовок формы
     function MenuRequirementUpdate() {
-      var $date = $( '#date' );
       var $splendingdate = $( '#splendingdate' );
-      var $h1 = $( 'h1' );
-      var $date_val = $date.val();
-      var $path_ajax = $date.data( 'ajax-path' ) + '&' + $date.attr( 'name' ) + '=' + $date_val + '&' + $splendingdate.attr( 'name' ) + '=' + $splendingdate.val();
+      var $path_ajax = $date.data( 'ajax-path' ) + '&' + $splendingdate.attr( 'name' ) + '=' + $splendingdate.val();
 
-      $h1.text( $h1.data( 'text' ) + ' ' + $date_val );
       $.ajax( { url: $path_ajax, type: 'POST', dataType: 'script' } );
     };
 
@@ -27,7 +23,7 @@ $( document ).on( 'turbolinks:load', function() {
     } );
 
     // Дата - при выборе сохраняем значение
-    $( '#date, #splendingdate' ).datepicker( {
+    $( ' #splendingdate' ).datepicker( {
       onSelect: function() {
         var $this = $( this );
         if ( $this.data( 'old-value' ) != $this.val() ) { MenuRequirementUpdate() };  // Обновление реквизитов и заголовок формы
@@ -53,19 +49,21 @@ $( document ).on( 'turbolinks:load', function() {
     // Количество детей - при потери фокуса сохраняем значение
     $( '#table_menu_children_categories input' ).change( function() {
       var $this = $( this );
-      var $thisOldValue = floatValue( $this.data( 'old-value' ) );
-      var $thisValue = Math.trunc( floatValue( $this.val() ) );
+      var $thisOldValue = toDecimal( $this.data( 'old-value' ), 0 );
+      var $thisValue = toDecimal( $this.val( ), 0 );
 
-      $this.val( IntToString( $thisValue ) );
+      $this.val( floatToString( $thisValue, 0 ) );
 
       if ( $thisOldValue != $thisValue ) {
         $this.data( 'old-value' , $thisValue );
         var $name_arr = $this.attr( 'name' ).split( '_' );
 
-        var $countTotal = $( '#table_menu_children_categories #' + $name_arr[0] + '_' + $name_arr[1] + '_' + $name_arr[2] + '_total' );
+        var $countTotal = $( '#table_menu_children_categories #' + $name_arr[0]
+          + '_' + $name_arr[1] + '_' + $name_arr[2] + '_total' );
 
-        $countTotal.html( IntToString(floatValue( $countTotal.html() ) - $thisOldValue + $thisValue ) );
-        $this.data( 'ajax-blur', $this.data( 'ajax-path' ) + '&' + $name_arr[0] + '_' + $name_arr[1] + '_' + $name_arr[2] + '=' + $thisValue ); };
+        $countTotal.html( floatToString( toDecimal( $countTotal.html(), 0 ) - $thisOldValue + $thisValue, 0 ) );
+        $this.data( 'ajax-blur',
+          $this.data( 'ajax-path' ) + '&' + $name_arr[0] + '_' + $name_arr[1] + '_' + $name_arr[2] + '=' + $thisValue ); };
         if ( $name_arr[1] = 'all' ) { ChildrenCostCalc( $name_arr[2], $name_arr[3] ) }; // Пересчитать дітодень
     } );
 
@@ -89,9 +87,9 @@ $( document ).on( 'turbolinks:load', function() {
     // Количество товара - при изминении пересчитывем значения
     $( '#table_menu_products input' ).change( function() {
       var $this = $( this );
-      var $thisOldValue = floatValue( $this.data( 'old-value' ) );
-      var $thisValue = +`${ floatValue( $this.val() ) }`.match(/-?\d+(\.\d{1,3})?/)[0];
-      $this.val( $thisValue.toFixed(3) );
+      var $thisOldValue = toDecimal( $this.data( 'old-value' ), 3 );
+      var $thisValue = toDecimal( $this.val( ), 3 );
+      $this.val( floatToString( $thisValue, 3) );
 
       if ( $thisOldValue != $thisValue ) {
         $this.data( 'old-value', $thisValue );
@@ -105,27 +103,31 @@ $( document ).on( 'turbolinks:load', function() {
           case 'diff':
             $countType = 'fact';
             var $count = $( '#table_menu_products #' + $name_arr[0] + '_' + $countType + '_' + $name_arr[2] + '_' + $name_arr[3] + '_' + $name_arr[4] );
-            $countOldValue = floatValue( $count.val() );
-            $countValue = $countOldValue - $thisOldValue + $thisValue;
-            $count.val( f3_to_s( $countValue ) ).data( 'old-value', $countValue );
+            $countOldValue = toDecimal( $count.val(), 3 );
+            $countValue = toRound($countOldValue - $thisOldValue + $thisValue, 3);
+            console.log($countOldValue, $thisOldValue, $thisValue);
+            $count.val( floatToString( $countValue, 3 ) ).data( 'old-value', $countValue );
             $this.removeClass( 'positive' ).removeClass( 'positive' ).addClass( $thisValue > 0 ? 'positive' : 'negative' );
             break;
           case 'fact':
             var $countDiff = $( '#table_menu_products #' + $name_arr[0] + '_diff_' + $name_arr[2] + '_' + $name_arr[3] + '_' + $name_arr[4] );
-            var $countDiffInputValue = floatValue( $countDiff.val() ) - $thisOldValue + $thisValue;
-            $countDiff.val( f3_to_s( $countDiffInputValue ) ).removeClass( 'positive negative' ).removeClass( 'positive' ).addClass( $countDiffValue > 0 ? 'positive' : 'negative' );
+            var $countDiffInputValue = toDecimal( $countDiff.val( ), 3 ) - $thisOldValue + $thisValue;
+            $countDiff.val( floatToString( $countDiffInputValue, 3 ) )
+              .removeClass( 'negative' )
+              .removeClass( 'positive' )
+              .addClass( $countDiffValue > 0 ? 'positive' : 'negative' );
             break;
         }
 
         var $countAll = $( '#table_menu_products #' + $name_arr[0] + '_' + $countType + '_all_' + $name_arr[2] );
-        $countAll.html( f3_to_s( floatValue( $countAll.html() ) + $countDiffValue ) );
+        $countAll.html( floatToString( toDecimal( $countAll.html( ), 3 ) + $countDiffValue, 3 ) );
 
-        var $sumValue = Math.round( $countValue * floatValue( $( '#table_menu_products #price_' + $name_arr[2] ).html() ) * 100 ) / 100;
-        var $sumDiff = $sumValue - floatValue( $count.data( 'sum' ) );
-        $count.data( 'sum', f2_to_s( $sumValue ) );
+        var $sumValue = toRound( $countValue * toDecimal( $( '#table_menu_products #price_' + $name_arr[2] ).html( ), 2 ), 2);
+        var $sumDiff = $sumValue - toDecimal( $count.data( 'sum' ), 2);
+        $count.data( 'sum', floatToString( $sumValue, 2 ) );
 
         var $childrenCost = $( '#table_menu_children_categories #children_cost_' + $countType + '_' + $name_arr[3] );
-        $childrenCost.data( 'sum', f2_to_s( floatValue( $childrenCost.data( 'sum' ) ) + $sumDiff ) );
+        $childrenCost.data( 'sum', floatToString( toDecimal( $childrenCost.data( 'sum' ), 2) + $sumDiff, 2) );
 
         ChildrenCostCalc( $countType, $name_arr[3] ); // Пересчитать дітодень
 
@@ -136,15 +138,17 @@ $( document ).on( 'turbolinks:load', function() {
     // Пересчитать дітодень
     function ChildrenCostCalc( $countType, $categoryId ) {
       var $childrenCost = $( '#table_menu_children_categories #children_cost_' + $countType + '_' + $categoryId );
-      var $costValue = floatValue( $( '#table_menu_children_categories #cost_' + $categoryId ).html() );
+      var $costValue = toDecimal( $( '#table_menu_children_categories #cost_' + $categoryId ).html(), 2 );
       var $childrenDiff = $( '#table_menu_children_categories #children_diff_' + $countType + '_' + $categoryId );
-      var $countAllValue = floatValue( $( '#table_menu_children_categories #count_all_' + $countType + '_' + $categoryId ).val() );
+      var $countAllValue = toDecimal( $( '#table_menu_children_categories #count_all_' + $countType + '_' + $categoryId ).val(), 2 );
 
-      var $childrenCostValue = $countAllValue == 0 ? 0 : Math.round( floatValue( $childrenCost.data( 'sum' ) ) / $countAllValue * 100 ) / 100 ;
+      var $childrenCostValue = $countAllValue == 0 ? 0 : toRound( toDecimal( $childrenCost.data( 'sum' ), 2 ) / $countAllValue, 2 );
       var $childrenDiffValue = $childrenCostValue - $costValue;
 
-      $childrenCost.html( f2_to_s( $childrenCostValue ) );
-      $childrenDiff.html( f2_to_s( $childrenDiffValue ) ).removeClass( 'positive negative' ).addClass( $childrenDiffValue > 0 ? 'positive' : 'negative' );
+      $childrenCost.html( floatToString( $childrenCostValue, 2 ) );
+      $childrenDiff.html( floatToString( $childrenDiffValue, 2 ) )
+        .removeClass( 'positive negative' )
+        .addClass( $childrenDiffValue > 0 ? 'positive' : 'negative' );
     };
 
     //

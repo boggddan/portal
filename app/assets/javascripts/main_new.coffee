@@ -12,28 +12,28 @@ mergeDeep = (target, source) -> # Соеднинение двох объекто
 
   target
 
-window.toDecimal = ( $value, $scale = -1 ) ->
-  switch typeof( $value )
-    when 'number' then $returnVal = $value
-    when 'string'
-      $returnVal = parseFloat( $value.toString().replace(',','.').replace(/\s+/g,'') )
-      $returnVal = 0 if isNaN( $returnVal )
-    else $returnVal = 0
-
-  if $scale isnt -1
-    $scaleVal = Math.pow( 10, $scale )
-    $returnVal = Math.trunc( $returnVal * $scaleVal ) / $scaleVal
-  $returnVal
-
-window.floatToString = ( $value, $scale = 0 ) ->
-  if $value
-    if $scale
-      $scaleVal = Math.pow( 10, $scale )
-      $returnVal = ( Math.trunc( $value * $scaleVal ) / $scaleVal ).toFixed( $scale )
-    else
-      $returnVal = $value
-  else
-    $returnVal = ''
+# window.toDecimal111 = ( $value, $scale = -1 ) ->
+#   switch typeof( $value )
+#     when 'number' then $returnVal = $value
+#     when 'string'
+#       $returnVal = parseFloat( $value.toString().replace(',','.').replace(/\s+/g,'') )
+#       $returnVal = 0 if isNaN( $returnVal )
+#     else $returnVal = 0
+#
+#   if $scale isnt -1
+#     $scaleVal = Math.pow( 10, $scale )
+#     $returnVal = Math.trunc( $returnVal * $scaleVal ) / $scaleVal
+#   $returnVal
+#
+# window.floatToString111 = ( $value, $scale = 0 ) ->
+#   if $value
+#     if $scale
+#       $scaleVal = Math.pow( 10, $scale )
+#       $returnVal = ( Math.trunc( $value * $scaleVal ) / $scaleVal ).toFixed( $scale )
+#     else
+#       $returnVal = $value
+#   else
+#     $returnVal = ''
 
 window.setSession = ( $key, $value ) -> # Запись в сессию
   $sessionObj = JSON.parse( sessionStorage.getItem( $key ) ) || { } # спарсим объект обратно
@@ -244,21 +244,17 @@ window.clickHeader = ( $elem ) ->
   $elem.toggleClass 'hide'
   $( '.panel_main' ).toggleClass 'hide'
 
-  # const clickHeader = elem => {
-  #   elem.classList.toggle( 'hide' );
-  #   document.querySelector( '.panel_main' ).classList.toggle( 'hide' );
-  # };
-
-window.сhangeValue = ( $elem, $parentName, $func ) -> # Изминение значение на панели
+window.сhangeValue = ( $elem, $parentName, $func ) -> # Изминение значение таблице и на панели
   $elem = $( $elem ) unless $elem instanceof $
   $name = $elem.attr 'name'
   $dataType = $elem.data( 'type' )
 
   if $dataType?.charAt(0) is 'n'
     $scale = +$dataType.slice(1) or -1
-    $val = window.toDecimal $elem.val( ), $scale
+    $val = toDecimal( $elem.val( ), $scale )
     $valOld =  +$elem.data 'old-value'
-    $strVal = window.floatToString $val
+    $strVal = floatToString( $val )
+    console.log($val, $scale, $elem.val( ), $strVal )
     $elem.val( $strVal ).attr 'value', $strVal
   else
     $val = $elem.val( )
@@ -295,8 +291,8 @@ window.initValue = ( $elem ) ->
 
   if $dataType?.charAt( 0 ) is 'n'
     $scale = +$dataType.slice(1) or -1
-    $val = window.toDecimal $elemVal, $scale
-    $valFmt = window.floatToString( $val )
+    $val = toDecimal( $elemVal, $scale )
+    $valFmt = floatToString( $val )
     if $tagName is 'INPUT' then $elem.val( $valFmt ) else $elem.text( $valFmt )
   else
     $val = $elemVal

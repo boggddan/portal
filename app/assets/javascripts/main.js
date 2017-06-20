@@ -1,3 +1,54 @@
+
+// Преобразование в число и обрезание разрядности
+const toDecimal = ( value, scale = -1 ) => {
+  let result = 0;
+
+  if ( ['number', 'string'].includes(typeof value) ) {
+    result = +( new RegExp(
+        `(-?\\d+)([.,]${ scale ? '\\d{1,' + (scale === -1 ? '' : scale) + '}' : '' })?`)
+      .exec( `${ value }` ) || ['0'] )[0].replace( ',', '.' );
+  }
+
+  return result
+}
+
+const floatToString = ( value, scale = -1 ) => {
+  let result = '';
+
+  if ( value ) {
+    const strValue = value.toString();
+
+    if ( scale === -1 ) result = strValue;
+    else {
+      let scaleValue;
+      const arrValue = strValue.split('.');
+      if ( scale === 0 ) result = arrValue[ 0 ];
+      else {
+        if ( arrValue.length === 1 ) scaleValue = '0'.repeat( scale );
+        else {
+          const arrScaleLen = arrValue[ 1 ].length;
+          scaleValue = ( arrValue[ 1 ] +
+            ( scale > arrScaleLen ? '0'.repeat( scale - arrScaleLen ) : '' ) ).slice( 0, scale );
+        }
+        result = arrValue[ 0 ] + '.' + scaleValue;
+      }
+    }
+  }
+
+  return result;
+};
+
+// Нужно дописать!!!!
+const toRound = ( value, scale = 0 ) => {
+  let result;
+  if ( scale === 2 ) result = Math.round( value * 100) / 100;
+  if ( scale === 3 ) result = Math.round( value * 1000) / 1000;
+
+
+  return result;
+}
+ /////////////////////////////////////////////////////////////
+
 var $dialogOptions = {
   autoOpen: false,
   resizable: false,
@@ -34,33 +85,33 @@ $( document ).on( 'turbolinks:load' , function() {
 
 
 
-  // Проверка значения
-  floatValue = function($value) {
-    var $returnValue = '' ;
-    if (typeof($value) != 'undefined') { $returnValue = $value.toString().replace(',','.').replace(' ','') };
-    if ( $.isNumeric($returnValue) ) { $returnValue = parseFloat( $returnValue ) } else { $returnValue = 0 };
-    return $returnValue
-  };
-
-  float3Value = function( $value ) {
-    return Math.trunc( (floatValue( $value ) + 0.0001) * 1000 ) / 1000;
-  }
-
-  f3_to_s = function($value) {
-    return $value ? `${ floatValue( $value ) }`.match(/-?\d+(\.\d{1,3})?/)[0] : ''
-  }
-
-  f_to_s = function($value) {
-    return $value ? $value : ''
-  }
-
-    f2_to_s = function($value) {
-    return $value ? $value.toFixed(2) : ''
-  }
-
-  IntToString = function($value) {
-    return $value ? $value : ''
-  }
+  // // Проверка значения
+  // floatValue = function($value) {
+  //   var $returnValue = '' ;
+  //   if (typeof($value) != 'undefined') { $returnValue = $value.toString().replace(',','.').replace(' ','') };
+  //   if ( $.isNumeric($returnValue) ) { $returnValue = parseFloat( $returnValue ) } else { $returnValue = 0 };
+  //   return $returnValue
+  // };
+  //
+  // float3Value = function( $value ) {
+  //   return Math.trunc( (floatValue( $value ) + 0.0001) * 1000 ) / 1000;
+  // }
+  //
+  // f3_to_s = function($value) {
+  //   return $value ? `${ floatValue( $value ) }`.match(/-?\d+(\.\d{1,3})?/)[0] : ''
+  // }
+  //
+  // f_to_s = function($value) {
+  //   return $value ? $value : ''
+  // }
+  //
+  //   f2_to_s = function($value) {
+  //   return $value ? $value.toFixed(2) : ''
+  // }
+  //
+  // IntToString = function($value) {
+  //   return $value ? $value : ''
+  // }
 
 
  getScrollbarWidth = function($value) {
