@@ -4,7 +4,7 @@ class Institution::ReceiptsController < Institution::BaseController
 
   def ajax_filter_supplier_orders # Фильтрация заявок поставщикам
     @supplier_orders = SupplierOrder
-      .select( :id, :date, :number, 'suppliers.name AS name' )
+      .select( :id, :date, :number, :is_del_1c, 'suppliers.name AS name' )
       .joins( :supplier )
       .where( branch: current_branch, date: params[ :date_start ]..params[ :date_end ] )
       .order( "#{ params[ :sort_field ] } #{ params[ :sort_order ] }" )

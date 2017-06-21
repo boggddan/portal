@@ -5,7 +5,7 @@ table.table_new *{ data: { type: :list_doc }  }
     col.number
     col.number
     col.date
-    col.date    
+    col.date
     col.button
     col.button
     col.button
@@ -24,7 +24,7 @@ table.table_new *{ data: { type: :list_doc }  }
       tr *{ data: { id: tm.id } }
         td *{ data: { field: :date } } = date_str( tm.date )
         td *{ data: { field: :number } } = tm.number
-        td = tm.number_sa
+        td *{ class: ( tm.is_del_1c ? :is_del  : '' ) } = tm.number_sa
         td = date_str( tm.date_eb )
         td = date_str( tm.date_ee )
         td : button.btn_view *{ disabled: !tm.number_sa }

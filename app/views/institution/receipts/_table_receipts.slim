@@ -26,7 +26,7 @@ table.table_new *{ data: { type: :list_doc }  }
           td *{ data: { field: :number } } = rc.number
           td = rc.contract_number
           td = rc.invoice_number
-          td = rc.number_sa
+          td *{ class: ( rc.is_del_1c ? :is_del : '' ) } = rc.number_sa
           td : button.btn_view *{ disabled: !rc.number_sa }
           td : button.btn_edit *{ disabled: rc.number_sa }
           td : button.btn_del *{ disabled: rc.number_sa }

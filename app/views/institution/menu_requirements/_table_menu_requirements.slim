@@ -22,8 +22,8 @@ table.table_new *{ data: { type: :list_doc } }
   tbody
     - @menu_requirements.each do | mr |
       tr *{ data:{ id: mr.id } }
-        td.number_field = mr.number_sap
-        td.number_field = mr.number_saf
+        td.number_field *{ class: ( mr.is_del_plan_1c ? :is_del  : '' ) } = mr.number_sap
+        td.number_field *{ class: ( mr.is_del_fact_1c ? :is_del  : '' ) } = mr.number_saf
         td.number_field = mr.number
         td.date_field = date_str( mr.date )
         td.date_field = date_str( mr.splendingdate )

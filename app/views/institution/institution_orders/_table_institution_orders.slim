@@ -24,7 +24,7 @@ table.table_new *{ data: { type: :list_doc }  }
         tr *{ data:{ id: io.id } }
           td *{ data: { field: :date } } = date_str( io.date )
           td *{ data: { field: :number } } = io.number
-          td = io.number_sa
+          td *{ class: ( io.is_del_1c ? :is_del : '' ) } = io.number_sa
           td = date_str( io.date_start )
           td = date_str( io.date_end )
           td : button.btn_view *{ disabled: !io.number_sa }

@@ -154,7 +154,16 @@ table.table_new {
 
       td {
         background-color: #fff;
+        &.active {
+          background-color: yellow;
+        }
+
+        &.is_del {
+          text-decoration: line-through red;
+          color: italic;
+        }
       }
+
       .hover.active {
         background-color: #FFE419;
       }
@@ -175,10 +184,6 @@ table.table_new {
         input:not(:focus):not(:hover) {
           background-color: #e7e7e7;
         }
-      }
-
-      .active {
-        background-color: yellow;
       }
     }
   }
