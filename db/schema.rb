@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170530183241) do
+ActiveRecord::Schema.define(version: 20170621133439) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -102,6 +102,7 @@ ActiveRecord::Schema.define(version: 20170530183241) do
     t.string "number", limit: 12
     t.date "date"
     t.string "number_sa", limit: 12
+    t.boolean "is_del_1c", default: false
     t.index ["date"], name: "index_institution_orders_on_date"
     t.index ["date_end"], name: "index_institution_orders_on_date_end"
     t.index ["date_start"], name: "index_institution_orders_on_date_start"
@@ -142,6 +143,7 @@ ActiveRecord::Schema.define(version: 20170530183241) do
     t.string "number_sa", limit: 12
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "is_del_1c", default: false
     t.index ["date"], name: "index_io_corrections_on_date"
     t.index ["institution_order_id"], name: "index_io_corrections_on_institution_order_id"
     t.index ["number"], name: "index_io_corrections_on_number"
@@ -195,6 +197,8 @@ ActiveRecord::Schema.define(version: 20170530183241) do
     t.datetime "updated_at", null: false
     t.string "number_sap", limit: 12
     t.string "number_saf", limit: 12
+    t.boolean "is_del_plan_1c", default: false
+    t.boolean "is_del_fact_1c", default: false
     t.index ["branch_id"], name: "index_menu_requirements_on_branch_id"
     t.index ["date"], name: "index_menu_requirements_on_date"
     t.index ["institution_id"], name: "index_menu_requirements_on_institution_id"
@@ -282,6 +286,7 @@ ActiveRecord::Schema.define(version: 20170530183241) do
     t.datetime "updated_at", null: false
     t.string "number_sa", limit: 12
     t.string "number", limit: 12
+    t.boolean "is_del_1c", default: false
     t.index ["contract_number"], name: "index_receipts_on_contract_number"
     t.index ["date"], name: "index_receipts_on_date"
     t.index ["institution_id"], name: "index_receipts_on_institution_id"
@@ -315,6 +320,7 @@ ActiveRecord::Schema.define(version: 20170530183241) do
     t.date "date_end"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "is_del_1c", default: false
     t.index ["branch_id"], name: "index_supplier_orders_on_branch_id"
     t.index ["date"], name: "index_supplier_orders_on_date"
     t.index ["number"], name: "index_supplier_orders_on_number"
@@ -373,6 +379,7 @@ ActiveRecord::Schema.define(version: 20170530183241) do
     t.date "date_ee"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "is_del_1c", default: false
     t.index ["branch_id"], name: "index_timesheets_on_branch_id"
     t.index ["date"], name: "index_timesheets_on_date"
     t.index ["institution_id"], name: "index_timesheets_on_institution_id"

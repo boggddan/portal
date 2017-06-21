@@ -1,52 +1,54 @@
+class myLibs {
+  // Преобразование в число и обрезание разрядности
+  toNumber( value, scale = -1 ) {
+    let result = 0;
 
-// Преобразование в число и обрезание разрядности
-const toDecimal = ( value, scale = -1 ) => {
-  let result = 0;
+    if ( ['number', 'string'].includes(typeof value) ) {
+      result = +( new RegExp(
+          `(-?\\d+)([.,]${ scale ? '\\d{1,' + (scale === -1 ? '' : scale) + '}' : '' })?`)
+        .exec( `${ value }` ) || ['0'] )[0].replace( ',', '.' );
+    }
 
-  if ( ['number', 'string'].includes(typeof value) ) {
-    result = +( new RegExp(
-        `(-?\\d+)([.,]${ scale ? '\\d{1,' + (scale === -1 ? '' : scale) + '}' : '' })?`)
-      .exec( `${ value }` ) || ['0'] )[0].replace( ',', '.' );
+    return result
   }
 
-  return result
-}
+  numToStr( value, scale = -1 ) {
+    let result = '';
 
-const floatToString = ( value, scale = -1 ) => {
-  let result = '';
+    if ( value ) {
+      const strValue = value.toString();
 
-  if ( value ) {
-    const strValue = value.toString();
-
-    if ( scale === -1 ) result = strValue;
-    else {
-      let scaleValue;
-      const arrValue = strValue.split('.');
-      if ( scale === 0 ) result = arrValue[ 0 ];
+      if ( scale === -1 ) result = strValue;
       else {
-        if ( arrValue.length === 1 ) scaleValue = '0'.repeat( scale );
+        let scaleValue;
+        const arrValue = strValue.split('.');
+        if ( scale === 0 ) result = arrValue[ 0 ];
         else {
-          const arrScaleLen = arrValue[ 1 ].length;
-          scaleValue = ( arrValue[ 1 ] +
-            ( scale > arrScaleLen ? '0'.repeat( scale - arrScaleLen ) : '' ) ).slice( 0, scale );
+          if ( arrValue.length === 1 ) scaleValue = '0'.repeat( scale );
+          else {
+            const arrScaleLen = arrValue[ 1 ].length;
+            scaleValue = ( arrValue[ 1 ] +
+              ( scale > arrScaleLen ? '0'.repeat( scale - arrScaleLen ) : '' ) ).slice( 0, scale );
+          }
+          result = arrValue[ 0 ] + '.' + scaleValue;
         }
-        result = arrValue[ 0 ] + '.' + scaleValue;
       }
     }
+
+    return result;
   }
 
-  return result;
-};
+  // Нужно дописать!!!!
+  toRound( value, scale = 0 ) {
+    let result;
+    if ( scale === 2 ) result = Math.round( value * 100) / 100;
+    if ( scale === 3 ) result = Math.round( value * 1000) / 1000;
 
-// Нужно дописать!!!!
-const toRound = ( value, scale = 0 ) => {
-  let result;
-  if ( scale === 2 ) result = Math.round( value * 100) / 100;
-  if ( scale === 3 ) result = Math.round( value * 1000) / 1000;
-
-
-  return result;
+    return result;
+  }
 }
+
+const my = new myLibs(); //
  /////////////////////////////////////////////////////////////
 
 var $dialogOptions = {
@@ -62,23 +64,30 @@ var $dialogOptions = {
 
 var $formatDate = 'DD.MM.YYYY';
 
-moment.locale( 'uk' );
 
 
 $( document ).on( 'turbolinks:load' , function() {
+  moment.locale( 'uk' );
 
-  SetSession = function ( $key, $param, $value ) { // Запись в сессию
-    var $sessionObj = JSON.parse( sessionStorage.getItem( $key ) ) || { } ;//спарсим объект обратно
-    var $paramObj = { };
-    $paramObj[ $param ] = $value;
-    $.extend( $sessionObj, $paramObj ); // Обьединие масивов
-    sessionStorage.setItem( $key, JSON.stringify( $sessionObj ) );
-  };
+  $( '#error_msg .close' )
+    .on( 'click', ( ) => $( '#error_msg' ).addClass( 'hide' ));
 
-  GetSession = function ( $key, $param ) { // Чтение из сессии
-    var $sessionObj = JSON.parse( sessionStorage.getItem( $key ) ) || { } ;//спарсим объект обратно
-    return $sessionObj[ $param ] || '' ;
-  };
+  $( '#del_msg button:not( success )' )
+    .on( 'click', ( ) =>
+      $( '#del_msg' ).addClass( 'hide' ).find( '.success' ).off( 'click' ));
+
+  // SetSession = function ( $key, $param, $value ) { // Запись в сессию
+  //   var $sessionObj = JSON.parse( sessionStorage.getItem( $key ) ) || { } ;//спарсим объект обратно
+  //   var $paramObj = { };
+  //   $paramObj[ $param ] = $value;
+  //   $.extend( $sessionObj, $paramObj ); // Обьединие масивов
+  //   sessionStorage.setItem( $key, JSON.stringify( $sessionObj ) );
+  // };
+  //
+  // GetSession = function ( $key, $param ) { // Чтение из сессии
+  //   var $sessionObj = JSON.parse( sessionStorage.getItem( $key ) ) || { } ;//спарсим объект обратно
+  //   return $sessionObj[ $param ] || '' ;
+  // };
 
 
 

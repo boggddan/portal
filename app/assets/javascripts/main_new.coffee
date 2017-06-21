@@ -12,29 +12,6 @@ mergeDeep = (target, source) -> # Соеднинение двох объекто
 
   target
 
-# window.toDecimal111 = ( $value, $scale = -1 ) ->
-#   switch typeof( $value )
-#     when 'number' then $returnVal = $value
-#     when 'string'
-#       $returnVal = parseFloat( $value.toString().replace(',','.').replace(/\s+/g,'') )
-#       $returnVal = 0 if isNaN( $returnVal )
-#     else $returnVal = 0
-#
-#   if $scale isnt -1
-#     $scaleVal = Math.pow( 10, $scale )
-#     $returnVal = Math.trunc( $returnVal * $scaleVal ) / $scaleVal
-#   $returnVal
-#
-# window.floatToString111 = ( $value, $scale = 0 ) ->
-#   if $value
-#     if $scale
-#       $scaleVal = Math.pow( 10, $scale )
-#       $returnVal = ( Math.trunc( $value * $scaleVal ) / $scaleVal ).toFixed( $scale )
-#     else
-#       $returnVal = $value
-#   else
-#     $returnVal = ''
-
 window.setSession = ( $key, $value ) -> # Запись в сессию
   $sessionObj = JSON.parse( sessionStorage.getItem( $key ) ) || { } # спарсим объект обратно
   mergeDeep( $sessionObj, $value ) # Обьединие масивов
@@ -251,9 +228,9 @@ window.сhangeValue = ( $elem, $parentName, $func ) -> # Изминение зн
 
   if $dataType?.charAt(0) is 'n'
     $scale = +$dataType.slice(1) or -1
-    $val = toDecimal( $elem.val( ), $scale )
+    $val = my.toNumber( $elem.val( ), $scale )
     $valOld =  +$elem.data 'old-value'
-    $strVal = floatToString( $val )
+    $strVal = my.numToStr( $val )
     console.log($val, $scale, $elem.val( ), $strVal )
     $elem.val( $strVal ).attr 'value', $strVal
   else
@@ -291,8 +268,8 @@ window.initValue = ( $elem ) ->
 
   if $dataType?.charAt( 0 ) is 'n'
     $scale = +$dataType.slice(1) or -1
-    $val = toDecimal( $elemVal, $scale )
-    $valFmt = floatToString( $val )
+    $val = my.toNumber( $elemVal, $scale )
+    $valFmt = my.numToStr( $val )
     if $tagName is 'INPUT' then $elem.val( $valFmt ) else $elem.text( $valFmt )
   else
     $val = $elemVal
@@ -340,7 +317,7 @@ window.btnExitClick = ( $elem ) -> # Нажатие на кнопочку вых
 #####################
 
 $( document ).on 'turbolinks:load', ( ) ->
-  $( '#error_msg .close' ).click -> $( '#error_msg' ).addClass( 'hide' )
-
-  $( '#del_msg button:not( success )' ).click ->
-    $( '#del_msg' ).addClass( 'hide' ).find( '.success' ).off( 'click' )
+  # $( '#error_msg .close' ).click -> $( '#error_msg' ).addClass( 'hide' )
+  #
+  # $( '#del_msg button:not( success )' ).click ->
+  #   $( '#del_msg' ).addClass( 'hide' ).find( '.success' ).off( 'click' )

@@ -694,7 +694,8 @@ class SyncCatalogsController < ApplicationController
       end
     end
 
-    render json: error.any? ? { result: false, error: [ error ] } : { result: true, id: suppliers_package.id }
+    render json: error.any? ? { result: false, error: [ error ] }
+      : { result: true, id: suppliers_package.id }
   end
 
   # GET /api/suppliers_package?institution_code=14&supplier_code=8&product_code=00000000079&package_code=000000001&period=2017-05-03
@@ -866,8 +867,10 @@ class SyncCatalogsController < ApplicationController
       error.merge!( branch[ :error ] ) if branch[ :error ]
 
       if error.empty?
-        SupplierOrder.transaction do
-          update_fields = { supplier: supplier, date: date_int_to_str( params[ :date ] ),
+        ActiveRecord::Base.transaction do
+          update_fields = { supplier: supplier,
+                            is_del_1c: false,
+                            date: date_int_to_str( params[ :date ] ),
                             date_start: date_int_to_str( params[ :date_start ] ),
                             date_end: date_int_to_str( params[ :date_end ] ) }
 
@@ -920,7 +923,8 @@ class SyncCatalogsController < ApplicationController
       end
     end
 
-    render json: error && error.any? ? { result: false, error: [ error ] } : { result: true, number: number, id: id }
+    render json: error && error.any? ? { result: false, error: [ error ] }
+      : { result: true, number: number, id: id }
   end
 
   # GET api/supplier_order?branch_code=0003&number=00000011
@@ -949,9 +953,10 @@ class SyncCatalogsController < ApplicationController
       : { result: false, error: [ error ] }
   end
 
-  # DELETE api/supplier_order { "branch_code": "00000000003", "number": "000000000002" }
+  # DELETE api/supplier_order { "branch_code": "00000000003", "number": "000000000006", "type": 1 }
   def supplier_order_delete
     error = { branch_code: 'Не знайдений параметр [branch_code]',
+              type: 'Не знайдений параметр [type]',
               number: 'Не знайдений параметр [number]' }.stringify_keys!.except( *params.keys )
 
       if error.empty?
@@ -961,7 +966,13 @@ class SyncCatalogsController < ApplicationController
           number = params[ :number ]
           supplier_order = supplier_order_number( branch, number )
           unless error = supplier_order[ :error ]
-            supplier_order.destroy
+            type = params[ :type ]
+            case type
+            when 0 then supplier_order.destroy
+            when 1 then supplier_order.update( is_del_1c: true )
+            else
+              error = { type: "Такого значення не існує [#{ type }]" }
+            end
           end
         end
       end
@@ -995,10 +1006,13 @@ class SyncCatalogsController < ApplicationController
         supplier_order = supplier_order_number( institution.branch, params[ :supplier_order_number ].strip )
 
         unless error = supplier_order[ :error ]
-          Receipt.transaction do
+          ActiveRecord::Base.transaction do
             contract_number = params[ :contract_number ].strip
-            update_fields = { invoice_number: params[ :invoice_number ].strip, date: date_int_to_str( params[ :date ] ),
-                              date_sa: date_int_to_str( params[ :date_sa ] ), number_sa: params[ :number_sa ] }
+            update_fields = { invoice_number: params[ :invoice_number ].strip,
+                              is_del_1c: false,
+                              date: date_int_to_str( params[ :date ] ),
+                              date_sa: date_int_to_str( params[ :date_sa ] ),
+                              number_sa: params[ :number_sa ] }
             if receipt = supplier_order.receipts.find_by( institution: institution,
                  contract_number: contract_number, number: number )
               receipt.update( update_fields )
@@ -1008,6 +1022,7 @@ class SyncCatalogsController < ApplicationController
               number = receipt.number
             end
 
+            id = receipt.id
             receipt_products = receipt.receipt_products
             receipt_products.update_all( count: 0 )
 
@@ -1050,7 +1065,8 @@ class SyncCatalogsController < ApplicationController
       end
     end
 
-    render json: error && error.any? ? { result: false, error: [ error ] } : { result: true, number: number }
+    render json: error && error.any? ? { result: false, error: [ error ] }
+      : { result: true, number: number, id: id }
   end
 
   # GET /api/receipt?/receipt?institution_code=14&number=KL-000000005
@@ -1080,9 +1096,10 @@ class SyncCatalogsController < ApplicationController
       : { result: false, error: [ error ] }
   end
 
-  # DELETE /api/receipt { "institution_code": "14", "number": "000000000002" }
+  # DELETE /api/receipt { "branch_code": "00000000003", "number": "000000000006", "type": 1 }
   def receipt_delete
     error = { institution_code: 'Не знайдений параметр [institution_code]',
+              type: 'Не знайдений параметр [type]',
               number: 'Не знайдений параметр [number]' }.stringify_keys!.except( *params.keys )
 
     if error.empty?
@@ -1092,7 +1109,13 @@ class SyncCatalogsController < ApplicationController
         number = params[ :number ]
         receipt = receipt_number( institution, params[ :number ] )
         unless error = receipt[ :error ]
-          receipt.destroy
+            type = params[ :type ]
+            case type
+            when 0 then receipt.destroy
+            when 1 then receipt.update( is_del_1c: true )
+            else
+              error = { type: "Такого значення не існує [#{ type }]" }
+            end
         end
       end
     end
@@ -1122,9 +1145,12 @@ class SyncCatalogsController < ApplicationController
       institution = institution_code( params[ :institution_code ] )
 
       unless error = institution[ :error ]
-        InstitutionOrder.transaction do
-          update_fields = { date: date_int_to_str( params[ :date ] ), date_start: date_int_to_str( params[ :date_start ] ),
-                            date_end: date_int_to_str( params[ :date_end ] ), date_sa: date_int_to_str( params[ :date_sa ] ),
+        ActiveRecord::Base.transaction do
+          update_fields = { date: date_int_to_str( params[ :date ] ),
+                            is_del_1c: false,
+                            date_start: date_int_to_str( params[ :date_start ] ),
+                            date_end: date_int_to_str( params[ :date_end ] ),
+                            date_sa: date_int_to_str( params[ :date_sa ] ),
                             number_sa: params[ :number_sa ] }
 
           if institution_order = institution.institution_orders.find_by( number: number )
@@ -1133,6 +1159,8 @@ class SyncCatalogsController < ApplicationController
             institution_order = InstitutionOrder.create_with( update_fields ).create( institution: institution )
             number = institution_order.number
           end
+
+          id = institution_order.id
 
           institution_order_products = institution_order.institution_order_products
           institution_order_products.update_all( count: 0 )
@@ -1168,7 +1196,8 @@ class SyncCatalogsController < ApplicationController
       end
     end
 
-    render json: error && error.any? ? { result: false, error: [ error ] } : { result: true, number: number }
+    render json: error && error.any? ? { result: false, error: [ error ] }
+      : { result: true, number: number, id: id }
   end
 
   # GET api/institution_order?institution_code=14&number=000000000005
@@ -1196,9 +1225,10 @@ class SyncCatalogsController < ApplicationController
       : { result: false, error: [ error ] }
   end
 
-  # DELETE api/institution_order { "institution_code": "14", "number": "000000000002" }
+  # DELETE api/institution_order { "institution_code": "14", "number": "KL-000000013", "type": 1 }
   def institution_order_delete
     error = { institution_code: 'Не знайдений параметр [institution_code]',
+              type: 'Не знайдений параметр [type]',
               number: 'Не знайдений параметр [number]' }.stringify_keys!.except( *params.keys )
 
     if error.empty?
@@ -1208,7 +1238,13 @@ class SyncCatalogsController < ApplicationController
         number = params[ :number ]
         institution_order = institution_order_number( institution, number )
         unless error = institution_order[ :error ]
-          institution_order.destroy
+          type = params[ :type ]
+          case type
+          when 0 then institution_order.destroy
+          when 1 then institution_order.update( is_del_1c: true )
+          else
+            error = { type: "Такого значення не існує [#{ type }]" }
+          end
         end
       end
     end
@@ -1244,9 +1280,11 @@ class SyncCatalogsController < ApplicationController
         institution_order = institution_order_number( institution, params[ :institution_order_number ].strip )
 
         unless error = institution_order[ :error ]
-          IoCorrection.transaction do
+          ActiveRecord::Base.transaction do
             update_fields = { date: date_int_to_str( params[ :date ] ),
-                              date_sa: date_int_to_str(params[ :date_sa ] ), number_sa: params[ :number_sa ] }
+                              is_del_1c: false,
+                              date_sa: date_int_to_str(params[ :date_sa ] ),
+                              number_sa: params[ :number_sa ] }
 
             if io_correction = institution_order.io_corrections.find_by( number: number )
               io_correction.update( update_fields )
@@ -1255,6 +1293,7 @@ class SyncCatalogsController < ApplicationController
               number = io_correction.number
             end
 
+            id = io_correction.id
             io_correction_products = io_correction.io_correction_products
             io_correction_products.update_all( diff: 0 )
 
@@ -1290,7 +1329,8 @@ class SyncCatalogsController < ApplicationController
       end
     end
 
-    render json: error && error.any? ? { result: false, error: [ error ] } : { result: true, number: number }
+    render json: error && error.any? ? { result: false, error: [ error ] }
+      : { result: true, number: number, id: id }
   end
 
   # GET /api/institution_order_correction?institution_code=14&institution_order_number=000000000002&number=000000000010
@@ -1322,10 +1362,11 @@ class SyncCatalogsController < ApplicationController
       : { result: false, error: [ error ] }
   end
 
-  # DELETE /api/institution_order_correction { "institution_code": "14", "institution_order_number": "KL-000000024", "number": "KL-000000011" }
+  # DELETE /api/institution_order_correction { "institution_code": "14", "institution_order_number": "KL-000000053", "number": "KL-000000022",  "type": 1 }
   def io_correction_delete
     error = { institution_code: 'Не знайдений параметр [institution_code]',
               institution_order_number: 'Не знайдений параметр [institution_order_number]',
+              type: 'Не знайдений параметр [type]',
               number: 'Не знайдений параметр [number]' }.stringify_keys!.except( *params.keys )
 
     if error.empty?
@@ -1338,7 +1379,13 @@ class SyncCatalogsController < ApplicationController
           number = params[ :number ]
           io_correction = io_correction_number( institution_order, number )
           unless error = io_correction[ :error ]
-            io_correction.destroy
+            type = params[ :type ]
+            case type
+            when 0 then io_correction.destroy
+            when 1 then io_correction.update( is_del_1c: true )
+            else
+              error = { type: "Такого значення не існує [#{ type }]" }
+            end
           end
         end
       end
@@ -1376,11 +1423,14 @@ class SyncCatalogsController < ApplicationController
       error.merge!( institution[ :error ] ) if institution[ :error ]
 
       if error.empty?
-        MenuRequirement.transaction do
+        ActiveRecord::Base.transaction do
           date = date_int_to_str( params[ :date ] )
           splendingdate = params[ :splendingdate ].empty? ? date : date_int_to_str( params[ :splendingdate ] )
-          update_fields = { date: date, branch: branch, splendingdate: splendingdate,
-                            date_sap: date_int_to_str( params[ :date_sap ] ), number_sap: params[ :number_sap ] }
+          update_fields = { date: date, branch: branch,
+                            is_del_plan_1c: false,
+                            splendingdate: splendingdate,
+                            date_sap: date_int_to_str( params[ :date_sap ] ),
+                            number_sap: params[ :number_sap ] }
 
           if menu_requirement = institution.menu_requirements.find_by( number: number )
             menu_requirement.update( update_fields )
@@ -1389,11 +1439,12 @@ class SyncCatalogsController < ApplicationController
             number = menu_requirement.number
           end
 
+          id = menu_requirement.id
+
           ### menu_children_categories
           menu_children_categories = menu_requirement.menu_children_categories
           menu_children_categories.update_all( count_all_plan: 0, count_exemption_plan: 0, count_all_fact: 0,
                                                count_exemption_fact: 0 )
-
           error_children_categories = []
           params[ :children_categories ].each_with_index do | children_category_par, index |
             error = { children_category_code: 'Не знайдений параметр [children_category_code]',
@@ -1459,7 +1510,8 @@ class SyncCatalogsController < ApplicationController
       end
     end
 
-    render json: error && error.any? ? { result: false, error: [ error ] } : { result: true, number: number }
+    render json: error && error.any? ? { result: false, error: [ error ] }
+      : { result: true, number: number, id: id }
   end
 
   ###############################################################################################
@@ -1492,11 +1544,15 @@ class SyncCatalogsController < ApplicationController
         menu_requirement = menu_requirement_number( institution, number )
 
         unless error = menu_requirement[ :error ]
-          MenuRequirement.transaction do
+          ActiveRecord::Base.transaction do
+            id = menu_requirement.id
             date = date_int_to_str( params[ :date ] )
             splendingdate = params[ :splendingdate ].empty? ? date : date_int_to_str( params[ :splendingdate ] )
-            menu_requirement.update( date: date, branch: branch, splendingdate: splendingdate,
-                                     date_saf: date_int_to_str( params[ :date_saf ] ), number_saf: params[ :number_saf ] )
+            menu_requirement.update( date: date, branch: branch,
+                                     is_del_fact_1c: false,
+                                     splendingdate: splendingdate,
+                                     date_saf: date_int_to_str( params[ :date_saf ] ),
+                                     number_saf: params[ :number_saf ] )
 
             ### menu_children_categories
             menu_children_categories = menu_requirement.menu_children_categories
@@ -1566,7 +1622,8 @@ class SyncCatalogsController < ApplicationController
       end
     end
 
-    render json: error && error.any? ? { result: false, error: [ error ] } : { result: true, number: number }
+    render json: error && error.any? ? { result: false, error: [ error ] }
+      : { result: true, number: number, id: id }
   end
 
   # GET api/menu_requirement?institution_code=14&number=000000000028
@@ -1595,9 +1652,10 @@ class SyncCatalogsController < ApplicationController
       : { result: false, error: [ error ] }
   end
 
-  # DELETE api/menu_requirement { "institution_code": "14", "number": "000000000002" }
+  # DELETE api/menu_requirement { "institution_code": "14", "number": "KL-000000024", "type": 1 }
   def menu_requirement_delete
     error = { institution_code: 'Не знайдений параметр [institution_code]',
+              type: 'Не знайдений параметр [type]',
               number: 'Не знайдений параметр [number]' }.stringify_keys!.except( *params.keys )
 
     if error.empty?
@@ -1608,7 +1666,14 @@ class SyncCatalogsController < ApplicationController
         menu_requirement = menu_requirement_number( institution, number )
         error = menu_requirement[ :error ]
         unless error = menu_requirement[ :error ]
-          menu_requirement.destroy
+          type = params[ :type ]
+          case type
+          when 0 then menu_requirement.destroy
+          when 1 then menu_requirement.update( is_del_plan_1c: true )
+          when 2 then menu_requirement.update( is_del_fact_1c: true )
+          else
+            error = { type: "Такого значення не існує [#{ type }]" }
+          end
         end
       end
     end
@@ -1648,11 +1713,16 @@ class SyncCatalogsController < ApplicationController
       error.merge!( institution[ :error ] ) if institution[ :error ]
 
       if error.empty?
-        Timesheet.transaction do
-          update_fields = { branch: branch, date: date_int_to_str( params[ :date ] ),
-                            date_vb: date_int_to_str( params[ :date_vb ] ), date_ve: date_int_to_str( params[ :date_ve ] ),
-                            date_eb: date_int_to_str( params[ :date_eb ] ), date_ee: date_int_to_str( params[ :date_ee ] ),
-                            date_sa: date_int_to_str( params[ :date_sa ] ), number_sa: params[ :number_sa ] }
+        ActiveRecord::Base.transaction do
+          update_fields = { branch: branch,
+                            is_del_1c: false,
+                            date: date_int_to_str( params[ :date ] ),
+                            date_vb: date_int_to_str( params[ :date_vb ] ),
+                            date_ve: date_int_to_str( params[ :date_ve ] ),
+                            date_eb: date_int_to_str( params[ :date_eb ] ),
+                            date_ee: date_int_to_str( params[ :date_ee ] ),
+                            date_sa: date_int_to_str( params[ :date_sa ] ),
+                            number_sa: params[ :number_sa ] }
 
           if timesheet = institution.timesheets.find_by( number: number )
             timesheet.update( update_fields )
@@ -1660,6 +1730,8 @@ class SyncCatalogsController < ApplicationController
             timesheet = Timesheet.create_with( update_fields ).create( institution: institution )
             number = timesheet.number
           end
+
+          id = timesheet.id
 
           timesheet_dates = timesheet.timesheet_dates
           timesheet_dates.all.delete_all
@@ -1696,7 +1768,8 @@ class SyncCatalogsController < ApplicationController
       end
     end
 
-    render json: error && error.any? ? { result: false, error: [ error ] } : { result: true, number: number }
+    render json: error && error.any? ? { result: false, error: [ error ] }
+      : { result: true, number: number, id: id }
   end
 
   # GET api/timesheet?institution_code=14&number=000000000001
@@ -1725,9 +1798,10 @@ class SyncCatalogsController < ApplicationController
   end
   ###############################################################################################
 
-  # DELETE api/timesheet { "institution_code": "14", "number": "000000000002" }
+  # DELETE api/timesheet { "institution_code": "14", "number": "KL-000000028", "type": 1 }
   def timesheet_delete
     error = { institution_code: 'Не знайдений параметр [institution_code]',
+              type: 'Не знайдений параметр [type]',
               number: 'Не знайдений параметр [number]' }.stringify_keys!.except( *params.keys )
 
     if error.empty?
@@ -1737,7 +1811,14 @@ class SyncCatalogsController < ApplicationController
         number = params[ :number ]
         timesheet = timesheet_number( institution, number )
         unless error = timesheet[ :error ]
-          timesheet.destroy
+          type = params[ :type ]
+          case type
+          when 0 then timesheet.destroy
+          when 1 then timesheet.update( is_del_1c: true )
+          else
+            error = { type: "Такого значення не існує [#{ type }]" }
+          end
+
         end
       end
     end

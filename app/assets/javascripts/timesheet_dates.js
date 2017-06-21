@@ -18,7 +18,7 @@ $( document ).on( 'turbolinks:load', ( ) => {
         $groupTimesheet.removeClass( 'placeholder' );
       } else {
         $groupTimesheet.addClass( 'placeholder' );
-      };
+      }
 
       window.ajax(
         'Фільтрація данных табеля',
@@ -51,7 +51,7 @@ $( document ).on( 'turbolinks:load', ( ) => {
         $this.css( {cursor: cursorVal } );
         if ( isCtrl && !$this.hasClass( classActive ) ) $this.addClass( classActive );
         if ( isAlt && $this.hasClass( classActive ) ) $this.removeClass( classActive );
-      };
+      }
     };
 
     headerText( ); // Шапка формы
@@ -59,116 +59,114 @@ $( document ).on( 'turbolinks:load', ( ) => {
 
     $parentElem
       .find( 'h1' )
-        .on( 'click', function( ) { window.clickHeader( $( this ) ); } )
+      .on( 'click', function( ) { window.clickHeader( $( this ) ); } )
       .end( )
       .find( '.btn_send' )
-        .on( 'click', function( ) { window.btnSendClick( $( this ) ); } )  // Нажатие на кнопочку создать
+      .on( 'click', function( ) { window.btnSendClick( $( this ) ); } )  // Нажатие на кнопочку создать
       .end( )
       .find( '.btn_exit, .btn_save' )
-        .on( 'click', function( ) { window.btnExitClick( $( this ) ); } )
+      .on( 'click', function( ) { window.btnExitClick( $( this ) ); } )
       .end( )
       .find( '#date' ) // Дата
-        .data( 'old-value', $( '#date' ).val( ) )
-        .datepicker( { onSelect: function( ) { сhangeValue( $( this ), 'main', headerText ); } } )
+      .data( 'old-value', $( '#date' ).val( ) )
+      .datepicker( { onSelect: function( ) { сhangeValue( $( this ), 'main', headerText ); } } )
       .end( )
       .find( '#group_timesheet' )
-        .on( 'change', ( ) => filterTimesheetDates( ) )
+      .on( 'change', ( ) => filterTimesheetDates( ) )
       .end( )
       .find( '.reasons_absence' )
-        .on( 'click', function( ) {
-          const $this = $( this );
-          const dataVal = $this.text( );
-          const dataId = $this.data( 'id' );
+      .on( 'click', function( ) {
+        const $this = $( this );
+        const dataVal = $this.text( );
+        const dataId = $this.data( 'id' );
 
-          let cells = []
+        let cells = []
 
-          $('.parent_table td.active').each( function( ) {
-              const td = $( this );
-              if ( td.text( ) !== dataVal ) {
-                cells.push( td.data( 'id' ));
-                td.text( dataVal ).data( 'reasons-absence-id', dataId );
-              };
-              td.removeClass( 'active' );
-          } );
+        $('.parent_table td.active').each( function( ) {
+          const td = $( this );
+          if ( td.text( ) !== dataVal ) {
+            cells.push( td.data( 'id' ));
+            td.text( dataVal ).data( 'reasons-absence-id', dataId );
+          }
+          td.removeClass( 'active' );
+        } );
 
-          if ( cells.length ) {
-            const result = { ids: cells, reasons_absence_id: dataId };
-            window.ajax(
-              'Группова заміна позначок табеля',
-              $('.clmn').data( 'path-group-update' ),
-              'post',
-              { 'ids': cells, reasons_absence_id: dataId },
-              'json',
-              '',
-              false,
-              true );
-            //console.log(result);
-            timesheetSumAll( );
-         };
-       } )
+        if ( cells.length ) {
+          window.ajax(
+            'Группова заміна позначок табеля',
+            $('.clmn').data( 'path-group-update' ),
+            'post',
+            { 'ids': cells, reasons_absence_id: dataId },
+            'json',
+            '',
+            false,
+            true );
+          timesheetSumAll( );
+        }
+      } )
       .end( )
       .find('.parent_table')
-        .on( 'click', 'td', function( ) {
-          const $this = $( this );
-          if ( !dateSaVal && $this.hasClass( 'cell_mark' ) && !$this.attr( 'disabled' ) ) {
-            const reasonsAbsence = $( `.reasons_absence[data-id='${ $this.data('reasons-absence-id') }']` );
-            const reasonsAbsenceId = reasonsAbsence.data( 'next-id' );
-            $this.data( 'reasons-absence-id', reasonsAbsenceId );
-            $this.text( reasonsAbsence.data( 'next-val' ) );
-            timesheetDatesUpdate( $this.data( 'id' ), reasonsAbsenceId ); // Обновление маркера
-            timesheetSumAll( );
-          };
-        } )
-        .on( 'contextmenu', 'td.cell_mark', function( e ) {
-          e.preventDefault( );
-          const $this = $( this );
-          if ( !dateSaVal && !$this.attr( 'disabled' ) ) {
-            const reasonsAbsence = $( '.reasons_absence:first-child' );
-            const reasonsAbsenceId = reasonsAbsence.data( 'id' );
-            $this.data( 'reasons-absence-id', reasonsAbsenceId );
-            $this.text( '' );
-            timesheetDatesUpdate( $this.data( 'id' ), reasonsAbsenceId ); // Обновление маркера
-            timesheetSumAll( );
-          };
-        } )
-        .on( 'mouseover', 'td, th', function( e ) {
-          const $this = $( this );
-          e.preventDefault( );
-          $this.focus( );
-          if ( $this.hasClass( 'cell_mark' ) && !$this.attr( 'disabled' ) ) {
-            changeCell( $( this ), e );
-          };
-
-          if ( !$this.hasClass( 'hover' ) ) {
-              $this.closest( 'table' )
-              .find('.hover').removeClass('hover')
-              .end()
-              .find(`tr :nth-child( ${$this.index()+1 } )`)
-              .addClass('hover');
-            $this.addClass( 'hover' );
-          };
-        } )
-        .on( 'mouseout', 'td', function( e ) {
-          const $this = $( this );
-          if ( $this.hasClass( 'cell_mark' ) && !$this.attr( 'disabled' ) ) {
-            $this.css( { cursor: '' } );
-            $this.blur();
-          };
-        } )
-        .on( 'keydown', 'td.cell_mark:not([disabled])', function( e ) {
-          e.preventDefault( );
+      .on( 'click', 'td', function( ) {
+        const $this = $( this );
+        if ( !dateSaVal && $this.hasClass( 'cell_mark' ) && !$this.attr( 'disabled' ) ) {
+          const reasonsAbsence = $( `.reasons_absence[data-id='${ $this.data('reasons-absence-id') }']` );
+          const reasonsAbsenceId = reasonsAbsence.data( 'next-id' );
+          $this.data( 'reasons-absence-id', reasonsAbsenceId );
+          $this.text( reasonsAbsence.data( 'next-val' ) );
+          timesheetDatesUpdate( $this.data( 'id' ), reasonsAbsenceId ); // Обновление маркера
+          timesheetSumAll( );
+        }
+      } )
+      .on( 'contextmenu', 'td.cell_mark', function( e ) {
+        e.preventDefault( );
+        const $this = $( this );
+        if ( !dateSaVal && !$this.attr( 'disabled' ) ) {
+          const reasonsAbsence = $( '.reasons_absence:first-child' );
+          const reasonsAbsenceId = reasonsAbsence.data( 'id' );
+          $this.data( 'reasons-absence-id', reasonsAbsenceId );
+          $this.text( '' );
+          timesheetDatesUpdate( $this.data( 'id' ), reasonsAbsenceId ); // Обновление маркера
+          timesheetSumAll( );
+        }
+      } )
+      .on( 'mouseover', 'td, th', function( e ) {
+        const $this = $( this );
+        e.preventDefault( );
+        $this.focus( );
+        if ( $this.hasClass( 'cell_mark' ) && !$this.attr( 'disabled' ) ) {
           changeCell( $( this ), e );
-        } )
-        .on( 'keyup', 'td.cell_mark:not([disabled])', function( e ) {
-          $( this ).css( { cursor: '' } );
-        } )
-        .on( 'click', 'tr.row_data:not(.selected)', function( ) {
-          $( this ).addClass(' selected ').siblings( ).removeClass( 'selected' );
-        } ) ;
-  };
+        }
+
+        if ( !$this.hasClass( 'hover' ) ) {
+          $this.closest( 'table' )
+            .find('.hover').removeClass('hover')
+            .end()
+            .find(`tr :nth-child( ${$this.index()+1 } )`)
+            .addClass('hover');
+          $this.addClass( 'hover' );
+        }
+      } )
+      .on( 'mouseout', 'td', function( ) {
+        const $this = $( this );
+        if ( $this.hasClass( 'cell_mark' ) && !$this.attr( 'disabled' ) ) {
+          $this.css( { cursor: '' } );
+          $this.blur();
+        }
+      } )
+      .on( 'keydown', 'td.cell_mark:not([disabled])', function( e ) {
+        e.preventDefault( );
+        changeCell( $( this ), e );
+      } )
+      .on( 'keyup', 'td.cell_mark:not([disabled])', function() {
+        $( this ).css( { cursor: '' } );
+      } )
+      .on( 'click', 'tr.row_data:not(.selected)', function( ) {
+        $( this ).addClass(' selected ').siblings( ).removeClass( 'selected' );
+      } ) ;
+  }
 } );
 
-    // Подсчет итогов
+// Подсчет итогов
 const timesheetSumAll = ( ) => {
   const table = document.querySelector('table');
   table.querySelectorAll( '.cell_day' ).forEach( (td) => {// Очистка все итогов
@@ -193,7 +191,7 @@ const timesheetSumAll = ( ) => {
       } else {
         sum[ 0 ] += 1;
         elem.innerHTML = 1 + +elem.innerHTML;
-      };
+      }
     });
 
     cellSumName.forEach( ( v, i ) => {
@@ -249,13 +247,13 @@ const timesheetSumAll = ( ) => {
   table.querySelectorAll( 'tr.all' ).forEach( (tr) => { // По всем строкам итогов
     const sum = [ 0, 0 ];
 
-    tr.querySelectorAll('.cell_day').forEach( (td, index) => {
+    tr.querySelectorAll('.cell_day').forEach( (td) => {
       sum[ 0 ] += +td.innerHTML;
       sum[ 1 ] += +td.dataset.absence;
-     });
+    });
 
-     cellSumName.forEach( ( v, i ) => {
-       tr.querySelector( `#all_${ v }` ).innerHTML = sum[ i ] || '' ;
+    cellSumName.forEach( ( v, i ) => {
+      tr.querySelector( `#all_${ v }` ).innerHTML = sum[ i ] || '' ;
     });
   });
 };
