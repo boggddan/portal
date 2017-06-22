@@ -18,11 +18,11 @@ $( document ).on( 'turbolinks:load', ( ) => {
       //   .on( 'click', function( ) { window.btnSendClick( $( this ) ); } )  // Нажатие на кнопочку создать
       // .end( )
       .find( '.btn_exit, .btn_save' )
-      .on( 'click', function( ) { window.btnExitClick( $( this ) ); } )
+      .on( 'click', function( ) { window.btnExitClick( $( this ) ) } )
       .end( )
       .find( '#splendingdate' ) // Дата
       .data( 'old-value', $( '#splendingdate' ).val( ) )
-      .datepicker( { onSelect: function( ) { сhangeValue( $( this ), 'main', false ); } } )
+      .datepicker( { onSelect: function( ) { сhangeValue( $( this ), 'main', false ) } } )
 
 
     // Нажатие на кнопочку отправить

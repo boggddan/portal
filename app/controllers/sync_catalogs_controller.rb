@@ -63,6 +63,33 @@ class SyncCatalogsController < ApplicationController
     end
   end
 
+  def dishes_category_code( code )
+    code = code.strip
+    if dishes_category = DishesCategory.find_by( code: code )
+      dishes_category
+    else
+      { error: { dishes_category: "Не знайдений код категорії страви [#{ code }]" } }
+    end
+  end
+
+  def meal_code( code )
+    code = code.strip
+    if meal = Meal.find_by( code: code )
+      meal
+    else
+      { error: { meal: "Не знайдений код страви [#{ code }]" } }
+    end
+  end
+
+  def dish_code( code )
+    code = code.strip
+    if dish = Dish.find_by( code: code )
+      dish
+    else
+      { error: { dish: "Не знайдений код страви [#{ code }]" } }
+    end
+  end
+
   def price_product_date( branch, institution, product, date )
     if price_product = PriceProduct.where( branch: branch, institution: institution, product: product )
                          .where( ' price_date <= ? ', date ).order( :price_date ).last
@@ -999,6 +1026,7 @@ class SyncCatalogsController < ApplicationController
               number_sa: 'Не знайдений параметр [number_sa]',
               products: 'Не знайдений параметр [products]' }.stringify_keys!.except( *params.keys )
     number = params[ :number ].strip
+    id = 0
     if error.empty?
       institution = institution_code( params[ :institution_code ] )
 
@@ -1141,6 +1169,7 @@ class SyncCatalogsController < ApplicationController
               number_sa: 'Не знайдений параметр [number_sa]',
               products: 'Не знайдений параметр [products]' }.stringify_keys!.except( *params.keys )
     number = params[ :number ].strip
+    id = 0
     if error.empty?
       institution = institution_code( params[ :institution_code ] )
 
@@ -1163,7 +1192,7 @@ class SyncCatalogsController < ApplicationController
           id = institution_order.id
 
           institution_order_products = institution_order.institution_order_products
-          institution_order_products.update_all( count: 0 )
+          institution_order_products.update_all( amount: 0 )
 
           error_products = []
           params[ :products ].each_with_index do | product_par, index |
@@ -1176,7 +1205,7 @@ class SyncCatalogsController < ApplicationController
               product = product_code( product_par[ :product_code ].strip )
 
               unless error = product[ :error ]
-                update_fields = { count: product_par[ :count ], description: product_par[ :description ] }
+                update_fields = { amount: product_par[ :count ], description: product_par[ :description ] }
                 institution_order_products.create_with( update_fields )
                   .find_or_create_by( date: date_int_to_str( product_par[ :date ] ), product: product )
                   .update( update_fields )
@@ -1190,7 +1219,7 @@ class SyncCatalogsController < ApplicationController
             error =  { products: error_products }
             raise ActiveRecord::Rollback
           else
-            institution_order_products.where( count: 0 ).delete_all
+            institution_order_products.where( amount: 0 ).delete_all
           end
         end
       end
@@ -1252,17 +1281,13 @@ class SyncCatalogsController < ApplicationController
     render json: error && error.any? ? { result: false, error: [ error ] }
                      : { result: true, number: number, id: institution_order.id }
   end
-
-
-
-
   ###############################################################################################
 
   ###############################################################################################
   # POST /api/cu_institution_order_correction
-  # { "institution_code": "14", "institution_order_number": "000000000002", "number": "000000000004", "date": "1485296673", "date_sa": "1485296673", "number_sa": "000000000001",
-  #  "products": [{"date": "1485296673", "product_code": "000000079  ", "diff": 7, "description": "1 тиждень"},
-  #               {"date": "1485296673", "product_code": "000000048  ", "diff": 5, "description": "1 тиждень,3 тиждень"}]
+  # { "institution_code": "14", "institution_order_number": "KL-000000058", "number": "000000000004", "date": "1485296673", "date_sa": "1485296673", "number_sa": "000000000001",
+  #  "products": [{"date": "1485296673", "product_code": "000000079  ", "amount_order": 5, "amount": 7, "description": "1 тиждень"},
+  #               {"date": "1485296673", "product_code": "000000048  ", "amount_order": 8, "amount": 8, "description": "1 тиждень,3 тиждень"}]
   # }
   def io_correction_update
     error = { institution_code: 'Не знайдений параметр [institution_code]',
@@ -1273,6 +1298,7 @@ class SyncCatalogsController < ApplicationController
               number_sa: 'Не знайдений параметр [number_sa]',
               products: 'Не знайдений параметр [products]' }.stringify_keys!.except( *params.keys )
     number = params[:number].strip
+    id = 0
     if error.empty?
       institution = institution_code( params[ :institution_code ] )
 
@@ -1295,20 +1321,23 @@ class SyncCatalogsController < ApplicationController
 
             id = io_correction.id
             io_correction_products = io_correction.io_correction_products
-            io_correction_products.update_all( diff: 0 )
+            io_correction_products.update_all( amount: 0, amount_order: 0 )
 
             error_products = []
             params[ :products ].each_with_index do | product_par, index |
               error = { date: 'Не знайдений параметр [date]',
                         product_code: 'Не знайдений параметр [product_code]',
-                        diff: 'Не знайдений параметр [diff]',
+                        amount_order: 'Не знайдений параметр [amount_order]',
+                        amount: 'Не знайдений параметр [amount]',
                         description: 'Не знайдений параметр [description]' }.stringify_keys!.except( *product_par.keys )
 
               if error.empty?
                 product = product_code( product_par[ :product_code ].strip )
 
                 unless error = product[ :error ]
-                  update_fields = { diff: product_par[ :diff ], description: product_par[ :description ] }
+                  update_fields = { amount: product_par[ :amount ],
+                                    amount_order: product_par[ :amount_order ],
+                                    description: product_par[ :description ] }
                   io_correction_products.create_with( update_fields )
                     .find_or_create_by( date: date_int_to_str( product_par[ :date ] ), product: product )
                     .update( update_fields )
@@ -1322,7 +1351,7 @@ class SyncCatalogsController < ApplicationController
               error =  { products: error_products }
               raise ActiveRecord::Rollback
             else
-              io_correction_products.where( diff: 0 ).delete_all
+              io_correction_products.where( amount_order: 0, amount: 0 ).delete_all
             end
           end
         end
@@ -1825,6 +1854,170 @@ class SyncCatalogsController < ApplicationController
 
     render json: error && error.any? ? { result: false, error: [ error ] }
                      : { result: true, number: number, id: timesheet.id }
+  end
+  ###############################################################################################
+
+  ###############################################################################################
+  # POST /api/cu_dishes_categories { "dishes_categories": [ { "code": "000000001", "name": "Перша страва", "priority": 1 }, { "code": "000000002", "name": "Друга страва", "priority": 2 } ] }
+  def dishes_categories_update
+    errors = []
+    ids = []
+    ActiveRecord::Base.transaction do
+      params[ :dishes_categories ].each_with_index do | obj, index |
+        error = { code: 'Не знайдений параметр [code]',
+                  name: 'Не знайдений параметр [name]',
+                  priority: 'Не знайдений параметр [priority]' }
+          .stringify_keys!.except( *obj.keys )
+
+        if error.empty?
+          code = obj[ :code ].strip
+          update_fields = { name: obj[ :name ], priority: obj[ :priority ] }
+          dishes_category = DishesCategory.create_with( update_fields ).find_or_create_by( code: code )
+          dishes_category.update( update_fields )
+          ids << { code: code, id: dishes_category.id }
+        else
+          errors << { index: "Рядок [#{ index + 1 }]" }.merge( error )
+        end
+      end
+
+      raise ActiveRecord::Rollback if errors.any?
+    end
+
+    render json: errors.any? ? { result: false, error: errors }
+        : { result: true, dishes_categories: ids  }
+  end
+
+  # GET /api/dishes_categories?code=000000002
+  def dishes_category_view
+    error = { code: 'Не знайдений параметр [code]' }.stringify_keys!.except( *params.keys )
+
+    if error.size == 1
+      error = { }
+      dishes_category = DishesCategory.last
+    else
+      if error.empty?
+        dishes_category = dishes_category_code( params[ :code ].strip )
+        error = dishes_category[ :error ]
+      end
+    end
+
+    render json: dishes_category ? dishes_category.to_json : { result: false, error: [ error ] }
+  end
+
+  # GET /api/dishes_categories
+  def dishes_categories_view
+    render json: DishesCategory.all.order( :code ).to_json
+  end
+  ###############################################################################################
+
+  ###############################################################################################
+  # POST /api/cu_meals { "meals": [ { "code": "000000001", "name": "Сніданок", "priority": 1 }, { "code": "000000002", "name": "Обід", "priority": 2 } ] }
+  def meals_update
+    errors = []
+    ids = []
+    ActiveRecord::Base.transaction do
+      params[ :meals ].each_with_index do | obj, index |
+        error = { code: 'Не знайдений параметр [code]',
+                  name: 'Не знайдений параметр [name]',
+                  priority: 'Не знайдений параметр [priority]' }
+          .stringify_keys!.except( *obj.keys )
+
+        if error.empty?
+          code = obj[ :code ].strip
+          update_fields = { name: obj[ :name ], priority: obj[ :priority ] }
+          meal = Meal.create_with( update_fields ).find_or_create_by( code: code )
+          meal.update( update_fields )
+          ids << { code: code, id: meal.id }
+        else
+          errors << { index: "Рядок [#{ index + 1 }]" }.merge( error )
+        end
+      end
+
+      raise ActiveRecord::Rollback if errors.any?
+    end
+
+    render json: errors.any? ? { result: false, error: errors }
+        : { result: true, meals: ids  }
+  end
+
+  # GET /api/meal?code=000000002
+  def meal_view
+    error = { code: 'Не знайдений параметр [code]' }.stringify_keys!.except( *params.keys )
+
+    if error.size == 1
+      error = { }
+      meal = Meal.last
+    else
+      if error.empty?
+        meal = meal_code( params[ :code ].strip )
+        error = meal[ :error ]
+      end
+    end
+
+    render json: meal ? meal.to_json : { result: false, error: [ error ] }
+  end
+
+  # GET /api/meals
+  def meals_view
+    render json: Meal.all.order( :code ).to_json
+  end
+  ###############################################################################################
+
+  ###############################################################################################
+  # POST /api/cu_dishes { "dishes": [ { "code": "000000001", "name": "Каша", "dishes_category_code": "000000001", "priority": 1 }, { "code": "000000002", "name": "Борщ", "dishes_category_code": "000000002", "priority": 2 } ] }
+  def dishes_update
+    errors = []
+    ids = []
+    ActiveRecord::Base.transaction do
+      params[ :dishes ].each_with_index do | obj, index |
+        error = { code: 'Не знайдений параметр [code]',
+                  name: 'Не знайдений параметр [name]',
+                  dishes_category_code: 'Не знайдений параметр [dishes_category_code]',
+                  priority: 'Не знайдений параметр [priority]' }
+          .stringify_keys!.except( *obj.keys )
+
+        if error.empty?
+          dishes_category = dishes_category_code( obj[ :dishes_category_code ].strip )
+          unless error = dishes_category[ :error ]
+            code = obj[ :code ].strip
+            update_fields = { name: obj[ :name ], priority: obj[ :priority ], dishes_category: dishes_category }
+            dish = Dish.create_with( update_fields ).find_or_create_by( code: code )
+            dish.update( update_fields )
+            ids << { code: code, id: dish.id }
+          end
+        end
+
+        ( errors << { index: "Рядок [#{ index + 1 }]" }.merge!( error ) ) if error && error.any?
+      end
+
+      raise ActiveRecord::Rollback if errors.any?
+    end
+
+    render json: errors.any? ? { result: false, error: errors }
+        : { result: true, dishes: ids  }
+  end
+
+  # GET api/dish?code=000000001
+  def dish_view
+    error = { code: 'Не знайдений параметр [code]' }.stringify_keys!.except( *params.keys )
+
+    if error.size == 1
+      error = { }
+      dish = Dish.last
+    else
+      if error.empty?
+        dish = dish_code( params[ :code ].strip )
+        error = dish[ :error ]
+      end
+    end
+
+    render json: dish ? dish.to_json( include: { dishes_category: { only: [ :code, :name ] } } )
+      : { result: false, error: [ error ] }
+  end
+
+  # GET /api/dishes
+  def dishes_view
+    render json: Dish.all.order( :code ).to_json( include: { dishes_category: { only: [ :code, :name ] } } )
   end
   ###############################################################################################
 

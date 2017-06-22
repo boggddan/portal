@@ -18,6 +18,9 @@
   - [*Групи дітей* - `children_groups`](#Групи-дітей---children_groups-top)
   - [*Типи категорії дітей* - `children_categories_types`](#Типи-категорії-дітей---children_categories_types-top)
   - [*Причини відсутності дитини* - `reasons_absences`](#Причини-відсутності-дитини---reasons_absences-top)
+  - [*Категорії страв* - `dishes_categories`](#Категорії-страв---dishes_categories-top)
+  - [*Cтрави* - `dishes`](#Страви---dishes-top)
+  - [*Прийоми їжі* - `meals`](#Прийоми-їжі---meals-top)
 - [Документи](#Документи-top)
   - [*Замовлення постачальнику* - `supplier_orders`](#Замовлення-постачальнику---supplier_orders-top)
   - [*Надходження ТМЦ* - `receipts`](#Надходження-ТМЦ---receipts-top)
@@ -153,6 +156,27 @@ DELETE | Видалення даних (`"type": 0` фізично видаля�
   GET /api/reasons_absences
 ```
 
+### *Категорії страв* - `dishes_categories` [:top:](#Зміст)
+```
+  POST /api/cu_dishes_categories { "dishes_categories": [ { "code": "000000001", "name": "Перша страва", "priority": 1 }, { "code": "000000002", "name": "Друга страва", "priority": 2 } ] }
+  GET /api/dishes_category?code=000000002
+  GET /api/dishes_categories
+```
+
+### *Cтрави* - `dishes` [:top:](#Зміст)
+```
+  POST /api/cu_meals { "meals": [ { "code": "000000001", "name": "Сніданок", "priority": 1 }, { "code": "000000002", "name": "Обід", "priority": 2 } ] }
+  GET /api/meal?code=000000002
+  GET /api/meals
+```
+
+### *Прийоми їжі* - `meals` [:top:](#Зміст)
+```
+  POST /api/cu_meals { "dishes": [ { "code": "000000001", "name": "Каша", "dishes_category_code": "000000001", "priority": 1 }, { "code": "000000002", "name": "Борщ", "dishes_category_code": "000000002", "priority": 2 } ] }
+  GET /api/dish?code=000000001
+  GET /api/dishes
+```
+
 ## Документи [:top:](#Зміст)
 ### *Замовлення постачальнику* - `supplier_orders` [:top:](#Зміст)
 ```
@@ -177,10 +201,10 @@ DELETE | Видалення даних (`"type": 0` фізично видаля�
 
 ### *Коректування замовлення продуктів харчування* - `io_corrections` [:top:](#Зміст)
 ```
-  POST /api/cu_institution_order_correction { "institution_code": "14", "institution_order_number": "000000000002", "number": "000000000004", "date": "1485296673", "date_sa": "1485296673", "number_sa": "000000000001", "products": [ { "date": "1485296673", "product_code": "000000079", "diff": 7, "description": "1 тиждень" }, { "date": "1485296673", "product_code": "000000048  ", "diff": 5, "description": "1 тиждень,3 тиждень" } ] }
+  POST /api/cu_institution_order_correction { "institution_code": "14", "institution_order_number": "KL-000000058", "number": "000000000004", "date": "1485296673", "date_sa": "1485296673", "number_sa": "000000000001",
+	"products": [ { "date": "1485296673", "product_code": "000000079  ", "amount_order": 5, "amount": 7, "description": "1 тиждень" }, { "date": "1485296673", "product_code": "000000048  ", "amount_order": 8, "amount": 8, "description": "1 тиждень,3 тиждень" } ] }
   GET /api/institution_order_correction?institution_code=14&institution_order_number=000000000002&number=000000000010
   DELETE /api/institution_order_correction { "institution_code": "14", "institution_order_number": "KL-000000053", "number": "KL-000000022",  "type": 1 }
-
 ```
 
 ### *Меню-вимога* - `menu_requirements` [:top:](#Зміст)

@@ -1,0 +1,2 @@
+class DishesCategory < ApplicationRecord
+end

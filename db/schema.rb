@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170621133439) do
+ActiveRecord::Schema.define(version: 20170622132612) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -77,6 +77,28 @@ ActiveRecord::Schema.define(version: 20170621133439) do
     t.index ["children_category_id"], name: "index_children_groups_on_children_category_id"
     t.index ["code"], name: "index_children_groups_on_code"
     t.index ["institution_id"], name: "index_children_groups_on_institution_id"
+  end
+
+  create_table "dishes", force: :cascade do |t|
+    t.bigint "dishes_category_id"
+    t.string "code", limit: 9
+    t.string "name", limit: 50
+    t.integer "priority", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_dishes_on_code"
+    t.index ["dishes_category_id"], name: "index_dishes_on_dishes_category_id"
+    t.index ["priority"], name: "index_dishes_on_priority"
+  end
+
+  create_table "dishes_categories", force: :cascade do |t|
+    t.string "code", limit: 9
+    t.string "name", limit: 50
+    t.integer "priority", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_dishes_categories_on_code"
+    t.index ["priority"], name: "index_dishes_categories_on_priority"
   end
 
   create_table "institution_order_products", id: :serial, force: :cascade do |t|
@@ -157,6 +179,16 @@ ActiveRecord::Schema.define(version: 20170621133439) do
     t.datetime "updated_at", null: false
     t.index ["institution_order_product_id"], name: "index_iop_packages_on_institution_order_product_id"
     t.index ["suppliers_packages_id"], name: "index_iop_packages_on_suppliers_packages_id"
+  end
+
+  create_table "meals", force: :cascade do |t|
+    t.string "code", limit: 9
+    t.string "name", limit: 50
+    t.integer "priority", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_meals_on_code"
+    t.index ["priority"], name: "index_meals_on_priority"
   end
 
   create_table "menu_children_categories", id: :serial, force: :cascade do |t|
@@ -401,6 +433,7 @@ ActiveRecord::Schema.define(version: 20170621133439) do
   add_foreign_key "children_day_costs", "children_categories"
   add_foreign_key "children_groups", "children_categories"
   add_foreign_key "children_groups", "institutions"
+  add_foreign_key "dishes", "dishes_categories"
   add_foreign_key "institution_order_products", "institution_orders"
   add_foreign_key "institution_order_products", "products"
   add_foreign_key "institution_orders", "institutions"

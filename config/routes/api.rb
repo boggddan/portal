@@ -61,6 +61,18 @@ scope :api, controller: :sync_catalogs do
   get :children_group_view, path: :children_group
   get :children_groups_view, path: :children_groups
 
+  post :dishes_categories_update, path: :cu_dishes_categories
+  get :dishes_category_view, path: :dishes_category
+  get :dishes_categories_view, path: :dishes_categories
+
+  post :meals_update, path: :cu_meals
+  get :meal_view, path: :meal
+  get :meals_view, path: :meals
+
+  post :dishes_update, path: :cu_dishes
+  get :dish_view, path: :dish
+  get :dishes_view, path: :dishes
+
   # Обновление документов
   post :supplier_order_update, path: :cu_supplier_order
   get :supplier_order_view, path: :supplier_order

@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  dishes_category: one
+  code: MyString
+  name: MyString
+  priority: 1
+
+two:
+  dishes_category: two
+  code: MyString
+  name: MyString
+  priority: 1
