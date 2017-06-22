@@ -165,16 +165,16 @@ DELETE | Видалення даних (`"type": 0` фізично видаля�
 
 ### *Cтрави* - `dishes` [:top:](#Зміст)
 ```
-  POST /api/cu_meals { "meals": [ { "code": "000000001", "name": "Сніданок", "priority": 1 }, { "code": "000000002", "name": "Обід", "priority": 2 } ] }
-  GET /api/meal?code=000000002
-  GET /api/meals
+  POST /api/cu_meals { "dishes": [ { "code": "000000001", "name": "Каша", "dishes_category_code": "000000001", "priority": 1 }, { "code": "000000002", "name": "Борщ", "dishes_category_code": "000000002", "priority": 2 } ] }
+  GET /api/dish?code=000000001
+  GET /api/dishes
 ```
 
 ### *Прийоми їжі* - `meals` [:top:](#Зміст)
 ```
-  POST /api/cu_meals { "dishes": [ { "code": "000000001", "name": "Каша", "dishes_category_code": "000000001", "priority": 1 }, { "code": "000000002", "name": "Борщ", "dishes_category_code": "000000002", "priority": 2 } ] }
-  GET /api/dish?code=000000001
-  GET /api/dishes
+POST /api/cu_meals { "meals": [ { "code": "000000001", "name": "Сніданок", "priority": 1 }, { "code": "000000002", "name": "Обід", "priority": 2 } ] }
+GET /api/meal?code=000000002
+GET /api/meals
 ```
 
 ## Документи [:top:](#Зміст)
