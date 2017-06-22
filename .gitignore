@@ -21,4 +21,6 @@
 /public/assets
 /config/database.yml
 /config/savon.yml
+/db/schema.rb
+
 start.bat
