@@ -1444,6 +1444,7 @@ class SyncCatalogsController < ApplicationController
               children_categories: 'Не знайдений параметр [children_categories]',
               products: 'Не знайдений параметр [products]' }.stringify_keys!.except( *params.keys )
     number = params[ :number ].strip
+    id = 0
     if error.empty?
       branch = branch_code( params[ :branch_code ].strip )
       error.merge!( branch[ :error ] ) if branch[ :error ]
@@ -1562,6 +1563,7 @@ class SyncCatalogsController < ApplicationController
               children_categories: 'Не знайдений параметр [children_categories]',
               products: 'Не знайдений параметр [products]' }.stringify_keys!.except( *params.keys )
     number = params[ :number ].strip
+    id = 0
     if error.empty?
       branch = branch_code( params[ :branch_code ].strip )
       error.merge!( branch[ :error ] ) if branch[ :error ]
@@ -1733,7 +1735,7 @@ class SyncCatalogsController < ApplicationController
               number_sa: 'Не знайдений параметр [number_sa]',
               dates: 'Не знайдений параметр [dates]' }.stringify_keys!.except( *params.keys )
     number = params[ :number ].strip
-
+    id = 0
     if error.empty?
       branch = branch_code( params[ :branch_code ].strip )
       error.merge!( branch[ :error ] ) if branch[ :error ]
