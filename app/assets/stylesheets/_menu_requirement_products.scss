@@ -30,6 +30,7 @@
     };
 
     col:first-child { width: 250px; }
+    col ~ col { width: 85px; }
   }
 
   #col_md {

@@ -162,6 +162,7 @@ class MenuRequirementProducts {
 
     this.colCcTable = this.colCc.find('table');
     this.colCcTable
+      .tableHeadFixer( )
       .on( 'change', 'input', event => this.changeCountCategoty( event ) )
       .on( 'click', 'tr.row_data:not(.selected)', event => this.constructor.clickRow( event ) );
 
@@ -172,13 +173,13 @@ class MenuRequirementProducts {
     this.urlMdUpdate = this.colMd.data( 'path-update' );
     this.urlMdCreate = this.colMd.data( 'path-create' );
 
-    this.colMdTable = this.colMd.find( 'table' ).tableHeadFixer( );
-
     this.colMdCreate = this.colMd.find( '.btn_create' ).on( 'click', ( ) => this.createProducts( ) );
-
     this.colMd.find( 'h2' ).on( 'click', event => this.clickHeader( event ) );
 
+    this.colMdTable = this.colMd.find( 'table' );
+
     this.colMdTable
+      .tableHeadFixer( )
       .on( 'click', 'td.cell_mark', event => this.clickMdCell( event ) )
       .on( 'contextmenu', 'td.cell_mark', event => this.contextmenuMdCell( event ) )
       .on( 'mouseover', 'td.cell_mark', event => this.mouseoverMdCell( event ) )
