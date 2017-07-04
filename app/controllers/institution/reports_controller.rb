@@ -8,7 +8,7 @@ class Institution::ReportsController < Institution::BaseController
                                     'EndDate' => params[ :date_end ].to_date }
                                   .merge!( is_pdf.blank? ? {} : { 'IsPDF' => is_pdf } )
    }
-   puts message
+
    response = Savon.client( SAVON ).call( method_name.to_sym, message: message )
                      .body[ "#{ method_name }_response".to_sym ][ :return ]
 

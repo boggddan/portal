@@ -20,10 +20,8 @@
 
   .parent_table {
     table { width: 0 };
-    th:nth-child( 1 ) { width: 250px; }
-    th ~ th { width: 60px; }
-   // Ширину таблицы вычесляем Первая колонка 250, все остальные 60
-   // view/timesheets/ajax_filter_timesheet_dates.coffee
+    col:nth-child( 1 ) { width: 250px; }
+    col ~ col { width: 60px; }
 
     tr {
       &.all { @include row-group( 'th', #aaa, #fff, 3px, right ); }

@@ -1529,13 +1529,7 @@ class SyncCatalogsController < ApplicationController
           error.merge!( children_categories: error_children_categories ) if error_children_categories.any?
           error.merge!( error_products: error_products ) if error_products.any?
 
-          if error.empty?
-            menu_children_categories.where( count_all_plan: 0, count_exemption_plan: 0, count_all_fact: 0,
-                                            count_exemption_fact: 0 ).delete_all
-            menu_products.where( count_plan: 0, count_fact: 0 ).delete_all
-          else
-            raise ActiveRecord::Rollback
-          end
+          raise ActiveRecord::Rollback unless error.empty?
         end
       end
     end

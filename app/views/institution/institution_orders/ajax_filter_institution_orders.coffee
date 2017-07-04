@@ -4,7 +4,7 @@ $blockTable = $( '#col_io .parent_table' ).empty( )
 $disabled = false
 <% if @institution_orders.present? %>
 $blockTable.append '<%= j render( "table_institution_orders" ) %>'
-window.tableSetSession( $blockTable )
+MyLib.tableSetSession( $blockTable )
 $disabled = true
 <% end %>
 

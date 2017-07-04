@@ -3,6 +3,6 @@
 
 <% if @menu_requirements.present? %>
   $blockTable.append( '<%= j render( "table_menu_requirements" ) %>' );
-  window.tableSetSession( $blockTable );
+  MyLib.tableSetSession( $blockTable );
 <% end %>
 } ).call( this );

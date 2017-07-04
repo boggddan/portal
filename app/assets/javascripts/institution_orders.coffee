@@ -6,16 +6,16 @@ $( document ).on 'turbolinks:load', ->
     $parentElem = $institutionOrders
 
     $sessionKey = $parentElem.attr 'id'
-    $dateStartSession = window.getSession( $sessionKey )?.date_start
-    $dateEndSession = window.getSession( $sessionKey )?.date_end
+    $dateStartSession = MyLib.getSession( $sessionKey )?.date_start
+    $dateEndSession = MyLib.getSession( $sessionKey )?.date_end
 
     $( "#main_menu li[data-page=#{ $sessionKey }]" ).addClass( 'active' ).siblings(  ).removeClass 'active'
 
     getTable = ->
-      $sessionObj = window.getSession( $sessionKey )
+      $sessionObj = MyLib.getSession( $sessionKey )
       $clmn = $( '#col_io' )
       $clmnObj = $sessionObj[ $clmn.attr 'id' ]
-      window.ajax(
+      MyLib.ajax(
         'Фільтрація заявки'
         $clmn.data 'path-filter'
         'post'
@@ -26,7 +26,7 @@ $( document ).on 'turbolinks:load', ->
         'script' ) if $sessionObj?.date_start
 
     getTableCorrection = ->
-      $sessionObj = window.getSession( $sessionKey )
+      $sessionObj = MyLib.getSession( $sessionKey )
       $clmn = $( '#col_ioc' )
       $clmnObj = $sessionObj[ $clmn.attr 'id' ]
 
@@ -34,7 +34,7 @@ $( document ).on 'turbolinks:load', ->
       $institutionOrderId = $clmnIoObj?.row_id
 
       if $institutionOrderId
-        window.ajax(
+        MyLib.ajax(
           'Фільтрація коригування заявки'
           $clmn.data 'path-filter'
           'post'
@@ -51,12 +51,12 @@ $( document ).on 'turbolinks:load', ->
           .find( '.btn_create' ).prop 'disabled', true
 
     filterTable = -> # Фильтрация таблицы документов
-      setClearTableSession $sessionKey, 'col_io'
+      MyLib.setClearTableSession( $sessionKey, 'col_io' )
       getTable( )
       filterTableCorrection( )
 
     filterTableCorrection = -> # Фильтрация таблицы документов
-      setClearTableSession $sessionKey, 'col_ioc'
+      MyLib.setClearTableSession( $sessionKey, 'col_ioc' )
       getTableCorrection( )
 
     getTable( ) # Запрос таблицы документов
@@ -66,7 +66,7 @@ $( document ).on 'turbolinks:load', ->
     $( '#col_io' )
       .find( '.btn_create' )
         .click -> # Нажатие на кнопочку создать
-          window.createDoc(
+          MyLib.createDoc(
             $( @ )
             date_start: $( '#date_start' ).val( ), date_end: $( '#date_end' ).val( ) )
       .end( )
@@ -74,25 +74,25 @@ $( document ).on 'turbolinks:load', ->
         .val $dateStartSession
         .data 'old-value', $dateStartSession
         .attr readonly: true, placeholder: 'Дата...'
-        .datepicker( onSelect: -> window.selectDateStart $( @ ), '#date_end', filterTable )
+        .datepicker( onSelect: -> MyLib.selectDateStart $( @ ), '#date_end', filterTable )
       .end( )
       .find( '#date_end' ) # Конечная дата фильтрации
         .val $dateEndSession
         .data 'old-value', $dateEndSession
         .attr readonly: true, placeholder: 'Дата...'
-        .datepicker( onSelect: -> window.selectDateEnd $( @ ), '#date_start', filterTable )
+        .datepicker( onSelect: -> MyLib.selectDateEnd $( @ ), '#date_start', filterTable )
       .end( )
       .on 'click', 'td, th[data-sort]', ->
         $this = $( @ )
         if $this.is 'th'
-          window.tableHeaderClick $( @ ), filterTable # Нажатие для сортировки
+          MyLib.tableHeaderClick $( @ ), filterTable # Нажатие для сортировки
         else
           $button = $this.children 'button'
           $tr = $this.closest 'tr'
 
-          window.rowSelect( $tr, filterTableCorrection ) unless $tr.hasClass 'selected'
+          MyLib.rowSelect( $tr, filterTableCorrection ) unless $tr.hasClass 'selected'
 
-          window.tableButtonClick(
+          MyLib.tableButtonClick(
             $button
             ( ) ->
               $( '#col_io .btn_create' ).prop 'disabled', if $( '#col_io table' ).length then true else false
@@ -103,21 +103,21 @@ $( document ).on 'turbolinks:load', ->
       .find( '.btn_create' )
         .click -> # Нажатие на кнопочку создать
           $this = $( @ )
-          window.createDoc(
+          MyLib.createDoc(
             $this
             institution_order_id: $this.closest( '.clmn' ).data 'institution_order_id' )
       .end( )
       .on 'click', 'td, th[data-sort]', ->
         $this = $( @ )
         if $this.is 'th'
-          window.tableHeaderClick $( @ ), filterTableCorrection # Нажатие для сортировки
+          MyLib.tableHeaderClick $( @ ), filterTableCorrection # Нажатие для сортировки
         else
           $button = $this.children 'button'
           $tr = $this.closest 'tr'
 
-          window.rowSelect $tr unless $tr.hasClass 'selected'
+          MyLib.rowSelect $tr unless $tr.hasClass 'selected'
 
-          window.tableButtonClick(
+          MyLib.tableButtonClick(
             $button,
             ( ) -> $( '#col_ioc .btn_create' ).prop 'disabled', false
           ) if $button.length

@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  menu_requirement: one
+  meal: one
+  dish: one
+  is_enabled: false
+
+two:
+  menu_requirement: two
+  meal: two
+  dish: two
+  is_enabled: false

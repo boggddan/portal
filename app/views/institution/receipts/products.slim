@@ -13,7 +13,7 @@ main#receipt_products *{data: {\
   h1.icon
 
   .panel_main.row_3
-    .panel_new
+    .panel
       button.btn_send *{disabled: disabled}
       button *{class: (disabled ? :btn_exit : :btn_save)}
 
@@ -26,7 +26,7 @@ main#receipt_products *{data: {\
         = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
           input_attr: {value:  date_str(@receipt.date_sa), disabled: true}
 
-    .panel_new
+    .panel
       = render label_text, label_attr: {class: :icon_number}, text: 'Поставка №',
         input_attr: {id: :number, value: @receipt.number, disabled: true}
       = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
@@ -36,7 +36,7 @@ main#receipt_products *{data: {\
       = render label_text, label_attr: {class: :icon_number}, text: 'за замовленням №',
         input_attr: {value: @receipt.supplier_order.number, disabled: true}
 
-    .panel_new
+    .panel
       = render label_text, label_attr: {class: :icon_filter}, text: 'Постачальник',
         input_attr: {id: :supplier_name, value: @receipt.supplier_order.supplier.name, disabled: true}
       = render label_text, label_attr: {class: :icon_filter}, text: 'за договором №',

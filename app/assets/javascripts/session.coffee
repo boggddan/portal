@@ -9,7 +9,7 @@ $( document ).on 'turbolinks:load', ( ) ->
       .find( 'button' )
         .click ->  # Нажатие на кнопочку создать
           $elem = $( @ )
-          pageLoader true
+          MyLib.pageLoader( true )
           $main = $elem.closest( 'main' )
           $usernameVal = $( '#username' ).val()
           $password = $( '#password' )
@@ -18,7 +18,7 @@ $( document ).on 'turbolinks:load', ( ) ->
           if $usernameVal and $passwordVal
             $password.attr( 'value', '' ).val('')
 
-            window.ajax(
+            MyLib.ajax(
               "Авторизація [#{ $usernameVal }]"
               $main.data( 'path-send' )
               'post'
@@ -31,4 +31,4 @@ $( document ).on 'turbolinks:load', ( ) ->
               when not $usernameVal then $header = 'Не введене ім\'я користувача'
               when not $passwordVal then $header = 'Не введений пароль'
 
-            window.errorMsg( $header )
+            MyLib.errorMsg( $header )

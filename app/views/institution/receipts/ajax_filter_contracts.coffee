@@ -14,7 +14,7 @@ $number = '<%= @supplier_order.number %>'
 $contract_number.append('<%= options_from_collection_for_select( @contracts, :contract_number, :contract_number ) %>')
 
 $sessionKey = $clmn.closest( 'main' ).attr( 'id' )
-$contractVal = window.getSession( $sessionKey )[ $contract_number.attr('id') ]
+$contractVal = MyLib.getSession( $sessionKey )[ $contract_number.attr('id') ]
 $contract_number.val( $contractVal ) if $contractVal
 $disabled = false
 <% end %>

@@ -20,7 +20,7 @@ $( document ).on( 'turbolinks:load', ( ) => {
         $groupTimesheet.addClass( 'placeholder' );
       }
 
-      window.ajax(
+      MyLib.ajax(
         'Фільтрація данных табеля',
         $('.clmn').data( 'path-filter' ),
         'post',
@@ -39,7 +39,7 @@ $( document ).on( 'turbolinks:load', ( ) => {
 
     const timesheetDatesUpdate = ( timesheetDatesId, reasonsAbsenceId ) => { // Обновление маркера
       const data = { id: timesheetDatesId, reasons_absence_id: reasonsAbsenceId };
-      window.ajax( captionDatesUpdate, urlDatesUpdate, 'post', data, 'json', '', false, false );
+      MyLib.ajax( captionDatesUpdate, urlDatesUpdate, 'post', data, 'json', '', false, false );
     };
 
     const classActive = 'active';
@@ -59,17 +59,17 @@ $( document ).on( 'turbolinks:load', ( ) => {
 
     $parentElem
       .find( 'h1' )
-      .on( 'click', function( ) { window.clickHeader( $( this ) ); } )
+      .on( 'click', function( ) { MyLib.clickHeader( $( this ) ); } )
       .end( )
       .find( '.btn_send' )
-      .on( 'click', function( ) { window.btnSendClick( $( this ) ); } )  // Нажатие на кнопочку создать
+      .on( 'click', function( ) { MyLib.btnSendClick( $( this ) ); } )  // Нажатие на кнопочку создать
       .end( )
       .find( '.btn_exit, .btn_save' )
-      .on( 'click', function( ) { window.btnExitClick( $( this ) ); } )
+      .on( 'click', function( ) { MyLib.btnExitClick( $( this ) ); } )
       .end( )
       .find( '#date' ) // Дата
       .data( 'old-value', $( '#date' ).val( ) )
-      .datepicker( { onSelect: function( ) { сhangeValue( $( this ), 'main', headerText ); } } )
+      .datepicker( { onSelect: function( ) { MyLib.changeValue( $( this ), 'main', headerText ); } } )
       .end( )
       .find( '#group_timesheet' )
       .on( 'change', ( ) => filterTimesheetDates( ) )
@@ -92,7 +92,7 @@ $( document ).on( 'turbolinks:load', ( ) => {
         } );
 
         if ( cells.length ) {
-          window.ajax(
+          MyLib.ajax(
             'Группова заміна позначок табеля',
             $('.clmn').data( 'path-group-update' ),
             'post',

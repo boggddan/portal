@@ -6,7 +6,7 @@ main#receipts
     path_filter: institution_receipts_ajax_filter_supplier_orders_path } }
 
     h1 Замовлення постачальникам
-    .panel_new
+    .panel
       = render 'layouts/label_text', label_attr: { class: :icon_сalendar }, text: 'З', input_attr: { id: :date_start }
       = render 'layouts/label_text', label_attr: { class: :icon_сalendar }, text: 'ПО', input_attr: { id: :date_end }
 
@@ -21,7 +21,7 @@ main#receipts
     del: institution_receipts_delete_path } } }
 
     h1
-    .panel_new
+    .panel
       select#contract_number
       button.btn_create.right_first
 

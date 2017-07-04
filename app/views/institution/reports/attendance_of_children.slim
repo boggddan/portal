@@ -1,7 +1,7 @@
 main#attendance_of_children *{ data: { path_view: institution_reports_ajax_attendance_of_children_path } }
 
   h1 Звіт "Табель обліку відвідування дітей"
-  .panel_new
+  .panel
     = render 'layouts/label_text', label_attr: {class: :icon_сalendar}, text: 'З', input_attr: {id: :date_start}
     = render 'layouts/label_text', label_attr: {class: :icon_сalendar}, text: 'ПО', input_attr: {id: :date_end}
     = collection_select :children_group, :code, @children_groups, :code, :name , prompt: 'Всі групи'

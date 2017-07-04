@@ -6,16 +6,16 @@ $( document ).on 'turbolinks:load', ->
     $parentElem = $receipts
 
     $sessionKey = $parentElem.attr 'id'
-    $dateStartSession = window.getSession( $sessionKey )?.date_start
-    $dateEndSession = window.getSession( $sessionKey )?.date_end
+    $dateStartSession = MyLib.getSession( $sessionKey )?.date_start
+    $dateEndSession = MyLib.getSession( $sessionKey )?.date_end
 
     $( "#main_menu li[data-page=#{ $sessionKey }]" ).addClass( 'active' ).siblings(  ).removeClass 'active'
 
     getTable = ->
-      $sessionObj = window.getSession( $sessionKey )
+      $sessionObj = MyLib.getSession( $sessionKey )
       $clmn = $( '#col_so' )
       $clmnObj = $sessionObj[ $clmn.attr 'id' ]
-      window.ajax(
+      MyLib.ajax(
         'Фільтрація замовлення постачальникам'
         $clmn.data 'path-filter'
         'post'
@@ -26,7 +26,7 @@ $( document ).on 'turbolinks:load', ->
         'script' ) if $sessionObj?.date_start
 
     getContractNumbers = ->
-      $sessionObj = window.getSession( $sessionKey )
+      $sessionObj = MyLib.getSession( $sessionKey )
       $clmn = $( '#col_r' )
       $clmnObj = $sessionObj[ $clmn.attr 'id' ]
 
@@ -34,7 +34,7 @@ $( document ).on 'turbolinks:load', ->
       $supplierOrderId = $clmnSoObj?.row_id
 
       if $supplierOrderId
-        window.ajax(
+        MyLib.ajax(
           'Фільтрація списку договорів постачання'
           $clmn.data 'path-filter-contracts'
           'post'
@@ -49,7 +49,7 @@ $( document ).on 'turbolinks:load', ->
           .find( '.btn_create' ).prop( 'disabled', true )
 
     getTableReceipts = ->
-      $sessionObj = window.getSession( $sessionKey )
+      $sessionObj = MyLib.getSession( $sessionKey )
       $clmn = $( '#col_r' )
       $clmnObj = $sessionObj[ $clmn.attr 'id' ]
 
@@ -57,7 +57,7 @@ $( document ).on 'turbolinks:load', ->
       $supplierOrderId = $clmnSoObj?.row_id
 
       if $supplierOrderId
-        window.ajax(
+        MyLib.ajax(
           'Фільтрація постачань'
           $clmn.data 'path-filter'
           'post'
@@ -70,17 +70,17 @@ $( document ).on 'turbolinks:load', ->
         $clmn.find( '.parent_table' ).empty( )
 
     filterTable = -> # Фильтрация таблицы документов
-      setClearTableSession $sessionKey, 'col_so'
+      MyLib.setClearTableSession $sessionKey, 'col_so'
       getTable( )
       filterContracts( )
 
     filterContracts = -> # Фильтрация таблицы документов
-      setDeleteElemSession( $sessionKey, 'contract_number' )
+      MyLib.setDeleteElemSession( $sessionKey, 'contract_number' )
       getContractNumbers( )
       filterTableReceipt( )
 
     filterTableReceipt = -> # Фильтрация таблицы документов
-      setClearTableSession $sessionKey, 'col_r'
+      MyLib.setClearTableSession $sessionKey, 'col_r'
       getTableReceipts( )
 
     window.receiptsSelectCountact = ->
@@ -106,35 +106,35 @@ $( document ).on 'turbolinks:load', ->
         .val $dateStartSession
         .data 'old-value', $dateStartSession
         .attr readonly: true, placeholder: 'Дата...'
-        .datepicker( onSelect: -> window.selectDateStart $( @ ), '#date_end', filterTable )
+        .datepicker( onSelect: -> MyLib.selectDateStart $( @ ), '#date_end', filterTable )
       .end( )
       .find( '#date_end' ) # Конечная дата фильтрации
         .val $dateEndSession
         .data 'old-value', $dateEndSession
         .attr readonly: true, placeholder: 'Дата...'
-        .datepicker( onSelect: -> window.selectDateEnd $( @ ), '#date_start', filterTable )
+        .datepicker( onSelect: -> MyLib.selectDateEnd $( @ ), '#date_start', filterTable )
       .end( )
       .on 'click', 'td, th[data-sort]', ->
         $this = $( @ )
         if $this.is 'th'
-          window.tableHeaderClick $( @ ), filterTable # Нажатие для сортировки
+          MyLib.tableHeaderClick $( @ ), filterTable # Нажатие для сортировки
         else
           $tr = $this.closest 'tr'
 
-          window.rowSelect( $tr, filterContracts ) unless $tr.hasClass 'selected'
+          MyLib.rowSelect( $tr, filterContracts ) unless $tr.hasClass 'selected'
 
     ########
     $( '#col_r' )
       .find( '#contract_number' )
         .change ->
-          window.setSession( $sessionKey, { contract_number: $( @ ).val() } )
+          MyLib.setSession( $sessionKey, { contract_number: $( @ ).val() } )
           receiptsSelectCountact( )
           getTableReceipts( )
       .end( )
       .find( '.btn_create' )
         .click -> # Нажатие на кнопочку создать
           $this = $( @ )
-          window.createDoc(
+          MyLib.createDoc(
             $this,
               supplier_order_id: $this.closest( '.clmn' ).data( 'supplier_order_id' )
               contract_number: $( '#contract_number' ).val( ) )
@@ -142,11 +142,11 @@ $( document ).on 'turbolinks:load', ->
       .on 'click', 'td, th[data-sort]', ->
         $this = $( @ )
         if $this.is 'th'
-          window.tableHeaderClick $( @ ), filterTableReceipt # Нажатие для сортировки
+          MyLib.tableHeaderClick $( @ ), filterTableReceipt # Нажатие для сортировки
         else
           $button = $this.children 'button'
           $tr = $this.closest 'tr'
 
-          window.rowSelect $tr unless $tr.hasClass 'selected'
+          MyLib.rowSelect $tr unless $tr.hasClass 'selected'
 
-          window.tableButtonClick( $button, false ) if $button.length
+          MyLib.tableButtonClick( $button, false ) if $button.length

@@ -2,7 +2,7 @@ class Institution < ApplicationRecord
   belongs_to :branch
 
   has_many :children_groups
-  has_many :children_categories, -> { group(:id).order(:code) }, through: :children_groups
+  has_many :children_categories, -> { group( :id ).order( :code ) }, through: :children_groups
   has_many :supplier_order_products
   has_many :receipts
   has_many :menu_requirements

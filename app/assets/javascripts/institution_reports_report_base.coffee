@@ -4,8 +4,8 @@ $( document ).on 'turbolinks:load', ->
   if $reportBase.length
     $parentElem = $reportBase
     $sessionKey = $parentElem.attr 'id'
-    $dateStartSession = window.getSession( $sessionKey )?.date_start
-    $dateEndSession = window.getSession( $sessionKey )?.date_end
+    $dateStartSession = MyLib.getSession( $sessionKey )?.date_start
+    $dateEndSession = MyLib.getSession( $sessionKey )?.date_end
 
     ########
     $parentElem
@@ -13,7 +13,7 @@ $( document ).on 'turbolinks:load', ->
         .click -> # Нажатие на кнопочку создать
           $dateStart = $( '#date_start' )
           $dateEnd = $( '#date_end' )
-          window.ajax(
+          MyLib.ajax(
             "Формування звіта в 1С"
             $parentElem.data( 'path-view' )
             'post'
@@ -29,10 +29,10 @@ $( document ).on 'turbolinks:load', ->
         .val $dateStartSession
         .data 'old-value', $dateStartSession
         .attr readonly: true, placeholder: 'Дата...'
-        .datepicker( onSelect: -> window.selectDateStart $( @ ), '#date_end', false )
+        .datepicker( onSelect: -> MyLib.selectDateStart $( @ ), '#date_end', false )
       .end( )
       .find( '#date_end' ) # Конечная дата фильтрации
         .val $dateEndSession
         .data 'old-value', $dateEndSession
         .attr readonly: true, placeholder: 'Дата...'
-        .datepicker( onSelect: -> window.selectDateEnd $( @ ), '#date_start', false )
+        .datepicker( onSelect: -> MyLib.selectDateEnd $( @ ), '#date_start', false )

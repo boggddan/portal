@@ -5,9 +5,9 @@ $( document ).on 'turbolinks:load', ->
     $parentElem = $attendanceOfChildren
 
     $sessionKey = $parentElem.attr 'id'
-    $dateStartSession = window.getSession( $sessionKey )?.date_start
-    $dateEndSession = window.getSession( $sessionKey )?.date_end
-    $childrenGroupSession = window.getSession( $sessionKey )?.children_group
+    $dateStartSession = MyLib.getSession( $sessionKey )?.date_start
+    $dateEndSession = MyLib.getSession( $sessionKey )?.date_end
+    $childrenGroupSession = MyLib.getSession( $sessionKey )?.children_group
 
     ########
     $parentElem
@@ -16,7 +16,7 @@ $( document ).on 'turbolinks:load', ->
           $dateStart = $( '#date_start' )
           $dateEnd = $( '#date_end' )
           $childrenGroupCode = $( '#children_group_code' )
-          window.ajax(
+          MyLib.ajax(
             "Формування табеля в 1С"
             $parentElem.data( 'path-view' )
             'post'
@@ -33,13 +33,13 @@ $( document ).on 'turbolinks:load', ->
         .val $dateStartSession
         .data 'old-value', $dateStartSession
         .attr readonly: true, placeholder: 'Дата...'
-        .datepicker( onSelect: -> window.selectDateStart $( @ ), '#date_end', false )
+        .datepicker( onSelect: -> MyLib.selectDateStart $( @ ), '#date_end', false )
       .end( )
       .find( '#date_end' ) # Конечная дата фильтрации
         .val $dateEndSession
         .data 'old-value', $dateEndSession
         .attr readonly: true, placeholder: 'Дата...'
-        .datepicker( onSelect: -> window.selectDateEnd $( @ ), '#date_start', false )
+        .datepicker( onSelect: -> MyLib.selectDateEnd $( @ ), '#date_start', false )
       .end( )
       .find( '#children_group_code' ) # Конечная дата фильтрации
         .val $childrenGroupSession

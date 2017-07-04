@@ -4,18 +4,18 @@ $( document ).on( 'turbolinks:load', ( ) => {
     const $parentElem = $menuRequirements;
 
     const $sessionKey = $parentElem.attr( 'id' );
-    const $dateStartSession = ( window.getSession( $sessionKey ) || { } ).date_start;
-    const $dateEndSession = ( window.getSession( $sessionKey ) || { } ).date_end;
+    const $dateStartSession = ( MyLib.getSession( $sessionKey ) || { } ).date_start;
+    const $dateEndSession = ( MyLib.getSession( $sessionKey ) || { } ).date_end;
 
     $( `#main_menu li[data-page=${ $sessionKey }]` ).addClass( 'active' ).siblings(  ).removeClass( 'active' );
 
     const getTable = ( ) => {
-      const $sessionObj = window.getSession( $sessionKey );
+      const $sessionObj = MyLib.getSession( $sessionKey );
       const $clmn = $( '#col_mr' );
       const $clmnObj = $sessionObj[ $clmn.attr( 'id' ) ];
 
       if ( ( $sessionObj || { } ).date_start ) {
-        window.ajax(
+        MyLib.ajax(
           'Фільтрація табелів',
           $clmn.data( 'path-filter' ),
           'post',
@@ -28,7 +28,7 @@ $( document ).on( 'turbolinks:load', ( ) => {
     };
 
     const filterTable = ( ) => { // Фильтрация таблицы документов
-      setClearTableSession( $sessionKey, 'main' );
+      MyLib.setClearTableSession( $sessionKey, 'main' );
       getTable( );
     };
 
@@ -40,28 +40,28 @@ $( document ).on( 'turbolinks:load', ( ) => {
         .val( $dateStartSession )
         .data( 'old-value', $dateStartSession )
         .attr( { readonly: true, placeholder: 'Дата...' } )
-        .datepicker( { onSelect: function( ) { window.selectDateStart( $( this ), '#date_end', filterTable ); } } )
+        .datepicker( { onSelect: function( ) { MyLib.selectDateStart( $( this ), '#date_end', filterTable ); } } )
       .end( )
       .find( '#date_end' ) // Конечная дата фильтрации
         .val( $dateEndSession )
         .data( 'old-value', $dateEndSession )
         .attr( { readonly: true, placeholder: 'Дата...' } )
-        .datepicker( { onSelect: function( ) { window.selectDateEnd( $( this ), '#date_start', filterTable ); } } )
+        .datepicker( { onSelect: function( ) { MyLib.selectDateEnd( $( this ), '#date_start', filterTable ); } } )
       .end( )
       .find( '.btn_create' )
-        .on( 'click', function( ) { window.createDoc( $( this ), { } ); } )
+        .on( 'click', function( ) { MyLib.createDoc( $( this ), { } ); } )
       .end( )
       .on( 'click', 'td, th[data-sort]' , function( ) {
         const $this = $( this );
         if ( $this.is( 'th' ) ) {
-          window.tableHeaderClick( $this, filterTable ); // Нажатие для сортировки
+          MyLib.tableHeaderClick( $this, filterTable ); // Нажатие для сортировки
         } else {
           const $button = $this.children( 'button' );
           const $tr = $this.closest( 'tr' );
 
-          if ( !$tr.hasClass( 'selected' ) ) window.rowSelect( $tr );
+          if ( !$tr.hasClass( 'selected' ) ) MyLib.rowSelect( $tr );
 
-          if ( $button.length ) window.tableButtonClick( $button, false );
+          if ( $button.length ) MyLib.tableButtonClick( $button, false );
         };
       } );
   };

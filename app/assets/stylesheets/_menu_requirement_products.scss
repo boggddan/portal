@@ -1,94 +1,134 @@
+@mixin row-group( $el, $bgc, $c, $pl, $ta ) {
+  cursor: default;
+  text-align: center;
+
+  &:hover,
+  #{ $el }:hover,
+  #{ $el }:not(.hover) { background-color: $bgc; color: $c; }
+
+  :first-child { padding-left: $pl; text-align: $ta; }
+}
+
 #menu_requirement_products {
-  .menu_panel:nth-of-type(3) { label:nth-of-type(3) { margin-left: 45px;} }
-
-  /* Таблица категорий */
-  #table_menu_children_categories {
-    height: 100%;
-    table { table-layout: fixed; }
-
-    col:first-child { width: 250px; }
-
-    col ~ col { width: 100px; }
-
-    /* Шапка */
-    thead tr {
-      /* I - строка Граница для конца плана в шапке */
-      &:nth-child(1) th { border-bottom: 3px solid #e7e7e7; &:nth-child(1), &:nth-child(2) { border-right: 3px solid #e7e7e7;} }
-
-      /* II - строка Граница для конца плана в шапке */
-      &:nth-child(2) th { &:nth-child(1), &:nth-child(2), &:nth-child(3), &:nth-child(4) { border-right: 3px solid #e7e7e7; } }
-
-      /* III - строка Граница для конца плана в шапке */
-      &:nth-child(3) th { &:nth-child(2), &:nth-child(4), &:nth-child(6) { border-right: 3px solid #e7e7e7; } }
-    }
-
-    /* Таблица */
-    tbody td {
-      input { width: 100%; } /* Количество */
-      &:first-child { padding-left: 3px; text-align: left; }  /* Колонка с наименованием продуктов */
-      &:nth-child(1), &:nth-child(3), &:nth-child(5), &:nth-child(6), &:nth-child(8) { border-right: 3px solid #e7e7e7; } /* Граница для конца плана в таблице */
-      &:nth-child(8), &:nth-child(10) { font-weight: bold; } /* колонка "Отклонение" */
-    }
-
-    .selected { td { &:nth-child(1), &:nth-child(3), &:nth-child(5), &:nth-child(6), &:nth-child(8) { border-right-color: white; } } }  /* Граница */
-
-    /* Подвал */
-    tfoot td {
-      &:first-child { padding-right: 3px; text-align: right; }  /* Колонка с наименованием продуктов */
-      &:nth-child(1), &:nth-child(3) { border-right: 3px solid white; } /* Граница для конца плана */
-      &:nth-child(6), &:nth-child(8) { border-right: 3px solid #e7e7e7; } /* Граница  где нет итогов */
-      &:nth-last-child(1), &:nth-last-child(2), &:nth-last-child(3), &:nth-last-child(4), &:nth-last-child(5) { background-color: white; border-bottom: 1px solid #e7e7e7; } /* Заливка подвала где не будет итогов */
-      &:nth-last-child(1) { border-right: 1px solid #e7e7e7; }
+  .panel_main {
+    button[data-clmn] {
+      &:not(:disabled) {
+        background-image: linear-gradient(to right, #8bb41d, #b6e026 51%, #8bb41d 100%);
+        border-color: #8bb41d;
+      }
     }
   }
 
-  /* Таблица продуктов */
-  #table_menu_products {
-    &.min_height { max-height: 250px !important; }
+  .clmn_main {
+    flex-basis: 100%;
+  }
 
-    width: 1065px;
-    table { table-layout: fixed; width: 100%; }
+  #col_cc {
 
-    col:nth-child(1) { width: 250px; }
-    col ~ col { width: 75px; }
+    table {
+      width: 0;
+    };
 
-    /* Выравнивание слева для наименований категорий в шапке */
-    thead tr {
-      /* I строка - Граница для конца плана в шапке */
-      &:nth-child(1) th {  border-bottom: 3px solid #e7e7e7; &:nth-child(1), &:nth-child(2), &:nth-child(3) { border-right: 3px solid #e7e7e7; } }
+    col:first-child { width: 250px; }
+  }
 
-      /* II - строка Граница для конца плана в шапке */
-      &:nth-child(2) th {
-        &:nth-last-child(1),
-        &:nth-child(2):nth-last-child(3),
-        &:nth-child(3):nth-last-child(4),
-        &:nth-child(4):nth-last-child(5),
-        &:nth-child(5):nth-last-child(6),
-        &:nth-child(6):nth-last-child(7) { border-right: 3px solid #e7e7e7; border-left: 3px solid #e7e7e7; }
+  #col_md {
+
+    // FIX BUG
+    thead tr:nth-child(2) th:first-child {
+      border-left-width: 0;
+    }
+
+    table { width: 0 };
+    col:nth-child( 1 ) { width: 250px; }
+    col ~ col { width: 90px; }
+
+    tr {
+      &.category { @include row-group( 'td', #f1f1f1, #333, 50px, left ); }
+    }
+
+  }
+
+  #col_pr {
+    .panel {
+      label:not(:first-child) {
+        font-weight: bold;
       }
 
-      /* Нижняя граница для шапки */
-      &:nth-child(1) th[rowspan="3"],
-      &:nth-child(2) th[rowspan="2"],
-      &:nth-child(3) th { border-bottom: 3px solid #e7e7e7;}
+      label:first-child {
+        margin-right: 20px;
+      }
     }
 
-    /* Колонка с наименованием продуктов */
-    tbody td {
-      input { width: 100%; }
-      &:first-child { padding-left: 3px; text-align: left; }
-
-      &:nth-child(1), &:nth-child(2) { border-right: 3px solid #e7e7e7; }  /* Граница */
-
-      /* Жирный текст для итоговых колонок */
-      &:nth-last-child(1),
-      &:nth-child(4):nth-last-child(6),
-      &:nth-child(5):nth-last-child(7),
-      &:nth-child(6):nth-last-child(8),
-      &:nth-child(7):nth-last-child(9),
-      &:nth-child(8):nth-last-child(10) { font-weight: bold; background-color: #e7e7e7; border-bottom-color: white; }
+    // FIX BUG
+    thead {
+      tr:nth-child(2),
+      tr:nth-child(3) {
+        th:first-child {
+          border-left-width: 0;
+        }
+      }
     }
 
-    .selected { td { &:nth-child(1), &:nth-child(2) { border-right-color: white; } } }  /* Граница */
+    table {
+       width: 0;
+    };
+
+    .panel button {
+      min-width: 80px;
+    }
+
+    button[data-pf] {
+      &:not(:disabled) {
+        background-image: linear-gradient(to right, #eab92d, #c79810 51%, #eab92d 100%);
+        border-color: #eab92d;
+      }
+    }
+
+    button[data-meal-id] {
+      &:not(:disabled) {
+        background-image: linear-gradient(to right, #a6a6f2 0%, #d2d2f9 51%, #a6a6f2 100%);
+        border-color: #a6a6f2;
+      }
+    }
+
+    button[data-meal-id='-1'] {
+      margin-left: 20px;
+      margin-right: 15px;
+
+      &:not(:disabled) {
+        background-image: linear-gradient(to right, #1c5a85 0%, #3093c7 51%, #1c5a85 100%);
+        border-color: #1c5a85;
+      }
+    }
+
+    button[data-meal-id='0'] {
+      margin-left: 11px;
+
+      &:not(:disabled) {
+        background-image: linear-gradient(to right, #92cfde 0%, #76bdd1 51%, #92cfde 100%);
+        border-color: #92cfde;
+      }
+    }
+
+    col:nth-child( 1 ) { width: 250px; }
+
+    tr {
+      &.type { @include row-group( 'td', #f1f1f1, #333, 50px, left ); }
+
+      .price {
+        border-right: 3px solid #f1f1f1;
+        border-left: 2px solid #f1f1f1;
+      }
+
+      .last_dish {
+        border-right: 3px solid #e7e7e7;
+      }
+
+      .last_meal {
+        border-right: 3px solid #777;
+      }
+
+    }
   }
 }

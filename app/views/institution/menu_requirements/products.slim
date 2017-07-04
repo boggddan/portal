@@ -1,0 +1,59 @@
+/ Отображение заявки
+- label_text = 'layouts/label_text'
+
+main#menu_requirement_products *{ data: { \
+  id: @menu_requirement.id, disabled_plan: @disabled_plan.to_s, disabled_fact: @disabled_fact.to_s,
+  path: { \
+  send_plan: institution_menu_requirements_send_sap_path,
+  send_fact: institution_menu_requirements_send_saf_path,
+  exit: institution_menu_requirements_index_path,
+  update: institution_menu_requirements_update_path } } }
+
+  h1.icon
+  .panel_main.row_3
+    .panel
+      button.btn_send *{ data: { pf: :plan } } = ' план'
+      button.btn_send *{ data: { pf: :fact } } = ' факт'
+      button.btn_exit
+
+      - if @disabled_plan
+        = render label_text, label_attr: { class: :icon_number }, text: 'Надіслано план:',
+          input_attr: { value: @menu_requirement.number_sap, disabled: true }
+        = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
+          input_attr: { value:  date_str( @menu_requirement.date_sap ), disabled: true }
+
+        - if @disabled_fact
+          = render label_text, label_attr: { class: :icon_number }, text: 'факт план:',
+            input_attr: { value: @menu_requirement.number_saf, disabled: true }
+          = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
+            input_attr: { value:  date_str( @menu_requirement.date_saf ), disabled: true }
+
+    .panel
+      = render label_text, label_attr: { class: :icon_number }, text: 'Меню-вимога №',
+        input_attr: { id: :number, value: @menu_requirement.number, disabled: true }
+      = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
+        input_attr: { id: :date, value:  date_str( @menu_requirement.date ), disabled: true }
+      = render label_text, label_attr: { class: :icon_сalendar }, text: 'Дата списання',
+        input_attr: { id: :splendingdate, value:  date_str( @menu_requirement.splendingdate ),
+        readonly: true }
+    .panel
+      button.btn_gradient *{ data: { clmn: '#col_cc' } } Категорії
+      button.btn_gradient *{ data: { clmn: '#col_md' } } Вибір страв
+      button.btn_gradient *{ data: { clmn: '#col_pr' } } Продукти
+
+  .clmn_main
+    #col_cc.clmn *{ data: { path_update: institution_menu_requirements_children_category_update_path } }
+      h2.icon Кількість дітей по категоріях
+      = render( 'table_children_categories' ) if @menu_children_categories.present?
+
+    #col_md.clmn.hide *{ data: { \
+      path: { \
+      create: institution_menu_requirements_create_products_path,
+      update: institution_menu_requirements_meals_dish_update_path } } }
+
+      h2.icon Страви та прийоми їжі
+      .panel : button.btn_create *{ disabled: @disabled_plan }
+      .parent_table = render( 'table_meals_dishes' ) if @menu_meals_dishes.present?
+
+    #col_pr.clmn *{ data: { path_update: institution_menu_requirements_product_update_path } }
+      = render( 'table_menu_products' ) if @menu_products.present?

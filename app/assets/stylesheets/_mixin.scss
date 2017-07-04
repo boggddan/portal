@@ -51,7 +51,9 @@ $bdrs: 3px;
     border-radius: $bdrs;
     border: 1px solid #e7e7e7;
     cursor: pointer;
-    padding: if( $w == auto, 0 $pl 0 $pr * 2, 0 $pr 0 $pl );
+    @if ( $cnt != '' )  {
+      padding: if( $w == auto, 0 $pl 0 $pr * 2, 0 $pr 0 $pl );
+    }
     text-align: $ta;
     margin-left: 2px;
 

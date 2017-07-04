@@ -10,7 +10,7 @@ $( document ).on 'turbolinks:load', ( ) ->
     headerText = -> $( 'h1' ).text "Поставка №  #{ $( '#number' ).val( ) } від #{ $( '#date' ).val( ) }"
 
     headerText( )
-    window.tableSetSession( $( '.clmn .parent_table' ) )
+    MyLib.tableSetSession( $( '.clmn .parent_table' ) )
 
     calcDiff = ( $elem ) ->
       $tr = $elem.closest( 'tr' )
@@ -20,51 +20,51 @@ $( document ).on 'turbolinks:load', ( ) ->
       $diffElem = $tr.find( '[data-name=diff]' )
 
       if $elem.attr( 'name' ) is 'count_invoice' and $countInvoice and not $count
-        сhangeValue( $countElem.val( $countInvoice ), 'tr', false )
+        MyLib.changeValue( $countElem.val( $countInvoice ), 'tr', false )
         $diffElem.text( '' )
       else
-        initValue( $diffElem.text( ($count*1000 - $countInvoice*1000)/1000 ) )
+        MyLib.initValue( $diffElem.text( ($count*1000 - $countInvoice*1000)/1000 ) )
 
     $parentElem
       .find( 'h1' )
-        .click -> window.clickHeader( $( @ ) )
+        .click -> MyLib.clickHeader( $( @ ) )
       .end( )
       .find( '.btn_send' )
-        .click -> window.btnSendClick( $( @ ) )
+        .click -> MyLib.btnSendClick( $( @ ) )
       .end( )
       .find( '.btn_exit, .btn_save' )
-        .click -> window.btnExitClick $( @ )
+        .click -> MyLib.btnExitClick $( @ )
       .end( )
       .find( '.btn_print' )
-        .click -> window.btnPrintClick $( @ )
+        .click -> MyLib.btnPrintClick $( @ )
       .end( )
       .find( '#date' )   # Дата
         .data 'old-value', $( '#date' ).val( )
-        .datepicker( onSelect: -> сhangeValue( $( @ ), 'main', headerText ) )
+        .datepicker( onSelect: -> MyLib.changeValue( $( @ ), 'main', headerText ) )
       .end( )
         .find( '#invoice_number' )   # Дата
-          .change -> сhangeValue( $( @ ), 'main', false )
+          .change ->  MyLib.changeValue( $( @ ), 'main', false )
 
     $( '.clmn' )
       .find( 'tr.row_data' )
-        .click( -> window.rowSelect( $( @ ) ) unless $( @ ).hasClass 'selected' )
+        .click( -> MyLib.rowSelect( $( @ ) ) unless $( @ ).hasClass 'selected' )
       .end( )
       .find( 'tr.date :first-child' )
         .each -> # Отформатировать дату данные
           $this = $( @ )
-          $this.text window.capitalize( moment( $this.data 'value' ).format 'dddd - DD.MM.YY' )
+          $this.text MyLib.capitalize( moment( $this.data 'value' ).format 'dddd - DD.MM.YY' )
       .end( )
       .find( 'tr.row_data td[data-name=diff]' )
         .each -> calcDiff $( @ )
       .end( )
       .find( 'tr.row_data [data-type]' )
-        .each -> initValue( $( @ ) )
+        .each -> MyLib.initValue( $( @ ) )
       .end( )
       .find( 'tr.row_data input' )
         .change ->
-          сhangeValue( $( @ ), 'tr', false )
+          MyLib.changeValue( $( @ ), 'tr', false )
           calcDiff $( @ )
       .end( )
       .find( 'tr.row_data select[name=causes_deviation_id]' )
-        .change -> сhangeValue( $( @ ), 'tr', false )
+        .change -> MyLib.changeValue( $( @ ), 'tr', false )
 

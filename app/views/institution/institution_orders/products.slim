@@ -13,7 +13,7 @@ main#institution_order_products *{ data: { \
   h1.icon
 
   .panel_main.row_2
-    .panel_new
+    .panel
       button.btn_send *{ disabled: disabled }
       button *{ class: ( disabled ? :btn_exit : :btn_save ) }
 
@@ -26,7 +26,7 @@ main#institution_order_products *{ data: { \
         = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
           input_attr: { value:  date_str( @institution_order.date_sa ), disabled: true }
 
-    .panel_new
+    .panel
       = render label_text, label_attr: { class: :icon_number }, text: 'Заявка №',
         input_attr: { id: :number, value: @institution_order.number, disabled: true }
       = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',

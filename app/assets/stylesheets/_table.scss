@@ -1,126 +1,268 @@
+$ffIcon: 'Glyphicons Halflings';
 
-/* Табличка */
+@mixin tbl-btn($cnt, $c, $c_hover) {
+  &:before {
+    content: $cnt;
+  }
+
+  &:enabled {
+    color: $c;
+  }
+
+  &:hover:enabled {
+    color: $c_hover;
+  }
+}
+
+.parent_table {
+  flex-grow: 1;
+
+  &.hide { flex-basis: 0; };
+}
+
+@mixin tbl-border($tag, $style, $color) {
+  tr {
+    #{ $tag } {
+      &:first-child {
+        border-left: 1px solid #e7e7e7;
+      }
+
+      &:last-child {
+        border-right: 1px solid #e7e7e7;
+      }
+    }
+
+    &:last-child #{ $tag } {
+      border-bottom: 1px solid #e7e7e7;
+    }
+
+    #{ $tag }:first-child,
+    #{ $tag } ~ #{ $tag }:not(:last-child) {
+      border-right: 1px $style $color;
+    }
+  }
+}
+$h_td: 26px;
+$bdrs: 5px;
+
+// Табличка
 table.table {
+  table-layout: fixed;
+  max-width: 100%;
+  width: 100%;
   font-size: 13px;
+  text-align: center;
   word-wrap: break-word;
   border-spacing: 0;
-  -padding-top: 5px;
 
-  /* Заголовок таблицы */
+  colgroup {
+    .date {
+      width: 85px;
+    }
+
+    .number,
+    .count {
+      width: 100px;
+    }
+
+    .button {
+      width: $h_td;
+    }
+
+    col.hide {
+      display: none;
+    }
+  }
+
+  tr {
+    &:not(:last-child) {
+      th,
+      td {
+        border-bottom: 1px dotted #e7e7e7;
+      }
+    }
+
+    th,
+    td {
+      height: $h_td;
+      padding: 0;
+
+      &.hide { display: none }
+
+      &.hover:not(.active) {
+        background-color: #c0def7;
+      }
+    }
+  }
+
   thead {
-    &, th { background-color: #fbfbfb; }
     color: #333;
 
-    tr:nth-child(1) th {
-      & { border-top: 1px solid #e7e7e7; }
-      &:first-child { border-top-left-radius: 5px; }
-      &:last-child { border-top-right-radius: 5px; }
+    th {
+      position: relative;
+      background-color: #fbfbfb;
+      z-index: 1;
+
+      &[data-sort] {
+        cursor: pointer;
+
+        &:after {
+          font-family: $ffIcon;
+          top: 6px;
+          right: 2px;
+          position: absolute;
+          color: gray;
+        }
+
+        &.asc:after {
+          content: '\e093';
+        }
+
+        &.desc:after {
+          content: '\e094';
+        }
+      }
     }
 
-    tr th:first-child { border-left: 1px solid #e7e7e7; }
-    tr th:last-child { border-right: 1px solid #e7e7e7; }
+    tr {
+      &:first-child {
+        th {
+          border-top: 1px solid #e7e7e7;
+
+          &:first-child {
+            border-top-left-radius: $bdrs;
+          }
+
+          &:last-child {
+            border-top-right-radius: $bdrs;
+          }
+        }
+      }
+    }
+    @include tbl-border(th, dotted, #e7e7e7);
   }
 
-  tr { height: 27px; padding: 0; margin: 0 }
+  tbody {
+    @include tbl-border(td, dotted, #e7e7e7);
 
-  th:not(:nth-last-child(1)), td:not(:nth-last-child(1)) { border-right: 1px dotted #e7e7e7; }
+    tr {
+      cursor: pointer;
 
-  th, td { text-align: center; padding: 0; font-weight: normal; }
+      &:hover {
+        td:not(.active),
+        select:not(:focus),
+        input:not(:focus) {
+          background-color: #c0def7;
+        }
 
-  th, tr:not(:nth-last-child(1)) td { border-bottom: 1px dotted #e7e7e7; }
+        td.active {
+          background-color: #FFE419;
+        }
+      }
 
-  th {
-    position: relative;
-    &[id] { cursor: pointer; }
-    &:after { font-family: 'Glyphicons Halflings'; top: 6px; right: 2px; position: absolute; color: gray; }
-    &.sort_asc:after { content: '\e093'; }
-    &.sort_desc:after { content: '\e094'; }
+      td {
+        background-color: #fff;
+        &.active {
+          background-color: yellow;
+        }
+
+        &.is_del {
+          text-decoration: line-through red;
+          color: italic;
+        }
+      }
+
+      .hover.active {
+        background-color: #FFE419;
+      }
+
+      td:hover:not(.active),
+      select:hover:not(:focus),
+      input:hover:not(:focus) {
+        background-color: #a1caec;
+      }
+
+      // Нажатие в таблички строку для JQUERY
+      &.selected {
+        cursor: default;
+
+        &,
+        td,
+        select:not(:focus):not(:hover),
+        input:not(:focus):not(:hover) {
+          background-color: #e7e7e7;
+        }
+      }
+    }
+  }
+  // Выделение в таблички строку
+  tfoot {
+    background-color: #e7e7e7;
+    font-weight: bold;
+    @include tbl-border(td, solid, white);
   }
 
-  /* Поле ввода */
+  // Последним может быть и thead и tfooter
+  & :last-child {
+    tr {
+      &:last-child td {
+        &:first-child {
+          border-bottom-left-radius: $bdrs;
+        }
+
+        &:last-child {
+          border-bottom-right-radius: $bdrs;
+        }
+      }
+    }
+  }
+
   select, input {
+    height: $h_td - 1;
     width: 100%;
+    padding: 0;
     font-size: 13px;
-    height: 26px;
     text-align: center;
     border: none;
+    outline: none;
+    background-color: white;
 
-    &:focus { outline: none; }
-  }
-
-  /* Выделение в таблички строку */
-  tbody tr {
-    cursor: pointer;
-    &:hover td, &:hover input  { background-color: #c0def7; }
-
-    td {
-      background-color: white;
-      &[disabled] { background-color: #f1f1f1; cursor: default; }
-      &:hover:not([disabled]), &:hover:not([disabled]) input { background-color: #a1caec }
-      input:hover:focus { background-color: white }
+    &:hover:not(:focus) {
+      background-color: #a1caec;
     }
 
-    td:first-child { border-left: 1px solid #e7e7e7; }
-    td:last-child { border-right: 1px solid #e7e7e7; }
 
-    /* Нажатие в таблички строку для JQUERY */
-    &.selected {
-      td, input { background-color: #e7e7e7; }
-      td { border-right: 1px solid white; }
-      input:focus { background-color: white; }
+  }
+
+  // Базовая кнопка
+  button {
+    padding: 0;
+    cursor: pointer;
+    height: $h_td - 1;
+    width: $h_td - 1;
+    background-color: transparent;
+    border-style: none;
+
+    &:before {
+      font-family: $ffIcon;
+      top: 1px;
+      position: relative;
+    }
+
+    &:disabled {
+      color: #e7e7e7;
       cursor: default;
     }
 
-    /* Выделение в таблички строку */
-    &:last-child td {
-      border-bottom: 1px solid #e7e7e7;
-      &:first-child { &, input { border-bottom-left-radius: 5px; } }
-      &:last-child { &, input { border-bottom-right-radius: 5px; } }
-    }
-  }
-
-  /* Выделение в таблички строку */
-  tfoot {
-    background-color: #e7e7e7;
-    tr td {
-      font-weight: bold;
-      &:first-child { border-bottom-left-radius: 5px; }
-      &:last-child { border-bottom-right-radius: 5px; }
-    };
-  }
-
-  /* Базовая кнопка */
-  button {
-    height: 100%;
-    width: 25px;
-    background-color: transparent;
-    text-align: center;
-    font-size: 12px;
-    border-style: none;
-    cursor: pointer;
-    &:disabled { color: #e7e7e7; cursor: default; };
-    &:before { font-family: 'Glyphicons Halflings'; top: 1px; position: relative; }
-  }
-
-  /* Кнопка просмотр */
-  button.btn_view {
-    &:before { content: "\e105"; }
-    &:enabled { color: #5bc0de; }
-    &:hover:enabled { color: #31b0d5; }
-  }
-
-  /* Кнопка редактировать */
-  button.btn_edit {
-    &:before { content: "\270f"; }
-    &:enabled {color: #5cb85c;}
-    &:hover:enabled { color: #449d44; }
-  }
-
-  /* Кнопка удалить */
-  button.btn_del {
-    &:before { content: "\e014"; }
-    &:enabled {color: #d9534f; }
-    &:hover:enabled { color: #c9302c; }
+    &.btn_view {
+      @include tbl-btn('\e105', #5bc0de, #31b0d5);
+    } // Кнопка просмотр
+    &.btn_edit {
+      @include tbl-btn('\270f', #5cb85c, #449d44);
+    } // Кнопка редактировать
+    &.btn_del {
+      @include tbl-btn('\e014', #d9534f, #c9302c);
+    } // Кнопка удалить
   }
 
   /* Группировка колонок */
@@ -131,18 +273,20 @@ table.table {
     padding-left: 5px;
   }
 
-  .date_field { width: 85px; } /* Поле даты */
-  .datetime_field { width: 130px; } /* Поле даты и времени */
-  .count { width: 100px; input { width: 100px } } /* Поле количества */
-  .number_field { width: 100px; }
-
-  .uncheck_field { width: 60px; }
-
-  .check_field { width: 60px;
-    &:before { content: "\e013"; font-family: 'Glyphicons Halflings'; top: 1px; position: relative; color: #aaa;}
+  .name {
+    padding-left: 3px;
+    text-align: left;
   }
 
-  .negative { color: red };
-  .positive { color: green };
+  .check {
+    &:after {
+      content: '\e013';
+      font: normal 14px $ffIcon;
+    }
+  }
 
+  td.count input[value^='-'] {
+    font-weight: bold;
+    color: red;
+  }
 }

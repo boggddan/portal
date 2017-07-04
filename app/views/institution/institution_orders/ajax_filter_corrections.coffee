@@ -14,7 +14,7 @@ $disabled = not '<%= @institution_order.number_sa %>'
 
 <% if @io_corrections.present? %>
 $blockTable.append( '<%= j render( "table_corrections" ) %>' )
-window.tableSetSession( $blockTable )
+MyLib.tableSetSession( $blockTable )
 $disabled = not '<%= @io_corrections.last.number_sa %>'
 <% end %>
 

@@ -16,7 +16,7 @@ $ffIcon: 'Glyphicons Halflings';
 }
 
 // Менюшка панелька
-.panel_new {
+.panel {
   $mr: 4px;
   $bdrs: 3px;
 
@@ -29,6 +29,7 @@ $ffIcon: 'Glyphicons Halflings';
   line-height: 26px;
   color: #333;
   font-size: 13px;
+  overflow: hidden;
 
   // Блок для того что бы нарисовать иконку перед элементок
   label {
@@ -36,6 +37,7 @@ $ffIcon: 'Glyphicons Halflings';
     &.icon_edit { @include label-icon( 90px, '\270f', left ); } // Иконка редактирования
     &.icon_сalendar { @include label-icon( 90px, '\e109', center ); } // Иконка календарь
     &.icon_number { @include label-icon( 120px, '\e022', left ); };
+    &.icon_none { @include label-icon( 70px, '', center ); };
   }
 
   .btn_create { // Кнопка создать
@@ -132,4 +134,6 @@ $ffIcon: 'Glyphicons Halflings';
   .right_next {
     @include ml-mr( $mr, 0 );
   }
+
+  &.hide { flex-basis: 0; padding: 0; height: 0; };
 }

@@ -1,0 +1,30 @@
+table.table *{ data: { type: :list_doc } }
+  colgroup
+    col
+    - for i in 1..@menu_meals.size
+      col
+
+  thead
+    tr
+      th *{ rowspan: 2 } Блюдо
+      th *{ colspan: @menu_meals.size  } Прийоми їжі
+    tr
+      - @menu_meals.each do | o |
+        th = o[ :name ]
+
+  tbody
+    - category_id = 0
+    - @menu_dishes.each do | dish |
+      - unless category_id == dish[ :category_id ]
+        - category_id = dish[ :category_id ]
+        tr.row_group.category
+          td *{ colspan: @menu_meals.size + 1 } = dish[ :category_name ]
+
+      tr.row_data
+        td.name = dish[ :name ]
+        - @menu_meals.each do | meal |
+          - menu_meals_dish = @menu_meals_dishes.select { | o | \
+            o[ :dishes_id ] == dish[ :id ] && o[ :meals_id ] == meal[ :id ] } \
+            .first || { id: 0, is_enabled: 'null' }
+          td.cell_mark *{ class: menu_meals_dish[ :is_enabled ] ? :check : '',
+            data: { id: menu_meals_dish[ :id ] } }

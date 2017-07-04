@@ -9,6 +9,6 @@ class InstitutionOrder < ApplicationRecord
 
   def set_default_value
     self.number ||= number_next( self.class, institution_id )
-    self.date ||= self.date_start ||=  self.date_end ||= Date.today
+    self.date ||= self.date_start ||= self.date_end ||= Date.today
   end
 end
