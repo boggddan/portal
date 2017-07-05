@@ -43,9 +43,12 @@ class MenuRequirementProducts {
   clickMdCell( event ) {
     const { currentTarget: elem } = event;
     const dataId = +elem.dataset.id;
-    if ( !this.disabledFact && dataId ) {
+    const countPlan = +elem.dataset.countPlan;
+    const isCheck = elem.classList.contains( 'check' );
+
+    if ( (!this.disabledPlan || !isCheck || !countPlan) && !this.disabledFact && dataId ) {
       elem.classList.toggle( 'check' );
-      this.mdUpdate( dataId, elem.classList.contains( 'check' ) );
+      this.mdUpdate( dataId, !isCheck );
       this.checkMdExists( );
     }
   }

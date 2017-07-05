@@ -25,6 +25,7 @@ table.table *{ data: { type: :list_doc } }
         - @menu_meals.each do | meal |
           - menu_meals_dish = @menu_meals_dishes.select { | o | \
             o[ :dishes_id ] == dish[ :id ] && o[ :meals_id ] == meal[ :id ] } \
-            .first || { id: 0, is_enabled: false }
+            .first || { id: 0, is_enabled: false, count_plan: 0 }
           td.cell_mark *{ class: menu_meals_dish[ :is_enabled ] ? :check : '',
-            data: { id: menu_meals_dish[ :id ] } }
+            data: { id: menu_meals_dish[ :id ],
+            count_plan: menu_meals_dish[ :count_plan ] } }

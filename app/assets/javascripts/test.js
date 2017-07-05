@@ -1,6 +1,10 @@
-// const event = { currentTarget: { dataset: { pf: 55 } } };
+const disabledFact = false;
+const disabledPlan = true;
+const isCheck = true;
+const countPlan = 0;
+const dataId = 10;
+
+const result = (!disabledPlan || !isCheck || !countPlan) && !disabledFact && dataId;
 
 
-// const { currentTarget: { dataset: { pf } } } = event;
-
-// console.log( pf );
+console.log( Boolean(result) );

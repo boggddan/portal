@@ -86,6 +86,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
 
     @menu_meals_dishes = JSON.parse( @menu_requirement.menu_meals_dishes
       .joins( :meal, dish: :dishes_category )
+      .left_joins( :menu_products )
       .select( :id,
               :is_enabled,
               'meals.id AS meals_id',
@@ -93,8 +94,12 @@ class Institution::MenuRequirementsController < Institution::BaseController
               'dishes.id AS dishes_id',
               'dishes.name AS dishes_name',
               'dishes_categories.id AS category_id',
-              'dishes_categories.name AS category_name' )
-      .where( "dishes.code != ''", "meals.code != ''" )
+              'dishes_categories.name AS category_name',
+              'dishes_categories.name AS category_name',
+              'COALESCE( SUM( menu_products.count_plan ), 0) AS count_plan' )
+      .where( 'dishes.code != ?', '')
+      .where( 'meals.code != ?', '' )
+      .group( :id, 'meals.id', 'dishes.id', 'dishes_categories.id' )
       .order( 'meals.priority', 'meals.name', 'dishes_categories.priority',
               'dishes_categories.name', 'dishes.priority', 'dishes.name' )
       .to_json, symbolize_names: true )
