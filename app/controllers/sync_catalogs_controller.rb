@@ -1470,11 +1470,44 @@ class SyncCatalogsController < ApplicationController
           end
 
           id = menu_requirement.id
+          now = Time.now.to_s( :db )
 
           ### menu_children_categories
           menu_children_categories = menu_requirement.menu_children_categories
           menu_children_categories.update_all( count_all_plan: 0, count_exemption_plan: 0, count_all_fact: 0,
                                                count_exemption_fact: 0 )
+
+          #################################
+          # Создание запроса для блюд
+
+          sql_delete = "DELETE FROM menu_products WHERE menu_requirement_id = #{ id };" +
+             "DELETE FROM menu_meals_dishes WHERE menu_requirement_id = #{ id }"
+
+          meals_dishes = JSON.parse( Meal
+            .select( 'meals.id as meal_id', 'dishes.id as dish_id' )
+            .joins( 'LEFT JOIN dishes ON true' )
+            .order( 'meals.priority', 'meals.name', 'dishes.priority', 'dishes.name' )
+            .to_json, symbolize_names: true )
+
+          empty_meal = Meal.find_by( code: '' )
+          empty_dish = Dish.find_by( code: '' )
+
+          mmd_sql_values = ''
+          meals_dishes.each{ | md |
+            mmd_sql_values += ",(#{ id },#{ md[ :meal_id ] },#{ md[ :dish_id ] }, " +
+              "#{ md[ :meal_id ] == empty_meal.id && md[ :dish_id ] == empty_dish.id }," +
+              "'#{ now }','#{ now }')" if
+                 md[ :meal_id ] != empty_meal.id && md[ :dish_id ] != empty_dish.id ||
+                 md[ :meal_id ] == empty_meal.id && md[ :dish_id ] == empty_dish.id
+          }
+
+          mmd_fieds = %w( menu_requirement_id meal_id dish_id is_enabled created_at updated_at ).join( ',' )
+          mmd_sql = "INSERT INTO menu_meals_dishes ( #{ mmd_fieds } ) VALUES #{ mmd_sql_values[1..-1] }"
+          ActiveRecord::Base.connection.execute( "#{ sql_delete };#{ mmd_sql }" )
+
+          menu_meals_dish = menu_requirement.menu_meals_dishes.find_by( meal: empty_meal, dish: empty_dish )
+          ####
+
           error_children_categories = []
           params[ :children_categories ].each_with_index do | children_category_par, index |
             error = { children_category_code: 'Не знайдений параметр [children_category_code]',
@@ -1516,9 +1549,10 @@ class SyncCatalogsController < ApplicationController
               error.merge!( product[ :error ] ) if product[ :error ]
 
               if error.empty?
-                update_fields = { count_plan: product_par[ :count_plan ], count_fact: product_par[ :count_plan ] }
+                update_fields = { count_plan: product_par[ :count_plan ] }
                 menu_products.create_with( update_fields )
-                  .find_or_create_by( children_category: children_category, product: product ).update( update_fields )
+                  .find_or_create_by( children_category: children_category, product: product, menu_meals_dish: menu_meals_dish )
+                  .update( update_fields )
               end
             end
 
@@ -1583,6 +1617,9 @@ class SyncCatalogsController < ApplicationController
             menu_children_categories = menu_requirement.menu_children_categories
             menu_children_categories.update_all( count_all_fact: 0, count_exemption_fact: 0 )
 
+            menu_meals_dish = menu_requirement.menu_meals_dishes
+              .find_by( meal: Meal.find_by( code: '' ), dish: Dish.find_by( code: '' ) )
+
             error_children_categories = []
             params[ :children_categories ].each_with_index do | children_category_par, index |
               error = { children_category_code: 'Не знайдений параметр [children_category_code]',
@@ -1606,7 +1643,7 @@ class SyncCatalogsController < ApplicationController
 
             ### menu_products
             menu_products = menu_requirement.menu_products
-            menu_products.update_all( count_fact: 0 )
+            menu_products.where.not( menu_meals_dish: menu_meals_dish ).delete_all
 
             error_products = []
             params[ :products ].each_with_index do | product_par, index |
@@ -1624,7 +1661,8 @@ class SyncCatalogsController < ApplicationController
                 if error.empty?
                   update_fields = { count_fact: product_par[ :count_fact ] }
                   menu_products.create_with( update_fields )
-                    .find_or_create_by( children_category: children_category, product: product ).update( update_fields )
+                    .find_or_create_by( children_category: children_category, product: product, menu_meals_dish: menu_meals_dish )
+                    .update( update_fields )
                 end
               end
 
@@ -1638,7 +1676,10 @@ class SyncCatalogsController < ApplicationController
             if error.empty?
               menu_children_categories.where( count_all_plan: 0, count_exemption_plan: 0, count_all_fact: 0,
                                               count_exemption_fact: 0 ).delete_all
+
               menu_products.where( count_plan: 0, count_fact: 0 ).delete_all
+              menu_meals_dish.update( is_enabled: true )
+              menu_requirement.menu_meals_dishes.where( is_enabled: false ).delete_all
             else
               raise ActiveRecord::Rollback
             end

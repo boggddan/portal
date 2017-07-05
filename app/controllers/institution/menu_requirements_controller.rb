@@ -23,6 +23,8 @@ class Institution::MenuRequirementsController < Institution::BaseController
   end
 
   def menu_products
+    @empty_meal_id = Meal.find_by( code: '' ).id
+
     ###
     @menu_products = JSON.parse( @menu_requirement.menu_products
       .joins( { product: :products_type }, { menu_meals_dish: [ :meal, :dish ] }, :children_category )
@@ -33,8 +35,9 @@ class Institution::MenuRequirementsController < Institution::BaseController
         'children_categories.name AS category_name',
         'products.products_type_id', 'products_types.name AS type_name',
         'products.name AS product_name' )
-      .order( 'meals.priority', 'dishes.priority', 'children_categories.name',
-        'products_types.priority','products.name' )
+      .order( 'meals.priority', 'meals.name', 'dishes.priority',
+              'dishes.name', 'children_categories.name',
+              'products_types.priority', 'products_types.name', 'products.name' )
       .to_json, symbolize_names: true )
 
     @price_products = JSON.parse( @menu_requirement.institution.price_products
@@ -91,7 +94,9 @@ class Institution::MenuRequirementsController < Institution::BaseController
               'dishes.name AS dishes_name',
               'dishes_categories.id AS category_id',
               'dishes_categories.name AS category_name' )
-      .order( 'meals.priority', 'dishes_categories.priority', 'dishes.priority' )
+      .where( "dishes.code != ''", "meals.code != ''" )
+      .order( 'meals.priority', 'meals.name', 'dishes_categories.priority',
+              'dishes_categories.name', 'dishes.priority', 'dishes.name' )
       .to_json, symbolize_names: true )
 
     @menu_meals = @menu_meals_dishes.group_by{ | o | o[ :meals_id ] }
@@ -153,7 +158,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
     meals_dishes = JSON.parse( Meal
       .select( 'meals.id as meal_id', 'dishes.id as dish_id' )
       .joins( 'LEFT JOIN dishes ON true' )
-      .order( 'meals.priority', 'dishes.priority' )
+      .order( 'meals.priority', 'meals.name', 'dishes.priority', 'dishes.name' )
       .to_json, symbolize_names: true )
 
     children_categories = JSON.parse( current_institution.children_categories
@@ -309,6 +314,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
                                          'QuantityExemption' => o[ :count_exemption_fact ] } },
                                        'NumberFromWebPortal' => menu_requirement.number,
                                        'User' => current_user.username } }
+
       method_name = :create_menu_requirement_fact
       response = Savon.client( SAVON )
                    .call( method_name, message: message )

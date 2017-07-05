@@ -1,6 +1,6 @@
 class MenuRequirementProducts {
 
-  // Нажатие на кнопочку создать
+  // нажатие на кнопочку создать
   createProducts( ) {
     MyLib.ajax(
       this.captionMdCreate,
@@ -10,17 +10,17 @@ class MenuRequirementProducts {
       'script' );
   }
 
-  mdUpdate( mdId, value ) { // Обновление маркера
-    const data = { id: mdId, is_enabled: value };
+  mdUpdate( mdId, value ) { // обновление маркера
+    const data = { id: mdId, 'is_enabled': value };
     MyLib.ajax( this.captionMdUpdate, this.urlMdUpdate, 'post', data, 'json', '', false, false );
   }
 
-  // Шапка формы
+  // шапка формы
   headerText( ) {
     this.h1.text( `Меню-вимога №  ${ $( '#number' ).val( ) } від ${ $( '#date' ).val( ) }` );
   }
 
-  // Нажатие на кнопочку выход
+  // нажатие на кнопочку выход
   clickExit( ) {
     MyLib.pageLoader( true );
     window.location.replace( this.parentElem.data( 'path-exit' ) );
@@ -41,10 +41,11 @@ class MenuRequirementProducts {
   }
 
   clickMdCell( event ) {
-    const elem = $( event.currentTarget );
-    if ( !this.disabledPlan ) {
-      elem.toggleClass('check');
-      this.mdUpdate( elem.data( 'id' ), elem.hasClass( 'check' ) );
+    const { currentTarget: elem } = event;
+    const dataId = +elem.dataset.id;
+    if ( !this.disabledFact && dataId ) {
+      elem.classList.toggle( 'check' );
+      this.mdUpdate( dataId, elem.classList.contains( 'check' ) );
       this.checkMdExists( );
     }
   }
@@ -121,6 +122,7 @@ class MenuRequirementProducts {
     this.dataId = parentElem.data( 'id' );
     this.disabledPlan = parentElem.data( 'disabled-plan' );
     this.disabledFact = parentElem.data( 'disabled-fact' );
+    this.emptyMealId = parentElem.data( 'empty-meal-id' );
     this.h1 = parentElem.find( 'h1' );
     this.h1.on( 'click', event => this.clickHeader( event ) );
 
@@ -211,7 +213,7 @@ class MenuRequirementProducts {
 
     this.colPrTable
       .tableHeadFixer( { left: 2 } )
-      .find( '.price' )
+      .find( 'td.price' )
       .each( (...dataEach ) => {
         const { 1: elem } = dataEach;
         elem.innerHTML = MyLib.numToStr( +elem.innerHTML, -1);
@@ -238,12 +240,13 @@ class MenuRequirementProducts {
       .find( '.cell_data input' )
       .each( ( ...dataEach ) => {
         const { 1: elem } = dataEach;
-        const val = +elem.parentElement.dataset[ dataCurrentPf ];
+        const { parentElement : { dataset: parentData } } = elem;
+        const val = +parentData[ dataCurrentPf ];
+        const mealId = +parentData.mealId;
         elem.dataset.oldValue = val;
 
-        elem.disabled = currentDisabled;
-
-        elem.setAttribute( 'name', nameCurrentPf );
+        elem.disabled = currentDisabled || elem.dataset.id === '0' || mealId === this.emptyMealId;
+        elem.name = nameCurrentPf;
         elem.value = MyLib.numToStr( val, -1);
       } );
 
@@ -332,9 +335,9 @@ class MenuRequirementProducts {
 
       const dataId = elem.data( 'id' );
       const captionAjax = `Зміна значення ${ nameVal } з ${ valOld } на ${ val } [id: ${ dataId }]`;
-      const dataAjax = { id: dataId, [nameVal]: val };
+      const dataAjax = { id: dataId, [ nameVal ]: val };
 
-      MyLib.ajax( captionAjax, this.urlPrUpdate, 'post', dataAjax,'json', '', successAjax, false );
+      MyLib.ajax( captionAjax, this.urlPrUpdate, 'post', dataAjax, 'json', '', successAjax, false );
     } else {
       elem.val( strVal ).attr( 'value', strVal );
     }
@@ -349,9 +352,9 @@ class MenuRequirementProducts {
       const { dataId } = this;
 
       const captionAjax = `Зміна значення ${ nameVal } з ${ valOld } на ${ val } [id: ${ dataId }]`;
-      const dataAjax = { id: dataId, [nameVal]: val };
+      const dataAjax = { id: dataId, [ nameVal ]: val };
 
-      MyLib.ajax( captionAjax, this.urlUpdate, 'post', dataAjax,'json', '', false, false );
+      MyLib.ajax( captionAjax, this.urlUpdate, 'post', dataAjax, 'json', '', false, false );
     }
   }
 
@@ -394,9 +397,9 @@ class MenuRequirementProducts {
       const dataId = elem.data( 'id' );
       const nameVal = elem.attr( 'name' );
       const captionAjax = `Зміна значення ${ nameVal } з ${ valOld } на ${ val } [id: ${ dataId }]`;
-      const dataAjax = { id: dataId, [nameVal]: val };
+      const dataAjax = { id: dataId, [ nameVal ]: val };
 
-      MyLib.ajax( captionAjax, this.urlCcUpdate, 'post', dataAjax,'json', '', successAjax, false );
+      MyLib.ajax( captionAjax, this.urlCcUpdate, 'post', dataAjax, 'json', '', successAjax, false );
     } else {
       elem.val( strVal ).attr( 'value', strVal );
     }
@@ -406,7 +409,7 @@ class MenuRequirementProducts {
     const arrPlanFact = [ 'plan' ].concat( this.disabledPlan ? 'fact' : [] );
 
     const sumAll = arrPlanFact.reduce( (p, c) => Object.assign(
-      p, { [c]: { count_all: 0, count_exemption: 0, sum_products: 0 } }
+      p, { [ c ]: { countAll: 0, countExemption: 0, sumProducts: 0 } }
     ), { } );
 
     this.colCcTable.find( 'tbody tr.row_data' ).each( ( ...tr ) => {
@@ -428,9 +431,9 @@ class MenuRequirementProducts {
             .val( sumCost );
         }
 
-        sumAll[ pf ].count_all += countAll;
-        sumAll[ pf ].count_exemption += countExemption;
-        sumAll[ pf ].sum_products += sumProducts;
+        sumAll[ pf ].countAll += countAll;
+        sumAll[ pf ].countExemption += countExemption;
+        sumAll[ pf ].sumProducts += sumProducts;
       } );
     } );
 

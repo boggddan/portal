@@ -398,43 +398,63 @@ module.exports = {
 
       // enforce consistent spacing inside single-line blocks
       // http://eslint.org/docs/rules/block-spacing
-      // 'block-spacing': 'error',
+      'block-spacing': [ 'error', 'always' ],
 
       // enforce consistent brace style for blocks
       // http://eslint.org/docs/rules/brace-style
-      // 'brace-style': 'error',
+      'brace-style': [ 'error', '1tbs', { allowSingleLine: true } ],
 
       // enforce camelcase naming convention
       // http://eslint.org/docs/rules/camelcase
-      // 'camelcase': 'error',
+      'camelcase': [ 'error', { properties: 'always' } ],
 
       // enforce or disallow capitalization of the first letter of a comment
       // http://eslint.org/docs/rules/capitalized-comments
-      // 'capitalized-comments': 'error',
+      'capitalized-comments': [ 'error', 'never', { ignorePattern: '',
+                                                    ignoreInlineComments: false,
+                                                    ignoreConsecutiveComments: false }
+      ],
 
       // require or disallow trailing commas
       // http://eslint.org/docs/rules/comma-dangle
-      // 'comma-dangle': 'error',
+      'comma-dangle': [ 'error', {
+        arrays: 'never',
+        objects: 'never',
+        imports: 'never',
+        exports: 'never',
+        functions: 'never'
+    } ],
 
       // enforce consistent spacing before and after commas
       // http://eslint.org/docs/rules/comma-spacing
-      // 'comma-spacing': 'error',
+      'comma-spacing': [ 'error', { before: false, after: true } ],
 
       // enforce consistent comma style
       // http://eslint.org/docs/rules/comma-style
-      // 'comma-style': 'error',
+      'comma-style': [ 'error', 'last', { exceptions:
+        { ArrayExpression: false,
+          ArrayPattern: false,
+          ArrowFunctionExpression: false,
+          CallExpression: false,
+          FunctionDeclaration: false,
+          FunctionExpression: false,
+          ImportDeclaration: false,
+          ObjectExpression: true,
+          ObjectPattern: false,
+          VariableDeclaration: false } }
+      ],
 
       // enforce consistent spacing inside computed property brackets
       // http://eslint.org/docs/rules/computed-property-spacing
-      // 'computed-property-spacing': 'error',
+      'computed-property-spacing': [ 'error', 'always' ],
 
       // enforce consistent naming when capturing the current execution context
       // http://eslint.org/docs/rules/consistent-this
-      // 'consistent-this': 'error',
+      'consistent-this': [ 'error', 'self' ],
 
       // require or disallow newline at the end of files
       // http://eslint.org/docs/rules/eol-last
-      // 'eol-last': 'error',
+      'eol-last': [ 'error', 'always' ],
 
       // require or disallow spacing between function identifiers and their invocations
       // http://eslint.org/docs/rules/func-call-spacing
