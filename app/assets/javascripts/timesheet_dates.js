@@ -237,9 +237,7 @@ class TimesheetDates {
     const { classList } = elem;
     elem.focus( );
 
-    if ( classList.contains( 'cell_mark' ) && !this.disabled ) {
-      this.changeMarkCell( event );
-    }
+    this.changeMarkCell( event );
 
     if ( !classList.contains( 'hover' ) && !classList.contains( 'name' ) ) {
       this.colTbTable
