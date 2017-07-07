@@ -71,7 +71,7 @@ class TimesheetDates {
     this.colTbTable[ 0 ].querySelectorAll( 'th[data-date]' ).forEach( th => {
       const elemTh = th;
       const date = moment( elemTh.dataset.date );
-      elemTh.textContent = `${ date.format( 'd' ) } ${ MyLib.capitalize( date.format( 'ddd' ) ) }`;
+      elemTh.textContent = `${ date.format( 'D' ) } ${ MyLib.capitalize( date.format( 'ddd' ) ) }`;
     } );
   }
 
@@ -160,10 +160,10 @@ class TimesheetDates {
 
   changeMarkCell( event ) {
     const classActive = 'active';
-    const { target: elem, shiftKey: isShift } = event;
+    const { target: elem, altKey: isAlt } = event;
     const { classList } = elem;
 
-    if ( isShift ) {
+    if ( isAlt ) {
       const rowIndex = elem.parentNode.rowIndex - 1;
       const cellIndex = elem.cellIndex + 1;
 
@@ -253,7 +253,7 @@ class TimesheetDates {
 
   cellMarkKeyDown( event ) {
     event.preventDefault( );
-    if ( !event.originalEvent.repeat && !this.disabled ) {
+    if ( !event.originalEvent.repeat && !this.disabled && event.altKey ) {
       this.rangeData.minRow = 999999;
       this.rangeData.minCell = 999999;
       this.rangeData.maxRow = 0;
