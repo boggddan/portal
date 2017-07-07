@@ -187,7 +187,7 @@ table.table {
         cursor: default;
 
         &,
-        td,
+        td:not(.active),
         select:not(:focus):not(:hover),
         input:not(:focus):not(:hover) {
           background-color: #e7e7e7;
