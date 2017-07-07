@@ -4,7 +4,7 @@
 - label_text = 'layouts/label_text'
 
 main#timesheet_dates *{ data: { \
-  id: @timesheet.id,
+  id: @timesheet.id, disabled: disabled.to_s,
   path: { \
   send: institution_timesheets_send_sa_path,
   exit: institution_timesheets_index_path,
@@ -13,20 +13,20 @@ main#timesheet_dates *{ data: { \
   h1.icon
   .panel_main.row_2
     .panel
-      button.btn_send *{ disabled: disabled }
-      button *{ class: ( disabled ? :btn_exit : :btn_save ) }
+      button.btn_send
+      button.btn_exit
       - if disabled
         = render label_text, label_attr: { class: :icon_number }, text: 'Надіслано документ:',
           input_attr: { value: @timesheet.number_sa, disabled: true }
 
         = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
-          input_attr: { value:  date_str( @timesheet.date_sa ), disabled: true }
+          input_attr: { value: date_str( @timesheet.date_sa ), disabled: true }
 
     .panel
       = render label_text, label_attr: { class: :icon_number }, text: 'Табель №',
         input_attr: { id: :number, value: @timesheet.number, disabled: true }
       = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
-        input_attr: { id: :date, name: :date, value:  date_str( @timesheet.date ), disabled: disabled, readonly: true }
+        input_attr: { id: :date, value:  date_str( @timesheet.date ), readonly: true }
 
       = render label_text, label_attr: { class: :icon_сalendar }, text: 'З',
         input_attr: { value:  date_str( @timesheet.date_eb ), disabled: true }
@@ -36,16 +36,16 @@ main#timesheet_dates *{ data: { \
       = select_tag :group_timesheet, options_for_select( @group_timesheet ), prompt: 'Категорія / Група'
 
 
-  .clmn_main: .clmn *{ data: { path: { \
+  .clmn_main: #col_td.clmn *{ data: { path: { \
     filter: institution_timesheets_ajax_filter_timesheet_dates_path,
     update: institution_timesheets_dates_update_path,
-    group_update: institution_timesheets_dates_group_update_path } } }
+    updates: institution_timesheets_dates_updates_path } } }
 
     .panel
-      label Заміна виділений позначень&nbsp;
+      label Заміна виділених позначень&nbsp;
       - @reasons_absences.each_with_index do | v, i |
         - next_v = @reasons_absences[ @reasons_absences.last == v ? 0 : i + 1 ]
-        button.btn_gradient.reasons_absence *{ disabled: disabled,
-          data: { id: v[ 0 ], next_id: next_v[ 0 ], next_val: next_v[ 2 ]  } } = v[ 2 ]
+        button.btn_gradient *{ disabled: disabled,
+          data: { reasons_absence_id: v[ 0 ], next_id: next_v[ 0 ], next_val: next_v[ 2 ]  } } = v[ 2 ]
 
     .parent_table

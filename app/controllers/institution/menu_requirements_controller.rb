@@ -35,8 +35,9 @@ class Institution::MenuRequirementsController < Institution::BaseController
         'children_categories.name AS category_name',
         'products.products_type_id', 'products_types.name AS type_name',
         'products.name AS product_name' )
-      .order( 'meals.priority', 'meals.name', 'dishes.priority',
-              'dishes.name', 'children_categories.name',
+      .order( 'meals.priority', 'meals.name',
+              'dishes.priority', 'dishes.name',
+              'children_categories.priority', 'children_categories.name',
               'products_types.priority', 'products_types.name', 'products.name' )
       .to_json, symbolize_names: true )
 
@@ -75,7 +76,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
                :count_all_plan, :count_exemption_plan,
                :count_all_fact, :count_exemption_fact,
                'children_categories.name' )
-      .order( 'children_categories.name' )
+      .order( 'children_categories.priority', 'children_categories.name' )
       .to_json, symbolize_names: true )
 
     @children_day_costs = JSON.parse( ChildrenDayCost
@@ -94,7 +95,6 @@ class Institution::MenuRequirementsController < Institution::BaseController
               'dishes.id AS dishes_id',
               'dishes.name AS dishes_name',
               'dishes_categories.id AS category_id',
-              'dishes_categories.name AS category_name',
               'dishes_categories.name AS category_name',
               'COALESCE( SUM( menu_products.count_plan ), 0) AS count_plan' )
       .where( 'dishes.code != ?', '')

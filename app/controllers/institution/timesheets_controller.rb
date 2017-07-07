@@ -177,9 +177,8 @@ class Institution::TimesheetsController < Institution::BaseController
     render json: { status: true }
   end
 
-  def dates_group_update # Обновление группы маркеров
+  def dates_updates # Обновление группы маркеров
     update = params.permit( { ids: [] }, :reasons_absence_id ).to_h
-    puts "#{update}"
     reasons_absence_id = update[ :reasons_absence_id ]
 
     ActiveRecord::Base.transaction do
@@ -188,7 +187,7 @@ class Institution::TimesheetsController < Institution::BaseController
       end
     end
 
-    render json: { status: true, message: update }
+    render json: { status: true }
   end
 
   def ajax_filter_timesheet_dates # Фильтрация таблицы

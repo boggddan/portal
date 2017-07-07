@@ -414,17 +414,19 @@ class SyncCatalogsController < ApplicationController
   ###############################################################################################
 
   ###############################################################################################
-  # POST /api/cu_children_category { "code": "00000001", "name": "Яслі", "children_categories_type_code": "00000001" }
+  # POST /api/cu_children_category { "code": "000000001", "name": "Яслі", "priority": 1, "children_categories_type_code": "000000001" }
   def children_category_update
     error = { code: 'Не знайдений параметр [code]',
               name: 'Не знайдений параметр [name]',
+              priority: 'Не знайдений параметр [priority]',
               children_categories_type_code: 'Не знайдений параметр [children_categories_type_code]' }
               .stringify_keys!.except( *params.keys )
     if error.empty?
       children_categories_type = children_categories_type_code( params[ :children_categories_type_code ].strip )
       unless error = children_categories_type[ :error ]
         code = params[ :code ].strip
-        update_fields = { name: params[ :name ], children_categories_type: children_categories_type }
+        update_fields = { name: params[ :name ], priority: params[ :priority ],
+                          children_categories_type: children_categories_type }
         ChildrenCategory.create_with( update_fields ).find_or_create_by( code: code ).update( update_fields )
       end
     end

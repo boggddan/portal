@@ -1,7 +1,7 @@
 ( function( ) {
   objMenuRequirementProducts.colPr.empty( );
   <% if @menu_products.present? %>
-    objMenuRequirementProducts.colPr.append( '<%= j render( 'table_menu_products' ) if @menu_products.present? %>' );
+    objMenuRequirementProducts.colPr.append( '<%= j render( 'table_menu_products' ) %>' );
     objMenuRequirementProducts.colPrInit( );
     objMenuRequirementProducts.buttonColPr.click( );
   <% else %>

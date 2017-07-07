@@ -13,7 +13,7 @@
   - prefix_id = "#{ prefix_id }_#{ group_id }"
 
 tr *{ class: [ :row_group, type ], data: data }
-  = content_tag tag, name
+  = content_tag tag, name, class: :name
   - @sum_names.each do |sum_name|
     = content_tag tag, '', { class: :cell_sum, id: "#{ prefix_id }_#{ sum_name }" }
 

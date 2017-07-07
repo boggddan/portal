@@ -10,6 +10,6 @@ namespace :timesheets do
   post :ajax_filter_timesheet_dates # Фильтрация таблицы
   post :update # Обновление реквизитов документа
   post :dates_update # Обновление маркера
-  post :dates_group_update # Обновление группы маркеров
+  post :dates_updates # Обновление группы маркеров
   post :send_sa # Веб-сервис отправки табеля
 end

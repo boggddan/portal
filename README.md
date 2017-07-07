@@ -130,8 +130,8 @@ DELETE | Видалення даних (`"type": 0` фізично видаля�
 
 ### *Категорії дітей* - `children_categories` [:top:](#Зміст)
 ```
-  POST /api/cu_children_category { "code": "00000001", "name": "Яслі", "children_categories_type_code": "00000001" }
-  GET /api/children_category?code=000000003
+  POST /api/cu_children_category { "code": "000000001", "name": "Яслі", "priority": 1, "children_categories_type_code": "000000001" }
+  GET /api/children_category?code=000000001
   GET /api/children_categories
 ```
 

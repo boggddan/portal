@@ -10,7 +10,7 @@
 }
 
 #timesheet_dates {
-  .reasons_absence {
+  button[data-reasons-absence-id] {
     width: 40px;
     &:not(:disabled) {
       background-image: linear-gradient(to right, #EDE574 0%, #E1F5C4 51%, #EDE574 100%);
@@ -29,7 +29,7 @@
       &.group { @include row-group( 'td', #f1f1f1, #333, 15px, left ); }
 
       &.row_data {
-        & :first-child {
+        .name {
           cursor: default;
           padding-left: 27px;
           text-align: left;
@@ -44,7 +44,6 @@
           outline: none;
         }
       }
-
 
       .cell_sum {
        font-weight: bold;

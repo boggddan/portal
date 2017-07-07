@@ -440,6 +440,7 @@ class MyLib {
 
 
 let objMenuRequirementProducts;
+let objTimesheetDates;
 
 $( document ).on( 'turbolinks:load', ( ) => {
   moment.locale( 'uk' );
@@ -452,8 +453,12 @@ $( document ).on( 'turbolinks:load', ( ) => {
       $( '#del_msg' ).addClass( 'hide' ).find( '.success' ).off( 'click' ));
 
   const elemMenuRequirementProducts = $( '#menu_requirement_products' );
+  const elemTimesheetDates = $( '#timesheet_dates' );
 
   if ( elemMenuRequirementProducts.length ) {
     objMenuRequirementProducts = new MenuRequirementProducts( elemMenuRequirementProducts );
+  } else if ( elemTimesheetDates.length ) {
+    objTimesheetDates = new TimesheetDates( elemTimesheetDates );
   }
+
 } );

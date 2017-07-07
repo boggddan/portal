@@ -140,7 +140,7 @@ class MenuRequirementProducts {
     splendingdate.get( 0 ).dataset.oldValue = splendingdate.val( );
 
     this.btnExit = parentElem.find( '.btn_exit' )
-      .on( 'click', event => MyLib.btnExitClick( $( event.currentTarget ) ) );
+      .on( 'click', ( ) => this.clickExit( ) );
     if (!this.disabledFact) this.btnExit.removeClass( 'btn_exit' ).addClass( 'btn_save' );
 
     this.buttonColPr = parentElem.find( '.panel_main button[data-clmn="#col_pr"] ');
@@ -149,9 +149,11 @@ class MenuRequirementProducts {
       .find( '.btn_send' )
       .on( 'click', event => this.clickSend( event) )
       .end( )
-      .find( '.btn_send[data-pf=plan]' ).prop( 'disabled', this.disabledPlan )
+      .find( '.btn_send[data-pf=plan]' )
+      .prop( 'disabled', this.disabledPlan )
       .end( )
-      .find( '.btn_send[data-pf=fact]' ).prop( 'disabled', !this.disabledPlan || this.disabledFact )
+      .find( '.btn_send[data-pf=fact]' )
+      .prop( 'disabled', !this.disabledPlan || this.disabledFact )
       .end( )
       .find( '.panel_main button[data-clmn]' )
       .on( 'click', event => this.clickBtnClmn( event ) )
@@ -159,7 +161,8 @@ class MenuRequirementProducts {
       .find( '.btn_exit' )
       .on('click', ( ) => this.clickExit( ) )
       .end( )
-      .find( '.panel_main button[data-clmn="#col_cc"] ').click( );
+      .find( '.panel_main button[data-clmn="#col_cc"] ')
+      .click( );
 
     this.colCc = parentElem.find('#col_cc');
     this.captionCcSend = `Відправка данних в 1С [id: ${ this.dataId }]`;
@@ -232,18 +235,19 @@ class MenuRequirementProducts {
     const dataCurrentPf = `count${ MyLib.capitalize( currentPf ) }`;
     const nameCurrentPf = `count_${ currentPf }`;
 
-    if ( !this.disabledPlan ) this.colPr.find( 'button[data-pf]' ).prop( 'disabled', true );
-    else {
+    if ( this.disabledPlan ) {
       this.colPr
         .find( `button[data-pf=${ currentPf }]` ).prop( 'disabled', true )
         .siblings( 'button[data-pf]' ).prop( 'disabled', false );
+    } else {
+      this.colPr.find( 'button[data-pf]' ).prop( 'disabled', true );
     }
 
     this.colPrTable
       .find( '.cell_data input' )
       .each( ( ...dataEach ) => {
         const { 1: elem } = dataEach;
-        const { parentElement : { dataset: parentData } } = elem;
+        const { parentElement: { dataset: parentData } } = elem;
         const val = +parentData[ dataCurrentPf ];
         const mealId = +parentData.mealId;
         elem.dataset.oldValue = val;
@@ -259,7 +263,7 @@ class MenuRequirementProducts {
   calcProducts( ) {
     const categories = this.colPrTable.data( 'categories' ) || [ ];
 
-    const sumAll = categories.reduce( ( p, c ) => Object.assign( p, { [ c ]: { plan: 0, fact: 0 } } ), { } );
+    const sumAll = categories.reduce( ( prev, cur ) => Object.assign( prev, { [ cur ]: { plan: 0, fact: 0 } } ), { } );
     const arrPlanFact = [ 'plan' ].concat( this.disabledPlan ? 'fact' : [] );
 
     this.colPrTable.find( 'tbody tr.row_data' ).each( ( ...tr ) => {
@@ -317,7 +321,7 @@ class MenuRequirementProducts {
           .text( MyLib.numToStr( MyLib.toRound( sumAll[ categoryId ][ pf ], 2 ), -1 ) );
       } );
     } );
-    this.calcCategories ( );
+    this.calcCategories( );
   }
 
   changeCountProduct( event ) {
@@ -327,7 +331,8 @@ class MenuRequirementProducts {
     const val = MyLib.toNumber( elem.val( ), 3 );
     const strVal = MyLib.numToStr( val, -1 );
 
-    if ( val !== valOld ) {
+    if ( val === valOld ) elem.val( strVal ).attr( 'value', strVal );
+    else {
       const nameVal = elem.attr( 'name' );
 
       const successAjax = () => {
@@ -341,8 +346,6 @@ class MenuRequirementProducts {
       const dataAjax = { id: dataId, [ nameVal ]: val };
 
       MyLib.ajax( captionAjax, this.urlPrUpdate, 'post', dataAjax, 'json', '', successAjax, false );
-    } else {
-      elem.val( strVal ).attr( 'value', strVal );
     }
   }
 
@@ -378,7 +381,7 @@ class MenuRequirementProducts {
         elem.value = MyLib.numToStr( val, -1 );
         const { 0: pf } = elem.name.match( /[a-z]*$/ );
 
-        if ( pf === 'plan' && this.disabledPlan || ( pf === 'fact' && !this.disabledPlan || this.disabledFact ) ) {
+        if ( ( pf === 'plan' && this.disabledPlan ) || ( pf === 'fact' && ( !this.disabledPlan || this.disabledFact ) ) ) {
           elem.disabled = true;
         }
       } );
@@ -391,7 +394,9 @@ class MenuRequirementProducts {
     const val = MyLib.toNumber( elem.val( ), 0 );
     const strVal = MyLib.numToStr( val, -1 );
 
-    if ( val !== valOld ) {
+    if ( val === valOld ) {
+      elem.val( strVal ).attr( 'value', strVal );
+    } else {
       const successAjax = () => {
         elem.val( strVal ).attr( 'value', strVal ).data( 'old-value', val );
         this.calcCategories( );
@@ -403,16 +408,14 @@ class MenuRequirementProducts {
       const dataAjax = { id: dataId, [ nameVal ]: val };
 
       MyLib.ajax( captionAjax, this.urlCcUpdate, 'post', dataAjax, 'json', '', successAjax, false );
-    } else {
-      elem.val( strVal ).attr( 'value', strVal );
     }
   }
 
   calcCategories () {
     const arrPlanFact = [ 'plan' ].concat( this.disabledPlan ? 'fact' : [] );
 
-    const sumAll = arrPlanFact.reduce( (p, c) => Object.assign(
-      p, { [ c ]: { countAll: 0, countExemption: 0, sumProducts: 0 } }
+    const sumAll = arrPlanFact.reduce( ( prev, cur ) => Object.assign(
+      prev, { [ cur ]: { countAll: 0, countExemption: 0, sumProducts: 0 } }
     ), { } );
 
     this.colCcTable.find( 'tbody tr.row_data' ).each( ( ...tr ) => {
