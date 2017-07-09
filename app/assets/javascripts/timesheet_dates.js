@@ -1,5 +1,6 @@
-class TimesheetDates {
+/* exported TimesheetDates */
 
+class TimesheetDates {
   constructor( parentElem ) {
     const self = this;
     this.rangeData = { minRow: 0, minCell: 0, maxRow: 0, maxCell: 0, prevRow: 0, prevCell: 0 };
@@ -36,9 +37,9 @@ class TimesheetDates {
       .on( 'click', event => this.clickBtnClmn( event ) )
       .end( )
       .find( '.btn_exit' )
-      .on('click', ( ) => this.clickExit( ) );
+      .on( 'click', ( ) => this.clickExit( ) );
 
-    this.colTd = parentElem.find('#col_td');
+    this.colTd = parentElem.find( '#col_td' );
 
     this.urlTbUpdate = this.colTd.data( 'path-update' );
     this.urlTbFilter = this.colTd.data( 'path-filter' );
@@ -120,7 +121,7 @@ class TimesheetDates {
       'Фільтрація данных табеля',
       this.urlTbFilter,
       'post',
-      { id: this.dataId, field: paramName, 'field_id': value },
+      { id: this.dataId, field: paramName, field_id: value },
       'script',
       '',
       false,
@@ -149,7 +150,7 @@ class TimesheetDates {
         'Группова заміна позначок табеля',
         this.urlTbUpdates,
         'post',
-        { 'ids': cells, 'reasons_absence_id': reasonsAbsenceId },
+        { ids: cells, reasons_absence_id: reasonsAbsenceId },
         'json',
         '',
         false,
@@ -226,7 +227,7 @@ class TimesheetDates {
   }
 
   markUpdate( tbId, reasonsAbsenceId ) { // обновление маркера
-    const data = { id: tbId, 'reasons_absence_id': reasonsAbsenceId };
+    const data = { id: tbId, reasons_absence_id: reasonsAbsenceId };
     const caption = `Оновлення позначки табеля id = [ ${ tbId } ]`;
     MyLib.ajax( caption, this.urlTbUpdate, 'post', data, 'json', '', false, false );
   }
@@ -241,7 +242,7 @@ class TimesheetDates {
 
     if ( !classList.contains( 'hover' ) && !classList.contains( 'name' ) ) {
       this.colTbTable
-        .find('.hover').removeClass('hover')
+        .find( '.hover' ).removeClass( 'hover' )
         .end( )
         .find( `tr :nth-child( ${ elem.cellIndex + 1 } )` )
         .addClass( 'hover' );
@@ -269,7 +270,7 @@ class TimesheetDates {
   }
 
   static clickRow( event ) {
-    $( event.currentTarget ).addClass(' selected ').siblings( ).removeClass( 'selected' );
+    $( event.currentTarget ).addClass( ' selected ' ).siblings( ).removeClass( 'selected' );
   }
 
   clickHeader( event ) {
@@ -295,8 +296,8 @@ class TimesheetDates {
       const { dataset: { categoryId, groupId, childId } } = tr;
 
       tr.querySelectorAll( '.cell_mark:not([disabled]' ).forEach( td => {
-        const elem = table.querySelector(`#group_${ categoryId }_${ groupId }_${ td.dataset.dateId }`);
-        if (td.textContent) {
+        const elem = table.querySelector( `#group_${ categoryId }_${ groupId }_${ td.dataset.dateId }` );
+        if ( td.textContent ) {
           sum[ 1 ] += 1;
           elem.dataset.absence = 1 + +elem.dataset.absence;
         } else {
@@ -308,16 +309,16 @@ class TimesheetDates {
       cellSumName.forEach( ( val, i ) => {
         const sumElem = tr.querySelector( `#child_${ categoryId }_${ groupId }_${ childId }_${ val }` );
         sumElem.innerHTML = sum[ i ] || '';
-      });
-    });
+      } );
+    } );
 
     table.querySelectorAll( 'tr.group' ).forEach( tr => { // по всем строкам групп
       const sum = [ 0, 0 ];
 
       const { dataset: { categoryId, groupId } } = tr;
 
-      tr.querySelectorAll('.cell_day').forEach( ( td, index ) => {
-        const elem = table.querySelector(`#category_${ categoryId }_${ index }`);
+      tr.querySelectorAll( '.cell_day' ).forEach( ( td, index ) => {
+        const elem = table.querySelector( `#category_${ categoryId }_${ index }` );
         const sumAppearance = +td.innerHTML;
         const sumAbsence = +td.dataset.absence;
 
@@ -326,20 +327,20 @@ class TimesheetDates {
 
         if ( sumAbsence ) elem.dataset.absence = sumAbsence + +elem.dataset.absence;
         if ( sumAppearance ) elem.innerHTML = sumAppearance + +elem.innerHTML;
-      });
+      } );
 
       cellSumName.forEach( ( val, i ) => {
         const elemSum = tr.querySelector( `#group_${ categoryId }_${ groupId }_${ val }` );
         elemSum.innerHTML = sum[ i ] || '';
-      });
-    });
+      } );
+    } );
 
     table.querySelectorAll( 'tr.category' ).forEach( tr => { // по всем строкам с категорий
       const sum = [ 0, 0 ];
 
       const { dataset: { categoryId } } = tr;
 
-      tr.querySelectorAll('.cell_day').forEach( ( td, index ) => {
+      tr.querySelectorAll( '.cell_day' ).forEach( ( td, index ) => {
         const elem = table.querySelector( `#all_${ index }` );
         const sumAppearance = +td.innerHTML;
         const sumAbsence = +td.dataset.absence;
@@ -349,18 +350,18 @@ class TimesheetDates {
 
         if ( sumAbsence ) elem.dataset.absence = sumAbsence + +elem.dataset.absence;
         if ( sumAppearance ) elem.innerHTML = sumAppearance + +elem.innerHTML;
-      });
+      } );
 
       cellSumName.forEach( ( val, i ) => {
         const elemSum = tr.querySelector( `#category_${ categoryId }_${ val }` );
         elemSum.innerHTML = sum[ i ] || '';
-      });
-    });
+      } );
+    } );
 
     table.querySelectorAll( 'tr.all' ).forEach( tr => { // по всем строкам итогов
       const sum = [ 0, 0 ];
 
-      tr.querySelectorAll('.cell_day').forEach( td => {
+      tr.querySelectorAll( '.cell_day' ).forEach( td => {
         sum[ 0 ] += +td.innerHTML;
         sum[ 1 ] += +td.dataset.absence;
       } );
@@ -368,8 +369,7 @@ class TimesheetDates {
       cellSumName.forEach( ( val, i ) => {
         const elemSum = tr.querySelector( `#all_${ val }` );
         elemSum.innerHTML = sum[ i ] || '';
-      });
-    });
+      } );
+    } );
   }
-
 }

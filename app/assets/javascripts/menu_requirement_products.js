@@ -1,5 +1,6 @@
-class MenuRequirementProducts {
+/* exported MenuRequirementProducts */
 
+class MenuRequirementProducts {
   // нажатие на кнопочку создать
   createProducts( ) {
     MyLib.ajax(
@@ -11,7 +12,7 @@ class MenuRequirementProducts {
   }
 
   mdUpdate( mdId, value ) { // обновление маркера
-    const data = { id: mdId, 'is_enabled': value };
+    const data = { id: mdId, is_enabled: value };
     MyLib.ajax( this.captionMdUpdate, this.urlMdUpdate, 'post', data, 'json', '', false, false );
   }
 
@@ -31,7 +32,7 @@ class MenuRequirementProducts {
 
     MyLib.ajax(
       this.captionCcSend,
-      this.parentElem.data( `path-send-${ pf }`),
+      this.parentElem.data( `path-send-${ pf }` ),
       'post',
       { id: this.dataId, bug: '' },
       'json',
@@ -46,7 +47,7 @@ class MenuRequirementProducts {
     const countPlan = +elem.dataset.countPlan;
     const isCheck = elem.classList.contains( 'check' );
 
-    if ( (!this.disabledPlan || !isCheck || !countPlan) && !this.disabledFact && dataId ) {
+    if ( ( !this.disabledPlan || !isCheck || !countPlan ) && !this.disabledFact && dataId ) {
       elem.classList.toggle( 'check' );
       this.mdUpdate( dataId, !isCheck );
       this.checkMdExists( );
@@ -67,7 +68,7 @@ class MenuRequirementProducts {
     const elem = $( event.currentTarget );
     if ( !elem.hasClass( 'hover' ) ) {
       this.colMd
-        .find('.hover').removeClass('hover')
+        .find( '.hover' ).removeClass( 'hover' )
         .end( )
         .find( `thead tr:nth-child(2) :nth-child( ${ elem.index() } ), tbody tr :nth-child( ${ elem.index() + 1 } )` )
         .addClass( 'hover' );
@@ -78,7 +79,7 @@ class MenuRequirementProducts {
     const elem = $( event.currentTarget );
     if ( !elem.hasClass( 'hover' ) ) {
       this.colMd
-        .find('.hover').removeClass('hover')
+        .find( '.hover' ).removeClass( 'hover' )
         .end( )
         .find( `thead tr:nth-child(2) :nth-child( ${ elem.index() } ), tbody tr :nth-child( ${ elem.index() + 1 } )` )
         .addClass( 'hover' );
@@ -86,14 +87,14 @@ class MenuRequirementProducts {
   }
 
   static clickRow( event ) {
-    $( event.currentTarget ).addClass(' selected ').siblings( ).removeClass( 'selected' );
+    $( event.currentTarget ).addClass( ' selected ' ).siblings( ).removeClass( 'selected' );
   }
 
   clickHeader( event ) {
     const elem = $( event.currentTarget );
     elem.toggleClass( 'hide' );
     const parent = elem.parent();
-    const className = parent.attr( 'id' ) === this.parentElem.attr('id') ? '.panel_main' : '.panel';
+    const className = parent.attr( 'id' ) === this.parentElem.attr( 'id' ) ? '.panel_main' : '.panel';
 
     parent.find( className ).toggleClass( 'hide' );
   }
@@ -115,7 +116,7 @@ class MenuRequirementProducts {
   clickBtnClmn( event ) {
     const elem = $( event.currentTarget );
     elem.attr( 'disabled', true ).siblings( ).attr( 'disabled', null );
-    this.parentElem.find( elem.data( 'clmn' ) ).removeClass('hide').siblings().addClass( 'hide' );
+    this.parentElem.find( elem.data( 'clmn' ) ).removeClass( 'hide' ).siblings().addClass( 'hide' );
   }
 
   constructor( parentElem ) {
@@ -135,19 +136,19 @@ class MenuRequirementProducts {
     splendingdate
       .val( splendingdate.val( ) )
       .prop( 'disabled', this.disabledPlan )
-      .datepicker( { onSelect( ) { self.changeMenuRequirement(this) } } );
+      .datepicker( { onSelect( ) { self.changeMenuRequirement( this ) } } );
 
     splendingdate.get( 0 ).dataset.oldValue = splendingdate.val( );
 
     this.btnExit = parentElem.find( '.btn_exit' )
       .on( 'click', ( ) => this.clickExit( ) );
-    if (!this.disabledFact) this.btnExit.removeClass( 'btn_exit' ).addClass( 'btn_save' );
+    if ( !this.disabledFact ) this.btnExit.removeClass( 'btn_exit' ).addClass( 'btn_save' );
 
-    this.buttonColPr = parentElem.find( '.panel_main button[data-clmn="#col_pr"] ');
+    this.buttonColPr = parentElem.find( '.panel_main button[data-clmn="#col_pr"] ' );
 
     parentElem
       .find( '.btn_send' )
-      .on( 'click', event => this.clickSend( event) )
+      .on( 'click', event => this.clickSend( event ) )
       .end( )
       .find( '.btn_send[data-pf=plan]' )
       .prop( 'disabled', this.disabledPlan )
@@ -159,22 +160,22 @@ class MenuRequirementProducts {
       .on( 'click', event => this.clickBtnClmn( event ) )
       .end( )
       .find( '.btn_exit' )
-      .on('click', ( ) => this.clickExit( ) )
+      .on( 'click', ( ) => this.clickExit( ) )
       .end( )
-      .find( '.panel_main button[data-clmn="#col_cc"] ')
+      .find( '.panel_main button[data-clmn="#col_cc"] ' )
       .click( );
 
-    this.colCc = parentElem.find('#col_cc');
+    this.colCc = parentElem.find( '#col_cc' );
     this.captionCcSend = `Відправка данних в 1С [id: ${ this.dataId }]`;
     this.urlCcUpdate = this.colCc.data( 'path-update' );
 
-    this.colCcTable = this.colCc.find('table');
+    this.colCcTable = this.colCc.find( 'table' );
     this.colCcTable
       .tableHeadFixer( )
       .on( 'change', 'input', event => this.changeCountCategoty( event ) )
       .on( 'click', 'tr.row_data:not(.selected)', event => this.constructor.clickRow( event ) );
 
-    this.colMd = parentElem.find('#col_md');
+    this.colMd = parentElem.find( '#col_md' );
     this.captionMdUpdate = `Онов. позн. страви та прийоми їжі id = [${ this.dataId }]`;
     this.captionMdCreate = `Формування страв та прийомів їжі id = [${ this.dataId }]`;
 
@@ -193,7 +194,7 @@ class MenuRequirementProducts {
       .on( 'mouseover', 'td.cell_mark', event => this.mouseoverMdCell( event ) )
       .on( 'click', 'tr.row_data:not(.selected)', event => this.constructor.clickRow( event ) );
 
-    this.colPr = parentElem.find('#col_pr');
+    this.colPr = parentElem.find( '#col_pr' );
 
     this.urlPrUpdate = this.colPr.data( 'path-update' );
 
@@ -220,9 +221,9 @@ class MenuRequirementProducts {
     this.colPrTable
       .tableHeadFixer( { left: 2 } )
       .find( 'td.price' )
-      .each( (...dataEach ) => {
+      .each( ( ...dataEach ) => {
         const { 1: elem } = dataEach;
-        elem.innerHTML = MyLib.numToStr( +elem.innerHTML, -1);
+        elem.innerHTML = MyLib.numToStr( +elem.innerHTML, -1 );
       } );
 
     this.colPrTablePf( this.disabledPlan ? 'fact' : 'plan' );
@@ -254,7 +255,7 @@ class MenuRequirementProducts {
 
         elem.disabled = currentDisabled || elem.dataset.id === '0' || mealId === this.emptyMealId;
         elem.name = nameCurrentPf;
-        elem.value = MyLib.numToStr( val, -1);
+        elem.value = MyLib.numToStr( val, -1 );
       } );
 
     this.calcCategories( );
@@ -286,7 +287,7 @@ class MenuRequirementProducts {
           const selectorCategory = `td[data-meal-id=0][data-count-pf=${ pf }][data-children-category-id=${ categoryId }]`;
 
           countProduct[ pf ] += countCategoryPF;
-          if ( price ) sumAll[ categoryId ][ pf ] += MyLib.toRound( price * countCategoryPF, 3);
+          if ( price ) sumAll[ categoryId ][ pf ] += MyLib.toRound( price * countCategoryPF, 3 );
 
           trElem.children( `${ selectorCategory }[data-count-type=count]` )
             .text( MyLib.numToStr( countCategoryPF, -1 ) );
@@ -312,7 +313,6 @@ class MenuRequirementProducts {
             .text( MyLib.numToStr( MyLib.toRound( diff, 3 ), -1 ) );
         }
       } );
-
     } );
 
     categories.forEach( categoryId => {
@@ -367,13 +367,13 @@ class MenuRequirementProducts {
   colCcInit( ) {
     this.colCcTable
       .find( '.day_cost' )
-      .each( (...dataEach ) => {
+      .each( ( ...dataEach ) => {
         const { 1: elem } = dataEach;
-        elem.innerHTML = MyLib.numToStr( +elem.innerHTML, -1);
+        elem.innerHTML = MyLib.numToStr( +elem.innerHTML, -1 );
       } )
       .end( )
       .find( 'input' )
-      .each( (...dataEach ) => {
+      .each( ( ...dataEach ) => {
         const { 1: elem } = dataEach;
         const val = +elem.value;
         elem.dataset.oldValue = val;
@@ -411,7 +411,7 @@ class MenuRequirementProducts {
     }
   }
 
-  calcCategories () {
+  calcCategories() {
     const arrPlanFact = [ 'plan' ].concat( this.disabledPlan ? 'fact' : [] );
 
     const sumAll = arrPlanFact.reduce( ( prev, cur ) => Object.assign(
@@ -426,11 +426,11 @@ class MenuRequirementProducts {
         const countAll = +trElem.find( `input[name=count_all_${ pf }]` ).val( );
         const countExemption = +trElem.find( `input[name=count_exemption_${ pf }]` ).val( );
         const sumProducts = +trElem.find( `.sum_products_${ pf }` ).text( );
-        const sumCost = MyLib.numToStr( countAll ? MyLib.toRound( sumProducts / countAll, 2) : 0, -1 );
+        const sumCost = MyLib.numToStr( countAll ? MyLib.toRound( sumProducts / countAll, 2 ) : 0, -1 );
         const diffCost = MyLib.toRound( sumCost - dayCost, 2 );
 
         trElem.children( `.sum_cost_${ pf }` ).text( sumCost );
-        trElem.children( `.sum_diff_${ pf }` ).text( MyLib.numToStr( diffCost, -1) );
+        trElem.children( `.sum_diff_${ pf }` ).text( MyLib.numToStr( diffCost, -1 ) );
 
         if ( pf === this.colPrCurrentPf ) {
           this.colPr.find( `.panel input[data-children-category-id='${ trElem.data( 'id' ) }']` )

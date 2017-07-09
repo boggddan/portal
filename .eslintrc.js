@@ -2,14 +2,13 @@ module.exports = {
   env: {
     browser: true,
     es6: true,
-    jquery: true,
-    node: true
+    jquery: true
   },
     globals: {
     moment: true,
     MyLib: true
   },
-  extends: 'eslint:recommended',
+  extends: '',
   parserOptions: {
     ecmaVersion: 2017,
     sourceType: 'script',
@@ -18,6 +17,151 @@ module.exports = {
     },
   },
   rules: {
+      ////////////////////////////////////////
+      // Possible Errors
+      ////////////////////////////////////////
+
+      // enforce “for” loop update clause moving the counter in the right direction.
+      // http://eslint.org/docs/rules/for-direction
+      'for-direction': 'error',
+
+      // disallow await inside of loops
+      // http://eslint.org/docs/rules/no-await-in-loop
+      'no-await-in-loop': 'error',
+
+      // disallow comparing against -0
+      // http://eslint.org/docs/rules/no-compare-neg-zero
+      'no-compare-neg-zero': 'error',
+
+      // disallow assignment operators in conditional expressions
+      // http://eslint.org/docs/rules/no-cond-assign
+      'no-cond-assign': [ 'error', 'always' ],
+
+      // disallow the use of console
+      // http://eslint.org/docs/rules/no-console
+      'no-console': [ 'warn', { allow: [''] } ],
+
+      // disallow constant expressions in conditions
+      // http://eslint.org/docs/rules/no-constant-condition
+      'no-constant-condition': [ 'error', { checkLoops: true } ],
+
+      // disallow control characters in regular expressions
+      // http://eslint.org/docs/rules/no-control-regex
+      'no-control-regex': 'error',
+
+      // disallow the use of debugger
+      // http://eslint.org/docs/rules/no-debugger
+      'no-debugger': 'error',
+
+      // disallow duplicate arguments in function definitions
+      // http://eslint.org/docs/rules/no-dupe-args
+      'no-dupe-args': 'error',
+
+      // disallow duplicate keys in object literals
+      // http://eslint.org/docs/rules/no-dupe-keys
+      'no-dupe-keys': 'error',
+
+      // disallow duplicate case labels
+      // http://eslint.org/docs/rules/no-duplicate-case
+      'no-duplicate-case': 'error',
+
+      // disallow empty block statements
+      // http://eslint.org/docs/rules/no-empty
+      'no-empty': [ 'error', { allowEmptyCatch: false } ],
+
+      // disallow empty character classes in regular expressions
+      // http://eslint.org/docs/rules/no-empty-character-class
+      'no-empty-character-class': 'error',
+
+      // disallow reassigning exceptions in catch clauses
+      // http://eslint.org/docs/rules/no-empty-character-class
+      'no-ex-assign': 'error',
+
+      // disallow unnecessary boolean casts
+      // http://eslint.org/docs/rules/no-extra-boolean-cast
+      'no-extra-boolean-cast': 'error',
+
+      // disallow unnecessary parentheses
+      // http://eslint.org/docs/rules/no-extra-parens
+      'no-extra-parens': [ 'off', 'all', { conditionalAssign: true,
+                                             returnAssign: true,
+                                             nestedBinaryExpressions: true,
+                                             ignoreJSX: 'all',
+                                             enforceForArrowConditionals: true }
+      ],
+
+      // disallow unnecessary semicolons
+      // http://eslint.org/docs/rules/no-extra-semi
+      'no-extra-semi': 'error',
+
+      // disallow reassigning function declarations
+      // http://eslint.org/docs/rules/no-func-assign
+      'no-func-assign': 'error',
+
+      // disallow variable or function declarations in nested blocks
+      // http://eslint.org/docs/rules/no-inner-declarations
+      'no-inner-declarations': [ 'error', 'both' ],
+
+      // disallow invalid regular expression strings in RegExp constructors
+      // http://eslint.org/docs/rules/no-invalid-regexp
+      'no-invalid-regexp': [ 'error', { allowConstructorFlags: [ 'u', 'y'] } ],
+
+      // disallow irregular whitespace outside of strings and comments
+      // http://eslint.org/docs/rules/no-irregular-whitespace
+      'no-irregular-whitespace': [ 'error', { skipStrings: false,
+                                              skipComments: false,
+                                              skipRegExps: false,
+                                              skipTemplates: false }
+      ],
+
+      // disallow calling global object properties as functions
+      // http://eslint.org/docs/rules/no-obj-calls
+      'no-obj-calls': 'error',
+
+      // disallow calling some Object.prototype methods directly on objects
+      // http://eslint.org/docs/rules/no-prototype-builtins
+      'no-prototype-builtins': 'error',
+
+      // disallow multiple spaces in regular expressions
+      // http://eslint.org/docs/rules/no-regex-spaces
+      'no-regex-spaces': 'error',
+
+      // disallow sparse arrays
+      // http://eslint.org/docs/rules/no-sparse-arrays
+      'no-sparse-arrays': 'error',
+
+      // disallow template literal placeholder syntax in regular strings
+      // http://eslint.org/docs/rules/no-template-curly-in-string
+      'no-template-curly-in-string': 'error',
+
+      // disallow confusing multiline expressions
+      // http://eslint.org/docs/rules/no-unexpected-multiline
+      'no-unexpected-multiline': 'error',
+
+      // disallow unreachable code after return, throw, continue, and break statements
+      // http://eslint.org/docs/rules/no-unreachable
+      'no-unreachable': 'error',
+
+      // disallow control flow statements in finally blocks
+      // http://eslint.org/docs/rules/no-unsafe-finally
+      'no-unsafe-finally': 'error',
+
+      // disallow negating the left operand of relational operators
+      // http://eslint.org/docs/rules/no-unsafe-negation
+      'no-unsafe-negation': 'error',
+
+      // require calls to isNaN() when checking for NaN
+      // http://eslint.org/docs/rules/use-isnan
+      'use-isnan': 'error',
+
+      // enforce valid JSDoc comments
+      // http://eslint.org/docs/rules/valid-jsdoc
+      'valid-jsdoc': 'off',
+
+      // enforce comparing typeof expressions against valid strings
+      // http://eslint.org/docs/rules/valid-typeof
+      'valid-typeof': [ 'error', { requireStringLiterals: true } ],
+
       ////////////////////////////////////////
       // Best Practices
       ////////////////////////////////////////
@@ -337,35 +481,129 @@ module.exports = {
       yoda: [ 'error', 'never', { 'exceptRange': true } ],
 
       ////////////////////////////////////////
+      // Strict Mode
+      ////////////////////////////////////////
+
+      // require or disallow strict mode directives
+      // http://eslint.org/docs/rules/strict
+      strict: [ 'error', 'never' ],
+
+      ////////////////////////////////////////
+      // Variables
+      ////////////////////////////////////////
+
+      // require or disallow initialization in variable declarations
+      // http://eslint.org/docs/rules/init-declarations
+      'init-declarations': [ 'error', 'always' ],
+
+      // disallow catch clause parameters from shadowing variables in the outer scope
+      // http://eslint.org/docs/rules/no-catch-shadow
+      'no-catch-shadow': 'error',
+
+      // disallow deleting variables
+      // http://eslint.org/docs/rules/no-delete-var
+      'no-delete-var': 'error',
+
+      // disallow labels that share a name with a variable
+      // http://eslint.org/docs/rules/no-label-var
+      'no-label-var': 'error',
+
+      // disallow specified global variables
+      // http://eslint.org/docs/rules/no-restricted-globals
+      'no-restricted-globals': 'error',
+
+      // disallow variable declarations from shadowing variables declared in the outer scope
+      // http://eslint.org/docs/rules/no-shadow
+      'no-shadow': [ 'error', { builtinGlobals: false,
+                                hoist: 'all',
+                                allow: [] }
+      ],
+
+      // disallow identifiers from shadowing restricted names
+      // http://eslint.org/docs/rules/no-shadow-restricted-names
+      'no-shadow-restricted-names': 'error',
+
+      // disallow the use of undeclared variables unless mentioned in /*global */ comments
+      // http://eslint.org/docs/rules/no-undef
+      'no-undef': [ 'error', { typeof: true } ],
+
+      // disallow initializing variables to undefined
+      // http://eslint.org/docs/rules/no-undef-init
+      'no-undef-init': 'error',
+
+      // disallow the use of undefined as an identifier
+      // http://eslint.org/docs/rules/no-undefined
+      'no-undefined': 'error',
+
+      // disallow unused variables
+      // http://eslint.org/docs/rules/no-unused-vars
+      'no-unused-vars': [ 'error', { vars: 'all',
+                                     varsIgnorePattern: '',
+                                     args: 'all',
+                                     argsIgnorePattern: '',
+                                     ignoreRestSiblings: false,
+                                     caughtErrors: 'none',
+                                     caughtErrorsIgnorePattern: '' }
+      ],
+
+      // disallow the use of variables before they are defined
+      // http://eslint.org/docs/rules/no-use-before-define
+      'no-use-before-define': [ 'error', { 'functions': true,
+                                           classes: true,
+                                           variables: true }
+      ],
+
+      ////////////////////////////////////////
+      // Node.js and CommonJS
+      ////////////////////////////////////////
+
+      // require return statements after callbacks
+      // http://eslint.org/docs/rules/callback-return#
+      'callback-return': 'error',
+
+      // require require() calls to be placed at top-level module scope
+      // http://eslint.org/docs/rules/global-require#
+      'global-require': 'error',
+
+      // require error handling in callbacks
+      // http://eslint.org/docs/rules/handle-callback-err#
+      'handle-callback-err': [ 'error', "^(err|error)$" ],
+
+      // disallow use of the Buffer() constructor
+      // http://eslint.org/docs/rules/no-buffer-constructor#
+      'no-buffer-constructor': 'error',
+
+      // disallow require calls to be mixed with regular variable declarations
+      // http://eslint.org/docs/rules/no-mixed-requires#
+      'no-mixed-requires': [ 'error', { "grouping": true, "allowCall": true } ],
+
+      // disallow new operators with calls to require
+      // http://eslint.org/docs/rules/no-new-require#
+      'no-new-require': 'error',
+
+      // disallow string concatenation with __dirname and __filename
+      // http://eslint.org/docs/rules/no-path-concat#
+      'no-path-concat': 'error',
+
+      // disallow the use of process.env
+      // http://eslint.org/docs/rules/no-process-env#
+      'no-process-env': 'error',
+
+      // disallow the use of process.exit()
+      // http://eslint.org/docs/rules/no-process-exit#
+      'no-process-exit': 'error',
+
+      // disallow specified modules when loaded by require
+      // http://eslint.org/docs/rules/no-restricted-modules#
+      'no-restricted-modules': [ 'error', { paths: [ ], patterns: [ ] } ],
+
+      // disallow synchronous methods
+      // http://eslint.org/docs/rules/no-sync#
+      'no-sync': 'error',
+
+      ////////////////////////////////////////
       // Stylistic Issues
-      quotes: [ 'error', 'single', { avoidEscape: true } ], // enforce the consistent use of either backticks, double, or single quotes
-
-      // require or disallow semicolons instead of ASI
-      // http://eslint.org/docs/rules/semi
-      semi: [ 'error', 'always', { omitLastInOneLineBlock: true } ],
-
-      // enforce location of semicolons
-      // http://eslint.org/docs/rules/semi-style
-      'semi-style': [ 'error', 'last' ],
-
-      // semi-spacing
-      // http://eslint.org/docs/rules/semi-spacing
-      'semi-spacing': [ 'error', { before: false, after: true } ],
-
-      // enforce consistent spacing before or after unary operators
-      // http://eslint.org/docs/rules/space-unary-ops
-      'space-unary-ops': [ 'error', { words: true,
-                                      nonwords: false,
-                                      overrides: { }
-      } ],
-
-
-
-
-
-
-
-
+      ////////////////////////////////////////
 
       // enforce linebreaks after opening and before closing array brackets
       // http://eslint.org/docs/rules/array-bracket-newline
@@ -392,7 +630,7 @@ module.exports = {
 
       // enforce camelcase naming convention
       // http://eslint.org/docs/rules/camelcase
-      'camelcase': [ 'error', { properties: 'always' } ],
+      'camelcase': [ 'error', { properties: 'never' } ],
 
       // enforce or disallow capitalization of the first letter of a comment
       // http://eslint.org/docs/rules/capitalized-comments
@@ -670,342 +908,175 @@ module.exports = {
 
       // disallow trailing whitespace at the end of lines
       // http://eslint.org/docs/rules/no-trailing-spaces
-      // 'no-trailing-spaces': 'error',
+      'no-trailing-spaces': [ 'error', { skipBlankLines: false,
+                                         ignoreComments: false }
+      ],
 
       // disallow dangling underscores in identifiers
       // http://eslint.org/docs/rules/no-underscore-dangle
-      // 'no-underscore-dangle': 'error',
+      'no-underscore-dangle': [ 'error', { allow : [],
+                                           allowAfterThis: false,
+                                           allowAfterSuper: false }
+      ],
 
       // disallow ternary operators when simpler alternatives exist
       // http://eslint.org/docs/rules/no-unneeded-ternary
-      // 'no-unneeded-ternary': 'error',
+      'no-unneeded-ternary': [ 'error', { defaultAssignment: false } ],
 
       // disallow whitespace before properties
       // http://eslint.org/docs/rules/no-whitespace-before-property
-      // 'no-whitespace-before-property': 'error',
+      'no-whitespace-before-property': 'error',
 
       // enforce the location of single-line statements
       // http://eslint.org/docs/rules/nonblock-statement-body-position
-      // 'nonblock-statement-body-position': 'error',
+      'nonblock-statement-body-position': [ 'error', 'beside', { overrides: { } } ],
 
       // enforce consistent line breaks inside braces
       // http://eslint.org/docs/rules/object-curly-newline
-      // 'object-curly-newline': 'error',
+      'object-curly-newline': [ 'error', { multiline: true,
+                                           consistent: true } ],
 
       // enforce consistent spacing inside braces
       // http://eslint.org/docs/rules/object-curly-spacing
-      // 'object-curly-spacing': 'error',
+      'object-curly-spacing': [ 'error', 'always', { arraysInObjects: true,
+                                                     objectsInObjects: true }
+      ],
 
       // enforce placing object properties on separate lines
       // http://eslint.org/docs/rules/object-property-newline
-      // 'object-property-newline': 'error',
+      'object-property-newline': [ 'error', { allowMultiplePropertiesPerLine: true } ],
 
       // enforce variables to be declared either together or separately in functions
       // http://eslint.org/docs/rules/one-var
-      // 'one-var': 'error',
+      'one-var': [ 'error', { let: 'never',
+                              const: 'never',
+                              var: 'never' }
+      ],
 
       // require or disallow newlines around variable declarations
       // http://eslint.org/docs/rules/one-var-declaration-per-line
-      // 'one-var-declaration-per-line': 'error',
+      'one-var-declaration-per-line': [ 'error', 'always' ],
 
       // require or disallow assignment operator shorthand where possible
       // http://eslint.org/docs/rules/operator-assignment
-      // 'operator-assignment': 'error',
+      'operator-assignment': [ 'error', 'always' ],
 
       // enforce consistent linebreak style for operators
       // http://eslint.org/docs/rules/operator-linebreak
-      // 'operator-linebreak': 'error',
+      'operator-linebreak': [ 'error', 'after', { overrides: { } } ],
 
       // require or disallow padding within blocks
       // http://eslint.org/docs/rules/padded-blocks
-      // 'padded-blocks': 'error',
+      'padded-blocks': [ 'error', { blocks: 'never',
+                                    classes: 'never',
+                                    switches: 'never' }
+      ],
 
       // require or disallow padding lines between statements
       // http://eslint.org/docs/rules/padding-line-between-statements
-      // 'padding-line-between-statements': 'error',
-
+      'padding-line-between-statements': [ 'error',
+        { blankLine: 'always', prev: '*', next: 'return' }
+      ],
       // require quotes around object literal property names
       // http://eslint.org/docs/rules/quote-props
-      // 'quote-props': 'error',
+      'quote-props': [ 'error', 'as-needed', { keywords: false,
+                                               unnecessary: true,
+                                               numbers: false }
+      ],
 
       // enforce the consistent use of either backticks, double, or single quotes
       // http://eslint.org/docs/rules/quotes
-      // 'quotes': 'error',
+      'quotes': [ 'error', 'single', { avoidEscape: true,
+                                       allowTemplateLiterals: false }
+      ],
 
       // require JSDoc comments
       // http://eslint.org/docs/rules/require-jsdoc
-      // 'require-jsdoc': 'error',
+      'require-jsdoc': 'off',
 
       // require or disallow semicolons instead of ASI
       // http://eslint.org/docs/rules/semi
-      // 'semi': 'error',
+      'semi': [ 'error', 'always', { omitLastInOneLineBlock: true } ],
 
       // enforce consistent spacing before and after semicolons
       // http://eslint.org/docs/rules/semi-spacing
-      // 'semi-spacing': 'error',
+      'semi-spacing': [ 'error', { before: false, after: true } ],
 
       // enforce location of semicolons
       // http://eslint.org/docs/rules/semi-style
-      // 'semi-style': 'error',
+      'semi-style': [ 'error', 'last' ],
 
       // require object keys to be sorted
       // http://eslint.org/docs/rules/sort-keys
-      // 'sort-keys': 'error',
+      'sort-keys': [ 'off', 'asc', { caseSensitive: true,
+                                       natural: true }
+      ],
 
       // require variables within the same declaration block to be sorted
       // http://eslint.org/docs/rules/sort-vars
-      // 'sort-vars': 'error',
+      'sort-vars': [ 'off', { ignoreCase: false } ],
 
       // enforce consistent spacing before blocks
       // http://eslint.org/docs/rules/space-before-blocks
-      // 'space-before-blocks': 'error',
+      'space-before-blocks': [ 'error', { functions: 'always',
+                                          keywords: 'always',
+                                          classes: 'always' }
+      ],
 
       // enforce consistent spacing before function definition opening parenthesis
       // http://eslint.org/docs/rules/space-before-function-paren
-      // 'space-before-function-paren': 'error',
+      'space-before-function-paren': [ 'error', { anonymous: 'always',
+                                                  named: 'never',
+                                                  asyncArrow: 'always' }
+      ],
 
       // enforce consistent spacing inside parentheses
       // http://eslint.org/docs/rules/space-in-parens
-      // 'space-in-parens': 'error',
+      'space-in-parens': [ 'error', 'always', { exceptions: [] } ],
 
       // require spacing around infix operators
       // http://eslint.org/docs/rules/space-infix-ops
-      // 'space-infix-ops': 'error',
+      'space-infix-ops': [ 'error', { int32Hint: false } ],
 
       // enforce consistent spacing before or after unary operators
       // http://eslint.org/docs/rules/space-unary-ops
-      // 'space-unary-ops': 'error',
+      'space-unary-ops': [ 'error', { words: true,
+                                      nonwords: false,
+                                      overrides: { } }
+      ],
 
       // enforce consistent spacing after the // or /* in a comment
       // http://eslint.org/docs/rules/spaced-comment
-      // 'spaced-comment': 'error',
+      'spaced-comment': ['error', 'always', {
+        line: {
+            markers: [ '=', '!' ],
+            exceptions: [ '-', '+' ] },
+        block: {
+          markers: [ '=', '!' ],
+          exceptions: [ '-', '+' ],
+          balanced: true }
+        }
+      ],
 
       // enforce spacing around colons of switch statements
       // http://eslint.org/docs/rules/switch-colon-spacing
-      // 'switch-colon-spacing': 'error',
+      'switch-colon-spacing': [ 'error', { after: true, before: false } ],
 
       // require or disallow spacing between template tags and their literals
       // http://eslint.org/docs/rules/template-tag-spacing
-      // 'template-tag-spacing': 'error',
+      'template-tag-spacing': [ 'error', 'never' ],
 
       // require or disallow Unicode byte order mark (BOM)
       // http://eslint.org/docs/rules/unicode-bom
-      // 'unicode-bom': 'error',
+      'unicode-bom': [ 'error', 'never' ],
 
       // require parenthesis around regex literals
       // http://eslint.org/docs/rules/wrap-regex
-      // 'wrap-regex': 'error',
-
-      ////////////////////////////////////////
-      // Possible Errors
-
-      // enforce “for” loop update clause moving the counter in the right direction.
-      // http://eslint.org/docs/rules/for-direction
-      'for-direction': 'error',
-
-      // disallow await inside of loops
-      // http://eslint.org/docs/rules/no-await-in-loop
-      'no-await-in-loop': 'error',
-
-      // disallow comparing against -0
-      // http://eslint.org/docs/rules/no-compare-neg-zero
-      'no-compare-neg-zero': 'error',
-
-      // disallow assignment operators in conditional expressions
-      // http://eslint.org/docs/rules/no-cond-assign
-      'no-cond-assign': [ 'error', 'always' ],
-
-      // disallow the use of console
-      // http://eslint.org/docs/rules/no-console
-      'no-console': [ 'warn', { allow: [''] } ],
-
-      // disallow constant expressions in conditions
-      // http://eslint.org/docs/rules/no-constant-condition
-      'no-constant-condition': [ 'error', { checkLoops: true } ],
-
-      // disallow control characters in regular expressions
-      // http://eslint.org/docs/rules/no-control-regex
-      'no-control-regex': 'error',
-
-      // disallow the use of debugger
-      // http://eslint.org/docs/rules/no-debugger
-      'no-debugger': 'error',
-
-      // disallow duplicate arguments in function definitions
-      // http://eslint.org/docs/rules/no-dupe-args
-      'no-dupe-args': 'error',
-
-      // disallow duplicate keys in object literals
-      // http://eslint.org/docs/rules/no-dupe-keys
-      'no-dupe-keys': 'error',
-
-      // disallow duplicate case labels
-      // http://eslint.org/docs/rules/no-duplicate-case
-      'no-duplicate-case': 'error',
-
-      // disallow empty block statements
-      // http://eslint.org/docs/rules/no-empty
-      'no-empty': [ 'error', { allowEmptyCatch: false } ],
-
-      // disallow empty character classes in regular expressions
-      // http://eslint.org/docs/rules/no-empty-character-class
-      'no-empty-character-class': 'error',
-
-      // disallow reassigning exceptions in catch clauses
-      // http://eslint.org/docs/rules/no-empty-character-class
-      'no-ex-assign': 'error',
-
-      // disallow unnecessary boolean casts
-      // http://eslint.org/docs/rules/no-extra-boolean-cast
-      'no-extra-boolean-cast': 'error',
-
-      // disallow unnecessary parentheses
-      // http://eslint.org/docs/rules/no-extra-parens
-      'no-extra-parens': [ 'error', 'all', { conditionalAssign: true,
-                                             returnAssign: true,
-                                             nestedBinaryExpressions: true,
-                                             ignoreJSX: 'all',
-                                             enforceForArrowConditionals: true }
-      ],
-
-      // disallow unnecessary semicolons
-      // http://eslint.org/docs/rules/no-extra-semi
-      'no-extra-semi': 'error',
-
-      // disallow reassigning function declarations
-      // http://eslint.org/docs/rules/no-func-assign
-      'no-func-assign': 'error',
-
-      // disallow variable or function declarations in nested blocks
-      // http://eslint.org/docs/rules/no-inner-declarations
-      'no-inner-declarations': [ 'error', 'both' ],
-
-      // disallow invalid regular expression strings in RegExp constructors
-      // http://eslint.org/docs/rules/no-invalid-regexp
-      'no-invalid-regexp': [ 'error', { allowConstructorFlags: [ 'u', 'y'] } ],
-
-      // disallow irregular whitespace outside of strings and comments
-      // http://eslint.org/docs/rules/no-irregular-whitespace
-      'no-irregular-whitespace': [ 'error', { skipStrings: false,
-                                              skipComments: false,
-                                              skipRegExps: false,
-                                              skipTemplates: false }
-      ],
-
-      // disallow calling global object properties as functions
-      // http://eslint.org/docs/rules/no-obj-calls
-      'no-obj-calls': 'error',
-
-      // disallow calling some Object.prototype methods directly on objects
-      // http://eslint.org/docs/rules/no-prototype-builtins
-      'no-prototype-builtins': 'error',
-
-      // disallow multiple spaces in regular expressions
-      // http://eslint.org/docs/rules/no-regex-spaces
-      'no-regex-spaces': 'error',
-
-      // disallow sparse arrays
-      // http://eslint.org/docs/rules/no-sparse-arrays
-      'no-sparse-arrays': 'error',
-
-      // disallow template literal placeholder syntax in regular strings
-      // http://eslint.org/docs/rules/no-template-curly-in-string
-      'no-template-curly-in-string': 'error',
-
-      // disallow confusing multiline expressions
-      // http://eslint.org/docs/rules/no-unexpected-multiline
-      'no-unexpected-multiline': 'error',
-
-      // disallow unreachable code after return, throw, continue, and break statements
-      // http://eslint.org/docs/rules/no-unreachable
-      'no-unreachable': 'error',
-
-      // disallow control flow statements in finally blocks
-      // http://eslint.org/docs/rules/no-unsafe-finally
-      'no-unsafe-finally': 'error',
-
-      // disallow negating the left operand of relational operators
-      // http://eslint.org/docs/rules/no-unsafe-negation
-      'no-unsafe-negation': 'error',
-
-      // require calls to isNaN() when checking for NaN
-      // http://eslint.org/docs/rules/use-isnan
-      'use-isnan': 'error',
-
-      // enforce valid JSDoc comments
-      // http://eslint.org/docs/rules/valid-jsdoc
-      'valid-jsdoc': 'off',
-
-      // enforce comparing typeof expressions against valid strings
-      // http://eslint.org/docs/rules/valid-typeof
-      'valid-typeof': [ 'error', { requireStringLiterals: true } ],
-
-      ////////////////////////////////////////
-      // Variables
-
-      // require or disallow initialization in variable declarations
-      // http://eslint.org/docs/rules/init-declarations
-      'init-declarations': [ 'error', 'always' ],
-
-      // disallow catch clause parameters from shadowing variables in the outer scope
-      // http://eslint.org/docs/rules/no-catch-shadow
-      'no-catch-shadow': 'error',
-
-      // disallow deleting variables
-      // http://eslint.org/docs/rules/no-delete-var
-      'no-delete-var': 'error',
-
-      // disallow labels that share a name with a variable
-      // http://eslint.org/docs/rules/no-label-var
-      'no-label-var': 'error',
-
-      // disallow specified global variables
-      // http://eslint.org/docs/rules/no-restricted-globals
-      'no-restricted-globals': 'error',
-
-      // disallow variable declarations from shadowing variables declared in the outer scope
-      // http://eslint.org/docs/rules/no-shadow
-      'no-shadow': [ 'error', { builtinGlobals: false,
-                                hoist: 'all',
-                                allow: [] }
-      ],
-
-      // disallow identifiers from shadowing restricted names
-      // http://eslint.org/docs/rules/no-shadow-restricted-names
-      'no-shadow-restricted-names': 'error',
-
-      // disallow the use of undeclared variables unless mentioned in /*global */ comments
-      // http://eslint.org/docs/rules/no-undef
-      'no-undef': [ 'error', { typeof: true } ],
-
-      // disallow initializing variables to undefined
-      // http://eslint.org/docs/rules/no-undef-init
-      'no-undef-init': 'error',
-
-      // disallow the use of undefined as an identifier
-      // http://eslint.org/docs/rules/no-undefined
-      'no-undefined': 'error',
-
-      // disallow unused variables
-      // http://eslint.org/docs/rules/no-unused-vars
-      'no-unused-vars': [ 'error', { vars: 'all',
-                                     varsIgnorePattern: '',
-                                     args: 'all',
-                                     argsIgnorePattern: '',
-                                     ignoreRestSiblings: false,
-                                     caughtErrors: 'none',
-                                     caughtErrorsIgnorePattern: '' }
-      ],
-
-      // disallow the use of variables before they are defined
-      // http://eslint.org/docs/rules/no-use-before-define
-      'no-use-before-define': [ 'error', { 'functions': true,
-                                           classes: true,
-                                           variables: true }
-      ],
+      'wrap-regex':  'error',
 
       ////////////////////////////////////////
       // ECMAScript 6
+      ////////////////////////////////////////
 
       // require braces around arrow function bodies
       // http://eslint.org/docs/rules/arrow-body-style

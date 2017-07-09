@@ -1,0 +1,156 @@
+{
+  "comment": "https://github.com/DavidAnson/markdownlint/blob/master/doc/Rules.md",
+
+  "comment": "MD001 - Header levels should only increment by one level at a time",
+  "header-increment": true,
+
+  "comment": "MD002 - First header should be a top level header",
+  "first-header-h1": false,
+
+  "comment": "MD003 - Header style",
+  "header-style": {
+    "style": "atx"
+  },
+
+  "comment": "MD005 - Inconsistent indentation for list items at the same level",
+  "ul-style": {
+    "style": "dash"
+  },
+
+  "comment": "MD006 - Consider starting bulleted lists at the beginning of the line",
+  "list-indent": true,
+
+  "comment": "MD006 - Consider starting bulleted lists at the beginning of the line",
+  "ul-start-left": true,
+
+  "comment": "MD007 - Unordered list indentation",
+  "ul-indent": {
+    "indent": 2
+  },
+
+  "comment": "MD009 - Trailing spaces",
+  "no-trailing-spaces": {
+    "br-spaces": 0,
+    "comment": "Empty lines inside list items should not be indented",
+    "list_item_empty_lines": false
+  },
+
+  "comment": "MD010 - Hard tabs",
+  "no-hard-tabs": {
+    "code_blocks": true
+  },
+
+  "comment": "MD011 - Reversed link syntax",
+  "no-reversed-links": true,
+
+  "comment": "MD012 - Multiple consecutive blank lines",
+  "no-multiple-blanks": {
+    "maximum": 1
+   },
+
+  "comment": "MD013 - Line length",
+  "line-length": false,
+
+  "comment": "MD014 - Dollar signs used before commands without showing output",
+  "commands-show-output": true,
+
+  "comment": "MD018 - No space after hash on atx style header",
+  "no-missing-space-atx": true,
+
+  "comment": "MD019 - Multiple spaces after hash on atx style header",
+  "no-multiple-space-atx": true,
+
+  "comment": "MD020 - No space inside hashes on closed atx style header",
+  "no-missing-space-closed-atx": true,
+
+  "comment": "MD021 - Multiple spaces inside hashes on closed atx style header",
+  "no-multiple-space-closed-atx": true,
+
+  "comment": "MD022 - Headers should be surrounded by blank lines",
+  "comment": "Some headers have preceeding HTML anchors. Unfortunate that we have to disable this, as it otherwise catches a real problem that trips up some Markdown renderers",
+  "blanks-around-headers": true,
+
+  "comment": "MD023 - Headers must start at the beginning of the line",
+  "header-start-left": true,
+
+  "comment": "MD024: Disallow multiple headers with the same content",
+  "no-duplicate-header": true,
+
+  "comment": "MD025 - Multiple top level headers in the same document",
+  "single-h1": true,
+
+  "comment": "MD026 - Trailing punctuation in header",
+  "no-trailing-punctuation": {
+    "punctuation" : ".,:!?"
+  },
+  "comment": "MD027 - Multiple spaces after blockquote symbol",
+  "no-multiple-space-blockquote": true,
+
+  "comment": "MD028 - Blank line inside blockquote",
+  "no-blanks-blockquote": true,
+
+  "comment": "MD029 - Ordered list item prefix",
+  "ol-prefix": {
+    "style": "ordered"
+  },
+
+  "comment": "MD030 - Spaces after list markers",
+  "list-marker-space": {
+    "ul_single": 1,
+    "ol_single": 1,
+    "ul_multi": 1,
+    "ol_multi": 1
+  },
+
+  "comment": "MD031 - Fenced code blocks should be surrounded by blank lines",
+  "blanks-around-fences": true,
+
+  "comment": "MD032 - Lists should be surrounded by blank lines",
+  "blanks-around-lists": true,
+
+  "comment": "MD033 - Inline HTML",
+  "no-inline-html": true,
+
+  "comment": "MD034 - Bare URL used",
+  "no-bare-urls": true,
+
+  "comment": "MD035 - Horizontal rule style",
+  "hr-style": {
+    "style": "consistent"
+  },
+
+  "comment": "MD036 - Emphasis used instead of a header",
+  "no-emphasis-as-header": {
+    "punctuation": ".,;:!?"
+  },
+
+  "comment": "MD037 - Spaces inside emphasis markers",
+  "no-space-in-emphasis": true,
+
+  "comment": "MD038 - Spaces inside code span elements",
+  "no-space-in-code": true,
+
+  "comment": "MD039 - Spaces inside link text",
+  "no-space-in-links": true,
+
+  "comment": "MD040 - Fenced code blocks should have a language specified",
+  "fenced-code-language": true,
+
+  "comment": "MD041 - First line in file should be a top level header",
+  "first-line-h1": {
+    "level": 1,
+    "front_matter_title": "/^---title:---\n/m"
+  },
+
+  "comment": "MD042 - No empty links",
+  "no-empty-links": true,
+
+  "comment": "MD043 - Required header structure",
+  "required-headers": false,
+
+  "comment": "MD044 - Proper names should have the correct capitalization",
+  "proper-names": {
+    "names": [ "JavaScript" ],
+    "code_blocks": true
+  }
+}
