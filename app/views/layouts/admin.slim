@@ -1,0 +1,27 @@
+doctype html
+html
+  head
+    title Портал
+    = csrf_meta_tags
+
+    = stylesheet_link_tag    :application, media: :all, 'data-turbolinks-track' => :reload
+    = javascript_include_tag :application, 'data-turbolinks-track': :reload
+  body
+    = render 'layouts/loader'
+    = render 'layouts/del_msg'
+    = render 'layouts/error_msg'
+
+    nav#main_menu
+      ul
+        li.caption Портал
+        li.item *{ data: { page: :admin_index } }
+          a *{ href: admin_index_path } Початкова
+        li.item *{ data: {page: :institution_orders } }
+          a *{ href: admin_users_index_path } Користувачі
+        li.info
+          span = @current_user.username
+          span Адміністратор
+        li.item *{ data: { page: :exit } }
+          a *{ href: log_out_path } Вихід
+
+    == yield

@@ -3,8 +3,12 @@ class Institution::BaseController < ApplicationController
 
   layout 'institution'
 
+  def verify_institution
+    redirect_to root_path unless current_user.is_institution?
+  end
+
   def index
-    render 'institution/index'
+    render 'institution/index.slim'
   end
 
   def current_institution # Текущее подразделение

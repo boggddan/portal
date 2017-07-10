@@ -7,5 +7,12 @@ class User < ApplicationRecord
 
   validates :username, presence: true, uniqueness: true, length: { maximum: 50 }
   validates :username, presence: true, confirmation: true
-#  validates_confirmation_of :password
+
+  def is_admin?
+    self.userable_type == 'Admin'
+  end
+
+  def is_institution?
+    self.userable_type == 'Institution'
+  end
 end

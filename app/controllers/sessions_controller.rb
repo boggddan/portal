@@ -2,7 +2,8 @@ class SessionsController < ApplicationController
   skip_before_action :verify_log_in # Отключение фильтра проверки пользователя
 
   def log_in
-  end  
+    @current_user = session[ :user_id ] = nil
+  end
 
   def create # Создание входа в портал
     user = User.find_by_username( params[ :username ] )

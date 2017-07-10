@@ -1,5 +1,4 @@
 / Отображение документа табеля
-/ Отображение заявки
 - disabled = @timesheet.number_sa.present?
 - label_text = 'layouts/label_text'
 
@@ -42,7 +41,7 @@ main#timesheet_dates *{ data: { \
     updates: institution_timesheets_dates_updates_path } } }
 
     .panel
-      label Заміна виділених позначень&nbsp;
+      label Групова відмітка ( Alt + ліва кнопка миші )
       - @reasons_absences.each_with_index do | v, i |
         - next_v = @reasons_absences[ @reasons_absences.last == v ? 0 : i + 1 ]
         button.btn_gradient *{ disabled: disabled,

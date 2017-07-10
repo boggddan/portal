@@ -10,11 +10,20 @@
 }
 
 #timesheet_dates {
-  button[data-reasons-absence-id] {
-    width: 40px;
-    &:not(:disabled) {
-      background-image: linear-gradient(to right, #EDE574 0%, #E1F5C4 51%, #EDE574 100%);
-      border-color: #EDE574;
+
+  .clmn {
+
+    label {
+      margin-right: 15px;
+      text-decoration: solid underline #666;
+    }
+
+    button[data-reasons-absence-id] {
+      width: 40px;
+      &:not(:disabled) {
+        background-image: linear-gradient(to right, #73c1fb 0%, #529ad0 51%, #73c1fb 100%);
+        border-color: #73c1fb;
+      }
     }
   }
 

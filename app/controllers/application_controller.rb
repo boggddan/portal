@@ -3,27 +3,20 @@
   helper_method :current_user, :date_str
 
   def verify_log_in # Переход на страничку ввод логина и пароля, если не был произведен вход
-    redirect_to log_in_path unless current_user
-  end
-
-  def verify_admin
-    redirect_root unless current_user_type == 'Admin'
-  end
-
-  def verify_institution
-    redirect_root unless current_user_type == 'Institution'
+    redirect_to root_path unless current_user
   end
 
   def index
-    redirect_root
+    #redirect_root
+    #redirect_to root_path
   end
 
   def redirect_root
-    if current_user_type == 'Admin'
-      redirect_to admin_users_index_path
-    else
-      redirect_to institution_index_path
-    end
+    #if current_user_type == 'Admin'
+    #  redirect_to admin_index_path
+    #else
+    #  redirect_to institution_index_path
+    #end
   end
 
   def current_user # Текущий пользователь
@@ -86,6 +79,5 @@
       { error: { causes_deviation: "Не знайдений код причини відхилення [#{ code }]" } }
     end
   end
-
 
 end

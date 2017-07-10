@@ -8,9 +8,9 @@ class Admin::UsersController < Admin::BaseController
   end
 
   def new #
+    id = params[:id]
     @institution = Institution.all.order( :name )
     @supplier = Supplier.all.order( :name )
-    id = params[:id]
     @user = id ? User.find( id ) : User.new( userable_type: 'Admin', userable_id: 0 )
   end
 
