@@ -13,8 +13,8 @@
   .panel_main {
     button[data-clmn] {
       &:not(:disabled) {
-        background-image: linear-gradient(to right, #8bb41d, #b6e026 51%, #8bb41d 100%);
-        border-color: #8bb41d;
+        background-image: linear-gradient(to right, #6db369, #91d88d 51%, #6db369 100%);
+        border-color: #3e7d3b;
       }
     }
   }
@@ -79,37 +79,41 @@
       min-width: 80px;
     }
 
-    button[data-pf] {
+    button[data-pf=plan] {
       &:not(:disabled) {
-        background-image: linear-gradient(to right, #eab92d, #c79810 51%, #eab92d 100%);
-        border-color: #eab92d;
+        background-image: linear-gradient(to right, #b5e8b3, #cbf1ca 51%, #b5e8b3 100%);
+        border-color: #6db36c;
+        color: black;
+      }
+    }
+
+    button[data-pf=fact] {
+      &:not(:disabled) {
+        background-image: linear-gradient(to right, #e49393, #ffc7c7 51%, #e49393 100%);
+        border-color: #c35a5a;
       }
     }
 
     button[data-meal-id] {
       &:not(:disabled) {
-        background-image: linear-gradient(to right, #a6a6f2 0%, #d2d2f9 51%, #a6a6f2 100%);
-        border-color: #a6a6f2;
+        background-image: linear-gradient(to right, #fff2bc 0%, #fff9e0 51%, #fff2bc 100%);
+        border-color: #bfaa56;
+        color: black;
+      }
+    }
+
+    button[data-meal-id='0'],
+    button[data-meal-id='-1'] {
+      &:not(:disabled) {
+        background-image: linear-gradient(to right, #e2bc28 0%, #ffe47c 51%, #e2bc28 100%);
+        color: black;
+        border-color: #c7a41c;
       }
     }
 
     button[data-meal-id='-1'] {
       margin-left: 20px;
       margin-right: 15px;
-
-      &:not(:disabled) {
-        background-image: linear-gradient(to right, #1c5a85 0%, #3093c7 51%, #1c5a85 100%);
-        border-color: #1c5a85;
-      }
-    }
-
-    button[data-meal-id='0'] {
-      margin-left: 11px;
-
-      &:not(:disabled) {
-        background-image: linear-gradient(to right, #92cfde 0%, #76bdd1 51%, #92cfde 100%);
-        border-color: #92cfde;
-      }
     }
 
     col:nth-child( 1 ) { width: 250px; }

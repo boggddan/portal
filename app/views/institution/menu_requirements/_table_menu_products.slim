@@ -7,10 +7,10 @@ h2.icon Продукти харчування
   button.btn_gradient *{ data: { pf: :plan } } План
   button.btn_gradient *{ data: { pf: :fact } } Факт
 
-  button.btn_gradient *{ data: { meal_id: -1 } } Всі
+  button.btn_gradient *{ data: { meal_id: -1 } } Загальна
   - @products_meals.each do | o |
     button.btn_gradient *{ data: { meal_id: o[ :id ] } } = o[ :name ]
-  button.btn_gradient *{ data: { meal_id: 0 } } Всього
+  button.btn_gradient *{ data: { meal_id: 0 } } Підсумки
 
 .panel
   label Вартість дітодня:
@@ -94,7 +94,7 @@ h2.icon Продукти харчування
               td *{ class: i.odd? ? :last_diff : '', data: { meal_id: 0 } }
             td.last_cat
             td
-            td.last_plan
+            td
 
       tr.row_data
         td.name = pr[ :name ]
