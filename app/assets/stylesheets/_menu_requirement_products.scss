@@ -117,8 +117,9 @@
     tr {
       &.type { @include row-group( 'td', #f1f1f1, #333, 50px, left ); }
 
+
       .price {
-        border-right: 3px solid #f1f1f1;
+        border-right: 3px solid #777;
         border-left: 2px solid #f1f1f1;
       }
 
@@ -132,6 +133,14 @@
 
       .last_plan {
         border-right: 3px solid #333;
+      }
+
+      .last_cat {
+        border-left: 1px solid #777;
+      }
+
+      .last_diff {
+        border-right: 3px solid #e7e7e7;
       }
 
     }

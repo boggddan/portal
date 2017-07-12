@@ -160,6 +160,13 @@ table.table {
         }
       }
 
+      &:nth-child(odd):not(.selected):not(:hover) {
+        td:not(.hover):not(.active),
+        input {
+          background-color: #f7ffda;
+        }
+      }
+
       td {
         background-color: #fff;
         &.active {

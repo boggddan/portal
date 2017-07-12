@@ -36,6 +36,7 @@ h2.icon Продукти харчування
         th.last_meal *{ colspan: ( o[ :count ] * cats_size ), data: { meal_id: o[ :id ] } } = o[ :name ]
       th.last_plan *{ colspan: cats_size + 2, data: { meal_id: 0 } } ПЛАН
       th *{ colspan: cats_size * 2 + 3, data: { meal_id: 0 } } ФАКТ
+
     tr
       - @products_meals.each do | ml |
         - @products_meals_dishes.select{ | o | o[ :meal_id ] == ml[ :id ] }.each_with_index do | md, mdIndex |
@@ -45,11 +46,11 @@ h2.icon Продукти харчування
 
       - @products_categories.each do | o |
         th *{ rowspan: 2, data: { meal_id: 0 } } = o[ :name ]
-      th.last_plan *{ colspan: 2, data: { meal_id: 0 } } ВСЬОГО
+      th.last_plan.last_cat *{ colspan: 2, data: { meal_id: 0 } } ВСЬОГО
 
       - @products_categories.each do | o |
-        th *{ colspan: 2, data: { meal_id: 0 } } = o[ :name ]
-      th *{ colspan: 3, data: { meal_id: 0 } } ВСЬОГО
+        th.last_diff *{ colspan: 2, data: { meal_id: 0 } } = o[ :name ]
+      th.last_cat *{ colspan: 3, data: { meal_id: 0 } } ВСЬОГО
 
     tr
       - @products_meals.each do | ml |
@@ -59,13 +60,13 @@ h2.icon Продукти харчування
             - last_meal = cats_size == ccIndex + 1 && ml[ :count ] == mdIndex + 1 ? :last_meal : nil
             th *{ class: last_meal || last_dish, data: { meal_id: md[ :meal_id ] } } = cc[ :name ]
 
-      th *{ data: { meal_id: 0 } } К-СТЬ
+      th.last_cat *{ data: { meal_id: 0 } } К-СТЬ
       th.last_plan *{ data: { meal_id: 0 } } СУММА
 
       - @products_categories.each do | o |
         th *{ data: { meal_id: 0 } } відх.
-        th *{ data: { meal_id: 0 } } к-сть
-      th *{ data: { meal_id: 0 } } ВІДХ.
+        th.last_diff *{ data: { meal_id: 0 } } к-сть
+      th.last_cat *{ data: { meal_id: 0 } } ВІДХ.
       th *{ data: { meal_id: 0 } } К-СТЬ
       th *{ data: { meal_id: 0 } } СУММА
 
@@ -85,8 +86,15 @@ h2.icon Продукти харчування
                   - last_dish = cats_size == ccIndex + 1 ? :last_dish : nil
                   - last_meal = cats_size == ccIndex + 1 && ml[ :count ] == mdIndex + 1 ? :last_meal : nil
                   td *{ class: last_meal || last_dish, data: { meal_id: md[ :meal_id ] } }
-            - for i in 1..(cats_size + 2 + cats_size * 2 + 3 )
-              td *{ class: ( i == cats_size + 2 ? :last_plan : '' ), data: { meal_id: 0 } }
+            - for i in 0...cats_size
+              td *{ data: { meal_id: 0 } }
+            td.last_cat
+            td.last_plan
+            - for i in 0...cats_size * 2
+              td *{ class: i.odd? ? :last_diff : '', data: { meal_id: 0 } }
+            td.last_cat
+            td
+            td.last_plan
 
       tr.row_data
         td.name = pr[ :name ]
@@ -111,12 +119,12 @@ h2.icon Продукти харчування
 
         - @products_categories.each do | o |
           td *{ data: { meal_id: 0, count_pf: :plan, count_type: :count, children_category_id: o[ :id ] } }
-        td.count.cell_count *{ data: { meal_id: 0, count_pf: :plan } }
+        td.count.cell_count.last_cat *{ data: { meal_id: 0, count_pf: :plan } }
         td.count.cell_sum.last_plan *{ data: { meal_id: 0, count_pf: :plan } }
 
-        - @products_categories.each do | o |
+        - @products_categories.each_with_index do | o, i |
           td.count *{ data: { meal_id: 0, count_pf: :fact, count_type: :diff, children_category_id: o[ :id ] } }
-          td.count *{ data: { meal_id: 0, count_pf: :fact, count_type: :count, children_category_id: o[ :id ] } }
-        td.count.cell_diff *{ data: { meal_id: 0, count_pf: :fact } }
+          td.count.last_diff *{ data: { meal_id: 0, count_pf: :fact, count_type: :count, children_category_id: o[ :id ] } }
+        td.count.cell_diff.last_cat *{ data: { meal_id: 0, count_pf: :fact } }
         td.count.cell_count *{ data: { meal_id: 0, count_pf: :fact } }
         td.count.cell_sum *{ data: { meal_id: 0, count_pf: :fact } }
