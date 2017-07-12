@@ -116,6 +116,11 @@
       margin-right: 15px;
     }
 
+    button[data-meal-id='0'] {
+      margin-left: 15px;
+    }
+
+
     col:nth-child( 1 ) { width: 250px; }
 
     tr {
