@@ -1,8 +1,9 @@
 //  Фильтрация таблицы содержимого документа табеля
 ( function( ) {
-  objTimesheetDates.colTdParentTable.empty( );
   <% if @timesheet_dates.present? %>
-    objTimesheetDates.colTdParentTable.append( '<%= j render( 'table_timesheet_dates' ) %>' );
+    objTimesheetDates.colTdParentTable.innerHTML = '<%= j render( 'table_timesheet_dates' ) %>';
     objTimesheetDates.colTbInit( );
+  <% else %>
+    objTimesheetDates.colTdParentTable.innerHTML = '';
   <% end %>
 } ).call( this );

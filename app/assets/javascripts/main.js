@@ -50,6 +50,15 @@ class MyLib {
     return result;
   }
 
+  static toDateFormat( value ) {
+    return value ? moment( value, 'YYYY-MM-DD' ).format( 'L' ) : '';
+  }
+
+  static camelize( value ) {
+    return value.toLowerCase( )
+      .replace( /[-_](.)/g, word => word[ 1 ].toUpperCase() );
+  }
+
   // Изминение значение таблице и на панели
   static changeValue( elem, parentName, callback ) {
     const name = elem.attr( 'name' ) || elem.attr( 'id' );
@@ -456,9 +465,9 @@ $( document ).on( 'turbolinks:load', ( ) => {
   const elemTimesheetDates = $( '#timesheet_dates' );
 
   if ( elemMenuRequirementProducts.length ) {
-    objMenuRequirementProducts = new MenuRequirementProducts( elemMenuRequirementProducts );
+    objMenuRequirementProducts = new MenuRequirementProducts( elemMenuRequirementProducts[ 0 ] );
   } else if ( elemTimesheetDates.length ) {
-    objTimesheetDates = new TimesheetDates( elemTimesheetDates );
+    objTimesheetDates = new TimesheetDates( elemTimesheetDates[ 0 ] );
   }
 
 } );

@@ -43,6 +43,9 @@ body { /* Главний блок */
 }
 
 // ХАК для JQUERY  -- НУЖНО ДЛЯ Datapicker
+
+#ui-datepicker-div { z-index: 999 !important; }
+
 .ui-widget-header .ui-icon {
     background-image: image_url('lib/ui-icons_444444_256x240.png');
 }

@@ -10,7 +10,6 @@
 }
 
 #timesheet_dates {
-
   .clmn {
 
     label {
@@ -45,7 +44,7 @@
         }
       }
 
-      .cell_mark:not([disabled]) {
+      .cell_mark {
         color: transparent;
         text-shadow: 0 0 0 #333;
 

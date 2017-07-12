@@ -142,9 +142,15 @@ class Institution::TimesheetsController < Institution::BaseController
   def dates # Отображение дней табеля
     @timesheet = Timesheet.find_by( id: params[ :id ] )
 
-    @reasons_absences = ReasonsAbsence.select( :id, :code, :mark ).where( code: '' )
-      .or(ReasonsAbsence.select( :id, :code, :mark ).where.not( mark: '' ) )
-      .order( :priority ).pluck( :id, :code, :mark )
+    @reasons_absences = JSON.parse( ReasonsAbsence.select( :id, :code, :mark ).where( code: '' )
+      .or( ReasonsAbsence.select( :id, :code, :mark ).where.not( mark: '' ) )
+      .order( :priority )
+      .to_json, symbolize_names: true )
+
+    @reasons_absences.map!.with_index { | v, i |
+      next_v = @reasons_absences[ @reasons_absences.size == i + 1 ? 0 : i + 1 ];
+      v.merge!( { next_id: next_v[ :id ], next_mark: next_v[ :mark ] } ) }
+
 
     @group_timesheet = []
     children_category_id = 0

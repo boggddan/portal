@@ -1,14 +1,6 @@
-// // const disabledFact = false;
-// // const disabledPlan = true;
-// // const isCheck = true;
-// // const countPlan = 0;
-// // const dataId = 10;
+// const obj = { dd: { dd1: 1, dd2: 2 } };
 
-// // const result = (!disabledPlan || !isCheck || !countPlan) && !disabledFact && dataId;
+// const { dd: [ varDd, { dd1: varDd1 } ] } = obj;
+// // const { dd: varDd, dd: { dd1: varDd1 } } = obj;
 
-
-// // console.log( Boolean(result) );
-
-// const dd = [];
-// dd[0] = 5;
-// console.log(dd);
+// console.log( varDd, varDd1 );

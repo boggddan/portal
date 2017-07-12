@@ -21,21 +21,21 @@ main#menu_requirement_products *{ data: { \
         = render label_text, label_attr: { class: :icon_number }, text: 'Надіслано план:',
           input_attr: { value: @menu_requirement.number_sap, disabled: true }
         = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
-          input_attr: { value:  date_str( @menu_requirement.date_sap ), disabled: true }
+          input_attr: { data: { date: @menu_requirement.date_sap }, disabled: true }
 
         - if @disabled_fact
           = render label_text, label_attr: { class: :icon_number }, text: 'факт план:',
             input_attr: { value: @menu_requirement.number_saf, disabled: true }
           = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
-            input_attr: { value:  date_str( @menu_requirement.date_saf ), disabled: true }
+            input_attr: { data: { date: @menu_requirement.date_saf }, disabled: true }
 
     .panel
       = render label_text, label_attr: { class: :icon_number }, text: 'Меню-вимога №',
         input_attr: { id: :number, value: @menu_requirement.number, disabled: true }
       = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
-        input_attr: { id: :date, value:  date_str( @menu_requirement.date ), disabled: true }
+        input_attr: { id: :date, data: { date: @menu_requirement.date }, disabled: true }
       = render label_text, label_attr: { class: :icon_сalendar }, text: 'Дата списання',
-        input_attr: { id: :splendingdate, value:  date_str( @menu_requirement.splendingdate ),
+        input_attr: { id: :splendingdate, data: { date: @menu_requirement.splendingdate },
         readonly: true }
     .panel
       button.btn_gradient *{ data: { clmn: '#col_cc' } } Категорії
@@ -44,7 +44,7 @@ main#menu_requirement_products *{ data: { \
 
   .clmn_main
     #col_cc.clmn *{ data: { path_update: institution_menu_requirements_children_category_update_path } }
-      h2.icon Кількість дітей по категоріях
+      h2 Кількість дітей по категоріях
       = render( 'table_children_categories' ) if @menu_children_categories.present?
 
     #col_md.clmn.hide *{ data: { \
@@ -53,7 +53,7 @@ main#menu_requirement_products *{ data: { \
       update: institution_menu_requirements_meals_dish_update_path } } }
 
       h2.icon Страви та прийоми їжі
-      .panel : button.btn_create *{ disabled: @disabled_plan }
+      .panel : button.btn_create
       .parent_table = render( 'table_meals_dishes' ) if @menu_meals_dishes.present?
 
     #col_pr.clmn *{ data: { path_update: institution_menu_requirements_product_update_path } }

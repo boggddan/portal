@@ -4,6 +4,7 @@
 
 main#timesheet_dates *{ data: { \
   id: @timesheet.id, disabled: disabled.to_s,
+  reasons_absences: @reasons_absences.map { | o | o[ :id ] },
   path: { \
   send: institution_timesheets_send_sa_path,
   exit: institution_timesheets_index_path,
@@ -35,16 +36,16 @@ main#timesheet_dates *{ data: { \
       = select_tag :group_timesheet, options_for_select( @group_timesheet ), prompt: 'Категорія / Група'
 
 
-  .clmn_main: #col_td.clmn *{ data: { path: { \
+  .clmn_main: #col_td.clmn *{ data: { reasons_absences: @reasons_absences.map { | v | v[ :id ] },
+    path: { \
     filter: institution_timesheets_ajax_filter_timesheet_dates_path,
     update: institution_timesheets_dates_update_path,
     updates: institution_timesheets_dates_updates_path } } }
 
     .panel
-      label Групова відмітка ( Alt + ліва кнопка миші )
-      - @reasons_absences.each_with_index do | v, i |
-        - next_v = @reasons_absences[ @reasons_absences.last == v ? 0 : i + 1 ]
-        button.btn_gradient *{ disabled: disabled,
-          data: { reasons_absence_id: v[ 0 ], next_id: next_v[ 0 ], next_val: next_v[ 2 ]  } } = v[ 2 ]
+      label Групова відмітка ( стати на потрібну комірку та зажати клавішу Alt )
+      - @reasons_absences.each do | v |
+        button.btn_gradient *{ data: { reasons_absence_id: v[ :id ], next_id: v[ :next_id ],
+          next_val: v[ :next_mark ] } } = v[ :mark ]
 
     .parent_table

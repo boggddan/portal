@@ -72,6 +72,9 @@ $ffIcon: 'Glyphicons Halflings';
      transition: 0.5s;
   }
 
+  & > .hide {
+    display: none;
+  }
   //---------------------------
   // < select
   %row_group.row_group {

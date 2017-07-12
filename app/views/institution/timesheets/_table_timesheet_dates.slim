@@ -50,7 +50,6 @@ table.table
           - ( date_eb..date_ee ).each do | v1 |
             - if index < v.size && v[ index ].date == v1
               - v2 = v[ index ]
-              //- disabled = v2.mark.blank? && !v2.reason_code.blank?
               td *{ class: :cell_mark, data: { id: v2.id, date_id: index, reasons_absence_id: v2.reasons_absence_id },
                 spellcheck: :false, contenteditable: true } = v2.mark
               - index = index + 1

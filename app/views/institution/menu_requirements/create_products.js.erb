@@ -1,10 +1,9 @@
 ( function( ) {
-  objMenuRequirementProducts.colPr.empty( );
   <% if @menu_products.present? %>
-    objMenuRequirementProducts.colPr.append( '<%= j render( 'table_menu_products' ) %>' );
+    objMenuRequirementProducts.colPr.innerHTML = '<%= j render( 'table_menu_products' ) %>';
     objMenuRequirementProducts.colPrInit( );
     objMenuRequirementProducts.buttonColPr.click( );
   <% else %>
-    objMenuRequirementProducts.buttonColPr.prop( 'disabled', true );
+    objMenuRequirementProducts.colPr.innerHTML = '';
   <% end %>
 } ).call( this );

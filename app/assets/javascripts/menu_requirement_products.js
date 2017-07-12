@@ -3,46 +3,44 @@
 class MenuRequirementProducts {
   // нажатие на кнопочку создать
   createProducts( ) {
-    MyLib.ajax(
-      this.captionMdCreate,
-      this.urlMdCreate,
-      'post',
-      { id: this.dataId, bug: '' },
-      'script' );
+    const data =  { id: this.dataId, bug: '' };
+    const caption = `Формування страв та прийомів їжі id = [${ this.dataId }]`;
+    const { colMd: { dataset: { pathCreate: url } } } = this;
+    MyLib.ajax( caption, url, 'post', data, 'script', '', false, false );
   }
 
   mdUpdate( mdId, value ) { // обновление маркера
     const data = { id: mdId, is_enabled: value };
-    MyLib.ajax( this.captionMdUpdate, this.urlMdUpdate, 'post', data, 'json', '', false, false );
+    const caption = `Онов. позн. страви та прийоми їжі id = [${ this.dataId }]`;
+    const { colMd: { dataset: { pathUpdate: url } } } = this;
+    MyLib.ajax( caption, url, 'post', data, 'json', '', false, false );
   }
 
   // шапка формы
   headerText( ) {
-    this.h1.text( `Меню-вимога №  ${ $( '#number' ).val( ) } від ${ $( '#date' ).val( ) }` );
+    const { value: number } = this.parentElem.querySelector( '#number' );
+    const { value: date } = this.parentElem.querySelector( '#date' );
+    this.parentElem.querySelector( 'h1' ).textContent =
+      `Меню-вимога №  ${ number } від ${ date }`;
   }
 
   // нажатие на кнопочку выход
   clickExit( ) {
     MyLib.pageLoader( true );
-    window.location.replace( this.parentElem.data( 'path-exit' ) );
+    window.location.replace( this.parentElem.dataset.pathExit );
   }
 
   clickSend( event ) {
-    const { currentTarget: { dataset: { pf } } } = event;
-
-    MyLib.ajax(
-      this.captionCcSend,
-      this.parentElem.data( `path-send-${ pf }` ),
-      'post',
-      { id: this.dataId, bug: '' },
-      'json',
-      false,
-      ( ) => window.location.reload( ),
-      true );
+    const pf = `pathSend${ MyLib.capitalize( event.currentTarget.dataset.pf ) }`;
+    const caption = `Відправка данних в 1С [id: ${ this.dataId }]`;
+    const data = { id: this.dataId, bug: '' };
+    const successAjax = ( ) => window.location.reload( );
+    const { parentElem: { dataset: { [ pf ]: url } } } = this;
+    MyLib.ajax( caption, url, 'post', data, 'json', false, successAjax, true );
   }
 
-  clickMdCell( event ) {
-    const { currentTarget: elem } = event;
+  clickMdCell( target ) {
+    const elem = target;
     const dataId = +elem.dataset.id;
     const countPlan = +elem.dataset.countPlan;
     const isCheck = elem.classList.contains( 'check' );
@@ -55,179 +53,270 @@ class MenuRequirementProducts {
   }
 
   checkMdExists( ) {
-    this.colMdCreate.attr( 'disabled', this.disabledFact || this.colMd.find( 'td.check' ).length === 0 );
+    this.colMdCreate.disabled = this.disabledFact || !this.colMd.querySelector( 'td.check' );
   }
 
   contextmenuMdCell( event ) {
     event.preventDefault( );
-    const elem = $( event.currentTarget );
-    if ( !this.disabled ) this.mdUpdate( elem.data( 'id' ), false );
+    const { target: elem } = event;
+    if ( !this.disabled ) this.mdUpdate( elem.dataset.id, false );
   }
 
-  mouseoverMdCell( event ) {
-    const elem = $( event.currentTarget );
-    if ( !elem.hasClass( 'hover' ) ) {
-      this.colMd
-        .find( '.hover' ).removeClass( 'hover' )
-        .end( )
-        .find( `thead tr:nth-child(2) :nth-child( ${ elem.index() } ), tbody tr :nth-child( ${ elem.index() + 1 } )` )
-        .addClass( 'hover' );
+  mouseoverMdCell( target ) {
+    const elem = target;
+    const className = 'hover';
+    if ( !elem.classList.contains( className ) ) {
+      this.colMd.querySelectorAll( `.${ className }` ).forEach( hover => {
+        const elemHover = hover;
+        elemHover.classList.remove( className );
+      } );
+
+      this.colMd.querySelectorAll( `thead tr:nth-child(2) :nth-child(${ elem.cellIndex }), ` +
+          `tbody tr :nth-child(${ elem.cellIndex + 1 })` )
+        .forEach( hover => {
+          const elemHover = hover;
+          elemHover.classList.add( className );
+        } );
     }
   }
 
-  mouseoverPrCell( event ) {
-    const elem = $( event.currentTarget );
-    if ( !elem.hasClass( 'hover' ) ) {
-      this.colMd
-        .find( '.hover' ).removeClass( 'hover' )
-        .end( )
-        .find( `thead tr:nth-child(2) :nth-child( ${ elem.index() } ), tbody tr :nth-child( ${ elem.index() + 1 } )` )
-        .addClass( 'hover' );
-    }
+  static clickRow( elem ) {
+    const className = 'selected';
+
+    Array.from( elem.parentElement.children ).forEach( child => {
+      const { classList } = child;
+      if ( child === elem ) classList.add( className ); else classList.remove( 'selected' );
+    } );
   }
 
-  static clickRow( event ) {
-    $( event.currentTarget ).addClass( ' selected ' ).siblings( ).removeClass( 'selected' );
+  clickHeader( target ) {
+    const elem = target;
+    const { parentElement } = elem;
+    elem.classList.toggle( 'hide' );
+    const className = parentElement.id === this.parentElem.id ? '.panel_main' : '.panel';
+
+    parentElement.querySelectorAll( className ).forEach( child => child.classList.toggle( 'hide' ) );
   }
 
-  clickHeader( event ) {
-    const elem = $( event.currentTarget );
-    elem.toggleClass( 'hide' );
-    const parent = elem.parent();
-    const className = parent.attr( 'id' ) === this.parentElem.attr( 'id' ) ? '.panel_main' : '.panel';
+  clickBtnMeals( target ) {
+    const elem = target;
+    const { dataset: { mealId } } = elem;
 
-    parent.find( className ).toggleClass( 'hide' );
-  }
+    elem.parentElement.querySelectorAll( 'button[data-meal-id]' ).forEach( child => {
+      const elemChild = child;
+      elemChild.disabled = elem === elemChild;
+    } );
 
-  clickBtnMeals( event ) {
-    const elem = $( event.currentTarget );
-    const mealId = elem.data( 'meal-id' );
-    elem.prop( 'disabled', true ).siblings( 'button[data-meal-id]' ).prop( 'disabled', false );
-    if ( mealId === -1 ) {
-      this.colPrTable.find( '.hide' ).removeClass( 'hide' );
+    if ( mealId === '-1' ) {
+      this.colPrTable.querySelectorAll( `.hide[data-meal-id]:not([data-meal-id='${ this.emptyMealId }'])` )
+        .forEach( meal => {
+          const elemMeal = meal;
+          elemMeal.classList.remove( 'hide' );
+        } );
     } else {
-      this.colPrTable
-        .find( `[data-meal-id]:not([data-meal-id=${ mealId }])` ).addClass( 'hide' )
-        .end( )
-        .find( `[data-meal-id=${ mealId }]` ).removeClass( 'hide' );
+      this.colPrTable.querySelectorAll( '[data-meal-id]' )
+        .forEach( meal => {
+          const elemMeal = meal;
+          if ( elemMeal.dataset.mealId === mealId ) elemMeal.classList.remove( 'hide' );
+          else elemMeal.classList.add( 'hide' );
+        } );
     }
   }
 
   clickBtnClmn( event ) {
-    const elem = $( event.currentTarget );
-    elem.attr( 'disabled', true ).siblings( ).attr( 'disabled', null );
-    this.parentElem.find( elem.data( 'clmn' ) ).removeClass( 'hide' ).siblings().addClass( 'hide' );
+    const { currentTarget: elem } = event;
+    elem.parentElement.querySelectorAll( 'button[data-clmn]' ).forEach( child => {
+      const elemChild = child;
+      elemChild.disabled = elem === elemChild;
+    } );
+
+    const clmn = this.parentElem.querySelector( elem.dataset.clmn );
+    clmn.parentElement.querySelectorAll( '.clmn' ).forEach( child => {
+      const { classList } = child;
+      if ( clmn === child ) classList.remove( 'hide' ); else classList.add( 'hide' );
+    } );
   }
 
-  constructor( parentElem ) {
+  constructor( elem ) {
     const self = this;
+    const parentElem = elem;
 
-    this.parentElem = parentElem;
-    this.dataId = parentElem.data( 'id' );
-    this.disabledPlan = parentElem.data( 'disabled-plan' );
-    this.disabledFact = parentElem.data( 'disabled-fact' );
-    this.emptyMealId = parentElem.data( 'empty-meal-id' );
-    this.h1 = parentElem.find( 'h1' );
-    this.h1.on( 'click', event => this.clickHeader( event ) );
+    const disabledPlan = parentElem.dataset.disabledPlan === 'true';
+    const disabledFact = parentElem.dataset.disabledFact === 'true';
 
-    this.urlUpdate = this.parentElem.data( 'path-update' );
+    parentElem.querySelectorAll( 'input[data-date]' ).forEach( child => {
+      const elemChild = child;
+      elemChild.value = MyLib.toDateFormat( elemChild.dataset.date );
+    } );
 
-    const splendingdate = parentElem.find( '#splendingdate' );
-    splendingdate
-      .val( splendingdate.val( ) )
-      .prop( 'disabled', this.disabledPlan )
-      .datepicker( { onSelect( ) { self.changeMenuRequirement( this ) } } );
+    const splendingdate = parentElem.querySelector( '#splendingdate' );
+    ( { value: splendingdate.dataset.oldValue } = splendingdate );
+    splendingdate.disabled = disabledPlan;
+    $( splendingdate ).datepicker( { onSelect( ) { self.changeMenuRequirement( this ) } } );
 
-    splendingdate.get( 0 ).dataset.oldValue = splendingdate.val( );
+    const btnExit = parentElem.querySelector( '.btn_exit' );
+    btnExit.addEventListener( 'click', ( ) => this.clickExit( ) );
 
-    this.btnExit = parentElem.find( '.btn_exit' )
-      .on( 'click', ( ) => this.clickExit( ) );
-    if ( !this.disabledFact ) this.btnExit.removeClass( 'btn_exit' ).addClass( 'btn_save' );
+    if ( !disabledFact ) {
+      btnExit.classList.remove( 'btn_exit' );
+      btnExit.classList.add( 'btn_save' );
+    }
 
-    this.buttonColPr = parentElem.find( '.panel_main button[data-clmn="#col_pr"] ' );
+    parentElem.querySelector( 'h1' ).addEventListener( 'click', event => this.clickHeader( event.currentTarget ) );
 
-    parentElem
-      .find( '.btn_send' )
-      .on( 'click', event => this.clickSend( event ) )
-      .end( )
-      .find( '.btn_send[data-pf=plan]' )
-      .prop( 'disabled', this.disabledPlan )
-      .end( )
-      .find( '.btn_send[data-pf=fact]' )
-      .prop( 'disabled', !this.disabledPlan || this.disabledFact )
-      .end( )
-      .find( '.panel_main button[data-clmn]' )
-      .on( 'click', event => this.clickBtnClmn( event ) )
-      .end( )
-      .find( '.btn_exit' )
-      .on( 'click', ( ) => this.clickExit( ) )
-      .end( )
-      .find( '.panel_main button[data-clmn="#col_cc"] ' )
-      .click( );
+    parentElem.querySelectorAll( '.btn_send' ).forEach( child => {
+      const elemChild = child;
+      const { dataset: { pf } } = elemChild;
+      elemChild.disabled = ( pf === 'plan' && disabledPlan ) ||
+        ( pf === 'fact' && ( !disabledPlan || disabledFact ) );
+      elemChild.addEventListener( 'click', event => this.clickSend( event ) );
+    } );
 
-    this.colCc = parentElem.find( '#col_cc' );
-    this.captionCcSend = `Відправка данних в 1С [id: ${ this.dataId }]`;
-    this.urlCcUpdate = this.colCc.data( 'path-update' );
+    parentElem.querySelectorAll( '.panel_main button[data-clmn]' ).forEach( child => {
+      child.addEventListener( 'click', event => this.clickBtnClmn( event ) );
+      if ( child.matches( '[data-clmn="#col_pr"]' ) ) this.buttonColPr = child;
+    } );
 
-    this.colCcTable = this.colCc.find( 'table' );
-    this.colCcTable
-      .tableHeadFixer( )
-      .on( 'change', 'input', event => this.changeCountCategoty( event ) )
-      .on( 'click', 'tr.row_data:not(.selected)', event => this.constructor.clickRow( event ) );
+    const colCc = parentElem.querySelector( '#col_cc' );
+    const colCcTable = colCc.querySelector( 'table' );
 
-    this.colMd = parentElem.find( '#col_md' );
-    this.captionMdUpdate = `Онов. позн. страви та прийоми їжі id = [${ this.dataId }]`;
-    this.captionMdCreate = `Формування страв та прийомів їжі id = [${ this.dataId }]`;
+    colCcTable.addEventListener( 'change', event => {
+      if ( event.target.matches( 'input' ) ) {
+        this.changeCountCategoty( event.target );
+        event.stopPropagation();
+      }
+    } );
 
-    this.urlMdUpdate = this.colMd.data( 'path-update' );
-    this.urlMdCreate = this.colMd.data( 'path-create' );
+    colCcTable.addEventListener( 'click', event => {
+      const tr = event.target.closest( ' tr ' );
+      if ( tr && tr.matches( '.row_data:not(.selected)' ) ) {
+        this.constructor.clickRow( tr );
+        event.stopPropagation();
+      }
+    } );
 
-    this.colMdCreate = this.colMd.find( '.btn_create' ).on( 'click', ( ) => this.createProducts( ) );
-    this.colMd.find( 'h2' ).on( 'click', event => this.clickHeader( event ) );
+    const colMd = parentElem.querySelector( '#col_md' );
+    colMd.querySelector( 'h2' ).addEventListener( 'click', event => this.clickHeader( event.currentTarget ) );
 
-    this.colMdTable = this.colMd.find( 'table' );
+    const colMdCreate = colMd.querySelector( '.btn_create' );
+    colMdCreate.addEventListener( 'click', ( ) => this.createProducts( ) );
 
-    this.colMdTable
-      .tableHeadFixer( )
-      .on( 'click', 'td.cell_mark', event => this.clickMdCell( event ) )
-      .on( 'contextmenu', 'td.cell_mark', event => this.contextmenuMdCell( event ) )
-      .on( 'mouseover', 'td.cell_mark', event => this.mouseoverMdCell( event ) )
-      .on( 'click', 'tr.row_data:not(.selected)', event => this.constructor.clickRow( event ) );
+    const colMdTable = colMd.querySelector( 'table' );
 
-    this.colPr = parentElem.find( '#col_pr' );
+    colMdTable.addEventListener( 'click', event => {
+      if ( event.target.matches( 'td.cell_mark' ) ) {
+        this.clickMdCell( event.target );
+        event.stopPropagation();
+      }
+    } );
 
-    this.urlPrUpdate = this.colPr.data( 'path-update' );
+    colMdTable.addEventListener( 'contextmenu', event => {
+      if ( event.target.matches( 'td.cell_mark' ) ) {
+        this.contextmenuMdCell( event );
+        event.stopPropagation();
+      }
+    } );
 
-    this.colPr
-      .on( 'click', 'h2', event => this.clickHeader( event ) )
-      .on( 'click', 'button[data-pf]', event => this.colPrTablePf( event.currentTarget.dataset.pf ) )
-      .on( 'click', 'button[data-meal-id]', event => this.clickBtnMeals( event ) )
-      .on( 'change', 'td.cell_data input', event => this.changeCountProduct( event ) )
-      .on( 'click', 'tr.row_data:not(.selected)', event => this.constructor.clickRow( event ) );
+    colMdTable.addEventListener( 'mouseover', event => {
+      if ( event.target.matches( 'td.cell_mark' ) ) {
+        this.mouseoverMdCell( event.target );
+        event.stopPropagation();
+      }
+    } );
 
+    colMdTable.addEventListener( 'click', event => {
+      const tr = event.target.closest( ' tr ' );
+      if ( tr && tr.matches( '.row_data:not(.selected)' ) ) {
+        this.constructor.clickRow( tr );
+        event.stopPropagation();
+      }
+    } );
+
+    $( this.colMdTable ).tableHeadFixer( );
+
+    const colPr = parentElem.querySelector( '#col_pr' );
+
+    colPr.addEventListener( 'click', event => {
+      if ( event.target.matches( 'h2' ) ) {
+        this.clickHeader( event.target );
+        event.stopPropagation();
+      }
+
+      if ( event.target.matches( 'button[data-pf]' ) ) {
+        this.colPrTablePf( event.target.dataset.pf );
+        event.stopPropagation();
+      }
+
+      if ( event.target.matches( 'button[data-meal-id]' ) ) {
+        this.clickBtnMeals( event.target );
+        event.stopPropagation();
+      }
+
+      const tr = event.target.closest( ' tr ' );
+      if ( tr && tr.matches( '.row_data:not(.selected)' ) ) {
+        this.constructor.clickRow( tr );
+        event.stopPropagation();
+      }
+    } );
+
+    colPr.addEventListener( 'change', event => {
+      if ( event.target.matches( 'input' ) ) {
+        this.changeCountProduct( event.target );
+        event.stopPropagation( );
+      }
+    } );
+
+    const menuItem = document.querySelector( '#main_menu li[data-page=menu_requirements]' );
+    if ( menuItem ) {
+      Array.from( menuItem.parentElement.children ).forEach( child => {
+        const { classList } = child;
+        if ( child === menuItem ) classList.add( 'active' ); else classList.remove( 'active' );
+      } );
+    }
+
+    [ this.parentElem, this.colCc, this.colCcTable, this.colMd, this.colMdCreate, this.colMdTable, this.colPr ] =
+      [ parentElem, colCc, colCcTable, colMd, colMdCreate, colMdTable, colPr ];
+
+    [ this.dataId, this.disabledPlan, this.disabledFact, this.emptyMealId ] =
+      [ +parentElem.dataset.id, disabledPlan, disabledFact, +parentElem.dataset.emptyMealId ];
+
+    parentElem.querySelector( '.panel_main button[data-clmn="#col_cc"]' ).click( );
     this.headerText( );
-    $( '#main_menu li[data-page=menu_requirements]' ).addClass( 'active' ).siblings( ).removeClass( 'active' );
-
     this.checkMdExists( );
     this.colCcInit( );
     this.colPrInit( );
   }
 
   colPrInit( ) {
-    this.colPr.find( 'button[data-meal-id=-1]' ).prop( 'disabled', true );
+    this.colPrTable = this.colPr.querySelector( 'table' );
 
-    this.colPrTable = this.colPr.find( 'table' );
+    if ( this.colPrTable ) {
+      const buttonEmptyMeal = this.colPr.querySelector( `button[data-meal-id='${ this.emptyMealId }']` );
+      if ( buttonEmptyMeal ) buttonEmptyMeal.classList.add( 'hide' );
 
-    this.colPrTable
-      .tableHeadFixer( { left: 2 } )
-      .find( 'td.price' )
-      .each( ( ...dataEach ) => {
-        const { 1: elem } = dataEach;
-        elem.innerHTML = MyLib.numToStr( +elem.innerHTML, -1 );
+      $( this.colPrTable ).tableHeadFixer( { left: 2 } );
+
+      this.colPrTable.querySelectorAll( 'td.price' ).forEach( child => {
+        const elemChild = child;
+        elemChild.textContent = MyLib.numToStr( +elemChild.textContent, -1 );
       } );
 
-    this.colPrTablePf( this.disabledPlan ? 'fact' : 'plan' );
-    this.calcProducts( );
+      this.colPrTable.querySelectorAll( `[data-meal-id='${ this.emptyMealId }']` ).forEach( meal => {
+        const elemMeal = meal;
+        elemMeal.classList.add( 'hide' );
+      } );
+
+      const buttonMealAll = this.colPr.querySelector( 'button[data-meal-id="-1"]' );
+      if ( buttonMealAll ) buttonMealAll.click( );
+
+      this.colPrTablePf( this.disabledPlan ? 'fact' : 'plan' );
+
+      this.categories = JSON.parse( this.colPrTable.dataset.categories || '[ ]' );
+
+      this.calcProducts( );
+    } else {
+      this.calcCategories( );
+    }
   }
 
   colPrTablePf( currentPf ) {
@@ -237,17 +326,22 @@ class MenuRequirementProducts {
     const nameCurrentPf = `count_${ currentPf }`;
 
     if ( this.disabledPlan ) {
-      this.colPr
-        .find( `button[data-pf=${ currentPf }]` ).prop( 'disabled', true )
-        .siblings( 'button[data-pf]' ).prop( 'disabled', false );
+      const buttonPf = this.colPr.querySelector( `button[data-pf=${ currentPf }]` );
+      this.colPr.querySelectorAll( 'button[data-pf]' ).forEach( child => {
+        const elemChild = child;
+        elemChild.disabled = child === buttonPf;
+      } );
     } else {
-      this.colPr.find( 'button[data-pf]' ).prop( 'disabled', true );
+      this.colPr.querySelectorAll( 'button[data-pf]' ).forEach( child => {
+        const elemChild = child;
+        elemChild.disabled = true;
+      } );
     }
 
     this.colPrTable
-      .find( '.cell_data input' )
-      .each( ( ...dataEach ) => {
-        const { 1: elem } = dataEach;
+      .querySelectorAll( '.cell_data input' )
+      .forEach( child => {
+        const elem = child;
         const { parentElement: { dataset: parentData } } = elem;
         const val = +parentData[ dataCurrentPf ];
         const mealId = +parentData.mealId;
@@ -262,152 +356,151 @@ class MenuRequirementProducts {
   }
 
   calcProducts( ) {
-    const categories = this.colPrTable.data( 'categories' ) || [ ];
+    if ( this.colPrTable ) {
+      const sumAll = this.categories.reduce( ( prev, cur ) => Object.assign( prev, { [ cur ]: { plan: 0, fact: 0 } } ), { } );
+      const arrPlanFact = [ 'plan' ].concat( this.disabledPlan ? 'fact' : [] );
 
-    const sumAll = categories.reduce( ( prev, cur ) => Object.assign( prev, { [ cur ]: { plan: 0, fact: 0 } } ), { } );
-    const arrPlanFact = [ 'plan' ].concat( this.disabledPlan ? 'fact' : [] );
+      this.colPrTable.querySelectorAll( 'tbody tr.row_data' ).forEach( tr => {
+        const trElem = tr;
+        const countProduct = { plan: 0, fact: 0 };
+        const price = +trElem.querySelector( 'td.price' ).textContent;
 
-    this.colPrTable.find( 'tbody tr.row_data' ).each( ( ...tr ) => {
-      const trElem = $( tr[ 1 ] );
-      const countProduct = { plan: 0, fact: 0 };
-      const price = +trElem.children( 'td.price' ).text( );
+        this.categories.forEach( categoryId => {
+          const countCategory = { plan: 0, fact: 0 };
 
-      categories.forEach( categoryId => {
-        const countCategory = { plan: 0, fact: 0 };
+          trElem.querySelectorAll( `td.cell_data[data-children-category-id='${ categoryId }']` ).forEach( tdCell => {
+            const tdCellElem  = tdCell;
 
-        trElem.children( `td.cell_data[data-children-category-id=${ categoryId }]` ).each( ( ...tdCell ) => {
-          const tdCellElem  = $( tdCell[ 1 ] );
+            countCategory.plan += +tdCellElem.dataset.countPlan || 0;
+            countCategory.fact += +tdCellElem.dataset.countFact || 0;
+          } );
 
-          countCategory.plan += +tdCellElem.data( 'count-plan' ) || 0;
-          countCategory.fact += +tdCellElem.data( 'count-fact' ) || 0;
+          arrPlanFact.forEach( pf => {
+            const countCategoryPF = MyLib.toRound( countCategory[ pf ], 3 );
+            const selectorCategory = `td[data-meal-id='0'][data-count-pf=${ pf }][data-children-category-id='${ categoryId }']`;
+
+            countProduct[ pf ] += countCategoryPF;
+            if ( price ) sumAll[ categoryId ][ pf ] += MyLib.toRound( price * countCategoryPF, 3 );
+
+            trElem.querySelector( `${ selectorCategory }[data-count-type=count]` )
+              .textContent = MyLib.numToStr( countCategoryPF, -1 );
+
+            const diff = countCategory.fact - countCategory.plan;
+            if ( pf === 'fact' && diff ) {
+              trElem.querySelector( `${ selectorCategory }[data-count-type=diff]` )
+                .textContent = MyLib.numToStr( MyLib.toRound( diff, 3 ), -1 );
+            }
+          } );
         } );
 
         arrPlanFact.forEach( pf => {
-          const countCategoryPF = MyLib.toRound( countCategory[ pf ], 3 );
-          const selectorCategory = `td[data-meal-id=0][data-count-pf=${ pf }][data-children-category-id=${ categoryId }]`;
+          const countProductPF = MyLib.toRound( countProduct[ pf ], 3 );
+          const sumProduct = MyLib.toRound( price * countProductPF, 2 );
 
-          countProduct[ pf ] += countCategoryPF;
-          if ( price ) sumAll[ categoryId ][ pf ] += MyLib.toRound( price * countCategoryPF, 3 );
+          trElem.querySelector( `td.cell_count[data-count-pf=${ pf }]` )
+            .textContent = MyLib.numToStr( countProductPF, -1 );
+          trElem.querySelector( `td.cell_sum[data-count-pf=${ pf }]` )
+            .textContent = MyLib.numToStr( sumProduct, -1 );
 
-          trElem.children( `${ selectorCategory }[data-count-type=count]` )
-            .text( MyLib.numToStr( countCategoryPF, -1 ) );
-
-          const diff = countCategory.fact - countCategory.plan;
+          const diff = countProduct.fact - countProduct.plan;
           if ( pf === 'fact' && diff ) {
-            trElem.children( `${ selectorCategory }[data-count-type=diff]` )
-              .text( MyLib.numToStr( MyLib.toRound( diff, 3 ), -1 ) );
+            trElem.querySelector( `td.cell_diff[data-count-pf=${ pf }]` )
+              .textContent = MyLib.numToStr( MyLib.toRound( diff, 3 ), -1 );
           }
         } );
       } );
 
-      arrPlanFact.forEach( pf => {
-        const countProductPF = MyLib.toRound( countProduct[ pf ], 3 );
-        const sumProduct = MyLib.toRound( price * countProductPF, 2 );
-
-        trElem.children( `td.cell_count[data-count-pf=${ pf }]` ).text( MyLib.numToStr( countProductPF, -1 ) );
-        trElem.children( `td.cell_sum[data-count-pf=${ pf }]` ).text( MyLib.numToStr( sumProduct, -1 ) );
-
-        const diff = countProduct.fact - countProduct.plan;
-        if ( pf === 'fact' && diff ) {
-          trElem.children( `td.cell_diff[data-count-pf=${ pf }]` )
-            .text( MyLib.numToStr( MyLib.toRound( diff, 3 ), -1 ) );
-        }
+      this.categories.forEach( categoryId => {
+        arrPlanFact.forEach( pf => {
+          this.colCcTable.querySelector( `tr[data-id='${ categoryId }'] .sum_products_${ pf }` )
+            .textContent = MyLib.numToStr( MyLib.toRound( sumAll[ categoryId ][ pf ], 2 ), -1 );
+        } );
       } );
-    } );
-
-    categories.forEach( categoryId => {
-      arrPlanFact.forEach( pf => {
-        $( `tr[data-id='${ categoryId }'] .sum_products_${ pf }` )
-          .text( MyLib.numToStr( MyLib.toRound( sumAll[ categoryId ][ pf ], 2 ), -1 ) );
-      } );
-    } );
-    this.calcCategories( );
+      this.calcCategories( );
+    }
   }
 
-  changeCountProduct( event ) {
-    const elem = $( event.currentTarget );
+  changeCountProduct( target ) {
+    const elem = target;
+    const { dataset } = elem;
 
-    const valOld =  +elem.data( 'old-value' );
-    const val = MyLib.toNumber( elem.val( ), 3 );
+    const valOld = +dataset.oldValue;
+    const val = MyLib.toNumber( elem.value, 3 );
     const strVal = MyLib.numToStr( val, -1 );
 
-    if ( val === valOld ) elem.val( strVal ).attr( 'value', strVal );
+    if ( val === valOld ) elem.value = strVal;
     else {
-      const nameVal = elem.attr( 'name' );
+      const { name: nameVal } = elem;
 
       const successAjax = () => {
-        elem.val( strVal ).attr( 'value', strVal ).data( 'old-value', val );
-        elem.parent().data( nameVal.replace( '_', '-' ), val );
+        elem.value = strVal;
+        dataset.oldValue = val;
+        elem.parentElement.dataset[ MyLib.camelize( nameVal ) ] = val;
         this.calcProducts( );
       };
 
-      const dataId = elem.data( 'id' );
-      const captionAjax = `Зміна значення ${ nameVal } з ${ valOld } на ${ val } [id: ${ dataId }]`;
-      const dataAjax = { id: dataId, [ nameVal ]: val };
-
-      MyLib.ajax( captionAjax, this.urlPrUpdate, 'post', dataAjax, 'json', '', successAjax, false );
+      const { id: dataId } = dataset;
+      const caption = `Зміна значення ${ nameVal } з ${ valOld } на ${ val } [id: ${ dataId }]`;
+      const data = { id: dataId, [ nameVal ]: val };
+      const { colPr: { dataset: { pathUpdate: url } } } = this;
+      MyLib.ajax( caption, url, 'post', data, 'json', '', successAjax, false );
     }
   }
 
   changeMenuRequirement( target ) {
     const elem = target;
     const { id: nameVal, dataset: { oldValue: valOld }, value: val } = elem;
-
     if ( val !== valOld ) {
       elem.dataset.oldValue = val;
       const { dataId } = this;
 
-      const captionAjax = `Зміна значення ${ nameVal } з ${ valOld } на ${ val } [id: ${ dataId }]`;
-      const dataAjax = { id: dataId, [ nameVal ]: val };
-
-      MyLib.ajax( captionAjax, this.urlUpdate, 'post', dataAjax, 'json', '', false, false );
+      const data = { id: dataId, [ nameVal ]: val };
+      const caption = `Зміна значення ${ nameVal } з ${ valOld } на ${ val } [id: ${ dataId }]`;
+      const { parentElem: { dataset: { pathUpdate: url } } } = this;
+      MyLib.ajax( caption, url, 'post', data, 'json', '', false, false );
     }
   }
 
   colCcInit( ) {
-    this.colCcTable
-      .find( '.day_cost' )
-      .each( ( ...dataEach ) => {
-        const { 1: elem } = dataEach;
-        elem.innerHTML = MyLib.numToStr( +elem.innerHTML, -1 );
-      } )
-      .end( )
-      .find( 'input' )
-      .each( ( ...dataEach ) => {
-        const { 1: elem } = dataEach;
-        const val = +elem.value;
-        elem.dataset.oldValue = val;
+    this.colCcTable.querySelectorAll( '.day_cost' ).forEach( child => {
+      const childElem = child;
+      childElem.textContent = MyLib.numToStr( +childElem.textContent, -1 );
+    } );
 
-        elem.value = MyLib.numToStr( val, -1 );
-        const { 0: pf } = elem.name.match( /[a-z]*$/ );
+    this.colCcTable.querySelectorAll( 'input' ).forEach( child => {
+      const elemChild = child;
+      const val = +elemChild.value;
+      elemChild.dataset.oldValue = val;
 
-        if ( ( pf === 'plan' && this.disabledPlan ) || ( pf === 'fact' && ( !this.disabledPlan || this.disabledFact ) ) ) {
-          elem.disabled = true;
-        }
-      } );
+      elemChild.value = MyLib.numToStr( val, -1 );
+      const { 0: pf } = elemChild.name.match( /[a-z]*$/ );
+
+      elemChild.disabled = ( pf === 'plan' && this.disabledPlan ) ||
+         ( pf === 'fact' && ( !this.disabledPlan || this.disabledFact ) );
+    } );
   }
 
-  changeCountCategoty( event ) {
-    const elem = $( event.currentTarget );
+  changeCountCategoty( target ) {
+    const elem = target;
+    const { name: nameVal, dataset } = elem;
 
-    const valOld =  +elem.data( 'old-value' );
-    const val = MyLib.toNumber( elem.val( ), 0 );
+    const valOld = +dataset.oldValue;
+    const val = MyLib.toNumber( elem.value, 0 );
     const strVal = MyLib.numToStr( val, -1 );
 
-    if ( val === valOld ) {
-      elem.val( strVal ).attr( 'value', strVal );
-    } else {
+    if ( val === valOld ) elem.value = strVal;
+    else {
       const successAjax = () => {
-        elem.val( strVal ).attr( 'value', strVal ).data( 'old-value', val );
+        elem.value = strVal;
+        dataset.oldValue = val;
         this.calcCategories( );
       };
 
-      const dataId = elem.data( 'id' );
-      const nameVal = elem.attr( 'name' );
+      const { id: dataId } = dataset;
       const captionAjax = `Зміна значення ${ nameVal } з ${ valOld } на ${ val } [id: ${ dataId }]`;
       const dataAjax = { id: dataId, [ nameVal ]: val };
-
-      MyLib.ajax( captionAjax, this.urlCcUpdate, 'post', dataAjax, 'json', '', successAjax, false );
+      const { colCc: { dataset: { pathUpdate: url } } } = this;
+      MyLib.ajax( captionAjax, url, 'post', dataAjax, 'json', '', successAjax, false );
     }
   }
 
@@ -418,23 +511,24 @@ class MenuRequirementProducts {
       prev, { [ cur ]: { countAll: 0, countExemption: 0, sumProducts: 0 } }
     ), { } );
 
-    this.colCcTable.find( 'tbody tr.row_data' ).each( ( ...tr ) => {
-      const trElem  = $( tr[ 1 ] );
-      const dayCost = +trElem.find( '.day_cost' ).text( );
+    this.colCcTable.querySelectorAll( 'tbody tr.row_data' ).forEach( tr => {
+      const trElem  = tr;
+      const dayCost = +trElem.querySelector( '.day_cost' ).textContent;
 
       arrPlanFact.forEach( pf => {
-        const countAll = +trElem.find( `input[name=count_all_${ pf }]` ).val( );
-        const countExemption = +trElem.find( `input[name=count_exemption_${ pf }]` ).val( );
-        const sumProducts = +trElem.find( `.sum_products_${ pf }` ).text( );
+        const countAll = +trElem.querySelector( `input[name=count_all_${ pf }]` ).value;
+        const countExemption = +trElem.querySelector( `input[name=count_exemption_${ pf }]` ).value;
+        const sumProducts = +trElem.querySelector( `.sum_products_${ pf }` ).textContent;
         const sumCost = MyLib.numToStr( countAll ? MyLib.toRound( sumProducts / countAll, 2 ) : 0, -1 );
         const diffCost = MyLib.toRound( sumCost - dayCost, 2 );
 
-        trElem.children( `.sum_cost_${ pf }` ).text( sumCost );
-        trElem.children( `.sum_diff_${ pf }` ).text( MyLib.numToStr( diffCost, -1 ) );
+        trElem.querySelector( `.sum_cost_${ pf }` ).textContent = sumCost;
+        trElem.querySelector( `.sum_diff_${ pf }` ).textContent = MyLib.numToStr( diffCost, -1 );
 
         if ( pf === this.colPrCurrentPf ) {
-          this.colPr.find( `.panel input[data-children-category-id='${ trElem.data( 'id' ) }']` )
-            .val( sumCost );
+          const inputCategotySum = this.colPr.querySelector(
+            `.panel input[data-children-category-id='${ trElem.dataset.id }']` );
+          if ( inputCategotySum ) inputCategotySum.value = sumCost;
         }
 
         sumAll[ pf ].countAll += countAll;
@@ -443,11 +537,11 @@ class MenuRequirementProducts {
       } );
     } );
 
-    const trRowGroup = this.colCcTable.find( 'tr.row_group' );
+    const trRowGroup = this.colCcTable.querySelector( 'tr.row_group' );
     arrPlanFact.forEach( pf => {
-      trRowGroup.children( `.count_all_${ pf }` ).text( MyLib.numToStr( sumAll[ pf ].count_all, -1 ) );
-      trRowGroup.children( `.count_exemption_${ pf }` ).text( MyLib.numToStr( sumAll[ pf ].count_exemption, -1 ) );
-      trRowGroup.children( `.sum_products_${ pf }` ).text( MyLib.numToStr( sumAll[ pf ].sum_products, -1 ) );
+      trRowGroup.querySelector( `.count_all_${ pf }` ).textContent = MyLib.numToStr( sumAll[ pf ].countAll, -1 );
+      trRowGroup.querySelector( `.count_exemption_${ pf }` ).textContent = MyLib.numToStr( sumAll[ pf ].countExemption, -1 );
+      trRowGroup.querySelector( `.sum_products_${ pf }` ).textContent = MyLib.numToStr( sumAll[ pf ].sumProducts, -1 );
     } );
   }
 }

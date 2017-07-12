@@ -1,79 +1,115 @@
 /* exported TimesheetDates */
 
 class TimesheetDates {
-  constructor( parentElem ) {
+  constructor( elem ) {
     const self = this;
+    const parentElem = elem;
+
+    const disabled = parentElem.dataset.disabled === 'true';
+
+    const date = parentElem.querySelector( '#date' );
+    ( { value: date.dataset.oldValue } = date );
+    date.disabled = disabled;
+    $( date ).datepicker( { onSelect( ) { self.changeTimesheet( this ) } } );
+
+    const btnExit = parentElem.querySelector( '.btn_exit' );
+    btnExit.addEventListener( 'click', ( ) => this.clickExit( ) );
+
+    if ( !disabled ) {
+      btnExit.classList.remove( 'btn_exit' );
+      btnExit.classList.add( 'btn_save' );
+    }
+
+    parentElem.querySelector( 'h1' ).addEventListener( 'click', event => this.clickHeader( event.currentTarget ) );
+
+    const groupTimesheet = parentElem.querySelector( '#group_timesheet' );
+    groupTimesheet.addEventListener( 'change', event => this.filterGroups( event ) );
+
+    const btnSend = parentElem.querySelector( '.btn_send' );
+    btnSend.disabled = disabled;
+    btnSend.addEventListener( 'click', ( ) => this.clickSend( ) );
+
+    const colTd = parentElem.querySelector( '#col_td' );
+
+    parentElem.querySelectorAll( 'button[data-reasons-absence-id]' ).forEach( child => {
+      const elemChild = child;
+      elemChild.disabled = disabled;
+      elemChild.addEventListener( 'click', event => this.clickReasonAbsence( event ) );
+    } );
+
+    const colTdParentTable = colTd.querySelector( '.parent_table' );
+
+    colTdParentTable.addEventListener( 'click', event => {
+      if ( event.target.matches( 'td.cell_mark' ) ) {
+        this.cellMarkClickLeft( event.target );
+        event.stopPropagation();
+      }
+
+      const tr = event.target.closest( ' tr ' );
+      if ( tr && tr.matches( '.row_data:not(.selected)' ) ) {
+        this.constructor.clickRow( tr );
+        event.stopPropagation();
+      }
+    } );
+
+    colTdParentTable.addEventListener( 'contextmenu', event => {
+      if ( event.target.matches( 'td.cell_mark' ) ) {
+        this.cellMarkClickRight( event );
+        event.stopPropagation();
+      }
+    } );
+
+    colTdParentTable.addEventListener( 'mouseover', event => {
+      if ( event.target.matches( 'td.cell_mark' ) ) {
+        this.cellMouseOver( event );
+        event.stopPropagation();
+      }
+    } );
+
+    colTdParentTable.addEventListener( 'keydown', event => {
+      if ( event.target.matches( 'td.cell_mark' ) ) {
+        this.cellMarkKeyDown( event );
+        event.stopPropagation();
+      }
+    } );
+
+    const menuItem = document.querySelector( '#main_menu li[data-page=timesheets]' );
+    if ( menuItem ) {
+      Array.from( menuItem.parentElement.children ).forEach( child => {
+        const { classList } = child;
+        if ( child === menuItem ) classList.add( 'active' ); else classList.remove( 'active' );
+      } );
+    }
+
+    [ this.dataId, this.disabled ] = [ +parentElem.dataset.id, disabled ];
+
+    [ this.parentElem, this.colTd, this.colTdParentTable ] = [ parentElem, colTd, colTdParentTable ];
+
     this.rangeData = { minRow: 0, minCell: 0, maxRow: 0, maxCell: 0, prevRow: 0, prevCell: 0 };
-
-    this.parentElem = parentElem;
-    this.dataId = parentElem.data( 'id' );
-    this.disabled = parentElem.data( 'disabled' );
-    this.h1 = parentElem.find( 'h1' );
-    this.h1.on( 'click', event => this.clickHeader( event ) );
-
-    this.urlUpdate = this.parentElem.data( 'path-update' );
-
-    this.date = parentElem.find( '#date' );
-    this.date
-      .prop( 'disabled', this.disabled )
-      .datepicker( { onSelect( ) { self.changeTimesheet( this ) } } );
-
-    this.date[ 0 ].dataset.oldValue = this.date.val( );
-
-    this.btnExit = parentElem.find( '.btn_exit' )
-      .on( 'click', ( ) => this.clickExit( ) );
-    if ( !this.disabled ) this.btnExit.removeClass( 'btn_exit' ).addClass( 'btn_save' );
-
-    this.groupTimesheet = parentElem.find( '#group_timesheet' )
-      .on( 'change', event => this.filterGroups( event ) )
-      .addClass( 'placeholder' );
-
-    parentElem
-      .find( '.btn_send' )
-      .prop( 'disabled', this.disabled )
-      .on( 'click', event => this.clickSend( event ) )
-      .end( )
-      .find( '.panel_main button[data-clmn]' )
-      .on( 'click', event => this.clickBtnClmn( event ) )
-      .end( )
-      .find( '.btn_exit' )
-      .on( 'click', ( ) => this.clickExit( ) );
-
-    this.colTd = parentElem.find( '#col_td' );
-
-    this.urlTbUpdate = this.colTd.data( 'path-update' );
-    this.urlTbFilter = this.colTd.data( 'path-filter' );
-    this.urlTbUpdates = this.colTd.data( 'path-updates' );
-
-    this.colTd
-      .find( 'button[data-reasons-absence-id]' )
-      .on( 'click', event => this.clickReasonAbsence( event ) );
-
-    this.colTdParentTable = this.colTd.find( '.parent_table' );
-
-    this.colTdParentTable
-      .on( 'click', 'td.cell_mark', event => this.cellMarkClickLeft( event ) )
-      .on( 'contextmenu', 'td.cell_mark', event => this.cellMarkClickRight( event ) )
-      .on( 'mouseover', 'td, th', event => this.cellMouseOver( event ) )
-      .on( 'keydown', 'td.cell_mark:not([disabled])', event => this.cellMarkKeyDown( event ) )
-      .on( 'click', 'tr.row_data:not(.selected)', event => this.constructor.clickRow( event ) );
+    this.reasonsAbsences = JSON.parse( this.parentElem.dataset.reasonsAbsences || '[ ]' );
 
     this.headerText( );
-    $( '#main_menu li[data-page=timesheets ]' ).addClass( 'active' ).siblings( ).removeClass( 'active' );
-
-    this.groupTimesheet.change( );
+    groupTimesheet.dispatchEvent( new Event( 'change' ) );
   }
 
   colTbInit( ) {
-    this.colTbTable = this.colTdParentTable.find( 'table' );
-    this.colTbTable.tableHeadFixer( { left: 3 } );
-    this.calcMarks( );
+    this.colTbTable = this.colTdParentTable.querySelector( 'table' );
+    $( this.colTbTable ).tableHeadFixer( { left: 3 } );
 
-    this.colTbTable[ 0 ].querySelectorAll( 'th[data-date]' ).forEach( th => {
+    this.colTbTable.querySelectorAll( 'th[data-date]' ).forEach( th => {
       const elemTh = th;
       const date = moment( elemTh.dataset.date );
       elemTh.textContent = `${ date.format( 'D' ) } ${ MyLib.capitalize( date.format( 'ddd' ) ) }`;
     } );
+
+    this.colTbTable.querySelectorAll( 'td.cell_mark' ).forEach( child => {
+      const elemChild = child;
+      if ( !this.reasonsAbsences.includes( +elemChild.dataset.reasonsAbsenceId ) ) {
+        elemChild.setAttribute( 'disabled', true );
+      }
+    } );
+
+    this.calcMarks( );
   }
 
   changeTimesheet( target ) {
@@ -84,29 +120,25 @@ class TimesheetDates {
       elem.dataset.oldValue = val;
       const { dataId } = this;
       this.headerText( );
-      const captionAjax = `Зміна значення ${ nameVal } з ${ valOld } на ${ val } [id: ${ dataId }]`;
-      const dataAjax = { id: dataId, [ nameVal ]: val };
-
-      MyLib.ajax( captionAjax, this.urlUpdate, 'post', dataAjax, 'json', '', false, false );
+      const caption = `Зміна значення ${ nameVal } з ${ valOld } на ${ val } [id: ${ dataId }]`;
+      const data = { id: dataId, [ nameVal ]: val };
+      const { parentElem: { dataset: { pathUpdate: url } } } = this;
+      MyLib.ajax( caption, url, 'post', data, 'json', '', false, false );
     }
   }
 
   // нажатие на кнопочку выход
   clickExit( ) {
     MyLib.pageLoader( true );
-    window.location.replace( this.parentElem.data( 'path-exit' ) );
+    window.location.replace( this.parentElem.dataset.pathExit );
   }
 
   clickSend( ) {
-    MyLib.ajax(
-      `Відправка данних в 1С [id: ${ this.dataId }]`,
-      this.parentElem.data( 'path-send' ),
-      'post',
-      { id: this.dataId, bug: '' },
-      'json',
-      false,
-      ( ) => window.location.reload( ),
-      true );
+    const caption = `Відправка данних в 1С [id: ${ this.dataId }]`;
+    const { parentElem: { dataset: { pathSend: url } } } = this;
+    const data = { id: this.dataId, bug: '' };
+    const successAjax = ( ) => window.location.reload( );
+    MyLib.ajax( caption, url, 'post', data, 'json', false, successAjax, true );
   }
 
   filterGroups( event ) { // фильтрация категории / группы
@@ -117,44 +149,34 @@ class TimesheetDates {
     if ( value ) elem.classList.remove( 'placeholder' );
     else elem.classList.add( 'placeholder' );
 
-    MyLib.ajax(
-      'Фільтрація данных табеля',
-      this.urlTbFilter,
-      'post',
-      { id: this.dataId, field: paramName, field_id: value },
-      'script',
-      '',
-      false,
-      true );
+    const caption = 'Фільтрація данных табеля';
+    const data = { id: this.dataId, field: paramName, field_id: value };
+    const { colTd: { dataset: { pathFilter: url } } }  = this;
+    MyLib.ajax( caption, url, 'post', data, 'script', '', false, true );
   }
 
   clickReasonAbsence( event ) {
     const { target: elem } = event;
-    const { innerHTML: dataVal } = elem;
+    const { textContent: dataVal } = elem;
     const { dataset: { reasonsAbsenceId } } = elem;
 
     const cells = [ ];
 
-    this.colTbTable[ 0 ].querySelectorAll( 'td.active' ).forEach( td => {
+    this.colTbTable.querySelectorAll( 'td.active' ).forEach( td => {
       const tdElem = td;
       if ( tdElem.dataset.reasonsAbsenceId !== reasonsAbsenceId ) {
         cells.push( tdElem.dataset.id );
-        tdElem.innerHTML = dataVal;
+        tdElem.textContent = dataVal;
         tdElem.dataset.reasonsAbsenceId = reasonsAbsenceId;
       }
       tdElem.classList.remove( 'active' );
     } );
 
     if ( cells.length ) {
-      MyLib.ajax(
-        'Группова заміна позначок табеля',
-        this.urlTbUpdates,
-        'post',
-        { ids: cells, reasons_absence_id: reasonsAbsenceId },
-        'json',
-        '',
-        false,
-        true );
+      const caption = 'Группова заміна позначок табеля';
+      const data = { ids: cells, reasons_absence_id: reasonsAbsenceId };
+      const { colTd: { dataset: { pathUpdates: url } } } = this;
+      MyLib.ajax( caption, url, 'post', data, 'json', '', false, true );
       this.calcMarks( );
     }
   }
@@ -181,15 +203,16 @@ class TimesheetDates {
         this.rangeData.maxCell = Math.max( this.rangeData.maxCell, cellIndex );
       }
 
-      this.colTbTable[ 0 ]
-        .querySelectorAll( 'tbody .active' )
+      this.colTbTable.querySelectorAll( '.active' )
         .forEach( cell => cell.classList.remove( classActive ) );
 
-      this.colTbTable[ 0 ]
+      this.colTbTable
         .querySelectorAll( `tbody tr:nth-child(n+${ this.rangeData.minRow }):nth-child(-n+${ this.rangeData.maxRow }) ` +
           `td:nth-child(n+${ this.rangeData.minCell }):nth-child(-n+${ this.rangeData.maxCell })` )
         .forEach( cell => {
-          if ( cell.classList.contains( 'cell_mark' ) ) cell.classList.add( classActive );
+          if ( cell.classList.contains( 'cell_mark' ) && !cell.hasAttribute( 'disabled' ) ) {
+            cell.classList.add( classActive );
+          }
         } );
 
       this.rangeData.prevRow = rowIndex;
@@ -197,11 +220,11 @@ class TimesheetDates {
     }
   }
 
-  cellMarkClickLeft( event ) {
-    const { target: elem } = event;
+  cellMarkClickLeft( target ) {
+    const elem = target;
 
-    if ( !this.disabled && elem.classList.contains( 'cell_mark' ) && !elem.hasAttribute( 'disabled' ) ) {
-      const reasonsAbsence = this.colTd[ 0 ]
+    if ( !this.disabled && !elem.hasAttribute( 'disabled' ) ) {
+      const reasonsAbsence = this.colTd
         .querySelector( `button[data-reasons-absence-id='${ elem.dataset.reasonsAbsenceId }']` );
 
       const { dataset: { nextId: raId, nextVal: raVal } } = reasonsAbsence;
@@ -217,10 +240,10 @@ class TimesheetDates {
     const { target: elem } = event;
 
     if ( !this.disabled && !elem.getAttribute( 'disabled' ) ) {
-      const reasonsAbsence = this.colTd[ 0 ].querySelector( 'button[data-reasons-absence-id]' );
+      const reasonsAbsence = this.colTd.querySelector( 'button[data-reasons-absence-id]' );
       const { dataset: { reasonsAbsenceId } } = reasonsAbsence;
       elem.dataset.reasonsAbsenceId = reasonsAbsenceId;
-      elem.innerHTML = '';
+      elem.textContent = '';
       this.markUpdate( elem.dataset.id, reasonsAbsenceId ); // обновление маркера
       this.calcMarks( );
     }
@@ -229,7 +252,8 @@ class TimesheetDates {
   markUpdate( tbId, reasonsAbsenceId ) { // обновление маркера
     const data = { id: tbId, reasons_absence_id: reasonsAbsenceId };
     const caption = `Оновлення позначки табеля id = [ ${ tbId } ]`;
-    MyLib.ajax( caption, this.urlTbUpdate, 'post', data, 'json', '', false, false );
+    const { colTd: { dataset: { pathUpdate: url } } }  = this;
+    MyLib.ajax( caption, url, 'post', data, 'json', '', false, false );
   }
 
   cellMouseOver( event ) {
@@ -238,137 +262,146 @@ class TimesheetDates {
     const { classList } = elem;
     elem.focus( );
 
-    this.changeMarkCell( event );
+    if ( !this.disabled ) this.changeMarkCell( event );
 
-    if ( !classList.contains( 'hover' ) && !classList.contains( 'name' ) ) {
-      this.colTbTable
-        .find( '.hover' ).removeClass( 'hover' )
-        .end( )
-        .find( `tr :nth-child( ${ elem.cellIndex + 1 } )` )
-        .addClass( 'hover' );
-      elem.classList.add( 'hover' );
+    const className = 'hover';
+    if ( !elem.classList.contains( className ) && !classList.contains( 'name' ) ) {
+      this.colTdParentTable.querySelectorAll( `.${ className }` ).forEach( hover => {
+        const elemHover = hover;
+        elemHover.classList.remove( className );
+      } );
+
+      this.colTdParentTable.querySelectorAll( `tr :nth-child( ${ elem.cellIndex + 1 } )` ).forEach( hover => {
+        const elemHover = hover;
+        elemHover.classList.add( className );
+      } );
     }
   }
 
   cellMarkKeyDown( event ) {
     event.preventDefault( );
-    if ( !event.originalEvent.repeat && !this.disabled && event.altKey ) {
+    if ( !this.disabled && !event.repeat && event.altKey ) {
       this.rangeData.minRow = 999999;
       this.rangeData.minCell = 999999;
       this.rangeData.maxRow = 0;
       this.rangeData.maxCell = 0;
       this.rangeData.prevRow = 0;
       this.rangeData.prevCell = 0;
-
       this.changeMarkCell( event );
     }
   }
 
   headerText( ) { // шапка формы
-    const { value: numberValue } = this.parentElem[ 0 ].querySelector( '#number' );
-    this.h1.text( `Табель №  ${ numberValue } від ${ this.date.val( ) }` );
+    const { value: number } = this.parentElem.querySelector( '#number' );
+    const { value: date } = this.parentElem.querySelector( '#date' );
+    this.parentElem.querySelector( 'h1' ).textContent =
+      `Табель № ${ number } від ${ date }`;
   }
 
-  static clickRow( event ) {
-    $( event.currentTarget ).addClass( ' selected ' ).siblings( ).removeClass( 'selected' );
+  static clickRow( elem ) {
+    const className = 'selected';
+
+    Array.from( elem.parentElement.children ).forEach( child => {
+      const { classList } = child;
+      if ( child === elem ) classList.add( className ); else classList.remove( 'selected' );
+    } );
   }
 
-  clickHeader( event ) {
-    const elem = $( event.currentTarget );
-    elem.toggleClass( 'hide' );
-    this.parentElem.find( '.panel_main' ).toggleClass( 'hide' );
+  clickHeader( target ) {
+    const elem = target;
+    elem.classList.toggle( 'hide' );
+    this.parentElem.querySelector( '.panel_main' ).classList.toggle( 'hide' );
   }
 
   // подсчет итогов
   calcMarks( ) {
-    const { colTbTable: { 0: table } } = this;
-    table.querySelectorAll( '.cell_day' ).forEach( td => { // очистка все итогов
+    this.colTbTable.querySelectorAll( '.cell_day' ).forEach( td => { // очистка все итогов
       const elem = td;
-      elem.innerHTML = '';
+      elem.textContent = '';
       elem.dataset.absence = '';
     } );
 
     const cellSumName = [ 'appearance', 'absence' ];
 
-    table.querySelectorAll( 'tr.row_data' ).forEach( tr => { // по всем строкам с данными
+    this.colTbTable.querySelectorAll( 'tr.row_data' ).forEach( tr => { // по всем строкам с данными
       const sum = [ 0, 0 ];
 
       const { dataset: { categoryId, groupId, childId } } = tr;
 
       tr.querySelectorAll( '.cell_mark:not([disabled]' ).forEach( td => {
-        const elem = table.querySelector( `#group_${ categoryId }_${ groupId }_${ td.dataset.dateId }` );
+        const elem = this.colTbTable.querySelector( `#group_${ categoryId }_${ groupId }_${ td.dataset.dateId }` );
         if ( td.textContent ) {
           sum[ 1 ] += 1;
           elem.dataset.absence = 1 + +elem.dataset.absence;
         } else {
           sum[ 0 ] += 1;
-          elem.innerHTML = 1 + +elem.innerHTML;
+          elem.textContent = 1 + +elem.textContent;
         }
       } );
 
       cellSumName.forEach( ( val, i ) => {
         const sumElem = tr.querySelector( `#child_${ categoryId }_${ groupId }_${ childId }_${ val }` );
-        sumElem.innerHTML = sum[ i ] || '';
+        sumElem.textContent = sum[ i ] || '';
       } );
     } );
 
-    table.querySelectorAll( 'tr.group' ).forEach( tr => { // по всем строкам групп
+    this.colTbTable.querySelectorAll( 'tr.group' ).forEach( tr => { // по всем строкам групп
       const sum = [ 0, 0 ];
 
       const { dataset: { categoryId, groupId } } = tr;
 
       tr.querySelectorAll( '.cell_day' ).forEach( ( td, index ) => {
-        const elem = table.querySelector( `#category_${ categoryId }_${ index }` );
-        const sumAppearance = +td.innerHTML;
+        const elem = this.colTbTable.querySelector( `#category_${ categoryId }_${ index }` );
+        const sumAppearance = +td.textContent;
         const sumAbsence = +td.dataset.absence;
 
         sum[ 0 ] += sumAppearance;
         sum[ 1 ] += sumAbsence;
 
         if ( sumAbsence ) elem.dataset.absence = sumAbsence + +elem.dataset.absence;
-        if ( sumAppearance ) elem.innerHTML = sumAppearance + +elem.innerHTML;
+        if ( sumAppearance ) elem.textContent = sumAppearance + +elem.textContent;
       } );
 
       cellSumName.forEach( ( val, i ) => {
         const elemSum = tr.querySelector( `#group_${ categoryId }_${ groupId }_${ val }` );
-        elemSum.innerHTML = sum[ i ] || '';
+        elemSum.textContent = sum[ i ] || '';
       } );
     } );
 
-    table.querySelectorAll( 'tr.category' ).forEach( tr => { // по всем строкам с категорий
+    this.colTbTable.querySelectorAll( 'tr.category' ).forEach( tr => { // по всем строкам с категорий
       const sum = [ 0, 0 ];
 
       const { dataset: { categoryId } } = tr;
 
       tr.querySelectorAll( '.cell_day' ).forEach( ( td, index ) => {
-        const elem = table.querySelector( `#all_${ index }` );
-        const sumAppearance = +td.innerHTML;
+        const elem = this.colTbTable.querySelector( `#all_${ index }` );
+        const sumAppearance = +td.textContent;
         const sumAbsence = +td.dataset.absence;
 
         sum[ 0 ] += sumAppearance;
         sum[ 1 ] += sumAbsence;
 
         if ( sumAbsence ) elem.dataset.absence = sumAbsence + +elem.dataset.absence;
-        if ( sumAppearance ) elem.innerHTML = sumAppearance + +elem.innerHTML;
+        if ( sumAppearance ) elem.textContent = sumAppearance + +elem.textContent;
       } );
 
       cellSumName.forEach( ( val, i ) => {
         const elemSum = tr.querySelector( `#category_${ categoryId }_${ val }` );
-        elemSum.innerHTML = sum[ i ] || '';
+        elemSum.textContent = sum[ i ] || '';
       } );
     } );
 
-    table.querySelectorAll( 'tr.all' ).forEach( tr => { // по всем строкам итогов
+    this.colTbTable.querySelectorAll( 'tr.all' ).forEach( tr => { // по всем строкам итогов
       const sum = [ 0, 0 ];
 
       tr.querySelectorAll( '.cell_day' ).forEach( td => {
-        sum[ 0 ] += +td.innerHTML;
+        sum[ 0 ] += +td.textContent;
         sum[ 1 ] += +td.dataset.absence;
       } );
 
       cellSumName.forEach( ( val, i ) => {
         const elemSum = tr.querySelector( `#all_${ val }` );
-        elemSum.innerHTML = sum[ i ] || '';
+        elemSum.textContent = sum[ i ] || '';
       } );
     } );
   }

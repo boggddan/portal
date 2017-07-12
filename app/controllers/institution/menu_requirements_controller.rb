@@ -58,7 +58,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
         dish_id: k[ 1 ], dish_name: v[ 0 ][ :dish_name ] } }
 
     @products_meals = @products_meals_dishes.group_by { | o | o[ :meal_id ] }
-      .map{ | k, v | { id: k, name: v[ 0 ][ :meal_name ], count: v.size } }
+      .map { | k, v | { id: k, name: v[ 0 ][ :meal_name ], count: v.size } }
 
     @products_categories = @menu_products.group_by { | o | o[ :children_category_id ] }
       .map{ | k, v | { id: k, name: v[ 0 ][ :category_name ] } }
