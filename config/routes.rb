@@ -4,9 +4,10 @@ Rails.application.routes.draw do
     root action: :index, controller: :base, constraints: RoleRouteConstraint.new( :is_institution? )
   end
 
-  #root action: :index, controller: 'institution/base', constraints: RoleRouteConstraint.new( :is_institution? )
+  scope module: :admin do
+    root action: :index, controller: :base, constraints: RoleRouteConstraint.new( :is_admin? )
+  end
 
-  root action: :index, controller: 'admin/base', constraints: RoleRouteConstraint.new( :is_admin? )
   root action: :log_in, controller: :sessions
 
   draw :api
