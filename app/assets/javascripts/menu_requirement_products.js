@@ -202,37 +202,38 @@ class MenuRequirementProducts {
     colMdCreate.addEventListener( 'click', ( ) => this.createProducts( ) );
 
     const colMdTable = colMd.querySelector( 'table' );
+    if ( colMdTable ) {
+      colMdTable.addEventListener( 'click', event => {
+        if ( event.target.matches( 'td.cell_mark' ) ) {
+          this.clickMdCell( event.target );
+          event.stopPropagation();
+        }
+      } );
 
-    colMdTable.addEventListener( 'click', event => {
-      if ( event.target.matches( 'td.cell_mark' ) ) {
-        this.clickMdCell( event.target );
-        event.stopPropagation();
-      }
-    } );
+      colMdTable.addEventListener( 'contextmenu', event => {
+        if ( event.target.matches( 'td.cell_mark' ) ) {
+          this.contextmenuMdCell( event );
+          event.stopPropagation();
+        }
+      } );
 
-    colMdTable.addEventListener( 'contextmenu', event => {
-      if ( event.target.matches( 'td.cell_mark' ) ) {
-        this.contextmenuMdCell( event );
-        event.stopPropagation();
-      }
-    } );
+      colMdTable.addEventListener( 'mouseover', event => {
+        if ( event.target.matches( 'td.cell_mark' ) ) {
+          this.mouseoverMdCell( event.target );
+          event.stopPropagation();
+        }
+      } );
 
-    colMdTable.addEventListener( 'mouseover', event => {
-      if ( event.target.matches( 'td.cell_mark' ) ) {
-        this.mouseoverMdCell( event.target );
-        event.stopPropagation();
-      }
-    } );
+      colMdTable.addEventListener( 'click', event => {
+        const tr = event.target.closest( ' tr ' );
+        if ( tr && tr.matches( '.row_data:not(.selected)' ) ) {
+          this.constructor.clickRow( tr );
+          event.stopPropagation();
+        }
+      } );
 
-    colMdTable.addEventListener( 'click', event => {
-      const tr = event.target.closest( ' tr ' );
-      if ( tr && tr.matches( '.row_data:not(.selected)' ) ) {
-        this.constructor.clickRow( tr );
-        event.stopPropagation();
-      }
-    } );
-
-    $( this.colMdTable ).tableHeadFixer( );
+      $( this.colMdTable ).tableHeadFixer( );
+    }
 
     const colPr = parentElem.querySelector( '#col_pr' );
 
