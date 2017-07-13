@@ -125,7 +125,7 @@ class MenuRequirementProducts {
 
   clickBtnClmn( event ) {
     const { currentTarget: elem } = event;
-    elem.parentElement.querySelectorAll( 'button[data-clmn]' ).forEach( child => {
+    elem.parentElement.querySelectorAll( 'button[data-clmn].nav' ).forEach( child => {
       const elemChild = child;
       elemChild.disabled = elem === elemChild;
     } );
@@ -293,6 +293,9 @@ class MenuRequirementProducts {
     this.colPrTable = this.colPr.querySelector( 'table' );
 
     if ( this.colPrTable ) {
+      this.buttonColPr.classList.add( 'nav' );
+      this.buttonColPr.disabled = false;
+
       $( this.colPrTable ).tableHeadFixer( { left: 2 } );
 
       this.colPrTable.querySelectorAll( 'td.price' ).forEach( child => {
@@ -301,7 +304,7 @@ class MenuRequirementProducts {
       } );
 
       const buttonMealAll = this.colPr.querySelector( 'button[data-meal-id="-1"]' );
-      if ( buttonMealAll ) buttonMealAll.click( );
+      buttonMealAll.click( );
 
       this.colPrTablePf( this.disabledPlan ? 'fact' : 'plan' );
 
@@ -309,6 +312,8 @@ class MenuRequirementProducts {
 
       this.calcProducts( );
     } else {
+      this.buttonColPr.classList.remove( 'nav' );
+      this.buttonColPr.disabled = true;
       this.calcCategories( );
     }
   }
@@ -328,6 +333,7 @@ class MenuRequirementProducts {
     } else {
       this.colPr.querySelectorAll( 'button[data-pf]' ).forEach( child => {
         const elemChild = child;
+        if ( child.dataset.pf === 'plan' ) elemChild.classList.remove( 'nav' );
         elemChild.disabled = true;
       } );
     }

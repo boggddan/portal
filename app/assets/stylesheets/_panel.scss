@@ -70,11 +70,25 @@ $ffIcon: 'Glyphicons Halflings';
      background-size: 200% auto;
      &:hover { background-position: right center; };
      transition: 0.5s;
+     border: none;
   }
 
   & > .hide {
     display: none;
   }
+
+  button.nav:disabled {
+    //cursor: default;
+    background-color: #337ab7;
+    color: white;
+    border: solid 1.5px #1d64a0;
+    background-image: none;
+    &:hover:enabled {
+      background-position: none;
+      background-color: #337ab7;
+    }
+  }
+
   //---------------------------
   // < select
   %row_group.row_group {

@@ -20,7 +20,6 @@
     button[data-clmn] {
       &:not(:disabled) {
         background-image: linear-gradient( to right, #6db369, #91d88d 51%, #6db369 100% );
-        border-color: #3e7d3b;
       }
     }
   }
@@ -117,7 +116,6 @@
     button[data-pf=plan] {
       &:not(:disabled) {
         background-image: linear-gradient( to right, #b5e8b3, #cbf1ca 51%, #b5e8b3 100% );
-        border-color: #6db36c;
         color: black;
       }
     }
@@ -127,14 +125,12 @@
 
       &:not(:disabled) {
         background-image: linear-gradient( to right, #e49393, #ffc7c7 51%, #e49393 100% );
-        border-color: #c35a5a;
       }
     }
 
     button[data-meal-id] {
       &:not(:disabled) {
         background-image: linear-gradient( to right, #fff2bc 0%, #fff9e0 51%, #fff2bc 100% );
-        border-color: #bfaa56;
         color: black;
       }
     }
@@ -145,7 +141,6 @@
       &:not(:disabled) {
         background-image: linear-gradient( to right, #e2bc28 0%, #ffe47c 51%, #e2bc28 100% );
         color: black;
-        border-color: #c7a41c;
       }
     }
 
@@ -154,12 +149,9 @@
 
       &:not(:disabled) {
         background-image: linear-gradient( to right, #e49393, #ffc7c7 51%, #e49393 100% );
-        border-color: #c35a5a;
         color: white;
       }
     }
-
-
 
     col:nth-child( 1 ) { width: 250px; }
 
