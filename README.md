@@ -181,7 +181,7 @@ GET /api/dishes_categories
 ### *Страви* - `dishes` [:top:](#Зміст)
 
 ```json
-POST /api/cu_meals { "dishes": [ { "code": "000000001", "name": "Каша", "dishes_category_code": "000000001", "priority": 1 }, { "code": "000000002", "name": "Борщ", "dishes_category_code": "000000002", "priority": 2 } ] }
+POST /api/cu_dishes { "dishes": [ { "code": "000000003", "name": "Суп", "dishes_category_code": "000000001", "priority": 4 }, { "code": "000000004", "name": "Чай", "dishes_category_code": "000000002", "priority": 3 } ] }
 GET /api/dish?code=000000001
 GET /api/dishes
 ```

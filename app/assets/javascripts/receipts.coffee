@@ -6,8 +6,11 @@ $( document ).on 'turbolinks:load', ->
     $parentElem = $receipts
 
     $sessionKey = $parentElem.attr 'id'
-    $dateStartSession = MyLib.getSession( $sessionKey )?.date_start
-    $dateEndSession = MyLib.getSession( $sessionKey )?.date_end
+    $dateStartSession = MyLib.getSession( $sessionKey )?.date_start || MyLib.toDateFormat( moment( ).startOf( 'month' ) )
+    MyLib.setSession( $sessionKey, { date_start: $dateStartSession } );
+
+    $dateEndSession = MyLib.getSession( $sessionKey )?.date_end || MyLib.toDateFormat( moment( ).endOf( 'month' ) )
+    MyLib.setSession( $sessionKey, { date_end: $dateEndSession } );
 
     $( "#main_menu li[data-page=#{ $sessionKey }]" ).addClass( 'active' ).siblings(  ).removeClass 'active'
 

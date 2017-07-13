@@ -3,14 +3,22 @@ $( document ).on( 'turbolinks:load', ( ) => {
   if ( $menuRequirements.length ) {
     const $parentElem = $menuRequirements;
 
-    const $sessionKey = $parentElem.attr( 'id' );
-    const $dateStartSession = ( MyLib.getSession( $sessionKey ) || { } ).date_start;
-    const $dateEndSession = ( MyLib.getSession( $sessionKey ) || { } ).date_end;
+    const sessionKey = $parentElem.attr( 'id' );
 
-    $( `#main_menu li[data-page=${ $sessionKey }]` ).addClass( 'active' ).siblings(  ).removeClass( 'active' );
+    const dateStartSession = ( MyLib.getSession( sessionKey ) ||
+      { } ).date_start || MyLib.toDateFormat( moment( ).startOf( 'month' ) );
+
+    MyLib.setSession( sessionKey, { date_start: dateStartSession } );
+
+    const dateEndSession = ( MyLib.getSession( sessionKey ) ||
+      { } ).date_end || MyLib.toDateFormat( moment( ).endOf( 'month' ) );
+
+    MyLib.setSession( sessionKey, { date_end: dateEndSession } );
+
+    $( `#main_menu li[data-page=${ sessionKey }]` ).addClass( 'active' ).siblings(  ).removeClass( 'active' );
 
     const getTable = ( ) => {
-      const $sessionObj = MyLib.getSession( $sessionKey );
+      const $sessionObj = MyLib.getSession( sessionKey );
       const $clmn = $( '#col_mr' );
       const $clmnObj = $sessionObj[ $clmn.attr( 'id' ) ];
 
@@ -28,7 +36,7 @@ $( document ).on( 'turbolinks:load', ( ) => {
     };
 
     const filterTable = ( ) => { // Фильтрация таблицы документов
-      MyLib.setClearTableSession( $sessionKey, 'main' );
+      MyLib.setClearTableSession( sessionKey, 'main' );
       getTable( );
     };
 
@@ -37,14 +45,14 @@ $( document ).on( 'turbolinks:load', ( ) => {
     ////
     $( '#col_mr' )
       .find( '#date_start' ) // Начальная дата фильтрации
-        .val( $dateStartSession )
-        .data( 'old-value', $dateStartSession )
+        .val( dateStartSession )
+        .data( 'old-value', dateStartSession )
         .attr( { readonly: true, placeholder: 'Дата...' } )
         .datepicker( { onSelect: function( ) { MyLib.selectDateStart( $( this ), '#date_end', filterTable ); } } )
       .end( )
       .find( '#date_end' ) // Конечная дата фильтрации
-        .val( $dateEndSession )
-        .data( 'old-value', $dateEndSession )
+        .val( dateEndSession )
+        .data( 'old-value', dateEndSession )
         .attr( { readonly: true, placeholder: 'Дата...' } )
         .datepicker( { onSelect: function( ) { MyLib.selectDateEnd( $( this ), '#date_start', filterTable ); } } )
       .end( )

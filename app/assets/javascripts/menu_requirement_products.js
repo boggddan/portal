@@ -6,7 +6,7 @@ class MenuRequirementProducts {
     const data =  { id: this.dataId, bug: '' };
     const caption = `Формування страв та прийомів їжі id = [${ this.dataId }]`;
     const { colMd: { dataset: { pathCreate: url } } } = this;
-    MyLib.ajax( caption, url, 'post', data, 'script', '', false, false );
+    MyLib.ajax( caption, url, 'post', data, 'script', '', false, true );
   }
 
   mdUpdate( mdId, value ) { // обновление маркера
@@ -108,7 +108,7 @@ class MenuRequirementProducts {
     } );
 
     if ( mealId === '-1' ) {
-      this.colPrTable.querySelectorAll( `.hide[data-meal-id]:not([data-meal-id='${ this.emptyMealId }'])` )
+      this.colPrTable.querySelectorAll( '.hide[data-meal-id]' )
         .forEach( meal => {
           const elemMeal = meal;
           elemMeal.classList.remove( 'hide' );
@@ -202,6 +202,7 @@ class MenuRequirementProducts {
     colMdCreate.addEventListener( 'click', ( ) => this.createProducts( ) );
 
     const colMdTable = colMd.querySelector( 'table' );
+
     if ( colMdTable ) {
       colMdTable.addEventListener( 'click', event => {
         if ( event.target.matches( 'td.cell_mark' ) ) {
@@ -232,7 +233,7 @@ class MenuRequirementProducts {
         }
       } );
 
-      $( this.colMdTable ).tableHeadFixer( );
+      $( colMdTable ).tableHeadFixer( );
     }
 
     const colPr = parentElem.querySelector( '#col_pr' );
@@ -278,8 +279,8 @@ class MenuRequirementProducts {
     [ this.parentElem, this.colCc, this.colCcTable, this.colMd, this.colMdCreate, this.colMdTable, this.colPr ] =
       [ parentElem, colCc, colCcTable, colMd, colMdCreate, colMdTable, colPr ];
 
-    [ this.dataId, this.disabledPlan, this.disabledFact, this.emptyMealId ] =
-      [ +parentElem.dataset.id, disabledPlan, disabledFact, +parentElem.dataset.emptyMealId ];
+    [ this.dataId, this.disabledPlan, this.disabledFact ] =
+      [ +parentElem.dataset.id, disabledPlan, disabledFact ];
 
     parentElem.querySelector( '.panel_main button[data-clmn="#col_cc"]' ).click( );
     this.headerText( );
@@ -292,19 +293,11 @@ class MenuRequirementProducts {
     this.colPrTable = this.colPr.querySelector( 'table' );
 
     if ( this.colPrTable ) {
-      const buttonEmptyMeal = this.colPr.querySelector( `button[data-meal-id='${ this.emptyMealId }']` );
-      if ( buttonEmptyMeal ) buttonEmptyMeal.classList.add( 'hide' );
-
       $( this.colPrTable ).tableHeadFixer( { left: 2 } );
 
       this.colPrTable.querySelectorAll( 'td.price' ).forEach( child => {
         const elemChild = child;
         elemChild.textContent = MyLib.numToStr( +elemChild.textContent, -1 );
-      } );
-
-      this.colPrTable.querySelectorAll( `[data-meal-id='${ this.emptyMealId }']` ).forEach( meal => {
-        const elemMeal = meal;
-        elemMeal.classList.add( 'hide' );
       } );
 
       const buttonMealAll = this.colPr.querySelector( 'button[data-meal-id="-1"]' );
@@ -345,10 +338,9 @@ class MenuRequirementProducts {
         const elem = child;
         const { parentElement: { dataset: parentData } } = elem;
         const val = +parentData[ dataCurrentPf ];
-        const mealId = +parentData.mealId;
         elem.dataset.oldValue = val;
 
-        elem.disabled = currentDisabled || elem.dataset.id === '0' || mealId === this.emptyMealId;
+        elem.disabled = currentDisabled || elem.dataset.id === '0';
         elem.name = nameCurrentPf;
         elem.value = MyLib.numToStr( val, -1 );
       } );
@@ -463,7 +455,7 @@ class MenuRequirementProducts {
   }
 
   colCcInit( ) {
-    this.colCcTable.querySelectorAll( '.day_cost' ).forEach( child => {
+    this.colCcTable.querySelectorAll( 'td.day_cost' ).forEach( child => {
       const childElem = child;
       childElem.textContent = MyLib.numToStr( +childElem.textContent, -1 );
     } );

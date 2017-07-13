@@ -23,8 +23,6 @@ class Institution::MenuRequirementsController < Institution::BaseController
   end
 
   def menu_products
-    @empty_meal_id = Meal.find_by( code: '' ).id
-
     ###
     @menu_products = JSON.parse( @menu_requirement.menu_products
       .joins( { product: :products_type }, { menu_meals_dish: [ :meal, :dish ] }, :children_category )
@@ -97,13 +95,10 @@ class Institution::MenuRequirementsController < Institution::BaseController
               'dishes_categories.id AS category_id',
               'dishes_categories.name AS category_name',
               'COALESCE( SUM( menu_products.count_plan ), 0) AS count_plan' )
-      .where( 'dishes.code != ?', '')
-      .where( 'meals.code != ?', '' )
       .group( :id, 'meals.id', 'dishes.id', 'dishes_categories.id' )
       .order( 'meals.priority', 'meals.name', 'dishes_categories.priority',
               'dishes_categories.name', 'dishes.priority', 'dishes.name' )
       .to_json, symbolize_names: true )
-
     @menu_meals = @menu_meals_dishes.group_by{ | o | o[ :meals_id ] }
       .map{ | k, v | { id: k, name: v[ 0 ][ :meals_name ] } }
 
@@ -178,8 +173,14 @@ class Institution::MenuRequirementsController < Institution::BaseController
 
         # Создание запроса для блюд
         mmd_sql_values = ''
+
+        empty_meal_id = Meal.find_by( code: '' ).id
+        empty_dish_id = Dish.find_by( code: '' ).id
+
         meals_dishes.each{ | md |
-          mmd_sql_values += ",(#{ id },#{ md[ :meal_id ] },#{ md[ :dish_id ] },'#{ now }','#{ now }')"
+          mmd_sql_values += ",(#{ id },#{ md[ :meal_id ] },#{ md[ :dish_id ] },'#{ now }','#{ now }')" if
+              md[ :meal_id ] != empty_meal_id && md[ :dish_id ] != empty_dish_id ||
+              md[ :meal_id ] == empty_meal_id && md[ :dish_id ] == empty_dish_id
         }
 
         mmd_fieds = %w( menu_requirement_id meal_id dish_id created_at updated_at ).join( ',' )

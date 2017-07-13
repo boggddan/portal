@@ -1,8 +1,11 @@
+// EsLint v4.2.0
+
 module.exports = {
   env: {
     browser: true,
     es6: true,
-    jquery: true
+    jquery: true,
+    node: true
   },
     globals: {
     moment: true,
@@ -13,6 +16,9 @@ module.exports = {
     ecmaVersion: 2017,
     sourceType: 'script',
     ecmaFeatures: {
+      globalReturn: false,
+      impliedStrict: true,
+      jsx: false,
       experimentalObjectRestSpread: true
     },
   },
@@ -21,7 +27,7 @@ module.exports = {
       // Possible Errors
       ////////////////////////////////////////
 
-      // enforce “for” loop update clause moving the counter in the right direction.
+      // enforce �for� loop update clause moving the counter in the right direction.
       // http://eslint.org/docs/rules/for-direction
       'for-direction': 'error',
 
@@ -476,7 +482,7 @@ module.exports = {
       // http://eslint.org/docs/rules/wrap-iife
       'wrap-iife': [ 'error', 'outside', { functionPrototypeMethods: true } ],
 
-      // require or disallow “Yoda” conditions
+      // require or disallow �Yoda� conditions
       // http://eslint.org/docs/rules/yoda
       yoda: [ 'error', 'never', { 'exceptRange': true } ],
 
@@ -557,11 +563,11 @@ module.exports = {
       // Node.js and CommonJS
       ////////////////////////////////////////
 
-      // require return statements after callbacks
+      // require�return�statements after callbacks
       // http://eslint.org/docs/rules/callback-return#
       'callback-return': 'error',
 
-      // require require() calls to be placed at top-level module scope
+      // require�require()�calls to be placed at top-level module scope
       // http://eslint.org/docs/rules/global-require#
       'global-require': 'error',
 
@@ -573,27 +579,27 @@ module.exports = {
       // http://eslint.org/docs/rules/no-buffer-constructor#
       'no-buffer-constructor': 'error',
 
-      // disallow require calls to be mixed with regular variable declarations
+      // disallow�require�calls to be mixed with regular variable declarations
       // http://eslint.org/docs/rules/no-mixed-requires#
       'no-mixed-requires': [ 'error', { "grouping": true, "allowCall": true } ],
 
-      // disallow new operators with calls to require
+      // disallow�new�operators with calls to�require
       // http://eslint.org/docs/rules/no-new-require#
       'no-new-require': 'error',
 
-      // disallow string concatenation with __dirname and __filename
+      // disallow string concatenation with�__dirname�and�__filename
       // http://eslint.org/docs/rules/no-path-concat#
       'no-path-concat': 'error',
 
-      // disallow the use of process.env
+      // disallow the use of�process.env
       // http://eslint.org/docs/rules/no-process-env#
       'no-process-env': 'error',
 
-      // disallow the use of process.exit()
+      // disallow the use of�process.exit()
       // http://eslint.org/docs/rules/no-process-exit#
       'no-process-exit': 'error',
 
-      // disallow specified modules when loaded by require
+      // disallow specified modules when loaded by�require
       // http://eslint.org/docs/rules/no-restricted-modules#
       'no-restricted-modules': [ 'error', { paths: [ ], patterns: [ ] } ],
 
@@ -688,11 +694,11 @@ module.exports = {
       // http://eslint.org/docs/rules/func-name-matching
       'func-name-matching': [ 'error', 'always', { includeCommonJSModuleExports: true } ],
 
-      // require or disallow named function expressions
+      // require or disallow named�function�expressions
       // http://eslint.org/docs/rules/func-names
       'func-names': [ 'error', 'as-needed' ],
 
-      // enforce the consistent use of either function declarations or expressions
+      // enforce the consistent use of either�function�declarations or expressions
       // http://eslint.org/docs/rules/func-style
       'func-style': [ 'error', 'expression', { allowArrowFunctions: true } ],
 
@@ -819,7 +825,7 @@ module.exports = {
       // http://eslint.org/docs/rules/newline-per-chained-call
       'newline-per-chained-call': [ 'error', { ignoreChainWithDepth: 5 } ],
 
-      // disallow Array constructors
+      // disallow�Array�constructors
       // http://eslint.org/docs/rules/no-array-constructor
       'no-array-constructor': 'error',
 
@@ -827,7 +833,7 @@ module.exports = {
       // http://eslint.org/docs/rules/no-bitwise
       'no-bitwise': [ 'error', { allow: [ ] } ],
 
-      // disallow continue statements
+      // disallow�continue�statements
       // http://eslint.org/docs/rules/no-continue
       'no-continue': 'error',
 
@@ -835,7 +841,7 @@ module.exports = {
       // http://eslint.org/docs/rules/no-inline-comments
       'no-inline-comments': 'off',
 
-      // disallow if statements as the only statement in else blocks
+      // disallow�if�statements as the only statement in�else�blocks
       // http://eslint.org/docs/rules/no-lonely-if
       'no-lonely-if': 'error',
 
@@ -873,11 +879,11 @@ module.exports = {
       // http://eslint.org/docs/rules/no-nested-ternary
       'no-nested-ternary': 'error',
 
-      // disallow Object constructors
+      // disallow�Object�constructors
       // http://eslint.org/docs/rules/no-new-object
       'no-new-object': 'error',
 
-      // disallow the unary operators ++ and --
+      // disallow the unary operators�++�and�--
       // http://eslint.org/docs/rules/no-plusplus
       'no-plusplus': [ 'error', { allowForLoopAfterthoughts: true } ],
 
@@ -1023,7 +1029,7 @@ module.exports = {
                                           classes: 'always' }
       ],
 
-      // enforce consistent spacing before function definition opening parenthesis
+      // enforce consistent spacing before�function�definition opening parenthesis
       // http://eslint.org/docs/rules/space-before-function-paren
       'space-before-function-paren': [ 'error', { anonymous: 'always',
                                                   named: 'never',
@@ -1045,7 +1051,7 @@ module.exports = {
                                       overrides: { } }
       ],
 
-      // enforce consistent spacing after the // or /* in a comment
+      // enforce consistent spacing after the�//�or�/*�in a comment
       // http://eslint.org/docs/rules/spaced-comment
       'spaced-comment': ['error', 'always', {
         line: {

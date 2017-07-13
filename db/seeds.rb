@@ -13,10 +13,10 @@ CausesDeviation.create_with( name: '' ).find_or_create_by( code: '' )
 ProductsType.create_with( name: '', priority: 0 ).find_or_create_by( code: '' )
 
 # Пустая категория блюд
-DishesCategory.create_with( name: '', priority: 0 ).find_or_create_by( code: '' )
+DishesCategory.create_with( name: '', priority: 9999 ).find_or_create_by( code: '' )
 
 # Пустой тип блюда
-Dish.create_with( name: 'Бухгалерія', priority: -1, dishes_category: DishesCategory.find_by( code: '' ) ).find_or_create_by( code: '' )
+Dish.create_with( name: 'ЗАГАЛЬНЕ', priority: -1, dishes_category: DishesCategory.find_by( code: '' ) ).find_or_create_by( code: '' )
 
 # Пустой тип приема пищи
-Meal.create_with( name: 'Бухгалерія', priority: -1 ).find_or_create_by( code: '' )
+Meal.create_with( name: 'ЗАГАЛЬНЕ', priority: 9999 ).find_or_create_by( code: '' )

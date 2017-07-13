@@ -7,10 +7,10 @@ h2.icon Продукти харчування
   button.btn_gradient *{ data: { pf: :plan } } План
   button.btn_gradient *{ data: { pf: :fact } } Факт
 
-  button.btn_gradient *{ data: { meal_id: -1 } } Загальна
   - @products_meals.each do | o |
     button.btn_gradient *{ data: { meal_id: o[ :id ] } } = o[ :name ]
   button.btn_gradient *{ data: { meal_id: 0 } } Підсумки
+  button.btn_gradient *{ data: { meal_id: -1 } } Всі прийоми їжі
 
 .panel
   label Вартість дітодня:

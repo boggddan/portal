@@ -6,25 +6,25 @@ table.table *{ data: { type: :list_doc } }
 
   thead
     tr
-      th *{ rowspan: 3 } Категорії
-      th *{ colspan: 4 } Кількість дітей
+      th.name *{ rowspan: 3 } Категорії
+      th.last_count *{ colspan: 4 } Кількість дітей
       th *{ colspan: 7 } Вартість дітодня
 
     tr
-      th *{ colspan: 2 } План
-      th *{ colspan: 2 } Факт
-      th *{ rowspan: 2 } За постановою
-      th *{ colspan: 3 } План
+      th.last_plan *{ colspan: 2 } План
+      th.last_count *{ colspan: 2 } Факт
+      th.day_cost *{ rowspan: 2 } За постановою
+      th.last_plan *{ colspan: 3 } План
       th *{ colspan: 3 } Факт
 
     tr
       th Всього
-      th Пільговики
+      th.last_plan Пільговики
       th Всього
-      th Пільговики
+      th.last_count Пільговики
       th Сумма продуктів
       th Вартість
-      th Відхилення
+      th.last_plan Відхилення
       th Сумма продуктів
       th Вартість
       th Відхилення
@@ -35,11 +35,11 @@ table.table *{ data: { type: :list_doc } }
         td.name = cc[ :name ]
         td.count.data_cell
           &text *{ name: :count_all_plan, value: cc[ :count_all_plan ], data: { id: cc[ :id ] } }
-        td.count.data_cell
+        td.count.data_cell.last_plan
           &text *{ name: :count_exemption_plan, value: cc[ :count_exemption_plan ], data: { id: cc[ :id ] } }
         td.count.data_cell
           &text *{ name: :count_all_fact, value: cc[ :count_all_fact ], data: { id: cc[ :id ] } }
-        td.count.data_cell
+        td.count.data_cell.last_count
           &text *{ name: :count_exemption_fact, value: cc[ :count_exemption_fact ], data: { id: cc[ :id ] } }
         - children_day_cost =  @children_day_costs.select { |cdc| \
           cdc[ :children_category_id ] == cc[ :children_category_id ] } \
@@ -47,7 +47,7 @@ table.table *{ data: { type: :list_doc } }
         td.count.day_cost = children_day_cost
         td.count.sum_products_plan
         td.count.sum_cost_plan
-        td.count.sum_diff_plan
+        td.count.sum_diff_plan.last_plan
         td.count.sum_products_fact
         td.count.sum_cost_fact
         td.count.sum_diff_fact
@@ -55,13 +55,13 @@ table.table *{ data: { type: :list_doc } }
     tr.row_group
       td.name Всього:
       td.count.count_all_plan
-      td.count.count_exemption_plan
+      td.count.count_exemption_plan.last_plan
       td.count.count_all_fact
-      td.count.count_exemption_fact
-      td
+      td.count.count_exemption_fact.last_count
+      td.day_cost
       td.count.sum_products_plan
       td
-      td
+      td.last_plan
       td.count.sum_products_fact
       td
       td
