@@ -121,7 +121,7 @@
     }
 
     button[data-pf=fact] {
-      margin-right: 20px;
+      margin-right: 50px;
 
       &:not(:disabled) {
         background-image: linear-gradient( to right, #e49393, #ffc7c7 51%, #e49393 100% );
@@ -136,7 +136,7 @@
     }
 
     button[data-meal-id='0'] {
-      margin-left: 15px;
+      margin-left: 50px;
 
       &:not(:disabled) {
         background-image: linear-gradient( to right, #e2bc28 0%, #ffe47c 51%, #e2bc28 100% );
@@ -145,8 +145,6 @@
     }
 
     button[data-meal-id='-1'] {
-       margin-left: 15px;
-
       &:not(:disabled) {
         background-image: linear-gradient( to right, #e49393, #ffc7c7 51%, #e49393 100% );
         color: white;
