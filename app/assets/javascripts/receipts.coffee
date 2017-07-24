@@ -6,11 +6,11 @@ $( document ).on 'turbolinks:load', ->
     $parentElem = $receipts
 
     $sessionKey = $parentElem.attr 'id'
-    $dateStartSession = MyLib.getSession( $sessionKey )?.date_start || MyLib.toDateFormat( moment( ).startOf( 'month' ) )
-    MyLib.setSession( $sessionKey, { date_start: $dateStartSession } );
+    $dateStartSession = MyLib.getSession( $sessionKey )?.dateStart || MyLib.toDateFormat( moment( ).startOf( 'month' ) )
+    MyLib.setSession( $sessionKey, { dateStart: $dateStartSession } );
 
-    $dateEndSession = MyLib.getSession( $sessionKey )?.date_end || MyLib.toDateFormat( moment( ).endOf( 'month' ) )
-    MyLib.setSession( $sessionKey, { date_end: $dateEndSession } );
+    $dateEndSession = MyLib.getSession( $sessionKey )?.dateEnd || MyLib.toDateFormat( moment( ).endOf( 'month' ) )
+    MyLib.setSession( $sessionKey, { dateEnd: $dateEndSession } );
 
     $( "#main_menu li[data-page=#{ $sessionKey }]" ).addClass( 'active' ).siblings(  ).removeClass 'active'
 
@@ -22,11 +22,13 @@ $( document ).on 'turbolinks:load', ->
         'Фільтрація замовлення постачальникам'
         $clmn.data 'path-filter'
         'post'
-          date_start: $sessionObj.date_start
-          date_end: $sessionObj.date_end
-          sort_field: $clmnObj?.sort_field
-          sort_order: $clmnObj?.sort_order
-        'script' ) if $sessionObj?.date_start
+          date_start: $sessionObj.dateStart
+          date_end: $sessionObj.dateEnd
+          sort_field: $clmnObj?.sortField || ''
+          sort_order: $clmnObj?.sortOrder || ''
+        'script'
+        null
+        true  ) if $sessionObj?.dateStart
 
     getContractNumbers = ->
       $sessionObj = MyLib.getSession( $sessionKey )
@@ -36,13 +38,17 @@ $( document ).on 'turbolinks:load', ->
       $clmnSoObj = $sessionObj[ 'col_so' ]
       $supplierOrderId = $clmnSoObj?.row_id
 
+      $clmn[ 0 ].querySelector( '#contract_number' ).innerHTML = '<option value="">Договір</option>'
+
       if $supplierOrderId
         MyLib.ajax(
           'Фільтрація списку договорів постачання'
           $clmn.data 'path-filter-contracts'
           'post'
           supplier_order_id: $supplierOrderId
-          'script' )
+          'script'
+          null
+          true )
       else
         $clmn
           .find( 'h1' ).text( $clmn.data 'captions' )
@@ -65,10 +71,12 @@ $( document ).on 'turbolinks:load', ->
           $clmn.data 'path-filter'
           'post'
             supplier_order_id: $supplierOrderId
-            contract_number: $sessionObj?.contract_number
-            sort_field: $clmnObj?.sort_field
-            sort_order: $clmnObj?.sort_order
-          'script' )
+            contract_number: $sessionObj?.contract_number || ''
+            sort_field: $clmnObj?.sortField || ''
+            sort_order: $clmnObj?.sortOrder || ''
+          'script'
+          null
+          true )
       else
         $clmn.find( '.parent_table' ).empty( )
 
@@ -120,11 +128,11 @@ $( document ).on 'turbolinks:load', ->
       .on 'click', 'td, th[data-sort]', ->
         $this = $( @ )
         if $this.is 'th'
-          MyLib.tableHeaderClick $( @ ), filterTable # Нажатие для сортировки
+          MyLib.tableHeaderClick( $( @ )[ 0 ], filterTable ) # Нажатие для сортировки
         else
           $tr = $this.closest 'tr'
 
-          MyLib.rowSelect( $tr, filterContracts ) unless $tr.hasClass 'selected'
+          MyLib.rowClick( $tr[ 0 ], filterContracts ) unless $tr.hasClass 'selected'
 
     ########
     $( '#col_r' )
@@ -145,11 +153,14 @@ $( document ).on 'turbolinks:load', ->
       .on 'click', 'td, th[data-sort]', ->
         $this = $( @ )
         if $this.is 'th'
-          MyLib.tableHeaderClick $( @ ), filterTableReceipt # Нажатие для сортировки
+          MyLib.tableHeaderClick( $( @ )[ 0 ], filterTableReceipt ) # Нажатие для сортировки
         else
           $button = $this.children 'button'
           $tr = $this.closest 'tr'
 
-          MyLib.rowSelect $tr unless $tr.hasClass 'selected'
+          MyLib.rowClick( $tr[ 0 ], null ) unless $tr.hasClass 'selected'
 
-          MyLib.tableButtonClick( $button, false ) if $button.length
+          if $button.hasClass('btn_del')
+            MyLib.tableDelClick( $button[ 0 ], null )
+          else if $button.hasClass('btn_view') or $button.hasClass('btn_edit')
+            MyLib.tableEditClick( $button[ 0 ] )

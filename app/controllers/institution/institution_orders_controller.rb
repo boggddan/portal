@@ -56,7 +56,8 @@ class Institution::InstitutionOrdersController < Institution::BaseController
             #  .where( product: product, institution: current_institution ).group( :package_id ) do
           end
         end
-        result = { status: true, urlParams: { id: institution_order.id } }
+        href = institution_institution_orders_products_path( { id: institution_order.id } )
+        result = { status: true, href: href }
       end
     else
       result = { status: false, caption: 'За вибраний період даних немає в 1С',
@@ -114,7 +115,8 @@ class Institution::InstitutionOrdersController < Institution::BaseController
               .create( product: product, date: date, description: food[ :comments ], amount_order: amount_order, amount: amount_order  )
           end
         end
-        result = { status: true, urlParams: { id: io_correction.id } }
+        href = institution_institution_orders_correction_products_path( { id: io_correction.id } )
+        result = { status: true, href: href }
       end
     else
       result = { status: false, caption: 'За вибраний період даних немає в 1С',

@@ -22,8 +22,8 @@ table.table *{ data: { type: :list_doc }  }
   tbody
     - @timesheets.each do | tm |
       tr *{ data: { id: tm.id } }
-        td *{ data: { field: :date } } = date_str( tm.date )
-        td *{ data: { field: :number } } = tm.number
+        td = date_str( tm.date )
+        td *{ data: { delete: true } } = tm.number
         td *{ class: ( tm.is_del_1c ? :is_del  : '' ) } = tm.number_sa
         td = date_str( tm.date_eb )
         td = date_str( tm.date_ee )

@@ -47,7 +47,7 @@ $( document ).on 'turbolinks:load', ( ) ->
 
     $( '#col_iocp' )
       .find( 'tr.row_data' )
-        .click( -> MyLib.rowSelect( $( @ ) ) unless $( @ ).hasClass 'selected' )
+        .click( -> MyLib.rowClick( $( @ )[ 0 ], null ) unless $( @ ).hasClass 'selected' )
       .end( )
       .find( 'tr.date :first-child' )
         .each -> # Отформатировать дату данные

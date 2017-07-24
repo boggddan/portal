@@ -1,0 +1,11 @@
+// фильтрация таблицы заявок
+( function ajax( ) {
+  const parentTable = document.querySelector( '#col_so .parent_table' );
+
+  <% if @supplier_orders.present? %>
+    parentTable.innerHTML = '<%= j render( "table_supplier_orders" ) %>';
+    MyLib.tableSetSession( parentTable );
+  <% else %>
+    parentTable.innerHTML = '';
+  <% end %>
+}( ) );

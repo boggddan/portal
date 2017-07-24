@@ -36,7 +36,7 @@
   end
 
   def product_code( code )
-    code = code.strip
+    code = code.nil? ? '' : code.strip
     if product = Product.find_by( code: code )
       product
     else
@@ -45,7 +45,7 @@
   end
 
   def child_code( code )
-    code = code.strip
+    code = code.nil? ? '' : code.strip
     if child = Child.find_by( code: code )
       child
     else
@@ -54,7 +54,7 @@
   end
 
   def reasons_absence_code( code )
-    code = code.strip
+    code = code.nil? ? '' : code.strip
     if reasons_absence = ReasonsAbsence.find_by( code: code )
       reasons_absence
     else
@@ -63,7 +63,7 @@
   end
 
   def children_group_code( code )
-    code = code.strip
+    code = code.nil? ? '' : code.strip
     if children_group = ChildrenGroup.find_by( code: code )
       children_group
     else
@@ -72,7 +72,7 @@
   end
 
   def causes_deviation_code( code )
-    code = code.strip
+    code = code.nil? ? '' : code.strip
     if causes_deviation = CausesDeviation.find_by( code: code )
       causes_deviation
     else

@@ -9,8 +9,8 @@ h2.icon Продукти харчування
 
   - @products_meals.each do | o |
     button.btn_gradient.nav *{ data: { meal_id: o[ :id ] } } = o[ :name ]
-  button.btn_gradient.nav *{ data: { meal_id: 0 } } Підсумки
   button.btn_gradient.nav *{ data: { meal_id: -1 } } Всі прийоми їжі
+  button.btn_gradient.nav *{ data: { meal_id: 0 } } Підсумки
 
 .panel
   label Вартість дітодня:

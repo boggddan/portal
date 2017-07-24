@@ -92,7 +92,8 @@ class TimesheetDates {
     groupTimesheet.dispatchEvent( new Event( 'change' ) );
   }
 
-  colTbInit( ) {
+  colTbInit( elements ) {
+    this.colTdParentTable.innerHTML = elements;
     this.colTbTable = this.colTdParentTable.querySelector( 'table' );
     $( this.colTbTable ).tableHeadFixer( { left: 3 } );
 
@@ -123,7 +124,7 @@ class TimesheetDates {
       const caption = `Зміна значення ${ nameVal } з ${ valOld } на ${ val } [id: ${ dataId }]`;
       const data = { id: dataId, [ nameVal ]: val };
       const { parentElem: { dataset: { pathUpdate: url } } } = this;
-      MyLib.ajax( caption, url, 'post', data, 'json', '', false, false );
+      MyLib.ajax( caption, url, 'post', data, 'json', null, false );
     }
   }
 
@@ -136,9 +137,9 @@ class TimesheetDates {
   clickSend( ) {
     const caption = `Відправка данних в 1С [id: ${ this.dataId }]`;
     const { parentElem: { dataset: { pathSend: url } } } = this;
-    const data = { id: this.dataId, bug: '' };
+    const data = { id: this.dataId };
     const successAjax = ( ) => window.location.reload( );
-    MyLib.ajax( caption, url, 'post', data, 'json', false, successAjax, true );
+    MyLib.ajax( caption, url, 'post', data, 'json', successAjax, true );
   }
 
   filterGroups( event ) { // фильтрация категории / группы
@@ -152,7 +153,7 @@ class TimesheetDates {
     const caption = 'Фільтрація данных табеля';
     const data = { id: this.dataId, field: paramName, field_id: value };
     const { colTd: { dataset: { pathFilter: url } } }  = this;
-    MyLib.ajax( caption, url, 'post', data, 'script', '', false, true );
+    MyLib.ajax( caption, url, 'post', data, 'script', null, true );
   }
 
   clickReasonAbsence( event ) {
@@ -176,7 +177,7 @@ class TimesheetDates {
       const caption = 'Группова заміна позначок табеля';
       const data = { ids: cells, reasons_absence_id: reasonsAbsenceId };
       const { colTd: { dataset: { pathUpdates: url } } } = this;
-      MyLib.ajax( caption, url, 'post', data, 'json', '', false, true );
+      MyLib.ajax( caption, url, 'post', data, 'json', null, true );
       this.calcMarks( );
     }
   }
@@ -253,7 +254,7 @@ class TimesheetDates {
     const data = { id: tbId, reasons_absence_id: reasonsAbsenceId };
     const caption = `Оновлення позначки табеля id = [ ${ tbId } ]`;
     const { colTd: { dataset: { pathUpdate: url } } }  = this;
-    MyLib.ajax( caption, url, 'post', data, 'json', '', false, false );
+    MyLib.ajax( caption, url, 'post', data, 'json', null, false );
   }
 
   cellMouseOver( event ) {

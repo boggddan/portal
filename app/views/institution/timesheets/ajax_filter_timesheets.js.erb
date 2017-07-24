@@ -1,8 +1,11 @@
-( function( ) {
-  const $blockTable = $( '#col_t' ).children( '.parent_table' ).empty( );
+( function ajax( ) {
+  const parentTable = document.querySelector( '#col_t .parent_table' );
 
-<% if @timesheets.present? %>
-  $blockTable.append( '<%= j render( "table_timesheets" ) %>' );
-  MyLib.tableSetSession( $blockTable );
-<% end %>
-} ).call( this );
+  <% if @timesheets.present? %>
+    parentTable.innerHTML = '<%= j render( "table_timesheets" ) %>';
+    MyLib.tableSetSession( parentTable );
+  <% else %>
+    parentTable.innerHTML = elements;
+  <% end %>
+
+}( ) );

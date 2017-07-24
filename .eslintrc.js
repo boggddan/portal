@@ -624,7 +624,7 @@ module.exports = {
 
       // enforce line breaks after each array element
       // http://eslint.org/docs/rules/array-element-newline
-      'array-element-newline': [ 'error', { multiline: true } ],
+      'array-element-newline': [ 'off', { multiline: true } ],
 
       // enforce consistent spacing inside single-line blocks
       // http://eslint.org/docs/rules/block-spacing
@@ -869,7 +869,7 @@ module.exports = {
 
       // disallow multiple empty lines
       // http://eslint.org/docs/rules/no-multiple-empty-lines
-      'no-multiple-empty-lines': [ 'error', { max: 2, maxEOF: 1, maxBOF: 1 } ],
+      'no-multiple-empty-lines': [ 'error', { max: 1, maxEOF: 1, maxBOF: 1 } ],
 
       // disallow negated conditions
       // http://eslint.org/docs/rules/no-negated-condition

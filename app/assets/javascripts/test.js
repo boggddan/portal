@@ -1,6 +1,3 @@
-// const obj = { dd: { dd1: 1, dd2: 2 } };
-
-// const { dd: [ varDd, { dd1: varDd1 } ] } = obj;
-// // const { dd: varDd, dd: { dd1: varDd1 } } = obj;
-
-// console.log( varDd, varDd1 );
+// dd = '["{\"id\":40,\"username\":\"user2\",\"userable_type\":\"Institution\",\"userable_id\":980190990}"]';
+// dd2 = JSON.parse( dd )
+// console.log(dd2)

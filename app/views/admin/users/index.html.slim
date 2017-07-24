@@ -1,0 +1,13 @@
+main#users
+
+  #col_us.clmn *{ data: { caption: 'Користувач',
+  path: { \
+  filter: admin_users_filter_users_path,
+  create: admin_users_new_path,
+  view: admin_users_new_path,
+  del: admin_users_delete_path } } }
+
+    h1 Користувачі
+    .panel : button.btn_create
+
+    .parent_table

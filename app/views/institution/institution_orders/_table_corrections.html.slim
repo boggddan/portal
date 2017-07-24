@@ -18,8 +18,8 @@ table.table *{ data: { type: :list_doc }  }
     tbody
       - @io_corrections.each do | ioc |
         tr *{ data:{ id: ioc.id } }
-          td *{ data: { field: :date } } = date_str( ioc.date )
-          td *{ data: { field: :number } } = ioc.number
+          td = date_str( ioc.date )
+          td *{ data: { delete: true } } = ioc.number
           td *{ class: ( ioc.is_del_1c ? :is_del : '' ) } = ioc.number_sa
           td : button.btn_view *{ disabled: !ioc.number_sa }
           td : button.btn_edit *{ disabled: ioc.number_sa }

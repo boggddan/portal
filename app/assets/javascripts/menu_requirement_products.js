@@ -3,7 +3,7 @@
 class MenuRequirementProducts {
   // нажатие на кнопочку создать
   createProducts( ) {
-    const data =  { id: this.dataId, bug: '' };
+    const data =  { id: this.dataId };
     const caption = `Формування страв та прийомів їжі id = [${ this.dataId }]`;
     const { colMd: { dataset: { pathCreate: url } } } = this;
     MyLib.ajax( caption, url, 'post', data, 'script', '', false, true );
@@ -26,17 +26,16 @@ class MenuRequirementProducts {
 
   // нажатие на кнопочку выход
   clickExit( ) {
-    MyLib.pageLoader( true );
-    window.location.replace( this.parentElem.dataset.pathExit );
+    MyLib.assignLocation( this.parentElem.dataset.pathExit );
   }
 
   clickSend( event ) {
     const pf = `pathSend${ MyLib.capitalize( event.currentTarget.dataset.pf ) }`;
     const caption = `Відправка данних в 1С [id: ${ this.dataId }]`;
-    const data = { id: this.dataId, bug: '' };
+    const data = { id: this.dataId };
     const successAjax = ( ) => window.location.reload( );
     const { parentElem: { dataset: { [ pf ]: url } } } = this;
-    MyLib.ajax( caption, url, 'post', data, 'json', false, successAjax, true );
+    MyLib.ajax( caption, url, 'post', data, 'json', '', successAjax, true );
   }
 
   clickMdCell( target ) {
@@ -286,10 +285,12 @@ class MenuRequirementProducts {
     this.headerText( );
     this.checkMdExists( );
     this.colCcInit( );
-    this.colPrInit( );
+    this.colPrInit( '' );
   }
 
-  colPrInit( ) {
+  colPrInit( elements ) {
+    this.colPr.innerHtml = elements;
+
     this.colPrTable = this.colPr.querySelector( 'table' );
 
     if ( this.colPrTable ) {

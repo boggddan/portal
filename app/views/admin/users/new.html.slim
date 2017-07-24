@@ -1,0 +1,43 @@
+- label_text = 'layouts/label_text'
+
+main#user_new  *{ data: { \
+  user: @user,
+  path: { \
+  create: admin_users_create_path,
+  exit: admin_users_index_path } } }
+
+  h1
+  .panel
+    button.btn_save
+    button.btn_exit
+
+  .panel
+    = render label_text, label_attr: { class: :icon_none }, text: 'Користувач:',
+      input_attr: { id: :username, class: :right_first, placeholder: 'Логін...' }
+  .panel
+    = render label_text, label_attr: { class: :icon_none }, text: 'Пароль:',
+      input_attr: { id: :password, placeholder: 'Пароль...' }
+  .panel
+    = render label_text, label_attr: { class: :icon_none }, text: 'Підтвердження:',
+      input_attr: { id: :password_confirmation, class: :align_right, placeholder: 'Пароль...' }
+
+  fieldset
+    legend Тип користувача
+    .panel *{ data: { userable_type: 'Admin' } }
+      label
+        &radio *{ name: :userable_type }
+        | Адміністратор
+
+    .panel *{ data: { userable_type: 'Institution' } }
+      label
+        &radio *{ name: :userable_type }
+        | Дитячий садок:
+      select.align_right
+        = options_for_select( @institution )
+
+    .panel *{ data: { userable_type: 'Supplier' } }
+      label
+        &radio *{ name: :userable_type }
+        | Дитячий садок:
+      select.align_right
+        = options_for_select( @supplier )

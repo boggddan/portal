@@ -1,38 +1,38 @@
-$( document ).on( 'turbolinks:load', function() {
+/* exported Users */
 
-  // Если объект существует
-  if ( $( '#users' ).length ) {
-    $( '#main_menu li' ).removeClass( 'active' );
-    $( '#mm_users' ).addClass( 'active' );
+class Users extends FormList {
+  constructor( elem ) {
+    super( elem );
+    this.parentElem = elem;
 
-    $( '#dialog_delete' ).data( 'delete', 'deleteUser();' ); // Функция для удаления пользователя
-    $( '#dialog_delete' ).data( 'un-delete', 'unDeleteUser();' ); // Отмена удаления пользователя
+    const colUs = this.parentElem.querySelector( '#col_us' );
+    const colUsParentTable = colUs.querySelector( '.parent_table' );
 
-    $( '.table' ).tableHeadFixer(); // Фиксируем шапку таблицы
+    this.tableEvents( colUs );
+    MyLib.mainMenuActive( 'users' );
 
-    // Удаление пользователя
-    deleteUser = function () {
-      var $path_ajax = $( '.table' ).data( 'path-del' ) + $( 'tr.delete' ).data( 'id' );
-      $.ajax( { url: $path_ajax, type: 'DELETE', dataType: 'script' } );
+    [ this.colUs, this.colUsParentTable ] = [ colUs, colUsParentTable ];
 
-      // Если один одна строка, тогда удаляем всю табличку
-      if ($( 'tbody' ).children().length == 1 ) { $( '#table_users' ).empty() }
-        else { $( 'tr.delete' ).remove() }
-    } };
+    this.getTableColUs( );
+  }
 
-    // Отмена удаления заявки
-    unDeleteUser = function() { $( 'tr.delete' ).removeClass( 'delete' ) };
+  filterTableColUs( ) { // фильтрация таблицы документов
+    MyLib.setClearTableSession( this.parentElem.id, this.colUs.id );
+    this.getTableColUs( );
+  }
 
-    // Нажатие на кнопочку удалить поступление
-    $( '#users' ).on( 'click', 'td .btn_del', function() {
-      $( this ).parents( 'tr' ).addClass( 'delete' );
-      $( '#dialog_delete' ).dialog( 'open' );
-    } );
+  getTableColUs( ) {
+    const clmnObj = MyLib.getSession( this.parentElem.id )[ this.colUs.id ] || { };
+    const caption = 'Фільтрація користвувачів';
+    const { colUs: { dataset: { pathFilter: url } } } = this;
+    const data = { sort_field: clmnObj.sortField || '', sort_order: clmnObj.sortOrder || '' };
+    MyLib.ajax( caption, url, 'post', data, 'script', null, true );
+  }
 
-    // Нажатие на кнопочку для перехода заполнения информации
-    $( '#users' ).on( 'click', 'td .btn_view, td .btn_edit', function() {
-      window.location.replace( $( this ).parents( 'table' )
-          .data( 'path-view' ) + $( this ).parents( 'tr' ).data( 'id' ) );
-    } );
+  colUsInit( elements ) {
+    this.colUsParentTable.innerHTML = elements;
+    this.tableSetSession( this.colUsParentTable );
+    this.tableFormat( this.colUsParentTable );
+  }
+}
 
-} );

@@ -1,0 +1,8 @@
+( function ajax( ) {
+  const parentTable = document.querySelector( '#col_us .parent_table' );
+  let elements = '';
+
+  elements = '<%= j render( "table_users" ) if @users.present? %>';
+
+  objUsers.colUsInit( elements )
+}( ) );

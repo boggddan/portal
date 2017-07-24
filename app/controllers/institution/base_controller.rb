@@ -8,7 +8,7 @@ class Institution::BaseController < ApplicationController
   end
 
   def index
-    render 'institution/index.slim'
+    render 'institution/index'
   end
 
   def current_institution # Текущее подразделение

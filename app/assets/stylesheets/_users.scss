@@ -1,19 +1,29 @@
-
 #users {
-  #table_users { height: 370px; }
+  flex-direction: row;
 
-  td:nth-of-type(1) { width: 200px; text-align: left; padding-left: 3px;}
-  td:nth-of-type(2) {width: 40px;}
-  td:nth-of-type(3) { width: 400px; text-align: left; padding-left: 3px;}
+  #col_us {
+    flex-basis: 1000px;
+
+    col:nth-child( 2 ) { width: 25px; }
+    col:nth-child( 3 ) { width: 400px; }
+  }
 }
 
 #user_new {
-
-  form > .panel { width: 450px; }
+  & > .panel {
+    label {
+      input {
+        margin-left: 20px;
+        width: 200px;
+        text-align: left;
+        padding: 0 3px;
+      }
+    }
+  }
 
   fieldset {
     width: 450px;
-    select { width: 300px }
+    select { width: 300px; }
   }
 
 }

@@ -196,7 +196,8 @@ class Institution::MenuRequirementsController < Institution::BaseController
         cc_sql = "INSERT INTO menu_children_categories ( #{ cc_fieds } ) VALUES #{ cc_sql_values[1..-1] }"
 
         ActiveRecord::Base.connection.execute( "#{ mmd_sql };#{ cc_sql }" )
-        result = { status: true, urlParams: { id: id } }
+        href = institution_menu_requirements_products_path( { id: menu_requirement.id } )
+        result = { status: true, href: href }
       end
     else
       result = { status: false, message: 'Незаповенені довідники (children_categories,meals,dishes)!' }

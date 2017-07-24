@@ -169,8 +169,12 @@ nav#main_menu {
 
 // Кнопки для детского сада
 #main_menu {
-  li[data-page=institution_index] > a:before {
+  li[ data-page $= 'index' ] > a::before {
     content: '\e021';
+  }
+
+  li[ data-page = 'users' ] > a::before {
+    content: '\e008';
   }
 
   li[data-page=institution_orders] > a:before {
@@ -200,7 +204,7 @@ nav#main_menu {
   li[data-page=institution_reports_children_day_cost],
   li[data-page=institution_reports_balances_in_warehouses],
   li[data-page=institution_reports_attendance_of_children] {
-    > a:before {
+    & > a::before {
       content: '\e045';
     }
   }

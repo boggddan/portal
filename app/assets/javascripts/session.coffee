@@ -9,7 +9,6 @@ $( document ).on 'turbolinks:load', ( ) ->
       .find( 'button' )
         .click ->  # Нажатие на кнопочку создать
           $elem = $( @ )
-          MyLib.pageLoader( true )
           $main = $elem.closest( 'main' )
           $usernameVal = $( '#username' ).val()
           $password = $( '#password' )
@@ -24,7 +23,8 @@ $( document ).on 'turbolinks:load', ( ) ->
               'post'
               { username: $usernameVal, password: $passwordVal }
               'json'
-              false )
+              null
+              true )
           else
             switch
               when not $usernameVal and not $passwordVal then $header = 'Не введені ім\'я користувача та пароль'

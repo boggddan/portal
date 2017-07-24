@@ -1,0 +1,28 @@
+// фильтрация таблицы заявок
+( function ajax( ) {
+  const clmn = document.getElementById( 'col_ioc' );
+  const parentTable = clmn.querySelector( '.parent_table' );
+  let [ id, number, disabled ] = [ '', '', true ];
+
+  parentTable.innerHTML = '';
+
+  <% if @institution_order.present? %>
+    [ id, number, disabled ] =
+      [
+        '<%= @institution_order.id %>',
+        '<%= @institution_order.number %>',
+        '<%= @institution_order.number_sa.present? %>' === 'true'
+      ];
+
+    <% if @io_corrections.present? %>
+      parentTable.innerHTML = '<%= j render( "table_corrections" ) %>';
+      MyLib.tableSetSession( parentTable );
+      disabled = '<%= @io_corrections.last.number_sa.present? %>' === 'false';
+    <% end %>
+  <% end %>
+
+  clmn.dataset.institutionOrderId = id;
+
+  clmn.querySelector( 'h1' ).textContent = `${ clmn.dataset.captions } ${ number }`;
+  clmn.querySelector( '.btn_create' ).disabled = disabled;
+}( ) );

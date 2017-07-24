@@ -20,7 +20,7 @@ $ffIcon: 'Glyphicons Halflings';
 input::-webkit-input-placeholder { color: #e7e7e7; text-align: left; }
 input::-moz-placeholder          { color: #e7e7e7; text-align: left; }
 input:-ms-input-placeholder      { color: #e7e7e7; text-align: left; }
-input:focus { outline: none; }
+input:focus { outline: e; }
 
 body { /* Главний блок */
   margin: 0;
@@ -47,7 +47,7 @@ body { /* Главний блок */
 #ui-datepicker-div { z-index: 999 !important; }
 
 .ui-widget-header .ui-icon {
-    background-image: image_url('lib/ui-icons_444444_256x240.png');
+  background-image: image_url('lib/ui-icons_444444_256x240.png');
 }
 
 /* Заголовоки */

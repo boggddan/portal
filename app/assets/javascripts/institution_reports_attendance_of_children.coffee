@@ -25,7 +25,7 @@ $( document ).on 'turbolinks:load', ->
               children_group: $childrenGroupCode.val( )
               is_pdf: $( @ ).hasClass( 'btn_print' )
             'json'
-            false
+            ''
             false
             true )
       .end( )

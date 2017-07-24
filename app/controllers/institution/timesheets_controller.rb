@@ -39,56 +39,83 @@ class Institution::TimesheetsController < Institution::BaseController
                      'З': date_str( v[ :date_eb ] ), 'ПО': date_str( v[ :date_ee ] ) } }  }
     else
       message = { 'CreateRequest' => { 'StartDate' => date_start,
-                                       'EndDate' => date_end,
-                                       'Institutions_id' => current_institution.code } }
+                                        'EndDate' => date_end,
+                                        'Institutions_id' => current_institution.code } }
       method_name = :get_data_time_sheet
       response = Savon.client( SAVON )
-                   .call( method_name, message: message )
-                   .body[ "#{ method_name }_response".to_sym ][ :return ]
+                    .call( method_name, message: message )
+                    .body[ "#{ method_name }_response".to_sym ][ :return ]
 
       web_service = { call: { savon: SAVON, method: method_name.to_s.camelize, message: message } }
 
-      result = { }
       ts_data = response[ :ts ]
 
-      if response[ :interface_state ] == 'OK' && ts_data
-        ActiveRecord::Base.transaction do
-          timesheet = Timesheet.create( institution: current_institution, branch: current_branch,
-            date_vb: response[ :date_vb ], date_ve: response[ :date_ve ],
-            date_eb: response[ :date_eb ], date_ee: response[ :date_ee ], date: Date.today )
+      result = { }
+      if response[ :interface_state ] == 'OK' && ts_data && ts_data.present?
+        error = [ ]
 
-          ts_data.each do | ts |
-            error = {}
-            child = child_code( ts[ :child_code ] )
-            error.merge!( child[ :error ] ) if child[ :error ]
+        children = { }
+        ts_data.group_by { | o | o[ :child_code ] }.each { | k, v |
+          child = child_code( k )
+          if child[ :error ] then error << child[ :error ] else children.merge!( k => child.id ) end
+        }
 
-            children_group = children_group_code( ts[ :children_group_code ] )
-            error.merge!( children_group[ :error ] ) if children_group[ :error ]
+        children_groups = { }
+        ts_data.group_by { | o | o[ :children_group_code ] }.each { | k, v |
+          children_group = children_group_code( k )
+          if children_group[ :error ] then error << children_group[ :error ] else children_groups.merge!( k => children_group.id ) end
+        }
 
-            reasons_absence = reasons_absence_code( ( ts[ :reasons_absence_code ] || '' ) )
-            error.merge!( reasons_absence[ :error ] ) if reasons_absence[ :error ]
+        reasons_absences = { }
+        ts_data.group_by { | o | o[ :reasons_absence_code ] }.each { | k, v |
+          reasons_absence = reasons_absence_code( k )
+          if reasons_absence[ :error ] then error << reasons_absence[ :error ] else reasons_absences.merge!( k => reasons_absence.id ) end
+        }
 
-            if error.empty?
-              TimesheetDate.new do | o |
-                o.date = ts[ :date ]
-                o.timesheet_id = timesheet.id
-                o.child_id = child.id
-                o.children_group_id = children_group.id
-                o.reasons_absence_id = reasons_absence.id
-                o.save( validate: false )
-              end
-            else
-              result = { status: false, caption: 'Неможливо створити документ',
-                         message: { error: error }.merge!( web_service ) }
-              raise ActiveRecord::Rollback
-            end
+        if error.empty?
+          ActiveRecord::Base.transaction do
+            now = Time.now.to_s( :db )
+
+            timesheet = Timesheet.create( institution: current_institution,
+                                          branch: current_branch,
+                                          date_vb: response[ :date_vb ],
+                                          date_ve: response[ :date_ve ],
+                                          date_eb: response[ :date_eb ],
+                                          date_ee: response[ :date_ee ],
+                                          date: now )
+            id = timesheet.id
+
+            fields = %w( timesheet_id children_group_id child_id reasons_absence_id
+                        date created_at updated_at ).join( ',' )
+
+            sql_values = ''
+
+            ts_data.each { | ts |
+              sql_values += ",(#{ id }," +
+                            "#{ children_groups[ ts[ :children_group_code ] ] }," +
+                            "#{ children[ ts[ :child_code ] ] }," +
+                            "#{ reasons_absences[ ts[ :reasons_absence_code ] ] }," +
+                            "'#{ ts[ :date ] }'," +
+                            "'#{ now }','#{ now }')"
+            }
+
+            sql = "INSERT INTO timesheet_dates ( #{ fields } ) VALUES #{ sql_values[1..-1] }"
+
+            file = File.new( 'out_sql', 'w' )
+            file.write( sql )
+            file.close
+            ActiveRecord::Base.connection.execute( sql )
+
+            href = institution_timesheets_dates_path( { id: id } )
+            result = { status: true, href: href }
           end
-
-          result = { status: true, urlParams: { id: timesheet.id } }
+        else
+          result = { status: false, caption: 'Неможливо створити документ',
+                    message: { error: error }.merge!( web_service ) }
         end
       else
         result = { status: false, caption: 'За вибраний період даних немає в 1С',
-                   message: web_service.merge!( response: response ) }
+                  message: web_service.merge!( response: response ) }
       end
     end
 
@@ -142,15 +169,14 @@ class Institution::TimesheetsController < Institution::BaseController
   def dates # Отображение дней табеля
     @timesheet = Timesheet.find_by( id: params[ :id ] )
 
-    @reasons_absences = JSON.parse( ReasonsAbsence.select( :id, :code, :mark ).where( code: '' )
+    reasons_absences = JSON.parse( ReasonsAbsence.select( :id, :code, :mark ).where( code: '' )
       .or( ReasonsAbsence.select( :id, :code, :mark ).where.not( mark: '' ) )
       .order( :priority )
       .to_json, symbolize_names: true )
 
-    @reasons_absences.map!.with_index { | v, i |
-      next_v = @reasons_absences[ @reasons_absences.size == i + 1 ? 0 : i + 1 ];
-      v.merge!( { next_id: next_v[ :id ], next_mark: next_v[ :mark ] } ) }
-
+    @reasons_absences = [ ]
+    reasons_absences.zip( reasons_absences.rotate ) { | item, item_next |
+      @reasons_absences << item.merge( { next_id: item_next[:id], next_mark: item_next[ :mark ] } ) }
 
     @group_timesheet = []
     children_category_id = 0

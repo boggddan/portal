@@ -16,7 +16,7 @@ html
         li.caption Портал
         li.item *{ data: { page: :admin_index } }
           a *{ href: admin_index_path } Початкова
-        li.item *{ data: {page: :institution_orders } }
+        li.item *{ data: { page: :users } }
           a *{ href: admin_users_index_path } Користувачі
         li.info
           span = @current_user.username

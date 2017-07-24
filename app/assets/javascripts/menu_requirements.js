@@ -6,14 +6,14 @@ $( document ).on( 'turbolinks:load', ( ) => {
     const sessionKey = $parentElem.attr( 'id' );
 
     const dateStartSession = ( MyLib.getSession( sessionKey ) ||
-      { } ).date_start || MyLib.toDateFormat( moment( ).startOf( 'month' ) );
+      { } ).dateStart || MyLib.toDateFormat( moment( ).startOf( 'month' ) );
 
-    MyLib.setSession( sessionKey, { date_start: dateStartSession } );
+    MyLib.setSession( sessionKey, { dateStart: dateStartSession } );
 
     const dateEndSession = ( MyLib.getSession( sessionKey ) ||
-      { } ).date_end || MyLib.toDateFormat( moment( ).endOf( 'month' ) );
+      { } ).dateEnd || MyLib.toDateFormat( moment( ).endOf( 'month' ) );
 
-    MyLib.setSession( sessionKey, { date_end: dateEndSession } );
+    MyLib.setSession( sessionKey, { dateEnd: dateEndSession } );
 
     $( `#main_menu li[data-page=${ sessionKey }]` ).addClass( 'active' ).siblings(  ).removeClass( 'active' );
 
@@ -22,16 +22,18 @@ $( document ).on( 'turbolinks:load', ( ) => {
       const $clmn = $( '#col_mr' );
       const $clmnObj = $sessionObj[ $clmn.attr( 'id' ) ];
 
-      if ( ( $sessionObj || { } ).date_start ) {
+      if ( ( $sessionObj || { } ).dateStart ) {
         MyLib.ajax(
           'Фільтрація табелів',
           $clmn.data( 'path-filter' ),
           'post',
-          { date_start: $sessionObj.date_start,
-            date_end: $sessionObj.date_end,
-            sort_field: ( $clmnObj || { } ).sort_field,
-            sort_order: ( $clmnObj || { } ).sort_order },
-          'script' );
+          { date_start: $sessionObj.dateStart,
+            date_end: $sessionObj.dateEnd,
+            sort_field: ( $clmnObj || { } ).sortField || '',
+            sort_order: ( $clmnObj || { } ).sortOrder || '' },
+          'script',
+          null,
+          true );
       };
     };
 
@@ -62,15 +64,17 @@ $( document ).on( 'turbolinks:load', ( ) => {
       .on( 'click', 'td, th[data-sort]' , function( ) {
         const $this = $( this );
         if ( $this.is( 'th' ) ) {
-          MyLib.tableHeaderClick( $this, filterTable ); // Нажатие для сортировки
+          MyLib.tableHeaderClick( $this[ 0 ], filterTable ); // Нажатие для сортировки
         } else {
-          const $button = $this.children( 'button' );
           const $tr = $this.closest( 'tr' );
 
-          if ( !$tr.hasClass( 'selected' ) ) MyLib.rowSelect( $tr );
+          if ( !$tr.hasClass( 'selected' ) ) MyLib.rowClick( $tr[ 0 ], null );
 
-          if ( $button.length ) MyLib.tableButtonClick( $button, false );
-        };
-      } );
+          const { 0: button } = $this.children( 'button' );
+          const { classList } = button;
+          if ( classList.contains( 'btn_del' ) ) MyLib.tableDelClick( button, null );
+          else if ( classList.contains( 'btn_view' ) || classList.contains( 'btn_edit' ) ) MyLib.tableEditClick( button );
+      } } );
+
   };
 } );

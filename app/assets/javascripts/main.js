@@ -1,14 +1,16 @@
+/* exported MyLib */
+
 class MyLib {
   static get formatDate( ) { return 'DD.MM.YYYY' }
 
-  // Преобразование в число и обрезание разрядности
+  // преобразование в число и обрезание разрядности
   static toNumber( value, scale = -1 ) {
     let result = 0;
 
-    if ( ['number', 'string'].includes(typeof value) ) {
+    if ( [ 'number', 'string' ].includes( typeof value ) ) {
       result = +( new RegExp(
-        `(-?\\d+)([.,]${ scale ? '\\d{1,' + (scale === -1 ? '' : scale) + '}' : '' })?`)
-        .exec( `${ value }` ) || ['0'] )[0].replace( ',', '.' );
+        `(-?\\d+)([.,]${ scale ? `\\d{1,${ scale === -1 ? '' : scale }}` : '' })?` )
+        .exec( `${ value }` ) || [ '0' ] )[ 0 ].replace( ',', '.' );
     }
 
     return result;
@@ -22,17 +24,17 @@ class MyLib {
 
       if ( scale === -1 ) result = strValue;
       else {
-        let scaleValue;
-        const arrValue = strValue.split('.');
-        if ( scale === 0 ) result = arrValue[ 0 ];
+        let scaleValue = '';
+        const arrValue = strValue.split( '.' );
+        if ( scale === 0 ) ( { 0: result } = arrValue );
         else {
           if ( arrValue.length === 1 ) scaleValue = '0'.repeat( scale );
           else {
-            const arrScaleLen = arrValue[ 1 ].length;
+            const { 1: { length: arrScaleLen } } = arrValue;
             scaleValue = ( arrValue[ 1 ] +
               ( scale > arrScaleLen ? '0'.repeat( scale - arrScaleLen ) : '' ) ).slice( 0, scale );
           }
-          result = arrValue[ 0 ] + '.' + scaleValue;
+          result = `${ arrValue[ 0 ] }.${ scaleValue }`;
         }
       }
     }
@@ -40,9 +42,9 @@ class MyLib {
     return result;
   }
 
-  // Нужно дописать!!!!
+  // нужно дописать!!!!
   static toRound( value, scale = 0 ) {
-    let result;
+    let result = 0;
     if ( scale === 0 ) result = Math.round( value );
     if ( scale === 2 ) result = Math.round( value * 100 ) / 100;
     if ( scale === 3 ) result = Math.round( value * 1000 ) / 1000;
@@ -59,15 +61,14 @@ class MyLib {
       .replace( /[-_](.)/g, word => word[ 1 ].toUpperCase() );
   }
 
-  // Изминение значение таблице и на панели
+  // изминение значение таблице и на панели
   static changeValue( elem, parentName, callback ) {
     const name = elem.attr( 'name' ) || elem.attr( 'id' );
     const dataType = elem.data( 'type' );
-    let val;
-    let valOld;
+    let [ val, valOld ] = [ 0, 0 ];
 
-    if ( dataType && dataType.charAt(0) === 'n' ) {
-      const scale = +dataType.slice(1) || -1;
+    if ( dataType && dataType.charAt( 0 ) === 'n' ) {
+      const scale = +dataType.slice( 1 ) || -1;
       val = this.toNumber( elem.val( ), scale );
       valOld = +elem.data( 'old-value' );
       const strVal = this.numToStr( val );
@@ -75,10 +76,10 @@ class MyLib {
       elem.val( strVal ).attr( 'value', strVal );
     } else {
       val = elem.val( );
-      valOld =  elem.data( 'old-value' );
+      valOld = elem.data( 'old-value' );
     }
 
-    let parentElem;
+    let parentElem = HTMLElement;
     let id = -1;
 
     switch ( parentName ) {
@@ -101,66 +102,99 @@ class MyLib {
         `Зміна значення ${ name } з ${ valOld } на ${ val } [id: ${ id }]`,
         parentElem.data( 'path-update' ),
         'post',
-        { id: id, [name]: val },
+        { id, [ name ]: val },
         'json',
-        '',
         callback,
         false );
     }
   }
 
-  static ajax( caption, url, type, data, dataType, urlAssing, callsuccess, loader = true ) {
-    this.pageLoader( loader );
-
-    $.ajax(
-      { url: url,
-        type: type,
-        data: data,
-        dataType: dataType,
-        success: data => {
-          if ( dataType === 'json' ) {
-            if ( data.status ) {
-              if ( urlAssing ) this.assignLocation( urlAssing, data.urlParams );
-              const href = data.href;
-              const view = data.view;
-              if ( href ) {
-                if ( href.search(/.pdf$/i) === -1 ) this.assignLocation( href ); else this.open( href );
-              }
-              if ( view ) $( '#view' ).html( view );
-              if ( callsuccess ) callsuccess( );
-            } else {
-              this.errorMsg( data.caption || caption, JSON.stringify( data.message, null, ' ' ) );
-            }
-          }
-
-          if ( loader ) this.pageLoader( false );
-        },
-        error: xhr => { this.errorMsg( caption, xhr.responseText ) }
-      }
-    );
+  static mainMenuActive( selector ) {
+    const menuItem = document.querySelector( `#main_menu li[data-page='${ selector }']` );
+    if ( menuItem ) {
+      Array.from( menuItem.parentElement.children ).forEach( child => {
+        const { classList } = child;
+        if ( child === menuItem ) classList.add( 'active' ); else classList.remove( 'active' );
+      } );
+    }
   }
 
-  // Нажатие на кнопочку выход
-  static btnExitClick(elem) {
+  static ajax( caption, url, type, dataValue, dataType, callSuccess, loader = true ) {
+    this.pageLoader( loader );
+
+    const scriptRun = text => {
+      const script = document.createElement( 'script' );
+      script.innerHTML = text;
+      document.head.appendChild( script );
+    };
+
+    const success = data => {
+      if ( dataType === 'json' ) {
+        if ( data.status ) {
+          const { href, view } = data;
+          if ( href ) {
+            if ( href.search( /.pdf$/i ) === -1 ) this.assignLocation( href ); else this.open( href );
+          } else if ( view ) {
+            document.getElementById( 'view' ).innerHTML( view );
+          }
+          if ( callSuccess ) callSuccess( );
+        } else {
+          this.errorMsg( data.caption || caption, JSON.stringify( data.message, null, ' ' ) );
+        }
+      } else if ( dataType === 'script' ) {
+        scriptRun( data );
+      }
+
+      if ( loader ) this.pageLoader( false );
+    };
+
+    const sendAjax = async ( ) => {
+      let data = '';
+      const formData = new FormData( );
+      Object.keys( dataValue ).forEach( key => formData.append( key, dataValue[ key ] ) );
+
+      const respond = await fetch( url, { method: type, body: formData, credentials: 'same-origin' } );
+      if ( respond.ok ) {
+        if ( dataType === 'json' ) {
+          data = await respond.json( );
+        } else if ( dataType === 'script' ) {
+          data = await respond.text( );
+        }
+      } else {
+        const message =  { status: respond.status, statusText: respond.statusText };
+        throw new Error( JSON.stringify( message, null, ' ' ) );
+      }
+
+      return data;
+    };
+
+    sendAjax( )
+      .then( data => success( data ) )
+      .catch( reason => this.errorMsg( caption, reason ) );
+  }
+
+  // нажатие на кнопочку выход
+  static btnExitClick( elem ) {
     this.pageLoader( true );
     window.location.replace( elem.closest( 'main' ).data( 'path-exit' ) );
   }
 
-  static pageLoader( is_enabled ) {
-    if ( is_enabled ) $( '.preloader' ).addClass( 'show' ); else $( '.preloader' ).removeClass( 'show' );
+  static pageLoader( isEnabled ) {
+    const { classList } = document.querySelector( '.preloader' );
+    if ( isEnabled ) classList.add( 'show' ); else classList.remove( 'show' );
   }
 
   static capitalize( str ) {
     return `${ str.charAt( 0 ).toUpperCase( ) }${ str.slice( 1 ) }`;
   }
 
-  static assignLocation( siteUrl, urlParams =  {} ) {
+  static assignLocation( siteUrl, urlParams = { } ) {
     this.pageLoader( true );
 
     const serializeParams = params =>
       Object.keys( params ).reduce( ( acc, cur ) =>
-        acc += `&${ cur }=${ encodeURIComponent( params[cur] ) }`
-        , '').replace(/^&/, '?');
+        acc += `&${ cur }=${ encodeURIComponent( params[ cur ] ) }`, '' )
+        .replace( /^&/, '?' );
 
     window.location.assign( `${ siteUrl }${ serializeParams( urlParams ) }` );
   }
@@ -172,7 +206,7 @@ class MyLib {
     let val = tagName === 'INPUT' ? elem.val( ) : elem.text( );
 
     if ( dataType && dataType.charAt( 0 ) === 'n' ) {
-      const scale = +dataType.slice(1) || -1;
+      const scale = +dataType.slice( 1 ) || -1;
       val = this.toNumber( val, scale );
       const valFmt = this.numToStr( val );
       if ( tagName === 'INPUT' ) elem.val( valFmt ); else elem.text( valFmt );
@@ -182,35 +216,16 @@ class MyLib {
   }
 
   static btnSendClick( elem ) {
-    this.pageLoader( true );
-    const main = elem.closest( 'main' );
-    const id = main.data( 'id' );
-
-    this.ajax(
-      `Відправка данних в 1С [id: ${ id }]`,
-      main.data( 'path-send' ),
-      'post',
-      { id: id, bug: '' },
-      'json',
-      false,
-      ( ) => window.location.reload( ),
-      true );
+    const { dataset: { id, pathSend: url } } = elem[ 0 ].closest( 'main' );
+    const caption = `Відправка данних в 1С [id: ${ id }]`;
+    const successAjax = ( ) => window.location.reload( );
+    this.ajax( caption, url, 'post', { id }, 'json', successAjax, true );
   }
 
   static btnPrintClick( elem ) {
-    this.pageLoader( true );
-    const main = elem.closest( 'main' );
-    const id = main.data( 'id' );
-
-    this.ajax(
-      `Формування звіта в 1С [id: ${ id }]`,
-      main.data( 'path-print' ),
-      'post',
-      { id: id, bug: '' },
-      'json',
-      false,
-      false,
-      true );
+    const { dataset: { id, pathPrint: url } } = elem[ 0 ].closest( 'main' );
+    const caption = `Формування звіта в 1С [id: ${ id }]`;
+    this.ajax( caption, url, 'post', { id }, 'json', null, true );
   }
 
   static clickHeader( elem ) {
@@ -222,70 +237,64 @@ class MyLib {
     }
   }
 
-  // Сообщение об ошибке
+  // сообщение об ошибке
   static errorMsg( header = '', message = '' ) {
     this.pageLoader( false );
-    $( '#error_msg' )
-      .removeClass( 'hide' )
-      .find( '.caption' ).text( header )
-      .end( )
-      .find( '.text' ).text( message );
+    const elem = document.getElementById( 'error_msg' );
+    elem.classList.remove( 'hide' );
+    elem.querySelector( '.caption' ).textContent = header;
+    elem.querySelector( '.text' ).textContent = message;
   }
 
-  // Сообщение об ошибке
+  // сообщение об ошибке
   static delMsg( header, callback ) {
     $( '#del_msg' )
       .removeClass( 'hide' )
       .find( '.caption' ).text( header )
       .end( )
-      .find( '.success' ).one( 'click', ( ) => {
-        $('#del_msg').addClass( 'hide' );
+      .find( '.success' )
+      .one( 'click', ( ) => {
+        $( '#del_msg' ).addClass( 'hide' );
         callback( );
       } );
   }
 
-  // Нажатие на кнопочку создать
+  // нажатие на кнопочку создать
   static createDoc( elem, data ) {
-    const dataAttr = $( elem ).closest( '.clmn' ).data( );
-
-    this.ajax(
-      `Сторення: ${ dataAttr.caption } `,
-      dataAttr.pathCreate,
-      'post',
-      data,
-      'json',
-      dataAttr.pathView );
+    const { dataset } = elem[ 0 ].closest( '.clmn' );
+    const caption = `Сторення: ${ dataset.caption }`;
+    this.ajax( caption, dataset.pathCreate, 'post', data, 'json', null, true );
   }
 
-
-  // Проверка на соотвествие типа, является ли объетом
-  static isObject(item) {
+  // проверка на соотвествие типа, является ли объетом
+  static isObject( item ) {
     return item && typeof item === 'object' && !Array.isArray( item );
   }
 
-  // Соеднинение двох объектов с мержирование ключей
-  static mergeDeep(target, source) {
+  // соеднинение двох объектов с мержирование ключей
+  static mergeDeep( target, source ) {
     if ( this.isObject( target ) && this.isObject( source ) ) {
-      Object.keys(source).forEach( key => {
+      Object.keys( source ).forEach( key => {
         if ( this.isObject( source[ key ] ) ) {
           if ( !target[ key ] ) Object.assign( target, { [ key ]: { } } );
           this.mergeDeep( target[ key ], source[ key ] );
         } else {
-          Object.assign( target, { [ key ]: source[key] } );
+          Object.assign( target, { [ key ]: source[ key ] } );
         }
       } );
     }
+
     return target;
   }
 
-  // Запись в сессию
+  // запись в сессию
   static setSession( key, value ) {
     const sessionObj = JSON.parse( sessionStorage.getItem( key ) ) || { }; // спарсим объект обратно
-    this.mergeDeep( sessionObj, value ); // Обьединие масивов
+    this.mergeDeep( sessionObj, value ); // обьединие масивов
     sessionStorage.setItem( key, JSON.stringify( sessionObj ) );
   }
 
-  // Запись в сессию
+  // запись в сессию
   static setClearTableSession( key, keyTable ) {
     const sessionObj = JSON.parse( sessionStorage.getItem( key ) ) || { }; // спарсим объект обратно
     if ( sessionObj[ keyTable ] ) {
@@ -295,7 +304,7 @@ class MyLib {
     }
   }
 
-  // Запись в сессию
+  // запись в сессию
   static setDeleteElemSession( key, elem ) {
     const sessionObj = JSON.parse( sessionStorage.getItem( key ) ) || { }; // спарсим объект обратно
     if ( sessionObj ) {
@@ -304,170 +313,163 @@ class MyLib {
     }
   }
 
-  // Чтение из сессии
+  // чтение из сессии
   static getSession( key ) {
     return JSON.parse( sessionStorage.getItem( key ) ) || { };
   }
 
   static getSessionKey( elem ) {
-    return elem.closest( 'main' ).attr( 'id' );
+    return $( elem ).closest( 'main' ).attr( 'id' );
   }
 
   static getSessionClmnKey( elem ) {
     return elem.closest( '.clmn' ).attr( 'id' );
   }
 
-  // Начальная дата фильтрации
-  static selectDateStart( elem, dateEndId, callback ) {
+  // начальная дата фильтрации
+  static selectDateStart( elem, dateEndId, callBack ) {
     const elemVal =  elem.val( );
 
     if ( elemVal !== elem.data( 'old-value' ) ) {
       const sessionKey = this.getSessionKey( elem );
-      this.setSession( sessionKey, { date_start: elemVal } );
+      this.setSession( sessionKey, { dateStart: elemVal } );
       elem.data( 'old-value', elemVal );
       const dateEnd = $( dateEndId );
       const dateEndVal = dateEnd.val( );
 
-      if ( !dateEndVal || moment( elemVal, this.formatDate ).isAfter( moment( dateEndVal, this.formatDate ) ) ){
-        this.setSession( sessionKey, { date_end: elemVal } );
+      if ( !dateEndVal ||
+        moment( elemVal, this.formatDate ).isAfter( moment( dateEndVal, this.formatDate ) ) ) {
+        this.setSession( sessionKey, { dateEnd: elemVal } );
         dateEnd.val( elemVal ).data( 'old-value', elemVal );
       }
-      if ( callback ) callback( );
+      if ( callBack ) callBack( );
     }
   }
 
-  // Конечная дата фильтрации
-  static selectDateEnd( elem, dateStartId, callback ) {
+  // конечная дата фильтрации
+  static selectDateEnd( elem, dateStartId, callBack ) {
     const elemVal = elem.val( );
 
     if ( elemVal !== elem.data( 'old-value' ) ) {
       const sessionKey = this.getSessionKey( elem );
-      this.setSession( sessionKey, { date_end: elemVal } );
+      this.setSession( sessionKey, { dateEnd: elemVal } );
       elem.data( 'old-value', elemVal );
       const dateStart = $( dateStartId );
       const dateStartVal = dateStart.val( );
 
       if ( !dateStartVal || moment( elemVal, this.formatDate ).isBefore( moment( dateStartVal, this.formatDate ) ) ) {
-        this.setSession( sessionKey, { date_start: elemVal } );
+        this.setSession( sessionKey, { dateStart: elemVal } );
         dateStart.val( elemVal ).data( 'old-value', elemVal );
       }
-      if ( callback ) callback( );
+      if ( callBack ) callBack( );
     }
   }
 
-  // Нажатие на строку в табичке
-  static rowSelect( elem, callback ) {
-    elem.addClass( 'selected' ).siblings().removeClass( 'selected' );
-    this.setSession(
-      this.getSessionKey( elem ),
-      { [ MyLib.getSessionClmnKey( elem) ]: { row_id: elem.data( 'id' ) } } );
-    if ( callback ) callback( );
+  // нажатие на строку в табичке
+  static rowClick( elem, callBack ) {
+    const className = 'selected';
+    const { id: sessionKey } = elem.closest( 'main' );
+    const { id: clmnKey } = elem.closest( '.clmn' );
+    this.setSession( sessionKey, { [ clmnKey ]: { rowId: elem.dataset.id } } );
+
+    Array.from( elem.parentElement.children ).forEach( child => {
+      if ( child === elem ) child.classList.add( className ); else child.classList.remove( className );
+    } );
+
+    if ( callBack ) callBack( );
   }
 
-  // Нажатие на кнопочку в табичке
-  static tableButtonClick( elem, callbackDel ) {
-    const clmn = $( elem ).closest( '.clmn' );
-    const dataAttr = clmn.data( );
+  static tableEditClick( elem ) {
+    const { dataset: { pathView: url } } = elem.closest( '.clmn' );
+    const { dataset: { id } } = elem.closest( 'tr' );
+
+    MyLib.assignLocation( url, { id } ); // для перехода в табличную часть
+  }
+
+  static tableDelClick( elem, callBack ) {
     const table = elem.closest( 'table' );
-
     const tr = elem.closest( 'tr' );
-    const trId = tr.data( 'id' );
 
-    // удалить
-    if ( elem.hasClass('btn_del') ) {
-      const msgDelCaption = `${ dataAttr.caption } \
-        № ${ tr.children( 'td[data-field=number]' ).text( ) } \
-        від ${ tr.children( 'td[data-field=date]' ).text( ) }`;
+    const { id: key } =  elem.closest( 'main' );
+    const { id: clmnKey, dataset: { pathDel: url, caption: captionClmn } } = elem.closest( '.clmn' );
+    const { dataset: { id } } = tr;
 
-      this.delMsg(
-        msgDelCaption,
-        ( ) => {
-          MyLib.ajax(
-            `Видалення: ${ msgDelCaption } [id: ${ trId }]`,
-            dataAttr.pathDel,
-            'delete',
-            { id: trId, bug: '' },
-            'json',
-            '',
-            ( ) => {
-              if ( table.find( 'tbody tr' ).length === 1 ) table.remove( ); else tr.remove( );
-              this.setClearTableSession( this.getSessionKey( clmn ), clmn.attr( 'id' ) );
-              if ( callbackDel ) callbackDel( );
-            },
-            true );
-        }
-      );
-    } else {
-      this.assignLocation( dataAttr.pathView, { id: trId } ); // для перехода в табличную часть
-    }
+    const { textContent: dataDel } = tr.querySelector( 'td[data-delete]' );
+    const caption = `Видалення: ${ captionClmn } ${ dataDel } `;
+
+    const successAjax = ( ) => {
+      if ( table.querySelectorAll( 'tbody tr' ).length === 1 ) table.remove( ); else tr.remove( );
+      MyLib.setClearTableSession( key, clmnKey );
+      if ( callBack ) callBack( );
+    };
+
+    const callbackOk = ( ) => MyLib.ajax( caption, url, 'delete', { id }, 'json', successAjax, true );
+    MyLib.delMsg( caption, callbackOk );
   }
 
-  // Нажатие для сортировки
-  static tableHeaderClick( elem, callback ) {
-    const classOrder = { add: 'desc', remove: 'asc'};
+  // нажатие для сортировки
+  static tableHeaderClick( elem, callBack ) {
+    const { classList, dataset } = elem;
+    const classOrder = { add: 'desc', remove: 'asc' };
+    const { id: key } =  elem.closest( 'main' );
+    const { id: clmnKey } = elem.closest( '.clmn' );
 
-    if ( elem.hasClass( classOrder.add ) ) [ classOrder.add, classOrder.remove ] = [ classOrder.remove,  classOrder.add ];
-    elem.removeClass( classOrder.remove ).addClass( classOrder.add );
+    if ( classList.contains( classOrder.add ) ) [ classOrder.add, classOrder.remove ] = [ classOrder.remove, classOrder.add ];
+    classList.remove( classOrder.remove );
+    classList.add( classOrder.add );
+    const value = { [ clmnKey ]: { sortField: dataset.sort, sortOrder: classOrder.add } };
 
-    this.setSession(
-      this.getSessionKey( elem ),
-      { [ this.getSessionClmnKey( elem ) ]: { sort_field:  elem.data( 'sort' ), sort_order: classOrder.add } } );
-    callback( ); // Фильтрация таблицы документов
+    MyLib.setSession( key, value );
+    if ( callBack ) callBack( ); // фильтрация таблицы документов
   }
 
-  static tableSetSession( elem ) {
-    const sessionKey = this.getSessionKey( elem );
-    const clmn =  $( elem ).closest( '.clmn' );
-    const clmnKey = clmn.attr( 'id' );
-    const sessionObj = this.getSession( sessionKey )[ clmnKey ];
-    elem
-      .children( 'table' ).tableHeadFixer( ) // Фиксируем шапку таблицы
-      .end( )
-      .scroll( ( ) => this.setSession( sessionKey, { [ clmnKey ]: { scroll_top: elem.scrollTop( ) } } ) );
+  static tableSetSession( parentTable ) {
+    const elem = parentTable instanceof $ ? parentTable[ 0 ] : parentTable;
+    const { id: sessionKey } = elem.closest( 'main' );
+    const { id: clmnKey } = elem.closest( '.clmn' );
 
-    if ( sessionObj ) {
-      if ( sessionObj.sort_field ) {
-        elem.find( `th[data-sort=${ sessionObj.sort_field }]`).addClass( sessionObj.sort_order );
-      }
+    const table = elem.querySelector( 'table' );
+    $( table ).tableHeadFixer( ); // фиксируем шапку таблицы
 
-      if ( sessionObj.scroll_top ) {
-        elem.scrollTop( sessionObj.scroll_top );
-      }
+    elem.addEventListener( 'scroll', event => this.setSession( sessionKey, { [ clmnKey ]: { scrollTop: event.target.scrollTop } } ) );
+    const { [ clmnKey ]: clmnObj } = this.getSession( sessionKey );
 
-      if ( sessionObj.row_id ) {
-        const row = elem.find( `tr[data-id=${ sessionObj.row_id } ]` );
-        if ( row ) row.addClass( 'selected' ); else this.setSession( sessionKey, { [ clmnKey ]: { row_id: 0 } } );
+    if ( clmnObj ) {
+      const { sortField, sortOrder, scrollTop, rowId } = clmnObj;
+      if ( sortField ) table.querySelector( `th[data-sort='${ sortField }']` ).classList.add( sortOrder );
+
+      if ( scrollTop ) elem.scrollTop = scrollTop;
+
+      if ( rowId ) {
+        const tr = table.querySelector( `tr[data-id='${ rowId }']` );
+        if ( tr ) tr.classList.add( 'selected' );
+        else this.setSession( sessionKey, { [ clmnKey ]: { rowId: 0 } } );
       }
     }
   }
-
-  static existElem( elem ) {
-    return elem.length > 0 ? true : false;
-  }
-
 }
 
-
-let objMenuRequirementProducts;
-let objTimesheetDates;
+let objMenuRequirementProducts = { };
+let objTimesheetDates = { };
+let objUsers = { };
+let objUserNew = { };
 
 $( document ).on( 'turbolinks:load', ( ) => {
   moment.locale( 'uk' );
 
-  $( '#error_msg .close' )
-    .on( 'click', ( ) => $( '#error_msg' ).addClass( 'hide' ));
+  $( '#error_msg .close' ).on( 'click', ( ) => $( '#error_msg' ).addClass( 'hide' ));
 
   $( '#del_msg button:not( success )' )
     .on( 'click', ( ) =>
-      $( '#del_msg' ).addClass( 'hide' ).find( '.success' ).off( 'click' ));
+      $( '#del_msg' ).addClass( 'hide' ).find( '.success' ).off( 'click' ) );
 
-  const elemMenuRequirementProducts = $( '#menu_requirement_products' );
-  const elemTimesheetDates = $( '#timesheet_dates' );
+  const elemMenuRequirementProducts = document.getElementById( 'menu_requirement_products' );
+  const elemTimesheetDates = document.getElementById( 'timesheet_dates' );
+  const elemUsers = document.getElementById( 'users' );
+  const elemUserNew = document.getElementById( 'user_new' );
 
-  if ( elemMenuRequirementProducts.length ) {
-    objMenuRequirementProducts = new MenuRequirementProducts( elemMenuRequirementProducts[ 0 ] );
-  } else if ( elemTimesheetDates.length ) {
-    objTimesheetDates = new TimesheetDates( elemTimesheetDates[ 0 ] );
-  }
-
+  if ( elemMenuRequirementProducts ) objMenuRequirementProducts = new MenuRequirementProducts( elemMenuRequirementProducts );
+  else if ( elemTimesheetDates ) objTimesheetDates = new TimesheetDates( elemTimesheetDates );
+  else if ( elemUsers ) objUsers = new Users( elemUsers );
+  else if ( elemUserNew ) objUserNew = new UserNew( elemUserNew );
 } );

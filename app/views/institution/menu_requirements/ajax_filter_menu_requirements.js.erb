@@ -1,8 +1,10 @@
-( function( ) {
-  const $blockTable = $( '#col_mr' ).children( '.parent_table' ).empty( );
+( function ajax( ) {
+  const parentTable = document.querySelector( '#col_mr .parent_table' );
 
-<% if @menu_requirements.present? %>
-  $blockTable.append( '<%= j render( "table_menu_requirements" ) %>' );
-  MyLib.tableSetSession( $blockTable );
-<% end %>
-} ).call( this );
+  <% if @menu_requirements.present? %>
+    parentTable.innerHTML = '<%= j render( "table_menu_requirements" ) %>';
+    MyLib.tableSetSession( parentTable );
+  <% else %>
+    parentTable.innerHTML = '';
+  <% end %>
+}( ) );

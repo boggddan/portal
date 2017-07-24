@@ -1,9 +1,9 @@
-( function( ) {
+( function ajax( ) {
+  let elements = '';
   <% if @menu_products.present? %>
-    objMenuRequirementProducts.colPr.innerHTML = '<%= j render( 'table_menu_products' ) %>';
-    objMenuRequirementProducts.colPrInit( );
+    elements = '<%= j render( 'table_menu_products' ) %>'
     objMenuRequirementProducts.buttonColPr.click( );
-  <% else %>
-    objMenuRequirementProducts.colPr.innerHTML = '';
   <% end %>
-} ).call( this );
+
+  objMenuRequirementProducts.colPrInit( elements );
+}( ) );

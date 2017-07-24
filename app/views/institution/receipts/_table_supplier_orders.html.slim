@@ -14,6 +14,6 @@ table.table *{ data: { type: :list_doc }  }
     tbody
       - @supplier_orders.each do | so |
         tr *{ data:{ id: so.id } }
-          td *{ data: { field: :date } } = date_str( so.date )
-          td *{ class: ( so.is_del_1c ? :is_del  : '' ), data: { field: :number } } = so.number
-          td *{ data: { field: :number } } = so.name
+          td = date_str( so.date )
+          td *{ class: ( so.is_del_1c ? :is_del  : '' ), data: { delete: true } } = so.number
+          td *{ data: { delete: true } } = so.name

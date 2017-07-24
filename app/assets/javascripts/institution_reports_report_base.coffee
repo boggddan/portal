@@ -21,7 +21,7 @@ $( document ).on 'turbolinks:load', ->
               date_end: $dateEnd.val( )
               is_pdf: if $( '.btn_print').length then $( @ ).hasClass( 'btn_print' ) else null
             'json'
-            false
+            ''
             false
             true )
       .end( )

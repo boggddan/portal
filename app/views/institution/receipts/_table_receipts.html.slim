@@ -22,8 +22,8 @@ table.table *{ data: { type: :list_doc }  }
     tbody
       - @receipts.each do | rc |
         tr *{ data:{ id: rc.id } }
-          td *{ data: { field: :date } } = date_str( rc.date )
-          td *{ data: { field: :number } } = rc.number
+          td = date_str( rc.date )
+          td *{ data: { delete: true } } = rc.number
           td = rc.contract_number
           td = rc.invoice_number
           td *{ class: ( rc.is_del_1c ? :is_del : '' ) } = rc.number_sa

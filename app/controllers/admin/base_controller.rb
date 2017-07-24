@@ -8,6 +8,6 @@ class Admin::BaseController < ApplicationController
   end
 
   def index
-    render 'institution/index.slim'
+    render 'admin/index'
   end
 end

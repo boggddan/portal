@@ -2,7 +2,7 @@ class SyncCatalogsController < ApplicationController
   skip_before_action :verify_log_in # Отключение фильтра проверки пользователя
 
   def branch_code( code )
-    code = code.strip
+    code = code.nil? ? '' : code.strip
     if branch = Branch.find_by( code: code )
       branch
     else
@@ -19,7 +19,7 @@ class SyncCatalogsController < ApplicationController
   end
 
   def supplier_code( code )
-    code = code.strip
+    code = code.nil? ? '' : code.strip
     if supplier = Supplier.find_by( code: code )
       supplier
     else
@@ -28,7 +28,7 @@ class SyncCatalogsController < ApplicationController
   end
 
   def products_type_code( code )
-    code = code.strip
+    code = code.nil? ? '' : code.strip
     if products_type = ProductsType.find_by( code: code )
       products_type
     else
@@ -37,7 +37,7 @@ class SyncCatalogsController < ApplicationController
   end
 
   def children_categories_type_code( code )
-    code = code.strip
+    code = code.nil? ? '' : code.strip
     if children_categories_type = ChildrenCategoriesType.find_by( code: code )
       children_categories_type
     else
@@ -46,7 +46,7 @@ class SyncCatalogsController < ApplicationController
   end
 
   def children_category_code( code )
-    code = code.strip
+    code = code.nil? ? '' : code.strip
     if children_category = ChildrenCategory.find_by( code: code )
       children_category
     else
@@ -55,7 +55,7 @@ class SyncCatalogsController < ApplicationController
   end
 
   def package_code( code )
-    code = code.strip
+    code = code.nil? ? '' : code.strip
     if package = Package.find_by( code: code )
       package
     else
@@ -64,7 +64,7 @@ class SyncCatalogsController < ApplicationController
   end
 
   def dishes_category_code( code )
-    code = code.strip
+    code = code.nil? ? '' : code.strip
     if dishes_category = DishesCategory.find_by( code: code )
       dishes_category
     else
@@ -73,7 +73,7 @@ class SyncCatalogsController < ApplicationController
   end
 
   def meal_code( code )
-    code = code.strip
+    code = code.nil? ? '' : code.strip
     if meal = Meal.find_by( code: code )
       meal
     else
@@ -82,7 +82,7 @@ class SyncCatalogsController < ApplicationController
   end
 
   def dish_code( code )
-    code = code.strip
+    code = code.nil? ? '' : code.strip
     if dish = Dish.find_by( code: code )
       dish
     else
@@ -119,7 +119,7 @@ class SyncCatalogsController < ApplicationController
 
 
   def supplier_order_number( branch, number )
-    number = number.strip
+    number = number.nil? ? '' : number.strip
     if supplier_order = SupplierOrder.find_by( branch: branch, number: number )
       supplier_order
     else
@@ -128,7 +128,7 @@ class SyncCatalogsController < ApplicationController
   end
 
   def receipt_number( institution, number )
-    number = number.strip
+    number = number.nil? ? '' : number.strip
     if receipt = Receipt.find_by( institution: institution, number: number )
       receipt
     else
@@ -137,7 +137,7 @@ class SyncCatalogsController < ApplicationController
   end
 
   def institution_order_number( institution, number )
-    number = number.strip
+    number = number.nil? ? '' : number.strip
     if institution_order = InstitutionOrder.find_by( institution: institution, number: number )
       institution_order
     else
@@ -146,7 +146,7 @@ class SyncCatalogsController < ApplicationController
   end
 
   def io_correction_number( institution_order, number )
-    number = number.strip
+    number = number.nil? ? '' : number.strip
     if io_correction = IoCorrection.find_by( institution_order: institution_order, number: number )
       io_correction
     else
@@ -155,7 +155,7 @@ class SyncCatalogsController < ApplicationController
   end
 
   def menu_requirement_number( institution, number )
-    number = number.strip
+    number = number.nil? ? '' : number.strip
     if menu_requirement = MenuRequirement.find_by( institution: institution, number: number )
       menu_requirement
     else
@@ -164,7 +164,7 @@ class SyncCatalogsController < ApplicationController
   end
 
   def timesheet_number( institution, number )
-    number = number.strip
+    number = number.nil? ? '' : number.strip
     if timesheet = Timesheet.find_by( institution: institution, number: number )
       timesheet
     else

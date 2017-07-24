@@ -22,8 +22,8 @@ table.table *{ data: { type: :list_doc }  }
     tbody
       - @institution_orders.each do | io |
         tr *{ data:{ id: io.id } }
-          td *{ data: { field: :date } } = date_str( io.date )
-          td *{ data: { field: :number } } = io.number
+          td = date_str( io.date )
+          td *{ data: { delete: true } } = io.number
           td *{ class: ( io.is_del_1c ? :is_del : '' ) } = io.number_sa
           td = date_str( io.date_start )
           td = date_str( io.date_end )

@@ -1,0 +1,11 @@
+// фильтрация таблицы заявок
+( function ajax( ) {
+  const parentTable = document.querySelector( '#col_r .parent_table' );
+
+  <% if @receipts.present? %>
+    parentTable.innerHTML = '<%= j render( "table_receipts" ) %>';
+    MyLib.tableSetSession( parentTable );
+  <% else %>
+    parentTable.innerHTML = '';
+  <% end %>
+}( ) );

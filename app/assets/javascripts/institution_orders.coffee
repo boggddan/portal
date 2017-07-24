@@ -7,11 +7,11 @@ $( document ).on 'turbolinks:load', ->
 
     $sessionKey = $parentElem.attr 'id'
 
-    $dateStartSession = MyLib.getSession( $sessionKey )?.date_start || MyLib.toDateFormat( moment( ).startOf( 'month' ) )
-    MyLib.setSession( $sessionKey, { date_start: $dateStartSession } );
+    $dateStartSession = MyLib.getSession( $sessionKey )?.dateStart || MyLib.toDateFormat( moment( ).startOf( 'month' ) )
+    MyLib.setSession( $sessionKey, { dateStart: $dateStartSession } );
 
-    $dateEndSession = MyLib.getSession( $sessionKey )?.date_end || MyLib.toDateFormat( moment( ).endOf( 'month' ) )
-    MyLib.setSession( $sessionKey, { date_end: $dateEndSession } );
+    $dateEndSession = MyLib.getSession( $sessionKey )?.dateEnd || MyLib.toDateFormat( moment( ).endOf( 'month' ) )
+    MyLib.setSession( $sessionKey, { dateEnd: $dateEndSession } );
 
     $( "#main_menu li[data-page=#{ $sessionKey }]" ).addClass( 'active' ).siblings(  ).removeClass 'active'
 
@@ -23,11 +23,13 @@ $( document ).on 'turbolinks:load', ->
         'Фільтрація заявки'
         $clmn.data 'path-filter'
         'post'
-          date_start: $sessionObj.date_start
-          date_end: $sessionObj.date_end
-          sort_field: $clmnObj?.sort_field
-          sort_order: $clmnObj?.sort_order
-        'script' ) if $sessionObj?.date_start
+          date_start: $sessionObj.dateStart
+          date_end: $sessionObj.dateEnd
+          sort_field: $clmnObj?.sortField || ''
+          sort_order: $clmnObj?.sortOrder || ''
+        'script'
+        false
+        true  ) if $sessionObj?.dateStart
 
     getTableCorrection = ->
       $sessionObj = MyLib.getSession( $sessionKey )
@@ -36,16 +38,17 @@ $( document ).on 'turbolinks:load', ->
 
       $clmnIoObj = $sessionObj[ 'col_io' ]
       $institutionOrderId = $clmnIoObj?.row_id
-
       if $institutionOrderId
         MyLib.ajax(
           'Фільтрація коригування заявки'
           $clmn.data 'path-filter'
           'post'
             institution_order_id: $institutionOrderId
-            sort_field: $clmnObj?.sort_field
-            sort_order: $clmnObj?.sort_order
-          'script' )
+            sort_field: $clmnObj?.sortField || ''
+            sort_order: $clmnObj?.sortOrder || ''
+          'script'
+          null
+          true  )
       else
         $clmn
           .find( '.parent_table' ).empty( )
@@ -89,19 +92,22 @@ $( document ).on 'turbolinks:load', ->
       .on 'click', 'td, th[data-sort]', ->
         $this = $( @ )
         if $this.is 'th'
-          MyLib.tableHeaderClick $( @ ), filterTable # Нажатие для сортировки
+          MyLib.tableHeaderClick( $( @ )[ 0 ], filterTable ) # Нажатие для сортировки
         else
           $button = $this.children 'button'
           $tr = $this.closest 'tr'
 
-          MyLib.rowSelect( $tr, filterTableCorrection ) unless $tr.hasClass 'selected'
+          MyLib.rowClick( $tr[ 0 ], filterTableCorrection ) unless $tr.hasClass 'selected'
 
-          MyLib.tableButtonClick(
-            $button
-            ( ) ->
+          if $button.hasClass('btn_del')
+            buttonDel = ( ) ->
               $( '#col_io .btn_create' ).prop 'disabled', if $( '#col_io table' ).length then true else false
               filterTableCorrection( )
-          ) if $button.length
+
+            MyLib.tableDelClick( $button[ 0 ], buttonDel )
+          else if $button.hasClass('btn_view') or $button.hasClass('btn_edit')
+            MyLib.tableEditClick( $button[ 0 ] )
+
     ########
     $( '#col_ioc' )
       .find( '.btn_create' )
@@ -109,19 +115,21 @@ $( document ).on 'turbolinks:load', ->
           $this = $( @ )
           MyLib.createDoc(
             $this
-            institution_order_id: $this.closest( '.clmn' ).data 'institution_order_id' )
+            institution_order_id: $this.closest( '.clmn' ).data 'institution-order-id' )
       .end( )
       .on 'click', 'td, th[data-sort]', ->
         $this = $( @ )
         if $this.is 'th'
-          MyLib.tableHeaderClick $( @ ), filterTableCorrection # Нажатие для сортировки
+          MyLib.tableHeaderClick( $( @ )[ 0 ], filterTableCorrection ) # Нажатие для сортировки
         else
           $button = $this.children 'button'
           $tr = $this.closest 'tr'
 
-          MyLib.rowSelect $tr unless $tr.hasClass 'selected'
+          MyLib.rowClick( $tr[ 0 ], null ) unless $tr.hasClass 'selected'
 
-          MyLib.tableButtonClick(
-            $button,
-            ( ) -> $( '#col_ioc .btn_create' ).prop 'disabled', false
-          ) if $button.length
+          if $button.hasClass('btn_del')
+            buttonDel = ( ) -> $( '#col_ioc .btn_create' ).prop 'disabled', false
+
+            MyLib.tableDelClick( $button[ 0 ], buttonDel )
+          else if $button.hasClass('btn_view') or $button.hasClass('btn_edit')
+            MyLib.tableEditClick( $button[ 0 ] )

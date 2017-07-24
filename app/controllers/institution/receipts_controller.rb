@@ -1,6 +1,5 @@
 class Institution::ReceiptsController < Institution::BaseController
-  def index
-  end
+  def index ; end
 
   def ajax_filter_supplier_orders # Фильтрация заявок поставщикам
     @supplier_orders = SupplierOrder
@@ -20,7 +19,7 @@ class Institution::ReceiptsController < Institution::BaseController
 
   def ajax_filter_receipts # Фильтрация документов поставок
     contract_number = params[ :contract_number ]
-    @receipts = Receipt.where( supplier_order_id: params[ :supplier_order_id ])
+    @receipts = current_institution.receipts.where( supplier_order_id: params[ :supplier_order_id ] )
       .where( ( { contract_number: ( contract_number ) } if contract_number && !contract_number.blank? ) )
       .order( "#{ params[ :sort_field ] } #{ params[ :sort_order ] }" )
   end
@@ -90,6 +89,8 @@ class Institution::ReceiptsController < Institution::BaseController
         .each{ |sop| ReceiptProduct.create(receipt: receipt, date: sop.date, product_id: sop.product_id,
                count_order: sop.count, causes_deviation: causes_deviation, price: sop.price ) }
       result = { status: true, urlParams: { id: receipt.id } }
+      href = institution_receipts_products_path( { id: receipt.id } )
+      result = { status: true, href: href }
     end
     render json: result
   end
