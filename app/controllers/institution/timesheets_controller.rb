@@ -1,7 +1,8 @@
 class Institution::TimesheetsController < Institution::BaseController
 
-  def index
-  end
+  def index ; end
+
+  def new ; end
 
   def ajax_filter_timesheets # Фильтрация документов
     @timesheets = Timesheet
@@ -11,16 +12,13 @@ class Institution::TimesheetsController < Institution::BaseController
 
   def delete # Удаление документа
     id = params[ :id ]
-
-    ActiveRecord::Base.transaction do
-      TimesheetDate.where( timesheet_id: id ).delete_all
-      Timesheet.where( id: id ).delete_all
+    if id
+      sql = "DELETE FROM timesheet_dates WHERE timesheet_id = #{ id };" +
+            "DELETE FROM timesheets WHERE id = #{ id }"
+      ActiveRecord::Base.connection.execute( sql )
     end
 
     render json: { status: true }
-  end
-
-  def new
   end
 
   def create
@@ -52,25 +50,19 @@ class Institution::TimesheetsController < Institution::BaseController
 
       result = { }
       if response[ :interface_state ] == 'OK' && ts_data && ts_data.present?
-        error = [ ]
+        error = { }
 
-        children = { }
-        ts_data.group_by { | o | o[ :child_code ] }.each { | k, v |
-          child = child_code( k )
-          if child[ :error ] then error << child[ :error ] else children.merge!( k => child.id ) end
-        }
+        children_codes = ts_data.group_by { | o | o[ :child_code ] }.map { | k, v | k }
+        children = exists_codes( :children, children_codes )
+        error.merge!( children[ :error ] ) unless children[ :status ]
 
-        children_groups = { }
-        ts_data.group_by { | o | o[ :children_group_code ] }.each { | k, v |
-          children_group = children_group_code( k )
-          if children_group[ :error ] then error << children_group[ :error ] else children_groups.merge!( k => children_group.id ) end
-        }
+        children_groups_codes = ts_data.group_by { | o | o[ :children_group_code ] }.map { | k, v | k }
+        children_groups = exists_codes( :children_groups, children_groups_codes )
+        error.merge!( children_groups[ :error ] ) unless children_groups[ :status ]
 
-        reasons_absences = { }
-        ts_data.group_by { | o | o[ :reasons_absence_code ] }.each { | k, v |
-          reasons_absence = reasons_absence_code( k )
-          if reasons_absence[ :error ] then error << reasons_absence[ :error ] else reasons_absences.merge!( k => reasons_absence.id ) end
-        }
+        reasons_absences_code = ts_data.group_by { | o | o[ :reasons_absence_code ] }.map { | k, v | k }
+        reasons_absences = exists_codes( :reasons_absences, reasons_absences_code )
+        error.merge!( reasons_absences[ :error ] ) unless reasons_absences[ :status ]
 
         if error.empty?
           ActiveRecord::Base.transaction do
@@ -92,18 +84,15 @@ class Institution::TimesheetsController < Institution::BaseController
 
             ts_data.each { | ts |
               sql_values += ",(#{ id }," +
-                            "#{ children_groups[ ts[ :children_group_code ] ] }," +
-                            "#{ children[ ts[ :child_code ] ] }," +
-                            "#{ reasons_absences[ ts[ :reasons_absence_code ] ] }," +
+                            "#{ children_groups[ :obj ][ ts[ :children_group_code ] || '' ] }," +
+                            "#{ children[ :obj ][ ts[ :child_code ] || '' ] }," +
+                            "#{ reasons_absences[ :obj ][ ts[ :reasons_absence_code ] || '' ] }," +
                             "'#{ ts[ :date ] }'," +
                             "'#{ now }','#{ now }')"
             }
 
             sql = "INSERT INTO timesheet_dates ( #{ fields } ) VALUES #{ sql_values[1..-1] }"
 
-            file = File.new( 'out_sql', 'w' )
-            file.write( sql )
-            file.close
             ActiveRecord::Base.connection.execute( sql )
 
             href = institution_timesheets_dates_path( { id: id } )
