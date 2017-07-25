@@ -84,9 +84,9 @@ class Institution::TimesheetsController < Institution::BaseController
 
             ts_data.each { | ts |
               sql_values += ",(#{ id }," +
-                            "#{ children_groups[ :obj ][ ts[ :children_group_code ] || '' ] }," +
-                            "#{ children[ :obj ][ ts[ :child_code ] || '' ] }," +
-                            "#{ reasons_absences[ :obj ][ ts[ :reasons_absence_code ] || '' ] }," +
+                            "#{ children_groups[ :obj ][ (ts[ :children_group_code ] || '' ).strip ] }," +
+                            "#{ children[ :obj ][ ( ts[ :child_code ] || '' ).strip ] }," +
+                            "#{ reasons_absences[ :obj ][ ( ts[ :reasons_absence_code ] || '' ).strip ] }," +
                             "'#{ ts[ :date ] }'," +
                             "'#{ now }','#{ now }')"
             }

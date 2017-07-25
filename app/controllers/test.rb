@@ -26,5 +26,4 @@
 # puts reasons_absences[ :obj ]['000000001']
 
 dd = [1..3]
-puts 1 == 1..2
-
+puts 'sdsdsd '.strip

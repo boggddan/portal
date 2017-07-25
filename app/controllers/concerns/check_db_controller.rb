@@ -52,7 +52,7 @@ module CheckDbController
     def exists_codes( table, codes )
       sql = "SELECT code, COALESCE( bb.id, -1 ) as id " +
       "FROM UNNEST(ARRAY"+
-          codes.map { | o | o || '' }.to_s.gsub( '"', '\'' ) +
+          codes.map { | o | ( o || '' ).strip }.to_s.gsub( '"', '\'' ) +
         ") AS code " +
       "LEFT JOIN #{ table } bb USING( code )"
 
