@@ -150,7 +150,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
           foods.each { | food |
             product_id = products[ :obj ][ ( food[ :code_of_food ] || '' ).strip ]
             date =  food[ :date ].to_date.to_s( :db )
-            mount = amounts
+            amount = amounts
               .select{ | o | o[ :product_id ] == product_id && o[ :date ] == date }
               .fetch( 0,  { amount: 0 } )[ :amount ]
 

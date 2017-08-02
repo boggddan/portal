@@ -25,7 +25,7 @@ table.table *{ data: { type: :list_doc } }
         td.number_field *{ class: ( mr.is_del_plan_1c ? :is_del  : '' ) } = mr.number_sap
         td.number_field *{ class: ( mr.is_del_fact_1c ? :is_del  : '' ) } = mr.number_saf
         td.number_field = mr.number
-        td.date_field = date_str( mr.date )
+        td.date_field *{ data: { delete: true } } = date_str( mr.date )
         td.date_field = date_str( mr.splendingdate )
         td : button.btn_view *{ disabled: !mr.number_saf }
         td : button.btn_edit *{ disabled: mr.number_saf }
