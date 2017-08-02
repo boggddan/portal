@@ -27,10 +27,10 @@ main#io_correction_products *{ data: { \
       = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
         input_attr: { id: :date, name: :date, value:  date_str( @io_correction.date ), disabled: disabled, readonly: true }
 
-      = render label_text, label_attr: {class: :icon_сalendar}, text: 'заявки №',
-        input_attr: { value:  date_str(@institutin_order.date), disabled: true }
+      = render label_text, label_attr: {class: :icon_number }, text: 'заявки №',
+        input_attr: { value: @io_correction.io_number, disabled: true }
       = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
-        input_attr: { value:  date_str( @institutin_order.date ), disabled: true }
+        input_attr: { value:  date_str( @io_correction.io_date ), disabled: true }
 
 
   #col_iocp.clmn *{ data: { path_update: institution_institution_orders_correction_product_update_path } }

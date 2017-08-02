@@ -2,8 +2,9 @@ class InstitutionOrder < ApplicationRecord
   #
   belongs_to :institution
 
-  has_many :io_corrections, dependent: :destroy
-  has_many :institution_order_products, dependent: :destroy
+  has_many :io_corrections
+  has_many :institution_order_products
+
   #
   before_save :set_default_value
 

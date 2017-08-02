@@ -6,14 +6,14 @@ class MenuRequirementProducts {
     const data =  { id: this.dataId };
     const caption = `Формування страв та прийомів їжі id = [${ this.dataId }]`;
     const { colMd: { dataset: { pathCreate: url } } } = this;
-    MyLib.ajax( caption, url, 'post', data, 'script', '', false, true );
+    MyLib.ajax( caption, url, 'post', data, 'script', false, true );
   }
 
   mdUpdate( mdId, value ) { // обновление маркера
     const data = { id: mdId, is_enabled: value };
     const caption = `Онов. позн. страви та прийоми їжі id = [${ this.dataId }]`;
     const { colMd: { dataset: { pathUpdate: url } } } = this;
-    MyLib.ajax( caption, url, 'post', data, 'json', '', false, false );
+    MyLib.ajax( caption, url, 'post', data, 'json', false, false );
   }
 
   // шапка формы
@@ -35,7 +35,7 @@ class MenuRequirementProducts {
     const data = { id: this.dataId };
     const successAjax = ( ) => window.location.reload( );
     const { parentElem: { dataset: { [ pf ]: url } } } = this;
-    MyLib.ajax( caption, url, 'post', data, 'json', '', successAjax, true );
+    MyLib.ajax( caption, url, 'post', data, 'json', successAjax, true );
   }
 
   clickMdCell( target ) {
@@ -285,11 +285,11 @@ class MenuRequirementProducts {
     this.headerText( );
     this.checkMdExists( );
     this.colCcInit( );
-    this.colPrInit( '' );
+    this.colPrInit( null );
   }
 
   colPrInit( elements ) {
-    this.colPr.innerHtml = elements;
+    if ( elements ) this.colPr.innerHTML = elements;
 
     this.colPrTable = this.colPr.querySelector( 'table' );
 
@@ -443,7 +443,7 @@ class MenuRequirementProducts {
       const caption = `Зміна значення ${ nameVal } з ${ valOld } на ${ val } [id: ${ dataId }]`;
       const data = { id: dataId, [ nameVal ]: val };
       const { colPr: { dataset: { pathUpdate: url } } } = this;
-      MyLib.ajax( caption, url, 'post', data, 'json', '', successAjax, false );
+      MyLib.ajax( caption, url, 'post', data, 'json', successAjax, false );
     }
   }
 
@@ -457,7 +457,7 @@ class MenuRequirementProducts {
       const data = { id: dataId, [ nameVal ]: val };
       const caption = `Зміна значення ${ nameVal } з ${ valOld } на ${ val } [id: ${ dataId }]`;
       const { parentElem: { dataset: { pathUpdate: url } } } = this;
-      MyLib.ajax( caption, url, 'post', data, 'json', '', false, false );
+      MyLib.ajax( caption, url, 'post', data, 'json', false, false );
     }
   }
 
@@ -500,7 +500,7 @@ class MenuRequirementProducts {
       const captionAjax = `Зміна значення ${ nameVal } з ${ valOld } на ${ val } [id: ${ dataId }]`;
       const dataAjax = { id: dataId, [ nameVal ]: val };
       const { colCc: { dataset: { pathUpdate: url } } } = this;
-      MyLib.ajax( captionAjax, url, 'post', dataAjax, 'json', '', successAjax, false );
+      MyLib.ajax( captionAjax, url, 'post', dataAjax, 'json', successAjax, false );
     }
   }
 

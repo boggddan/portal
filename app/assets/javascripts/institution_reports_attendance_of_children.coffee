@@ -25,7 +25,6 @@ $( document ).on 'turbolinks:load', ->
               children_group: $childrenGroupCode.val( )
               is_pdf: $( @ ).hasClass( 'btn_print' )
             'json'
-            ''
             false
             true )
       .end( )
@@ -43,5 +42,5 @@ $( document ).on 'turbolinks:load', ->
       .end( )
       .find( '#children_group_code' ) # Конечная дата фильтрации
         .val $childrenGroupSession
-        .change -> setSession( $sessionKey, { children_group: $( @ ).val( ) } )
+        .change -> MyLib.setSession( $sessionKey, { children_group: $( @ ).val( ) } )
       .end( )

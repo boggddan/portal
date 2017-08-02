@@ -36,7 +36,7 @@ $( document ).on 'turbolinks:load', ->
       $clmnObj = $sessionObj[ $clmn.attr 'id' ]
 
       $clmnSoObj = $sessionObj[ 'col_so' ]
-      $supplierOrderId = $clmnSoObj?.row_id
+      $supplierOrderId = $clmnSoObj?.rowId
 
       $clmn[ 0 ].querySelector( '#contract_number' ).innerHTML = '<option value="">Договір</option>'
 
@@ -63,7 +63,7 @@ $( document ).on 'turbolinks:load', ->
       $clmnObj = $sessionObj[ $clmn.attr 'id' ]
 
       $clmnSoObj = $sessionObj[ 'col_so' ]
-      $supplierOrderId = $clmnSoObj?.row_id
+      $supplierOrderId = $clmnSoObj?.rowId
 
       if $supplierOrderId
         MyLib.ajax(
@@ -147,7 +147,7 @@ $( document ).on 'turbolinks:load', ->
           $this = $( @ )
           MyLib.createDoc(
             $this,
-              supplier_order_id: $this.closest( '.clmn' ).data( 'supplier_order_id' )
+              supplier_order_id: $this.closest( '.clmn' ).data( 'supplier-order-id' )
               contract_number: $( '#contract_number' ).val( ) )
       .end( )
       .on 'click', 'td, th[data-sort]', ->

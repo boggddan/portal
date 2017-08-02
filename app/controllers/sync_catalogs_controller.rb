@@ -1,5 +1,5 @@
 class SyncCatalogsController < ApplicationController
-  skip_before_action :verify_log_in # Отключение фильтра проверки пользователя
+  #skip_before_action :verify_log_in # Отключение фильтра проверки пользователя
 
   def branch_code( code )
     code = code.nil? ? '' : code.strip
@@ -1482,8 +1482,7 @@ class SyncCatalogsController < ApplicationController
           #################################
           # Создание запроса для блюд
 
-          sql_delete = "DELETE FROM menu_products WHERE menu_requirement_id = #{ id };" +
-             "DELETE FROM menu_meals_dishes WHERE menu_requirement_id = #{ id }"
+          sql_delete = "DELETE FROM menu_meals_dishes WHERE menu_requirement_id = #{ id };"
 
           meals_dishes = JSON.parse( Meal
             .select( 'meals.id as meal_id', 'dishes.id as dish_id' )
@@ -1534,8 +1533,11 @@ class SyncCatalogsController < ApplicationController
           end
 
           ### menu_products
-          menu_products = menu_requirement.menu_products
-          menu_products.update_all( count_plan: 0, count_fact: 0 )
+          menu_products = MenuProduct
+            .joins( :menu_meals_dish )
+            .where( 'menu_meals_dishes.menu_requirement_id = ? ', id )
+
+          #menu_products.update_all( count_plan: 0, count_fact: 0 )
 
           error_products = []
           params[:products].each_with_index do | product_par, index |
@@ -1551,10 +1553,10 @@ class SyncCatalogsController < ApplicationController
               error.merge!( product[ :error ] ) if product[ :error ]
 
               if error.empty?
-                update_fields = { count_plan: product_par[ :count_plan ] }
-                menu_products.create_with( update_fields )
-                  .find_or_create_by( children_category: children_category, product: product, menu_meals_dish: menu_meals_dish )
-                  .update( update_fields )
+                MenuProduct.create( children_category: children_category,
+                                    product: product,
+                                    menu_meals_dish: menu_meals_dish,
+                                    count_plan: product_par[ :count_plan ] )
               end
             end
 
@@ -1644,7 +1646,10 @@ class SyncCatalogsController < ApplicationController
             end
 
             ### menu_products
-            menu_products = menu_requirement.menu_products
+            menu_products = MenuProduct
+              .joins( :menu_meals_dish )
+              .where( 'menu_meals_dishes.menu_requirement_id = ? ', id )
+
             menu_products.where.not( menu_meals_dish: menu_meals_dish ).delete_all
 
             error_products = []
@@ -1663,7 +1668,9 @@ class SyncCatalogsController < ApplicationController
                 if error.empty?
                   update_fields = { count_fact: product_par[ :count_fact ] }
                   menu_products.create_with( update_fields )
-                    .find_or_create_by( children_category: children_category, product: product, menu_meals_dish: menu_meals_dish )
+                    .find_or_create_by( children_category: children_category,
+                                        product: product,
+                                        menu_meals_dish: menu_meals_dish )
                     .update( update_fields )
                 end
               end
@@ -1713,11 +1720,37 @@ class SyncCatalogsController < ApplicationController
       end
     end
 
-    render json: menu_requirement ? menu_requirement.to_json( include: { branch: { only: [ :code, :name ] },
+    render json: error.present? ? { result: false, error: [ error ] } :
+    menu_requirement.to_json(
+      only: [ :number, :date, :splendingdate, :date_sap, :date_saf ],
+      include: {
+        branch: { only: [ :code, :name ] },
         institution: { only: [ :code, :name ] },
-        menu_children_categories: { include: { children_category: { only: [ :code, :name ] } } },
-        menu_products: { include: { children_category: { only: [ :code, :name ] },  product: { only: [ :code, :name ] } } } } )
-      : { result: false, error: [ error ] }
+        menu_children_categories: {
+          only: [ :count_exemption_plan, :count_all_plan, :count_exemption_fact, :count_all_fact ],
+          include: {
+            children_category: { only: [ :code, :name ] } }
+        },
+        menu_meals_dishes: {
+          include: {
+            meal: { only: [ :code, :name ] },
+            dish: { only: [ :code, :name ] },
+            menu_products: {
+              only: [ :count_plan, :count_fact ],
+              include: {
+                menu_meals_dish: {
+                  include: {
+                    meal: { only: [ :code, :name ] },
+                    dish: { only: [ :code, :name ] },
+                  }
+                },
+                children_category: { only: [ :code, :name ] },
+                product: { only: [ :code, :name ] } }
+            }
+          }
+        }
+      }
+    )
   end
 
   # DELETE api/menu_requirement { "institution_code": "14", "number": "KL-000000024", "type": 1 }
@@ -2060,4 +2093,56 @@ class SyncCatalogsController < ApplicationController
   end
   ###############################################################################################
 
+  # GET api/mm2?institution_code=14&number=KL-000000042
+  def mm2
+    error = { institution_code: 'Не знайдений параметр [institution_code]',
+              number: 'Не знайдений параметр [number]' }.stringify_keys!.except( *params.keys )
+
+    if error.empty?
+      institution = institution_code( params[ :institution_code ] )
+
+      unless error = institution[ :error ]
+        menu_requirement = MenuRequirement
+          .joins( institution: :branch )
+          .select( :id, :number, :date, :splendingdate, :date_sap, :date_saf,
+                   'branches.name AS branch_name',
+                   'institutions.name AS institution_name' )
+          .find_by( institution: institution, number: params[ :number ].strip )
+
+        menu_requirement_id = menu_requirement.id
+
+        menu_products = MenuProduct
+          .joins( { product: :products_type },
+                  { menu_meals_dish: [ :meal, :dish ] },
+                  :children_category )
+          .select( 'meals.name as meal_name',
+                   'dishes.name as dish_name',
+                   'children_categories.name AS category_name',
+                   'products_types.name AS type_name',
+                   'products.name AS product_name',
+                   :count_plan, :count_fact )
+          .where( 'menu_meals_dishes.menu_requirement_id = ? ', menu_requirement_id )
+          .order( 'meals.priority', 'meals.name',
+                  'dishes.priority', 'dishes.name',
+                  'children_categories.priority', 'children_categories.name',
+                  'products_types.priority', 'products_types.name', 'products.name' )
+          .as_json( except: :id )
+
+        menu_children_categories = MenuChildrenCategory
+          .joins( :children_category )
+          .select( 'children_categories.name',
+                  :count_all_plan, :count_exemption_plan,
+                  :count_all_fact, :count_exemption_fact )
+          .where( menu_requirement_id: menu_requirement_id )
+          .order( 'children_categories.priority', 'children_categories.name' )
+          .as_json( except: :id )
+      end
+    end
+
+    render json: error.present? ? { result: false, error: [ error ] } :
+      menu_requirement.as_json( except: :id )
+        .merge!( children_categories: menu_children_categories )
+        .merge!( products: menu_products )
+
+  end
 end

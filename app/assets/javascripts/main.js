@@ -133,9 +133,9 @@ class MyLib {
         if ( data.status ) {
           const { href, view } = data;
           if ( href ) {
-            if ( href.search( /.pdf$/i ) === -1 ) this.assignLocation( href ); else this.open( href );
+            if ( href.search( /.pdf$/i ) === -1 ) this.assignLocation( href ); else window.open( href );
           } else if ( view ) {
-            document.getElementById( 'view' ).innerHTML( view );
+            document.getElementById( 'view' ).innerHTML = view;
           }
           if ( callSuccess ) callSuccess( );
         } else {
@@ -150,10 +150,12 @@ class MyLib {
 
     const sendAjax = async ( ) => {
       let data = '';
-      const formData = new FormData( );
-      Object.keys( dataValue ).forEach( key => formData.append( key, dataValue[ key ] ) );
+      const headers = { 'Content-Type': 'application/json' };
+      const body = JSON.stringify( dataValue || { empty: '' } );
 
-      const respond = await fetch( url, { method: type, body: formData, credentials: 'same-origin' } );
+      const credentials = 'same-origin';
+      const respond = await fetch( url, { method: type, body, headers, credentials, redirect: "error"} );
+
       if ( respond.ok ) {
         if ( dataType === 'json' ) {
           data = await respond.json( );
@@ -161,8 +163,8 @@ class MyLib {
           data = await respond.text( );
         }
       } else {
-        const message =  { status: respond.status, statusText: respond.statusText };
-        throw new Error( JSON.stringify( message, null, ' ' ) );
+        data = await respond.text( );
+        throw new Error( data );
       }
 
       return data;
@@ -170,7 +172,7 @@ class MyLib {
 
     sendAjax( )
       .then( data => success( data ) )
-      .catch( reason => this.errorMsg( caption, reason ) );
+      .catch( reason => this.errorMsg( caption, reason ));
   }
 
   // нажатие на кнопочку выход
@@ -298,8 +300,8 @@ class MyLib {
   static setClearTableSession( key, keyTable ) {
     const sessionObj = JSON.parse( sessionStorage.getItem( key ) ) || { }; // спарсим объект обратно
     if ( sessionObj[ keyTable ] ) {
-      delete sessionObj[ keyTable ].row_id;
-      delete sessionObj[ keyTable ].scroll_top;
+      delete sessionObj[ keyTable ].rowId;
+      delete sessionObj[ keyTable ].scrollTop;
       sessionStorage.setItem( key, JSON.stringify( sessionObj ) );
     }
   }

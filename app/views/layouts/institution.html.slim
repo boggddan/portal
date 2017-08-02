@@ -31,11 +31,11 @@ html
               a *{ href: institution_reports_children_day_cost_path } Вартість дітодня за меню-вимогами
             li.item *{ data: { page: :institution_reports_balances_in_warehouses } }
               a *{ href: institution_reports_balances_in_warehouses_path } Залишки продуктів харчування
-            li.item *{data: {page: :institution_reports_attendance_of_children } }
+            li.item *{data: { page: :institution_reports_attendance_of_children } }
               a *{ href: institution_reports_attendance_of_children_path } Табель обліку відвідування дітей
         li.info
-          span = @current_user.username
-          span = @current_user.institution.name
+          span = current_user[ :username ]
+          span = current_institution[ :name ]
         li.item *{ data: { page: :exit } }
           a *{ href: log_out_path } Вихід
 

@@ -5,7 +5,7 @@
     parentTable.innerHTML = '<%= j render( "table_timesheets" ) %>';
     MyLib.tableSetSession( parentTable );
   <% else %>
-    parentTable.innerHTML = elements;
+    parentTable.innerHTML = '';
   <% end %>
 
 }( ) );

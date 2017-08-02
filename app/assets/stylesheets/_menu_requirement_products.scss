@@ -142,7 +142,8 @@
       }
     }
 
-    button[ data-meal-id = '-1' ] {
+    button[ data-meal-id =
+     '-1' ] {
       margin-left: 50px;
       &:not(:disabled) {
         background-image: linear-gradient( to right, #e49393, #ffc7c7 51%, #e49393 100% );

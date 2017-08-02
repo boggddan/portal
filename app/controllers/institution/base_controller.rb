@@ -1,10 +1,11 @@
 class Institution::BaseController < ApplicationController
   before_action :verify_institution
+  helper_method :current_institution
 
   layout 'institution'
 
   def verify_institution
-    redirect_to root_path unless current_user.is_institution?
+    redirect_to root_path unless current_user && current_user[ :is_institution? ]
   end
 
   def index
@@ -12,10 +13,17 @@ class Institution::BaseController < ApplicationController
   end
 
   def current_institution # Текущее подразделение
-    current_user.institution
+    JSON.parse( Institution
+      .select( :id, :code, :name, :branch_id )
+      .find( current_user[ :userable_id ] )
+      .to_json, symbolize_names: true )
   end
 
-  def current_branch # Текущий отдел
-    current_institution.branch
+  def current_branch # Текущее подразделение
+    JSON.parse( Branch
+      .joins( :institutions )
+      .select( :id,:code, :name )
+      .find_by( 'institutions.id': current_user[ :userable_id ] )
+      .to_json, symbolize_names: true )
   end
 end

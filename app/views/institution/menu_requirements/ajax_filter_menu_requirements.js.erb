@@ -4,6 +4,7 @@
   <% if @menu_requirements.present? %>
     parentTable.innerHTML = '<%= j render( "table_menu_requirements" ) %>';
     MyLib.tableSetSession( parentTable );
+
   <% else %>
     parentTable.innerHTML = '';
   <% end %>

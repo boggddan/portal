@@ -1,30 +1,20 @@
 class Institution::MenuRequirementsController < Institution::BaseController
-
-  def index
-  end
+  def index ; end
 
   def ajax_filter_menu_requirements # Фильтрация документов
     @menu_requirements = MenuRequirement
-      .where( institution: current_institution, date: params[ :date_start ]..params[ :date_end ] )
+      .where( institution_id: current_user[ :userable_id ],
+              date: params[ :date_start ]..params[ :date_end ] )
       .order( "#{ params[ :sort_field ] } #{ params[ :sort_order ] }" )
   end
 
   def delete # Удаление документа
-    id = params[ :id ]
-
-    ActiveRecord::Base.transaction do
-      MenuProduct.where( menu_requirement_id: id ).delete_all
-      MenuChildrenCategory.where( menu_requirement_id: id ).delete_all
-      MenuMealsDish.where( menu_requirement_id: id ).delete_all
-      MenuRequirement.where( id: id ).delete_all
-    end
-
+    MenuRequirement.find( params[ :id ] ).destroy
     render json: { status: true }
   end
 
   def menu_products
-    ###
-    @menu_products = JSON.parse( @menu_requirement.menu_products
+    @menu_products = JSON.parse( MenuProduct
       .joins( { product: :products_type }, { menu_meals_dish: [ :meal, :dish ] }, :children_category )
       .select( :id, :product_id, :menu_meals_dish_id, :children_category_id,
         :count_plan, :count_fact,
@@ -33,15 +23,17 @@ class Institution::MenuRequirementsController < Institution::BaseController
         'children_categories.name AS category_name',
         'products.products_type_id', 'products_types.name AS type_name',
         'products.name AS product_name' )
+      .where( 'menu_meals_dishes.menu_requirement_id = ? ', @menu_requirement_id )
       .order( 'meals.priority', 'meals.name',
               'dishes.priority', 'dishes.name',
               'children_categories.priority', 'children_categories.name',
               'products_types.priority', 'products_types.name', 'products.name' )
       .to_json, symbolize_names: true )
 
-    @price_products = JSON.parse( @menu_requirement.institution.price_products
+    @price_products = JSON.parse( PriceProduct
       .select( 'DISTINCT ON(product_id) product_id', :price )
-      .where('price_date <= ?', @menu_requirement.date )
+      .where( institution_id: current_user[ :userable_id ] )
+      .where( 'price_date <= ?', @menu_requirement.date )
       .order( :product_id, 'price_date DESC' )
       .to_json, symbolize_names: true )
 
@@ -65,15 +57,17 @@ class Institution::MenuRequirementsController < Institution::BaseController
   def products # Отображение товаров
     @menu_requirement = MenuRequirement.find( params[ :id ] )
 
+    @menu_requirement_id = @menu_requirement.id
     @disabled_plan = @menu_requirement.number_sap.present?
     @disabled_fact = @menu_requirement.number_saf.present?
 
-    @menu_children_categories = JSON.parse( @menu_requirement.menu_children_categories
+    @menu_children_categories = JSON.parse( MenuChildrenCategory
       .joins( :children_category )
       .select( :id, :children_category_id,
                :count_all_plan, :count_exemption_plan,
                :count_all_fact, :count_exemption_fact,
                'children_categories.name' )
+      .where( menu_requirement_id: @menu_requirement_id )
       .order( 'children_categories.priority', 'children_categories.name' )
       .to_json, symbolize_names: true )
 
@@ -83,7 +77,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .order( :children_category_id, 'cost_date DESC' )
       .to_json, symbolize_names: true )
 
-    @menu_meals_dishes = JSON.parse( @menu_requirement.menu_meals_dishes
+    @menu_meals_dishes = JSON.parse( MenuMealsDish
       .joins( :meal, dish: :dishes_category )
       .left_joins( :menu_products )
       .select( :id,
@@ -95,10 +89,12 @@ class Institution::MenuRequirementsController < Institution::BaseController
               'dishes_categories.id AS category_id',
               'dishes_categories.name AS category_name',
               'COALESCE( SUM( menu_products.count_plan ), 0) AS count_plan' )
+      .where( menu_requirement_id: @menu_requirement_id )
       .group( :id, 'meals.id', 'dishes.id', 'dishes_categories.id' )
       .order( 'meals.priority', 'meals.name', 'dishes_categories.priority',
               'dishes_categories.name', 'dishes.priority', 'dishes.name' )
       .to_json, symbolize_names: true )
+
     @menu_meals = @menu_meals_dishes.group_by{ | o | o[ :meals_id ] }
       .map{ | k, v | { id: k, name: v[ 0 ][ :meals_name ] } }
 
@@ -110,19 +106,21 @@ class Institution::MenuRequirementsController < Institution::BaseController
   end
 
   def create_products
-    id = params[ :id ]
-    @menu_requirement = MenuRequirement.find( id )
+    @menu_requirement_id = params[ :id ]
+    @menu_requirement = MenuRequirement.find( @menu_requirement_id )
 
-    menu_meals_dishes = JSON.parse( @menu_requirement.menu_meals_dishes
+    menu_meals_dishes = JSON.parse( MenuMealsDish
       .left_outer_joins( :menu_products )
       .select( :id, :is_enabled, 'COUNT(menu_products.id) as count' )
+      .where( menu_requirement_id: @menu_requirement_id )
       .order( :id )
       .group( :id )
       .to_json, symbolize_names: true )
 
-    pcc = JSON.parse( @menu_requirement.menu_children_categories
+    pcc = JSON.parse( MenuChildrenCategory
       .select( :children_category_id, 'products.id as product_id' )
       .joins( 'LEFT JOIN products ON true' )
+      .where( menu_requirement_id: @menu_requirement_id )
       .order( :id, 'products.name' )
       .to_json, symbolize_names: true )
 
@@ -132,16 +130,19 @@ class Institution::MenuRequirementsController < Institution::BaseController
     sql_del_values = ''
     menu_meals_dishes.each do | mmd |
       if mmd[ :is_enabled ] && mmd[ :count ].zero?
-        pcc.each{ | o |
-          sql_add_values += ",(#{ id },#{ mmd[ :id ] },#{ o[ :children_category_id ] },#{ o[ :product_id ] },'#{ now }','#{ now }')" }
+        pcc.each { | o |
+          sql_add_values += ",(#{ mmd[ :id ] }," +
+                            "#{ o[ :children_category_id ] }," +
+                            "#{ o[ :product_id ] },"+
+                            "'#{ now }','#{ now }')"
+          }
       end
-
 
       sql_del_values += ",#{ mmd[ :id ] }" if mmd[ :is_enabled ] == false && mmd[ :count ].nonzero?
     end
 
-    fieds = %w( menu_requirement_id menu_meals_dish_id
-                children_category_id product_id created_at updated_at ).join( ',' )
+    fieds = %w( menu_meals_dish_id children_category_id product_id
+                created_at updated_at ).join( ',' )
 
     sql = ( sql_add_values.present? ? "INSERT INTO menu_products ( #{ fieds } ) VALUES #{ sql_add_values[1..-1] }" : '' ) +
       ( sql_add_values.present? && sql_del_values.present? ? ';' : '' ) +
@@ -161,14 +162,18 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .order( 'meals.priority', 'meals.name', 'dishes.priority', 'dishes.name' )
       .to_json, symbolize_names: true )
 
-    children_categories = JSON.parse( current_institution.children_categories
+    children_categories = JSON.parse( Institution
+        .find( current_user[ :userable_id ] )
+        .children_categories
         .select( :id ).order( :name ).to_json, symbolize_names: true )
 
     if meals_dishes.present? && children_categories.present?
       ActiveRecord::Base.transaction do
-        menu_requirement = MenuRequirement.create!( institution: current_institution, branch: current_branch )
+        id = MenuRequirement
+          .create( institution_id: current_user[ :userable_id ],
+                   branch_id: current_institution[ :branch_id ] )
+          .id
 
-        id = menu_requirement.id
         now = Time.now.to_s( :db )
 
         # Создание запроса для блюд
@@ -196,85 +201,108 @@ class Institution::MenuRequirementsController < Institution::BaseController
         cc_sql = "INSERT INTO menu_children_categories ( #{ cc_fieds } ) VALUES #{ cc_sql_values[1..-1] }"
 
         ActiveRecord::Base.connection.execute( "#{ mmd_sql };#{ cc_sql }" )
-        href = institution_menu_requirements_products_path( { id: menu_requirement.id } )
+
+        href = institution_menu_requirements_products_path( { id: id } )
         result = { status: true, href: href }
       end
     else
       result = { status: false, message: 'Незаповенені довідники (children_categories,meals,dishes)!' }
     end
-    render json: result
+
+   render json: result
   end
 
   def children_category_update # Обновление количества по категориям
-    update = params.permit( :count_all_plan, :count_exemption_plan, :count_all_fact, :count_exemption_fact ).to_h
-    MenuChildrenCategory.find( params[:id] ).update( update ) if params[ :id ] && update.present?
-    render json: { status: true }
+    data = params.permit( :count_all_plan, :count_exemption_plan, :count_all_fact, :count_exemption_fact ).to_h
+    status = update_base_with_id( :menu_children_categories, params[ :id ], data )
+    render json: { status: status }
   end
 
   def product_update # Обновление количества по продуктам
-    update = params.permit( :count_plan, :count_fact ).to_h
-    MenuProduct.find( params[:id] ).update( update ) if params[ :id ] && update.present?
-    render json: { status: true }
+    data = params.permit( :count_plan, :count_fact ).to_h
+    status = update_base_with_id( :menu_products, params[ :id ], data )
+    render json: { status: status }
   end
 
   def update # Обновление реквизитов документа
-    update = params.permit( :splendingdate ).to_h
-    MenuRequirement.find( params[:id] ).update( update ) if params[:id] && update.any?
-    render json: { status: true  }
+    data = params.permit( :splendingdate ).to_h
+    status = update_base_with_id( :menu_requirements, params[ :id ], data )
+    render json: { status: status }
   end
 
   def meals_dish_update #
-    update = params.permit( :is_enabled ).to_h
-    MenuMealsDish.find( params[:id] ).update( update ) if params[:id] && update.any?
-    render json: { status: true }
+    data = params.permit( :is_enabled ).to_h
+    status = update_base_with_id( :menu_meals_dishes, params[ :id ], data )
+    render json: { status: status }
   end
 
   def send_sap # Веб-сервис отправки плана меню-требования
-    menu_requirement = MenuRequirement.find( params[:id] )
+    menu_requirement_id = params[ :id ]
 
-    menu_children_categories = JSON.parse( menu_requirement.menu_children_categories
+    menu_requirement = JSON.parse( MenuRequirement
+      .select( :number, :splendingdate, :date )
+      .find( menu_requirement_id )
+    .to_json, symbolize_names: true )
+
+    menu_children_categories = JSON.parse( MenuChildrenCategory
       .joins( :children_category )
       .select( :count_all_plan, :count_exemption_plan, 'children_categories.code as code' )
+      .where( menu_requirement_id: menu_requirement_id )
       .where.not( count_all_plan: 0 )
-      .or( menu_requirement.menu_children_categories
+      .or( MenuChildrenCategory
         .joins( :children_category )
         .select( :count_all_plan, :count_exemption_plan, 'children_categories.code as code' )
+        .where( menu_requirement_id: menu_requirement_id )
         .where.not( count_exemption_plan: 0 ) )
       .to_json, symbolize_names: true )
 
-    menu_products = JSON.parse( menu_requirement.menu_products
-      .joins( :children_category, :product )
-      .select( :count_plan, 'products.code AS product_code', 'children_categories.code AS category_code' )
-      .where.not( count_plan: 0 )
+    menu_products = JSON.parse( MenuMealsDish
+      .joins( menu_products: [ :children_category, :product ] )
+      .select( 'menu_products.count_plan',
+               'products.code AS product_code',
+               'children_categories.code AS category_code' )
+      .where( menu_requirement_id: menu_requirement_id )
+      .where( 'menu_products.count_plan != ? ', 0 )
       .to_json, symbolize_names: true )
 
     if menu_children_categories.present? && menu_products.present?
-      message = { 'CreateRequest' => { 'Branch_id' => menu_requirement.institution.branch.code,
-                                       'Institutions_id' =>  menu_requirement.institution.code,
-                                       'SplendingDate' => menu_requirement.splendingdate,
-                                       'Date' => menu_requirement.date,
-                                       'Goods' => menu_products.map { | o | {
-                                         'CodeOfCategory' => o[ :category_code ],
-                                         'CodeOfGoods' => o[ :product_code ],
-                                         'Quantity' => o[ :count_plan ].to_s } },
-                                       'Categories' => menu_children_categories.map { | o | {
-                                         'CodeOfCategory' => o[ :code ],
-                                         'QuantityAll' => o[ :count_all_plan ],
-                                         'QuantityExemption' => o[ :count_exemption_plan ] } },
-                                       'NumberFromWebPortal' => menu_requirement.number,
-                                       'User' => current_user.username } }
-      method_name = :create_menu_requirement_plan
-      response = Savon.client( SAVON )
-                   .call( method_name, message: message )
-                   .body[ "#{ method_name }_response".to_sym ][ :return ]
+      categories = menu_children_categories.map { | o | { 'CodeOfCategory' => o[ :code ],
+                                                          'QuantityAll' => o[ :count_all_plan ].to_s,
+                                                          'QuantityExemption' => o[ :count_exemption_plan ].to_s } }
 
-      web_service = { call: { savon: SAVON, method: method_name.to_s.camelize, message: message } }
+      goods = menu_products.map { | o | { 'CodeOfCategory' => o[ :category_code ],
+                                        'CodeOfGoods' => o[ :product_code ],
+                                        'Quantity' => o[ :count_plan ] } }
+
+      message = { 'CreateRequest' => { 'Branch_id' => current_branch[ :code ],
+                                       'Institutions_id' =>  current_institution[ :code ],
+                                       'SplendingDate' => menu_requirement[ :splendingdate ],
+                                       'Date' => menu_requirement[ :date ],
+                                       'Goods' => goods,
+                                       'Categories' =>  categories,
+                                       'NumberFromWebPortal' => menu_requirement[ :number ],
+                                       'User' => current_user[ :username ] } }
+      savon_return = get_savon( :create_menu_requirement_plan, message )
+      response = savon_return[ :response ]
+      web_service = savon_return[ :web_service ]
 
       if response[ :interface_state ] == 'OK'
-        menu_requirement.update( date_sap: Date.today, number_sap: response[ :respond ] )
-        menu_requirement.menu_children_categories
-          .update_all( 'count_all_fact = count_all_plan, count_exemption_fact = count_exemption_plan' )
-        menu_requirement.menu_products.update_all( 'count_fact = count_plan' )
+        ActiveRecord::Base.transaction do
+          data_menu_requirement = { date_sap: Date.today, number_sap: response[ :respond ].to_s }
+          update_base_with_id( :menu_requirements, menu_requirement_id, data_menu_requirement )
+
+          sql = 'UPDATE menu_children_categories ' +
+                'SET count_all_fact = count_all_plan, ' +
+                    'count_exemption_fact = count_exemption_plan ' +
+                    "WHERE menu_requirement_id = #{ menu_requirement_id };" +
+                'UPDATE menu_products ' +
+                'SET count_fact = count_plan ' +
+                  'FROM menu_meals_dishes bb ' +
+                  'WHERE menu_meals_dish_id = bb.id '+
+                    "AND bb.menu_requirement_id = #{ menu_requirement_id }"
+
+            ActiveRecord::Base.connection.execute( sql )
+          end
         result = { status: true }
       else
         result = { status: false, caption: 'Неуспішна сихронізація з 1С',
@@ -288,53 +316,83 @@ class Institution::MenuRequirementsController < Institution::BaseController
   end
 
   def send_saf # Веб-сервис отправки факта меню-требования
-    menu_requirement = MenuRequirement.find( params[:id] )
+    menu_requirement_id = params[ :id ]
 
-    menu_children_categories = JSON.parse( menu_requirement.menu_children_categories
+    menu_requirement = JSON.parse( MenuRequirement
+      .select( :number, :splendingdate, :date )
+      .find( menu_requirement_id )
+    .to_json, symbolize_names: true )
+
+    menu_children_categories = JSON.parse( MenuChildrenCategory
       .joins( :children_category )
       .select( :count_all_fact, :count_exemption_fact, 'children_categories.code as code' )
+      .where( menu_requirement_id: menu_requirement_id )
       .where.not( count_all_fact: 0 )
-      .or( menu_requirement.menu_children_categories
+      .or( MenuChildrenCategory
         .joins( :children_category )
         .select( :count_all_fact, :count_exemption_fact, 'children_categories.code as code' )
+        .where( menu_requirement_id: menu_requirement_id )
         .where.not( count_exemption_fact: 0 ) )
       .to_json, symbolize_names: true )
 
-    menu_products = JSON.parse( menu_requirement.menu_products
-      .joins( :children_category, :product )
-      .select( :count_fact, 'products.code AS product_code', 'children_categories.code AS category_code' )
-      .where.not( count_plan: 0 )
+    menu_products = JSON.parse( MenuMealsDish
+      .joins( menu_products: [ :children_category, :product ] )
+      .select( 'menu_products.count_fact',
+               'products.code AS product_code',
+               'children_categories.code AS category_code' )
+      .where( menu_requirement_id: menu_requirement_id )
+      .where( 'menu_products.count_fact != ? ', 0 )
       .to_json, symbolize_names: true )
 
     if menu_children_categories && menu_products
-      message = { 'CreateRequest' => { 'Branch_id' => menu_requirement.institution.branch.code,
-                                       'Institutions_id' =>  menu_requirement.institution.code,
-                                       'SplendingDate' =>menu_requirement.splendingdate,
-                                       'Date' => menu_requirement.date,
-                                       'Goods' => menu_products.map{ | o | {
-                                         'CodeOfCategory' => o[ :category_code ],
-                                         'CodeOfGoods' => o[ :product_code ],
-                                         'Quantity' => o[ :count_fact ].to_s } },
-                                       'Categories' => menu_children_categories.map { | o | {
-                                         'CodeOfCategory' => o[ :code ],
-                                         'QuantityAll' => o[ :count_all_fact ],
-                                         'QuantityExemption' => o[ :count_exemption_fact ] } },
-                                       'NumberFromWebPortal' => menu_requirement.number,
-                                       'User' => current_user.username } }
 
-      method_name = :create_menu_requirement_fact
-      response = Savon.client( SAVON )
-                   .call( method_name, message: message )
-                   .body[ "#{ method_name }_response".to_sym ][ :return ]
+      goods = menu_products.map{ | o | { 'CodeOfCategory' => o[ :category_code ],
+                                        'CodeOfGoods' => o[ :product_code ],
+                                        'Quantity' => o[ :count_fact ] } }
 
-      web_service = { call: { savon: SAVON, method: method_name.to_s.camelize, message: message } }
+      categories = menu_children_categories.map { | o | { 'CodeOfCategory' => o[ :code ],
+                                                          'QuantityAll' => o[ :count_all_fact ],
+                                                          'QuantityExemption' => o[ :count_exemption_fact ] } }
+
+      message = { 'CreateRequest' => { 'Branch_id' => current_branch[ :code ],
+                                       'Institutions_id' =>  current_institution[ :code],
+                                       'SplendingDate' =>menu_requirement[ :splendingdate ],
+                                       'Date' => menu_requirement[ :date ],
+                                       'Goods' => goods,
+                                       'Categories' => categories,
+                                       'NumberFromWebPortal' => menu_requirement[ :number ],
+                                       'User' => current_user[ :username ] } }
+      savon_return = get_savon( :create_menu_requirement_fact, message )
+      response = savon_return[ :response ]
+      web_service = savon_return[ :web_service ]
 
       if response[ :interface_state ] == 'OK'
-        menu_requirement.update( date_saf: Date.today, number_saf: response[ :respond ] )
-        menu_requirement.menu_children_categories
-          .where( count_all_plan: 0, count_exemption_plan: 0, count_all_fact: 0, count_exemption_fact: 0 ).delete_all
-        menu_requirement.menu_products.where( count_plan: 0, count_fact: 0 ).delete_all
-        menu_requirement.menu_meals_dishes.where( is_enabled: false ).delete_all
+        ActiveRecord::Base.transaction do
+          data_menu_requirement = { date_saf: Date.today, number_saf: response[ :respond ].to_s }
+          update_base_with_id( :menu_requirements, menu_requirement_id, data_menu_requirement )
+
+            MenuChildrenCategory
+              .where( menu_requirement_id: menu_requirement_id,
+                      count_all_plan: 0,
+                      count_exemption_plan: 0,
+                      count_all_fact: 0,
+                      count_exemption_fact: 0 )
+              .delete_all
+
+            MenuMealsDish
+              .where( menu_requirement_id: menu_requirement_id,
+                      is_enabled: false )
+              .delete_all
+
+            sql = 'DELETE FROM menu_products ' +
+                    'USING menu_meals_dishes bb ' +
+                    'WHERE menu_meals_dish_id = bb.id '+
+                      "AND bb.menu_requirement_id = #{ menu_requirement_id } " +
+                      'AND count_plan = 0 '+
+                      'AND count_fact = 0'
+
+            ActiveRecord::Base.connection.execute( sql )
+          end
         result = { status: true }
       else
         result = { status: false, caption: 'Неуспішна сихронізація з 1С',

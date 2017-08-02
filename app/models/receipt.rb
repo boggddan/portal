@@ -2,7 +2,8 @@ class Receipt < ApplicationRecord
   belongs_to :supplier_order
   belongs_to :institution
 
-  has_many :receipt_products, dependent: :destroy
+  has_many :receipt_products
+
   #
   before_save :set_default_value
 

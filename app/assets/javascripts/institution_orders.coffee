@@ -37,7 +37,7 @@ $( document ).on 'turbolinks:load', ->
       $clmnObj = $sessionObj[ $clmn.attr 'id' ]
 
       $clmnIoObj = $sessionObj[ 'col_io' ]
-      $institutionOrderId = $clmnIoObj?.row_id
+      $institutionOrderId = $clmnIoObj?.rowId
       if $institutionOrderId
         MyLib.ajax(
           'Фільтрація коригування заявки'

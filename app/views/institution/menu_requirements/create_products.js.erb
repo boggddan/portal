@@ -2,8 +2,8 @@
   let elements = '';
   <% if @menu_products.present? %>
     elements = '<%= j render( 'table_menu_products' ) %>'
-    objMenuRequirementProducts.buttonColPr.click( );
   <% end %>
 
   objMenuRequirementProducts.colPrInit( elements );
+  objMenuRequirementProducts.buttonColPr.click( );
 }( ) );

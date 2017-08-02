@@ -98,4 +98,7 @@ scope :api, controller: :sync_catalogs do
   post :timesheet_update, path: :cu_timesheet
   get :timesheet_view, path: :timesheet
   delete :timesheet_delete, path: :timesheet
+
+  get :mm1, path: :mm1
+  get :mm2, path: :mm2
 end

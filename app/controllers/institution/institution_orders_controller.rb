@@ -1,28 +1,26 @@
 class Institution::InstitutionOrdersController < Institution::BaseController
-  def index
-  end
+  def index ; end
 
   def get_schedule_of_food_supply( date_start, date_end ) # Веб-сервис на заявку
     message = { 'GetRequest' => { 'StartDate' => date_start,
                                   'EndDate' => date_end,
-                                  'DepartmentsCode' => current_institution.code } }
-    method_name = :get_schedule_of_food_supply
-    response = Savon.client( SAVON )
-                 .call( method_name, message: message )
-                 .body[ "#{ method_name }_response".to_sym ][ :return ]
+                                  'DepartmentsCode' => current_institution[ :code ] } }
 
-    web_service = { call: { savon: SAVON, method: method_name.to_s.camelize, message: message } }
-
-    { response: response, web_service: web_service }
+    get_savon( :get_schedule_of_food_supply, message )
   end
 
   def ajax_filter_institution_orders # Фильтрация таблицы заявок
     date_start = params[ :date_start ]
     date_end = params[ :date_end ]
+    institution_id = current_user[ :userable_id ]
 
     @institution_orders =
-      InstitutionOrder.where( institution: current_institution ).where( date_start: date_start..date_end )
-      .or(InstitutionOrder.where( institution: current_institution ).where( date_end: date_start..date_end ) )
+      InstitutionOrder
+        .where( institution_id: institution_id,
+                date_start: date_start..date_end )
+      .or( InstitutionOrder
+        .where( institution_id: current_user[ :userable_id ],
+                date_end: date_start..date_end ) )
       .order( "#{ params[ :sort_field ] } #{ params[ :sort_order ] }" )
   end
 
@@ -37,27 +35,47 @@ class Institution::InstitutionOrdersController < Institution::BaseController
     result = { }
     foods = response[ :food ]
 
-    if response[ :interface_state ] == 'OK' && foods
-      ActiveRecord::Base.transaction do
-        institution_order = InstitutionOrder.create( institution: current_institution,
-                                                     date_start: date_start, date_end: date_end )
-        foods.each do | food |
-          product = product_code( food[ :code_of_food ] )
+    if response[ :interface_state ] == 'OK' && foods && foods.present?
+      error = { }
 
-          if product[ :error ]
-            result = { status: false, caption: 'Неможливо створити документ',
-                       message: { error: product[ :error ] }.merge!( web_service ) }
-            raise ActiveRecord::Rollback
-          else
-            institution_order.institution_order_products
-              .create( product: product, date: food[ :date ], description: food[ :comments ] )
+      products_codes = foods.group_by { | o | o[ :code_of_food ] }.map { | k, v | k }
+      products = exists_codes( :products, products_codes )
+      error.merge!( products[ :error ] ) unless products[ :status ]
 
-            #SuppliersPackage.select( :package_id )
-            #  .where( product: product, institution: current_institution ).group( :package_id ) do
-          end
+      if error.empty?
+        now = Time.now.to_s( :db )
+
+        ActiveRecord::Base.transaction do
+          data = { institution_id: current_user[ :userable_id ],
+                   date_start: date_start,
+                   date_end: date_end }
+
+          id = InstitutionOrder( data ).id
+
+          fields = %w( institution_order_id product_id date
+                       description created_at updated_at ).join( ',' )
+
+          sql_values = ''
+
+          foods.each { | food |
+            product_id = products[ :obj ][ ( food[ :code_of_food ] || '' ).strip ]
+            sql_values += ",(#{ id }," +
+                          "#{ product_id }," +
+                          "'#{ food[ :date ] }'," +
+                          "'#{ food[ :description ] }'," +
+                          "'#{ now }','#{ now }')"
+          }
+
+          sql = "INSERT INTO institution_order_products ( #{ fields } ) VALUES #{ sql_values[1..-1] }"
+
+          ActiveRecord::Base.connection.execute( sql )
+
+          href = institution_institution_orders_products_path( { id: id } )
+          result = { status: true, href: href }
         end
-        href = institution_institution_orders_products_path( { id: institution_order.id } )
-        result = { status: true, href: href }
+      else
+        result = { status: false, caption: 'Неможливо створити документ',
+                   message: { error: error }.merge!( web_service ) }
       end
     else
       result = { status: false, caption: 'За вибраний період даних немає в 1С',
@@ -74,53 +92,91 @@ class Institution::InstitutionOrdersController < Institution::BaseController
 
   def ajax_filter_corrections # Фильтрация корректировок заявки
     @institution_order = InstitutionOrder.find( params[ :institution_order_id ] )
-    @io_corrections = @institution_order.io_corrections.order( "#{ params[ :sort_field ] } #{ params[ :sort_order ] }" )
+    @io_corrections = @institution_order.io_corrections
+      .order( "#{ params[ :sort_field ] } #{ params[ :sort_order ] }" )
   end
 
   def correction_create # Создание корректировки заявки
-    institution_order = InstitutionOrder.find( params[ :institution_order_id ] )
+    institution_order_id = params[ :institution_order_id ]
 
-    get_schedule = get_schedule_of_food_supply( institution_order.date_start,
-                                                institution_order.date_end )
+    institution_order = JSON.parse( InstitutionOrder
+      .select( :id, :date_start, :date_end )
+      .find( institution_order_id )
+      .to_json, symbolize_names: true )
+
+    get_schedule = get_schedule_of_food_supply( institution_order[ :date_start ],
+                                                institution_order[ :date_end ] )
     response = get_schedule[ :response ]
     web_service = get_schedule[ :web_service ]
 
     result = { }
-
     foods = response[ :food ]
 
-    if response[ :interface_state ] == 'OK' && foods
-      ActiveRecord::Base.transaction do
-        ioc_last_id = institution_order.io_corrections.last.try( :id )
-        io_correction = IoCorrection.create( institution_order: institution_order )
+    if response[ :interface_state ] == 'OK' && foods && foods.present?
+      error = { }
 
-        foods.each do | food |
-          product = product_code( food[ :code_of_food ] )
+      products_codes = foods.group_by { | o | o[ :code_of_food ] }.map { | k, v | k }
+      products = exists_codes( :products, products_codes )
+      error.merge!( products[ :error ] ) unless products[ :status ]
 
-          if product[ :error ]
-            result = { status: false, caption: 'Неможливо створити документ',
-                       message: { error: product[ :error ] }.merge!( web_service ) }
-            raise ActiveRecord::Rollback
-          else
-            date = food[ :date ]
+      if error.empty?
+        now = Time.now.to_s( :db )
 
-            where = { product: product, date: date }
+        ioc_last_id = IoCorrection
+          .select( :id )
+          .where( institution_order_id: institution_order_id )
+          .last
+          .try( :id )
 
-            amount_order = ( ioc_last_id ?
-              IoCorrectionProduct.select( :amount ).find_by( where.merge(io_correction_id: ioc_last_id ) ).try( :amount )
-              : institution_order.institution_order_products.select( :amount ).find_by( where ).try( :amount )
-            ) || 0
+        amounts = JSON.parse( ( ioc_last_id ?
+          IoCorrectionProduct
+            .select( :product_id, :date, :amount )
+            .where( io_correction_id: ioc_last_id )
+          :
+          InstitutionOrderProduct
+            .select( :product_id, :date, :amount )
+            .where( institution_order_id: institution_order_id )
+          ).to_json, symbolize_names: true )
 
-            io_correction.io_correction_products
-              .create( product: product, date: date, description: food[ :comments ], amount_order: amount_order, amount: amount_order  )
-          end
+        ActiveRecord::Base.transaction do
+          data = { institution_order_id: institution_order_id }
+          id = IoCorrection.create( data ).id
+
+          fields = %w( io_correction_id product_id date amount_order amount
+                        description created_at updated_at ).join( ',' )
+
+          sql_values = ''
+
+          foods.each { | food |
+            product_id = products[ :obj ][ ( food[ :code_of_food ] || '' ).strip ]
+            date =  food[ :date ].to_date.to_s( :db )
+            mount = amounts
+              .select{ | o | o[ :product_id ] == product_id && o[ :date ] == date }
+              .fetch( 0,  { amount: 0 } )[ :amount ]
+
+            sql_values += ",(#{ id }," +
+                          "#{ product_id }," +
+                          "'#{ date }'," +
+                          "#{ amount }," +
+                          "#{ amount }," +
+                          "'#{ food[ :description ] }'," +
+                          "'#{ now }','#{ now }')"
+          }
+
+          sql = "INSERT INTO io_correction_products ( #{ fields } ) VALUES #{ sql_values[1..-1] }"
+
+          ActiveRecord::Base.connection.execute( sql )
+
+          href = institution_institution_orders_correction_products_path( { id: id } )
+          result = { status: true, href: href }
         end
-        href = institution_institution_orders_correction_products_path( { id: io_correction.id } )
-        result = { status: true, href: href }
+      else
+        result = { status: false, caption: 'Неможливо створити документ',
+                  message: { error: error }.merge!( web_service ) }
       end
     else
       result = { status: false, caption: 'За вибраний період даних немає в 1С',
-                 message: web_service.merge!( response: response ) }
+                  message: web_service.merge!( response: response ) }
     end
 
     render json: result
@@ -133,50 +189,68 @@ class Institution::InstitutionOrdersController < Institution::BaseController
 
   def products # Отображение товаров
     @institution_order = InstitutionOrder.find( params[ :id ] )
-    @institution_order_products = @institution_order.institution_order_products
-      .select( :id, :product_id, :date, :amount, :description )
-      .joins( product: [ :products_type ] )
-      .select( 'products.name AS name', 'products_types.name AS type' )
-      .order( :date, 'products_types.priority','products.name' )
+    @institution_order_products = @institution_order
+      .institution_order_products
+        .select( :id, :product_id, :date, :amount, :description )
+        .joins( product: [ :products_type ] )
+        .select( 'products.name AS name', 'products_types.name AS type' )
+        .order( :date, 'products_types.priority','products.name' )
   end
 
   def update # Обновление реквизитов документа заявки
-    update = params.permit( :date ).to_h
-    InstitutionOrder.find( params[ :id ] ).update( update ) if params[ :id ] && update.any?
-    render json: { status: true }
+    data = params.permit( :date ).to_h
+    status = update_base_with_id( :institution_orders, params[ :id ], data )
+    render json: { status: status }
   end
 
   def product_update # Обновление количества
-    update = params.permit( :amount ).to_h
-    InstitutionOrderProduct.find( params[ :id ] ).update( update ) if params[ :id ] && update.any?
-    render json: { status: true }
+    data = params.permit( :amount ).to_h
+    status = update_base_with_id( :institution_order_products, params[ :id ], data )
+    render json: { status: status }
   end
 
   def send_sa # Веб-сервис отправки
-    institution_order = InstitutionOrder.find( params[ :id ] )
-    institution_order_products = institution_order.institution_order_products.where.not( amount: 0 )
+    institution_order_id = params[ :id ]
+
+    institution_order = JSON.parse( InstitutionOrder
+      .select( :id, :number, :date_start, :date_end )
+      .find( institution_order_id )
+      .to_json, symbolize_names: true )
+
+    institution_order_products = JSON.parse( InstitutionOrderProduct
+      .joins( :product )
+      .select( 'products.code AS code', :date, :amount )
+      .where( institution_order_id: institution_order_id )
+      .where.not( amount: 0 )
+      .to_json, symbolize_names: true )
 
     result = { }
     if institution_order_products.present?
-      message = { 'CreateRequest' => { 'Institutions_id' => current_institution.code,
-                                       'DateStart' => institution_order.date_start,
-                                       'DateFinish' => institution_order.date_end,
-                                       'NumberFromWebPortal' => institution_order.number,
-                                       'TMC' => institution_order_products.map{ | o | {
-                                         'Product_id' => o.product.code,
-                                         'Date' => o.date,
-                                         'Count_po' => o.amount.to_s } },
-                                       'User' => current_user.username } }
-      method_name = :creation_application_units
-      response = Savon.client( SAVON ).call( method_name, message: message )
-                   .body[ "#{ method_name }_response".to_sym ][ :return ]
+      tmc = institution_order_products.map{ | o | { 'Product_id' => o[ :code ],
+                                                    'Date' => o[ :date ],
+                                                    'Count_po' => o[ :amount ] } }
 
-      web_service = { call: { savon: SAVON, method: method_name.to_s.camelize, message: message } }
+      message = { 'CreateRequest' => { 'Institutions_id' => current_institution[ :code ],
+                                       'DateStart' => institution_order[ :date_start ],
+                                       'DateFinish' => institution_order[ :date_end ],
+                                       'NumberFromWebPortal' => institution_order[ :number ],
+                                       'TMC' => tmc,
+                                       'User' => current_user[ :username ] } }
+      savon_return = get_savon( :creation_application_units, message )
+      response = savon_return[ :response ]
+      web_service = savon_return[ :web_service ]
 
       if response[ :interface_state ] == 'OK'
-        institution_order.update( date_sa: Date.today, number_sa: response[ :respond ] )
-        institution_order.institution_order_products.where( amount: 0 ).destroy_all
-        result = { status: true }
+        ActiveRecord::Base.transaction do
+          data = { date_sa: Date.today, number_sa: response[ :respond ].to_s }
+          update_base_with_id( :institution_orders, institution_order_id, data )
+
+          InstitutionOrderProduct
+            .where( institution_order_id: institution_order_id, amount: 0 )
+            .delete_all
+
+          result = { status: true }
+        end
       else
         result = { status: false, caption: 'Неуспішна сихронізація з 1С',
                    message: web_service.merge!( response: response ) }
@@ -189,78 +263,97 @@ class Institution::InstitutionOrdersController < Institution::BaseController
   end
 
   def print # Веб-сервис отправки
-    institution_order = InstitutionOrder.find( params[ :id ] )
+    institution_order = JSON.parse( InstitutionOrder
+      .select( :number, :date_sa )
+      .find( params[ :id ] )
+      .to_json, symbolize_names: true )
 
     result = { }
-    message = { 'CreateRequest' => { 'Date' => institution_order.date_sa,
-                                     'NumberFromWebPortal' => institution_order.number } }
-    method_name = :get_print_form_of_order_of_devision
+    message = { 'CreateRequest' => { 'Date' => institution_order[ :date_sa ],
+                                     'NumberFromWebPortal' => institution_order[ :number ] } }
 
-    response = Savon.client( SAVON ).call( method_name, message: message )
-                   .body[ "#{ method_name }_response".to_sym ][ :return ]
+    savon_return = get_savon( :get_print_form_of_order_of_devision, message )
+    response = savon_return[ :response ]
+    web_service = savon_return[ :web_service ]
 
-    web_service = { call: { savon: SAVON, method: method_name.to_s.camelize, message: message } }
-
-    if response[ :interface_state ] == 'OK'
-      result = { status: true, href: response[ :respond ] }
-    else
-      result = { status: false, caption: 'Неуспішна сихронізація з 1С',
-                 message: web_service.merge!( response: response ) }
-    end
-
-    render json: result
+    render json: response[ :interface_state ] == 'OK' ?
+      { status: true, href: response[ :respond ] }
+      :
+      { status: false, caption: 'Неуспішна сихронізація з 1С',
+        message: web_service.merge!( response: response ) }
   end
 
   def correction_products # Отображение товаров корректировки заявки
-    @io_correction = IoCorrection.find( params[ :id ] )
-    @institutin_order = @io_correction.institution_order
-    @io_correction_products = @io_correction.io_correction_products
-                                    .select( :id, :product_id, :date, :amount_order, :amount, :description )
-                                    .joins( product: [ :products_type ] )
-                                    .select( 'products.name AS name', 'products_types.name AS type' )
-                                    .order( :date, 'products_types.priority','products.name' )
+    @io_correction = IoCorrection
+      .joins( :institution_order )
+      .select( :id, :number, :date, :number_sa, :date_sa,
+               'institution_orders.number AS io_number',
+               'institution_orders.date AS io_date' )
+      .find( params[ :id ] )
+
+    @io_correction_products = @io_correction
+      .io_correction_products
+        .select( :id, :product_id, :date, :amount_order, :amount, :description )
+        .joins( product: [ :products_type ] )
+        .select( 'products.name AS name', 'products_types.name AS type' )
+        .order( :date, 'products_types.priority','products.name' )
   end
 
   def correction_update # Обновление реквизитов документа корректировки
-    update = params.permit( :date ).to_h
-    IoCorrection.find( params[ :id ] ).update( update ) if params[ :id ] && update.any?
-    render json: { status: true }
+    data = params.permit( :date ).to_h
+    status = update_base_with_id( :io_corrections, params[ :id ], data )
+    render json: { status: status }
   end
 
   def correction_product_update # Обновление количества корректировки заявки
-    update = params.permit( :amount ).to_h
-    IoCorrectionProduct.find( params[ :id ] ).update( update ) if params[ :id ] && update.any?
-    render json: { status: true }
+    data = params.permit( :amount ).to_h
+    status = update_base_with_id( :io_correction_pruducts, params[ :id ], data )
+    render json: { status: status }
   end
 
   def correction_send_sa # Веб-сервис отправки
-    io_correction = IoCorrection.find( params[ :id ] )
-    institution_order = io_correction.institution_order
-    io_correction_products = io_correction.io_correction_products.where.not( amount: 0 )
+    io_correction_id = params[ :id ]
+
+    io_correction = JSON.parse( IoCorrection
+      .joins( :institution_order )
+      .select( :number, 'institution_orders.number AS io_number')
+      .find( io_correction_id )
+      .to_json, symbolize_names: true )
+
+    io_correction_products = JSON.parse( IoCorrectionProduct
+      .joins( :product )
+      .select( 'products.code AS code', :date, :amount, :amount_order )
+      .where( io_correction_id: io_correction_id )
+      .where.not( amount: 0 )
+      .to_json( methods: :diff_amount ), symbolize_names: true )
+      .reject! { | o | o[ :diff_amount ] == '0.0' }
 
     result = { }
     if io_correction_products.present?
-      institution_order = io_correction.institution_order
-      message = { 'CreateRequest' => { 'Institutions_id' => current_institution.code,
-                                       'NumberFromWebPortal' => io_correction.number,
-                                       'ApplicationNumber' => institution_order.number,
-                                       'TMC' => io_correction_products.map{ | o | {
-                                         'Product_id' => o.product.code,
-                                         'Date' => o.date,
-                                         'Count_po' => (o.amount - o.amount_order).to_s } },
-                                       'User' => current_user.username } }
-      method_name = :creation_correction_application_units
-      response = Savon.client( SAVON )
-                   .call( method_name, message: message )
-                   .body[ "#{ method_name }_response".to_sym ][ :return ]
+      tmc = io_correction_products.map{ | o | { 'Product_id' => o[ :code ],
+                                                'Date' => o[ :date ],
+                                                'Count_po' => o[ :diff_amount ] } }
 
-      web_service = { call: { savon: SAVON, method: method_name.to_s.camelize, message: message } }
+      message = { 'CreateRequest' => { 'Institutions_id' => current_institution[ :code ],
+                                       'NumberFromWebPortal' => io_correction[ :number ],
+                                       'ApplicationNumber' => io_correction[ :io_number ],
+                                       'TMC' => tmc,
+                                       'User' => current_user[ :username ] } }
+      savon_return = get_savon( :creation_correction_application_units, message )
+      response = savon_return[ :response ]
+      web_service = savon_return[ :web_service ]
 
       if response[ :interface_state ] == 'OK'
-        io_correction.update( date_sa: Date.today, number_sa: response[ :respond ] )
-        io_correction.io_correction_products.where( amount: 0 ).destroy_all
+        ActiveRecord::Base.transaction do
+          data = { date_sa: Date.today, number_sa: response[ :respond ].to_s }
+          update_base_with_id( :io_corrections, params[ :id ], data )
 
-        result = { status: true }
+          IoCorrectionProduct
+            .where( io_correction_id: io_correction_id, amount: 0 )
+            .delete_all
+
+          result = { status: true }
+        end
       else
         result = { status: false, caption: 'Неуспішна сихронізація з 1С',
                    message: web_service.merge!( response: response ) }

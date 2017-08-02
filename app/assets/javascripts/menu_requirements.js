@@ -59,7 +59,7 @@ $( document ).on( 'turbolinks:load', ( ) => {
         .datepicker( { onSelect: function( ) { MyLib.selectDateEnd( $( this ), '#date_start', filterTable ); } } )
       .end( )
       .find( '.btn_create' )
-        .on( 'click', function( ) { MyLib.createDoc( $( this ), { } ); } )
+        .on( 'click', function( ) { MyLib.createDoc( $( this ), null ) } )
       .end( )
       .on( 'click', 'td, th[data-sort]' , function( ) {
         const $this = $( this );

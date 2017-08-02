@@ -1,10 +1,11 @@
 main#menu_requirements
 
   #col_mr.clmn *{ data: { caption: 'Меню-вимоги',
-    path_filter: institution_menu_requirements_ajax_filter_menu_requirements_path,
-    path_create: institution_menu_requirements_create_path,
-    path_view: institution_menu_requirements_products_path,
-    path_del: institution_menu_requirements_delete_path } }
+    path: { \
+      filter: institution_menu_requirements_ajax_filter_menu_requirements_path,
+      create: institution_menu_requirements_create_path,
+      view: institution_menu_requirements_products_path,
+      del: institution_menu_requirements_delete_path } } }
 
     h1 Меню-вимоги
     .panel

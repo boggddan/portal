@@ -1,23 +1,17 @@
 class Institution::TimesheetsController < Institution::BaseController
 
   def index ; end
-
   def new ; end
 
   def ajax_filter_timesheets # Фильтрация документов
     @timesheets = Timesheet
-      .where( institution: current_institution, date: params[ :date_start ]..params[ :date_end ] )
+      .where( institution_id: current_user[ :userable_id ],
+              date: params[ :date_start ]..params[ :date_end ] )
       .order( "#{ params[ :sort_field ] } #{ params[ :sort_order ] }" )
   end
 
   def delete # Удаление документа
-    id = params[ :id ]
-    if id
-      sql = "DELETE FROM timesheet_dates WHERE timesheet_id = #{ id };" +
-            "DELETE FROM timesheets WHERE id = #{ id }"
-      ActiveRecord::Base.connection.execute( sql )
-    end
-
+    Timesheet.find( params[ :id ] ).destroy
     render json: { status: true }
   end
 
@@ -25,30 +19,37 @@ class Institution::TimesheetsController < Institution::BaseController
     date_start = params[ :date_start ].to_date
     date_end = params[ :date_end ].to_date
 
-    timesheet_exists = current_institution.timesheets.select( :id, :number, :date, :date_eb, :date_ee )
-                           .where( date_eb: date_start..date_end )
-      .or( current_institution.timesheets.select( :id, :number, :date, :date_eb, :date_ee ).where( date_ee: date_start..date_end ) )
+    timesheet_exists = JSON.parse( Timesheet
+      .select( :id, :number, :date, :date_eb, :date_ee )
+      .where( institution_id: current_user[ :userable_id ],
+              date_eb: date_start..date_end )
+      .or( Timesheet
+        .select( :id, :number, :date, :date_eb, :date_ee )
+        .where( institution_id: current_user[ :userable_id ],
+                date_ee: date_start..date_end ) )
       .order( :number )
+      .to_json, symbolize_names: true )
 
     if timesheet_exists.present?
       result = { status: false, caption: 'За выбраний період уже створений табель',
-                 message: timesheet_exists.map{ |v| {
-                     id: v[:id], 'Номер': v[ :number ], 'Дата:': date_str( v[ :date ]),
-                     'З': date_str( v[ :date_eb ] ), 'ПО': date_str( v[ :date_ee ] ) } }  }
+                 message: timesheet_exists.map{ | v | {
+                     id: v[ :id ],
+                     'Номер': v[ :number ],
+                     'Дата:': date_str( v[ :date ].to_date ),
+                     'З': date_str( v[ :date_eb ].to_date ),
+                     'ПО': date_str( v[ :date_ee ].to_date ) } } }
     else
       message = { 'CreateRequest' => { 'StartDate' => date_start,
                                         'EndDate' => date_end,
-                                        'Institutions_id' => current_institution.code } }
-      method_name = :get_data_time_sheet
-      response = Savon.client( SAVON )
-                    .call( method_name, message: message )
-                    .body[ "#{ method_name }_response".to_sym ][ :return ]
+                                        'Institutions_id' => current_institution[ :code ] } }
 
-      web_service = { call: { savon: SAVON, method: method_name.to_s.camelize, message: message } }
-
-      ts_data = response[ :ts ]
+      savon_return = get_savon( :get_data_time_sheet, message )
+      response = savon_return[ :response ]
+      web_service = savon_return[ :web_service ]
 
       result = { }
+      ts_data = response[ :ts ]
+
       if response[ :interface_state ] == 'OK' && ts_data && ts_data.present?
         error = { }
 
@@ -68,14 +69,15 @@ class Institution::TimesheetsController < Institution::BaseController
           ActiveRecord::Base.transaction do
             now = Time.now.to_s( :db )
 
-            timesheet = Timesheet.create( institution: current_institution,
-                                          branch: current_branch,
-                                          date_vb: response[ :date_vb ],
-                                          date_ve: response[ :date_ve ],
-                                          date_eb: response[ :date_eb ],
-                                          date_ee: response[ :date_ee ],
-                                          date: now )
-            id = timesheet.id
+            id = Timesheet
+              .create( institution_id: current_user[ :userable_id ],
+                       branch_id: current_institution[ :branch_id ],
+                       date_vb: response[ :date_vb ],
+                       date_ve: response[ :date_ve ],
+                       date_eb: response[ :date_eb ],
+                       date_ee: response[ :date_ee ],
+                       date: now )
+              .id
 
             fields = %w( timesheet_id children_group_id child_id reasons_absence_id
                         date created_at updated_at ).join( ',' )
@@ -83,10 +85,13 @@ class Institution::TimesheetsController < Institution::BaseController
             sql_values = ''
 
             ts_data.each { | ts |
+              children_group_id = children_groups[ :obj ][ ( ts[ :children_group_code ] || '' ).strip ]
+              child_id = children[ :obj ][ ( ts[ :child_code ] || '' ).strip ]
+              reasons_absence_id = reasons_absences[ :obj ][ ( ts[ :reasons_absence_code ] || '' ).strip ]
               sql_values += ",(#{ id }," +
-                            "#{ children_groups[ :obj ][ (ts[ :children_group_code ] || '' ).strip ] }," +
-                            "#{ children[ :obj ][ ( ts[ :child_code ] || '' ).strip ] }," +
-                            "#{ reasons_absences[ :obj ][ ( ts[ :reasons_absence_code ] || '' ).strip ] }," +
+                            "#{ children_group_id }," +
+                            "#{ child_id }," +
+                            "#{ reasons_absence_id }," +
                             "'#{ ts[ :date ] }'," +
                             "'#{ now }','#{ now }')"
             }
@@ -112,37 +117,46 @@ class Institution::TimesheetsController < Institution::BaseController
   end
 
   def send_sa
-    timesheet = Timesheet.find( params[ :id ] )
+    timesheet_id = params[ :id ]
 
-    timesheet_dates = timesheet.timesheet_dates
-      .select( :id, :date, 'children_categories.code AS category_code',
-        'children_groups.code AS group_code', 'children.code AS child_code',
-        'reasons_absences.code AS reason_code' )
+    timesheet = JSON.parse( Timesheet
+      .select( :id, :number, :date_vb, :date_ve, :date_eb, :date_ee )
+      .find( timesheet_id )
+      .to_json, symbolize_names: true )
+
+    timesheet_dates = JSON.parse( TimesheetDate
       .joins( :children_category, :children_group, :child, :reasons_absence )
+      .select( :id, :date,
+               'children_categories.code AS category_code',
+               'children_groups.code AS group_code',
+               'children.code AS child_code',
+               'reasons_absences.code AS reason_code' )
+      .where( timesheet_id: timesheet_id )
       .order( 'category_code', 'group_code', 'child_code', :date )
+      .to_json, symbolize_names: true )
 
     result = { }
     if timesheet_dates.present?
-      message = { 'CreateRequest' => { 'Institutions_id' => current_institution.code,
-                                       'NumberFromWebPortal' => timesheet.number,
-                                       'StartDate' => timesheet.date_vb,
-                                       'EndDate' => timesheet.date_ve,
-                                       'StartDateOfTheFill' => timesheet.date_eb,
-                                       'EndDateOfTheFill' => timesheet.date_ee,
-                                       'TS' => timesheet_dates.map{ | o | {
-                                         'Child_code' => o.child_code,
-                                         'Children_group_code' => o.group_code,
-                                         'Reasons_absence_code' => o.reason_code,
-                                         'Date' => o.date  } },
-                                       'User' => current_user.username } }
-      method_name = :creation_time_sheet
-      response = Savon.client( SAVON ).call( method_name, message: message )
-                   .body[ "#{ method_name }_response".to_sym ][ :return ]
+      ts = timesheet_dates.map{ | o | { 'Child_code' => o[ :child_code ],
+                                        'Children_group_code' => o[ :group_code ],
+                                        'Reasons_absence_code' => o[ :reason_code ],
+                                        'Date' => o[ :date ] } }
 
-      web_service = { call: { savon: SAVON, method: method_name.to_s.camelize, message: message } }
+      message = { 'CreateRequest' => { 'Institutions_id' => current_institution[ :code ],
+                                       'NumberFromWebPortal' => timesheet[ :number ],
+                                       'StartDate' => timesheet[ :date_vb ],
+                                       'EndDate' => timesheet[ :date_ve ],
+                                       'StartDateOfTheFill' => timesheet[ :date_eb ],
+                                       'EndDateOfTheFill' => timesheet[ :date_ee ],
+                                       'TS' => ts,
+                                       'User' => current_user[ :username ] } }
+      savon_return = get_savon( :creation_time_sheet, message )
+      response = savon_return[ :response ]
+      web_service = savon_return[ :web_service ]
 
       if response[ :interface_state ] == 'OK'
-        timesheet.update( date_sa: Date.today, number_sa: response[ :respond ] )
+        data = { date_sa: Date.today, number_sa: response[ :respond ].to_s }
+        update_base_with_id( :timesheets, timesheet_id, data )
         result = { status: true }
       else
         result = { status: false, caption: 'Неуспішна сихронізація з 1С',
@@ -187,25 +201,32 @@ class Institution::TimesheetsController < Institution::BaseController
   end
 
   def update # Обновление реквизитов документа
-    update = params.permit( :id, :date ).to_h
-    Timesheet.where( id: params[ :id ] ).update_all( update ) if params[ :id ] && update.any?
-    render json: { status: true }
+    data = params.permit( :date ).to_h
+    status = update_base_with_id( :timesheets, params[ :id ], data )
+    render json: { status: status }
   end
 
   def dates_update # Обновление маркера
-    update = params.permit( :reasons_absence_id ).to_h
-    TimesheetDate.find( params[ :id ] ).update( update ) if params[ :id ] && update.any?
-    render json: { status: true }
+    data = params.permit( :reasons_absence_id ).to_h
+    status = update_base_with_id( :timesheet_dates, params[ :id ], data )
+    render json: { status: status }
   end
 
   def dates_updates # Обновление группы маркеров
-    update = params.permit( { ids: [] }, :reasons_absence_id ).to_h
-    reasons_absence_id = update[ :reasons_absence_id ]
+    data = params.permit( { ids: [] }, :reasons_absence_id ).to_h
+    reasons_absence_id = data[ :reasons_absence_id ]
 
-    ActiveRecord::Base.transaction do
-      update[ :ids ].each do | id |
-        TimesheetDate.find( id ).update( reasons_absence_id: reasons_absence_id )
-      end
+    if data.present?
+      now = Time.now.to_s( :db )
+      sql = "UPDATE timesheet_dates SET " +
+              "reasons_absence_id = #{ reasons_absence_id }, " +
+              "updated_at = '#{ now }' " +
+            "FROM UNNEST(ARRAY" +
+              "#{ data[ :ids ].map { | o | o.to_i }.to_s }" +
+            ") as ids " +
+            "WHERE id = ids "
+
+      ActiveRecord::Base.connection.execute( sql )
     end
 
     render json: { status: true }
@@ -231,3 +252,4 @@ class Institution::TimesheetsController < Institution::BaseController
       .where( where )
   end
 end
+

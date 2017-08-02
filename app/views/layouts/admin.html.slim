@@ -19,7 +19,7 @@ html
         li.item *{ data: { page: :users } }
           a *{ href: admin_users_index_path } Користувачі
         li.info
-          span = @current_user.username
+          span = current_user[ :username ]
           span Адміністратор
         li.item *{ data: { page: :exit } }
           a *{ href: log_out_path } Вихід

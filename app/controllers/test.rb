@@ -1,29 +1,20 @@
-# # rails runner app/controllers/test.rb --environment=development
+  def number_next( table, where )
+    sql = "SELECT number FROM #{ table }" +
+      "WHERE "+
+        where.map { | k, v | "#{ k }=#{ ['String', 'Date' ].include?( v.class.name ) ? "'#{ v }'" : v }" }
+      "ORDER BY id DESC LIMIT 1"
 
-# require 'json'
+    number = JSON.parse( ActiveRecord::Base.connection.execute( number )
+      .to_json, symbolize_names: true )
 
-#     def exists_codes( table, codes )
-#       sql = "SELECT code, COALESCE( bb.id, -1 ) as id " +
-#       "FROM UNNEST(ARRAY"+
-#           codes.map { | o | o || '' }.to_s.gsub( '"', '\'' ) +
-#         ") AS code " +
-#       "LEFT JOIN #{ table } bb USING( code )"
 
-#       obj = JSON.parse( ActiveRecord::Base.connection.execute( sql ).to_json, symbolize_names: true )
-#       error_codes = obj.select { | o | o[ :id ] == -1 }.map{ | o | o[ :code ] }
+    prefix = institution.prefix.strip
+    prefix_length = prefix.length
 
-#       { status: error_codes.empty?,
-#         obj: obj.map { | o | { o[ :code ] => o[ :id ] } },
-#         error: { table => "Не знайдені кода: #{ error_codes.to_s.gsub( '"', '\'' ) }" } }
-#     end
 
-# error = { }
-# reasons_absences = exists_codes( 'reasons_absences', [ nil ,'000000001'] )
+    record_last = institution.try( model_name.table_name ).select( :number ).last
 
-# puts reasons_absences
+    number = record_last.number if record_last.number.to( prefix_length - 1 ) == prefix if record_last
 
-# error.merge!( reasons_absences[ :error ] ) unless reasons_absences[ :status ]
-# puts reasons_absences[ :obj ]['000000001']
-
-dd = [1..3]
-puts 'sdsdsd '.strip
+    ( number ||= "#{ prefix }-#{ '0'.rjust(model_name.type_for_attribute( 'number' ).limit - prefix_length - 1, '0' ) }" ).succ
+  end

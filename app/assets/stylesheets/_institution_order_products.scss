@@ -10,8 +10,8 @@
 
 #institution_order_products {
   #col_iop {
-    flex-basis: 640px;
-    col:nth-child(3) { width: 150px; };
+    flex-basis: 840px;
+    col:nth-child( 3 ) { width: 350px; };
 
     tr {
       &.date { @include row-group( #dadada, 3px ); }
