@@ -50,7 +50,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
                    date_start: date_start,
                    date_end: date_end }
 
-          id = InstitutionOrder( data ).id
+          id = InstitutionOrder.create( data ).id
 
           fields = %w( institution_order_id product_id date
                        description created_at updated_at ).join( ',' )
@@ -307,7 +307,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
 
   def correction_product_update # Обновление количества корректировки заявки
     data = params.permit( :amount ).to_h
-    status = update_base_with_id( :io_correction_pruducts, params[ :id ], data )
+    status = update_base_with_id( :io_correction_products, params[ :id ], data )
     render json: { status: status }
   end
 
@@ -326,7 +326,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
       .where( io_correction_id: io_correction_id )
       .where.not( amount: 0 )
       .to_json( methods: :diff_amount ), symbolize_names: true )
-      .reject! { | o | o[ :diff_amount ] == '0.0' }
+      .delete_if { | o | o[ :diff_amount ] == '0.0' }
 
     result = { }
     if io_correction_products.present?

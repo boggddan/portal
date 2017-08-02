@@ -1687,7 +1687,7 @@ class SyncCatalogsController < ApplicationController
                                               count_exemption_fact: 0 ).delete_all
 
               menu_products.where( count_plan: 0, count_fact: 0 ).delete_all
-              menu_meals_dish.update( is_enabled: true )
+              menu_meals_dish.update_all( is_enabled: true )
               menu_requirement.menu_meals_dishes.where( is_enabled: false ).delete_all
             else
               raise ActiveRecord::Rollback
