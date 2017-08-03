@@ -5,7 +5,7 @@ class Institution::ReportsController < Institution::BaseController
     message = { 'CreateRequest' => { 'Institutions_id' => current_institution[ :code ],
                                     'StartDate' => params[ :date_start ].to_date,
                                     'EndDate' => params[ :date_end ].to_date }
-                                  .merge!( is_pdf ? { } : { 'IsPDF' => is_pdf } )
+                                  .merge!( is_pdf.nil? ? { } : { 'IsPDF' => is_pdf } )
     }
 
     savon_return = get_savon( params[ :method_name ].to_sym, message )
@@ -15,7 +15,7 @@ class Institution::ReportsController < Institution::BaseController
     render json: response[ :interface_state ] == 'OK' ?
       { status: true, ( is_pdf && is_pdf == true ? :href : :view ) => respond = response[ :respond ] }
       :
-      { status: false, caption: 'Неуспішна сихронізація з 1С', message: web_service.merge!( response: response ) }
+      { status: false, caption: 'Неуспішна сихронізація з 1С', message: message }
   end
 
   # Вартість дітодня за меню-вимогами
