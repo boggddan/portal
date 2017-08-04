@@ -7,6 +7,7 @@ main#menu_requirement_products *{ data: { \
   send_plan: institution_menu_requirements_send_sap_path,
   send_fact: institution_menu_requirements_send_saf_path,
   exit: institution_menu_requirements_index_path,
+  print: institution_menu_requirements_print_path,
   update: institution_menu_requirements_update_path } } }
 
   h1.icon
@@ -15,6 +16,7 @@ main#menu_requirement_products *{ data: { \
       button.btn_send *{ data: { pf: :plan } } = ' план'
       button.btn_send *{ data: { pf: :fact } } = ' факт'
       button.btn_exit
+      button.btn_print
 
       - if @disabled_plan
         = render label_text, label_attr: { class: :icon_number }, text: 'Надіслано план:',

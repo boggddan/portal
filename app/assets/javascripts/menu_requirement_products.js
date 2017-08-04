@@ -38,6 +38,13 @@ class MenuRequirementProducts {
     MyLib.ajax( caption, url, 'post', data, 'json', successAjax, true );
   }
 
+  clickBtnPrint( ) {
+    const caption = `Відправка данних в 1С [id: ${ this.dataId }]`;
+    const data = { id: this.dataId };
+    const { parentElem: { dataset: { pathPrint: url } } } = this;
+    MyLib.ajax( caption, url, 'post', data, 'json', null, true );
+  }
+
   clickMdCell( target ) {
     const elem = target;
     const dataId = +elem.dataset.id;
@@ -170,6 +177,11 @@ class MenuRequirementProducts {
         ( pf === 'fact' && ( !disabledPlan || disabledFact ) );
       elemChild.addEventListener( 'click', event => this.clickSend( event ) );
     } );
+
+    const btnPrint = parentElem.querySelector( '.btn_print' );
+
+    if ( disabledPlan ) btnPrint.addEventListener( 'click', ( ) => this.clickBtnPrint( ) );
+    else btnPrint.disabled = true;
 
     parentElem.querySelectorAll( '.panel_main button[data-clmn]' ).forEach( child => {
       child.addEventListener( 'click', event => this.clickBtnClmn( event ) );

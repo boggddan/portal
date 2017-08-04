@@ -15,7 +15,8 @@ class Institution::ReportsController < Institution::BaseController
     render json: response[ :interface_state ] == 'OK' ?
       { status: true, ( is_pdf && is_pdf == true ? :href : :view ) => respond = response[ :respond ] }
       :
-      { status: false, caption: 'Неуспішна сихронізація з 1С', message: message }
+      { status: false, caption: 'Неуспішна сихронізація з 1С',
+        message: web_service.merge!( response: response ) }
   end
 
   # Вартість дітодня за меню-вимогами
