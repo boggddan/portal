@@ -1,6 +1,6 @@
 $ffIcon: 'Glyphicons Halflings';
 
-#pdf_preview {
+#form_splash {
   visibility: hidden;
   opacity: 0;
   position: fixed;
@@ -51,7 +51,6 @@ $ffIcon: 'Glyphicons Halflings';
   .caption {
     font-weight: bold;
     padding-left: 10px;
-    font-size: 16px;
   }
 
   &.print {
@@ -79,10 +78,6 @@ $ffIcon: 'Glyphicons Halflings';
   iframe {
     flex-grow: 1;
     border: none;
-
-    &.hide {
-      display: none;
-    }
   }
 
   .close {

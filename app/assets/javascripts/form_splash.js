@@ -8,7 +8,7 @@ class FormSplash {
     this.parentElem = parentElem;
   }
 
-  open( type, caption, data ) {
+  open( type, caption, data = '' ) {
     MyLib.pageLoader( false );
     const header = this.parentElem.querySelector( '.header' );
     const iframe = this.parentElem.querySelector( 'iframe' );
@@ -22,7 +22,6 @@ class FormSplash {
 
     if ( type === 'error' ) iframe.srcdoc = data; else iframe.src = data;
 
-    if ( data ) iframe.classList.remove( 'hide' ); else iframe.classList.add( 'hide' );
     this.parentElem.classList.remove( 'hide' );
   }
 

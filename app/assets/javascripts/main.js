@@ -134,14 +134,15 @@ class MyLib {
           const { href, view } = data;
           if ( href ) {
             if ( href.search( /.pdf$/i ) === -1 ) this.assignLocation( href );
-            else objPdfPreview.open( 'print', caption, href );
+            else objFormSplash.open( 'print', caption, href );
           } else if ( view ) {
             document.getElementById( 'view' ).innerHTML = view;
           }
           if ( callSuccess ) callSuccess( );
         } else {
-          const dataMessage = `<pre>${ JSON.stringify( data.message, null, 2 ) }</pre>`;
-          objPdfPreview.open( 'error', data.caption || caption, dataMessage );
+          let dataMessage = '';
+          if ( data.message ) dataMessage = `<pre>${ JSON.stringify( data.message, null, 2 ) }</pre>`;
+          objFormSplash.open( 'error', data.caption || caption, dataMessage );
         }
       } else if ( dataType === 'script' ) {
         scriptRun( data );
@@ -174,7 +175,7 @@ class MyLib {
 
     sendAjax( )
       .then( data => success( data ) )
-      .catch( reason => objPdfPreview.open( 'error', caption, reason ) );
+      .catch( reason => objFormSplash.open( 'error', caption, reason ) );
   }
 
   // нажатие на кнопочку выход
@@ -461,8 +462,6 @@ let objUserNew = { };
 $( document ).on( 'turbolinks:load', ( ) => {
   moment.locale( 'uk' );
 
-  $( '#error_msg .close' ).on( 'click', ( ) => $( '#error_msg' ).addClass( 'hide' ));
-
   $( '#del_msg button:not( success )' )
     .on( 'click', ( ) =>
       $( '#del_msg' ).addClass( 'hide' ).find( '.success' ).off( 'click' ) );
@@ -477,7 +476,7 @@ $( document ).on( 'turbolinks:load', ( ) => {
   else if ( elemUsers ) objUsers = new Users( elemUsers );
   else if ( elemUserNew ) objUserNew = new UserNew( elemUserNew );
 
-  const elemPdfPreview = document.getElementById( 'pdf_preview' );
-  if ( elemPdfPreview ) objPdfPreview = new FormSplash( elemPdfPreview );
+  const elemFormSplash = document.getElementById( 'form_splash' );
+  if ( elemFormSplash ) objFormSplash = new FormSplash( elemFormSplash );
 
 } );
