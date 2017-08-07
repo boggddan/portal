@@ -174,7 +174,7 @@ class MyLib {
 
     sendAjax( )
       .then( data => success( data ) )
-      .catch( reason => objPdfPreview.open( 'error', caption, `data:text/html,${ reason }` ) );
+      .catch( reason => objPdfPreview.open( 'error', caption, reason ) );
   }
 
   // нажатие на кнопочку выход
