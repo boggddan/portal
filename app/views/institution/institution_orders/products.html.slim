@@ -2,6 +2,8 @@
 - disabled = @institution_order.number_sa.present?
 - label_text = 'layouts/label_text'
 
+= render 'layouts/pdf_preview'
+
 main#institution_order_products *{ data: { \
   id: @institution_order.id,
   path: { \

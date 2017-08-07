@@ -1,6 +1,6 @@
 $ffIcon: 'Glyphicons Halflings';
 
-#error_msg {
+#pdf_preview {
   visibility: hidden;
   opacity: 0;
   position: fixed;
@@ -12,52 +12,75 @@ $ffIcon: 'Glyphicons Halflings';
   justify-content: center;
   align-items: center;
   z-index: 999;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba( 0, 0, 0, 0.7 );
   transition: opacity 1s, visibility 1s;
 
-  &:not(.hide) {
+  &:not( .hide ) {
     visibility: visible;
     opacity: 1;
   }
 
-  .message {
+  .window {
     position: relative;
     border: 1px solid #ccc;
     border-radius: 5px;
-    box-shadow: 0 0 15px 0 #fff;
-    background-color: #fff;
+    box-shadow: 0 0 15px 0 white;
+    background-color: white;
     transition: margin-top 1.3s;
+    height: calc( 100% - 30px );
+    width: calc( 100% - 30px );
+    display: flex;
+    flex-direction: column;
   }
 
   .header {
-    color: rgba(170, 68, 66, .7);
     border: 1px solid transparent;
     border-top-left-radius: 5px;
     background-color: #f2dede;
     padding: 10px 15px;
 
-    &:before {
-      content: '\e101';
+    &::before {
       position: relative;
       top: 2px;
       padding-right: 5px;
-      font-family: $ffIcon ;
+      font-family: $ffIcon;
     }
   }
 
   .caption {
-    color: #a94442;
     font-weight: bold;
     padding-left: 10px;
   }
 
-  .text {
-    outline: none;
-    height: 400px;
-    width: 680px;
-    border: 0;
-    padding: 3px;
-    word-wrap: normal;
+  &.print {
+    .header { color: #777 }
+    .header::before {
+      content: '\e045';
+    }
+
+    .caption {
+      color: #777;
+    }
+  }
+
+  &.error {
+    .header { color: red }
+    .header::before {
+      content: '\e101';
+    }
+
+    .caption {
+      color: #8a6d3b;
+    }
+  }
+
+  iframe {
+    flex-grow: 1;
+    border: none;
+
+    &.hide {
+      display: none;
+    }
   }
 
   .close {
@@ -68,16 +91,16 @@ $ffIcon: 'Glyphicons Halflings';
     height: 28px;
     background-color: #555;
     cursor: pointer;
-    color: #fff;
+    color: white;
     text-align: center;
-    font: bold 16px/20px verdana, sans-serif;
-    border: 2px solid #fff;
+    font: bold 16px/20px 'verdana', sans-serif;
+    border: 2px solid white;
     border-radius: 50%;
-    box-shadow: 0 2px 2px rgba(0, 0, 0, .5);
+    box-shadow: 0 2px 2px rgba( 0, 0, 0, 0.5 );
     outline: none;
 
     &:hover {
-      background-color: #f00;
+      background-color: red;
     }
   }
 }

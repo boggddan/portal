@@ -2,6 +2,8 @@
 - disabled = @receipt.number_sa.present?
 - label_text = 'layouts/label_text'
 
+= render 'layouts/pdf_preview'
+
 main#receipt_products *{data: {\
   id: @receipt.id,
   path: { \

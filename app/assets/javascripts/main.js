@@ -133,13 +133,15 @@ class MyLib {
         if ( data.status ) {
           const { href, view } = data;
           if ( href ) {
-            if ( href.search( /.pdf$/i ) === -1 ) this.assignLocation( href ); else window.open( href );
+            if ( href.search( /.pdf$/i ) === -1 ) this.assignLocation( href );
+            else objPdfPreview.open( 'print', caption, href );
           } else if ( view ) {
             document.getElementById( 'view' ).innerHTML = view;
           }
           if ( callSuccess ) callSuccess( );
         } else {
-          this.errorMsg( data.caption || caption, JSON.stringify( data.message, null, ' ' ) );
+          const dataMessage = `<pre>${ JSON.stringify( data.message, null, 2 ) }</pre>`;
+          objPdfPreview.open( 'error', data.caption || caption, dataMessage );
         }
       } else if ( dataType === 'script' ) {
         scriptRun( data );
@@ -172,7 +174,7 @@ class MyLib {
 
     sendAjax( )
       .then( data => success( data ) )
-      .catch( reason => this.errorMsg( caption, reason ));
+      .catch( reason => objPdfPreview.open( 'error', caption, `data:text/html,${ reason }` ) );
   }
 
   // нажатие на кнопочку выход
@@ -474,4 +476,8 @@ $( document ).on( 'turbolinks:load', ( ) => {
   else if ( elemTimesheetDates ) objTimesheetDates = new TimesheetDates( elemTimesheetDates );
   else if ( elemUsers ) objUsers = new Users( elemUsers );
   else if ( elemUserNew ) objUserNew = new UserNew( elemUserNew );
+
+  const elemPdfPreview = document.getElementById( 'pdf_preview' );
+  if ( elemPdfPreview ) objPdfPreview = new FormSplash( elemPdfPreview );
+
 } );

@@ -3,7 +3,7 @@
 
   helper_method :current_user, :date_str
 
-  def get_savon( method_name,  message )
+  def get_savon( method_name, message )
     response = Savon.client( SAVON )
                  .call( method_name, message: message )
                  .body[ "#{ method_name }_response".to_sym ][ :return ]

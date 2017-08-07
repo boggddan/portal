@@ -4,6 +4,7 @@ class MenuRequirement < ApplicationRecord
 
   has_many :menu_meals_dishes
   has_many :menu_children_categories
+
   #
   before_save :set_default_value
 
