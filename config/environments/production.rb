@@ -1,8 +1,21 @@
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
+  ### Settings are me changed
+
+  # Controls whether or not templates should be reloaded on each request.
+  config.action_view.cache_template_loading = false
+
   # Code is not reloaded between requests.
-  config.cache_classes = true
+  config.cache_classes = false
+
+  # Compress JavaScripts
+  # config.assets.js_compressor = :uglifier
+
+  # If true then any error will cause detailed debugging information
+  # to be dumped in the HTTP response.
+  config.consider_all_requests_local = true
+  ###
 
   # Eager load code on boot. This eager loads most of Rails and
   # your application in memory, allowing both threaded web servers
@@ -11,7 +24,6 @@ Rails.application.configure do
   config.eager_load = true
 
   # Full error reports are disabled and caching is turned on.
-  config.consider_all_requests_local       = true
   config.action_controller.perform_caching = true
 
   # Attempt to read encrypted secrets from `config/secrets.yml.enc`.
@@ -23,8 +35,7 @@ Rails.application.configure do
   # Apache or NGINX already handles this.
   config.public_file_server.enabled = true
 
-  # Compress JavaScripts and CSS.
-  # config.assets.js_compressor = :uglifier
+  # Compress CSS.
   # config.assets.css_compressor = :sass
 
   # Do not fallback to assets pipeline if a precompiled asset is missed.
