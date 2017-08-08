@@ -406,55 +406,52 @@ class Institution::MenuRequirementsController < Institution::BaseController
   end
 
   def print
-      menu_requirement_id = params[ :id ]
+    menu_requirement_id = params[ :id ]
 
-      data = JSON.parse( MenuRequirement
-        .joins( institution: :branch )
-        .select( :number, :date, :splendingdate, :date_sap, :date_saf,
-                  'branches.name AS branch_name',
-                  'institutions.name AS institution_name' )
-        .find( menu_requirement_id )
-        .to_json( except: :id ), symbolize_names: true )
-        .merge!( children_categories: JSON.parse( MenuChildrenCategory
-          .joins( :children_category )
-          .select( 'children_categories.name',
-                  :count_all_plan, :count_exemption_plan,
-                  :count_all_fact, :count_exemption_fact )
-          .where( menu_requirement_id: menu_requirement_id )
-          .order( 'children_categories.priority', 'children_categories.name' )
-          .to_json( except: :id ), symbolize_names: true ) )
-        .merge!( products: JSON.parse( MenuProduct
-          .joins( { product: :products_type },
-                  { menu_meals_dish: [ :meal, :dish ] },
-                  :children_category )
-          .select( 'meals.name as meal_name',
-                    'dishes.name as dish_name',
-                    'children_categories.name AS category_name',
-                    'products_types.name AS type_name',
-                    'products.name AS product_name',
-                    :count_plan, :count_fact )
-          .where( 'menu_meals_dishes.menu_requirement_id = ? ', menu_requirement_id )
-          .order( 'meals.priority', 'meals.name',
-                  'dishes.priority', 'dishes.name',
-                  'children_categories.priority', 'children_categories.name',
-                  'products_types.priority', 'products_types.name', 'products.name' )
-          .to_json( except: :id ), symbolize_names: true ) )
+    data = MenuRequirement
+      .joins( institution: :branch )
+      .select( :number, :date, :splendingdate, :date_sap, :date_saf,
+                'branches.name AS branch_name',
+                'institutions.name AS institution_name' )
+      .find( menu_requirement_id )
+      .as_json( except: :id )
+      .merge!( children_categories: MenuChildrenCategory
+        .joins( :children_category )
+        .select( 'children_categories.name',
+                :count_all_plan, :count_exemption_plan,
+                :count_all_fact, :count_exemption_fact )
+        .where( menu_requirement_id: menu_requirement_id )
+        .order( 'children_categories.priority', 'children_categories.name' )
+        .as_json( except: :id ) )
+      .merge!( products: MenuProduct
+        .joins( { product: :products_type },
+                { menu_meals_dish: [ :meal, :dish ] },
+                :children_category )
+        .select( 'meals.name as meal_name',
+                  'dishes.name as dish_name',
+                  'children_categories.name AS category_name',
+                  'products_types.name AS type_name',
+                  'products.name AS product_name',
+                  :count_plan, :count_fact )
+        .where( 'menu_meals_dishes.menu_requirement_id = ? ', menu_requirement_id )
+        .order( 'meals.priority', 'meals.name',
+                'dishes.priority', 'dishes.name',
+                'children_categories.priority', 'children_categories.name',
+                'products_types.priority', 'products_types.name', 'products.name' )
+        .as_json( except: :id ) )
+      .to_json
 
-    message = { "CreateRequest" => { "json" => data } }
+    message = { "CreateRequest" => { "json" => data.to_s } }
 
-    #savon_return = get_savon( :get_print_form_of_menu_requirement, message )
-    #response = savon_return[ :response ]
-    #web_service = savon_return[ :web_service ]
+    savon_return = get_savon( :get_print_form_of_menu_requirement, message )
+    response = savon_return[ :response ]
+    web_service = savon_return[ :web_service ]
 
-     render json:
-       { status: false, caption: 'Неуспішна сихронізація з 1С',
-         message: message }
-
-    # render json: response[ :interface_state ] == 'OK' ?
-    #   { status: true, ( is_pdf && is_pdf == true ? :href : :view ) => respond = response[ :respond ] }
-    #   :
-    #   { status: false, caption: 'Неуспішна сихронізація з 1С',
-    #     message: web_service.merge!( response: response ) }
+    render json: response[ :interface_state ] == 'OK' ?
+      { status: true, href: response[ :respond ] }
+      :
+      { status: false, caption: 'Неуспішна сихронізація з 1С',
+        message: web_service.merge!( response: response ) }
   end
 
 end
