@@ -441,7 +441,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
         .as_json( except: :id ) )
       .to_json
 
-    message = { "CreateRequest" => { "json" => data.to_s } }
+    message = { "CreateRequest" => { "json" => data } }
 
     savon_return = get_savon( :get_print_form_of_menu_requirement, message )
     response = savon_return[ :response ]

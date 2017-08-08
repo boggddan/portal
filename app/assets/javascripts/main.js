@@ -131,13 +131,14 @@ class MyLib {
     const success = data => {
       if ( dataType === 'json' ) {
         if ( data.status ) {
-          const { href, view } = data;
+          const { href, view, data: dataText } = data;
           if ( href ) {
             if ( href.search( /.pdf$/i ) === -1 ) this.assignLocation( href );
             else objFormSplash.open( 'print', caption, href );
           } else if ( view ) {
             document.getElementById( 'view' ).innerHTML = view;
           }
+
           if ( callSuccess ) callSuccess( );
         } else {
           let dataMessage = '';
