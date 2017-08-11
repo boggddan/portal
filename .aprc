@@ -1,7 +1,0 @@
-AwesomePrint.defaults = {
-  :indent => 5,
-  :color => {
-    :hash  => :green,
-    :class => :white
-  }
-}
