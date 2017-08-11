@@ -6,7 +6,7 @@ git_source(:github) do |repo_name|
 end
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 5.1.1'
+gem 'rails', '~> 5.1.3'
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 5.0'
 # Use Uglifier as compressor for JavaScript assets
@@ -22,8 +22,9 @@ gem 'turbolinks', '~> 5'
 gem 'jbuilder', '~> 2.5'
 # Use Redis adapter to run Action Cable in production
 # gem 'redis', '~> 3.0'
+
 # Use ActiveModel has_secure_password
-gem 'bcrypt', '3.1.11'
+gem 'bcrypt', git: 'https://github.com/codahale/bcrypt-ruby.git'
 
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
@@ -46,4 +47,7 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 gem 'puma'
 gem 'slim'
 gem 'pg'
-gem 'savon', '~> 2.11.0'
+gem 'savon'
+
+gem 'pry-rails'
+gem 'awesome_print'
