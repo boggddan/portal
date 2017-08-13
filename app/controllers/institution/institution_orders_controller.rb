@@ -43,8 +43,6 @@ class Institution::InstitutionOrdersController < Institution::BaseController
       error.merge!( products[ :error ] ) unless products[ :status ]
 
       if error.empty?
-        now = Time.now.to_s( :db )
-
         ActiveRecord::Base.transaction do
           data = { institution_id: current_user[ :userable_id ],
                    date_start: date_start,
@@ -118,8 +116,6 @@ class Institution::InstitutionOrdersController < Institution::BaseController
       error.merge!( products[ :error ] ) unless products[ :status ]
 
       if error.empty?
-        now = Time.now.to_s( :db )
-
         ioc_last_id = IoCorrection
           .select( :id )
           .where( institution_order_id: institution_order_id )
@@ -140,8 +136,8 @@ class Institution::InstitutionOrdersController < Institution::BaseController
           data = { institution_order_id: institution_order_id }
           id = IoCorrection.create( data ).id
 
-          fields = %w( io_correction_id product_id date amount_order amount
-                        description created_at updated_at ).join( ',' )
+          fields = %w( io_correction_id product_id date amount_order
+                       amount description ).join( ',' )
 
           sql_values = ''
 
@@ -157,8 +153,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
                           "'#{ date }'," +
                           "#{ amount }," +
                           "#{ amount }," +
-                          "'#{ food[ :description ] }'," +
-                          "'#{ now }','#{ now }')"
+                          "'#{ food[ :description ] }')"
           }
 
           sql = "INSERT INTO io_correction_products ( #{ fields } ) VALUES #{ sql_values[1..-1] }"

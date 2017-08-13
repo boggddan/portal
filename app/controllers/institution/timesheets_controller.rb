@@ -67,8 +67,6 @@ class Institution::TimesheetsController < Institution::BaseController
 
         if error.empty?
           ActiveRecord::Base.transaction do
-            now = Time.now.to_s( :db )
-
             id = Timesheet
               .create( institution_id: current_user[ :userable_id ],
                        branch_id: current_institution[ :branch_id ],
@@ -76,11 +74,11 @@ class Institution::TimesheetsController < Institution::BaseController
                        date_ve: response[ :date_ve ],
                        date_eb: response[ :date_eb ],
                        date_ee: response[ :date_ee ],
-                       date: now )
+                       date: Time.now.to_s( :db ) )
               .id
 
-            fields = %w( timesheet_id children_group_id child_id reasons_absence_id
-                        date created_at updated_at ).join( ',' )
+            fields = %w( timesheet_id children_group_id child_id
+                         reasons_absence_id date ).join( ',' )
 
             sql_values = ''
 
@@ -92,8 +90,7 @@ class Institution::TimesheetsController < Institution::BaseController
                             "#{ children_group_id }," +
                             "#{ child_id }," +
                             "#{ reasons_absence_id }," +
-                            "'#{ ts[ :date ] }'," +
-                            "'#{ now }','#{ now }')"
+                            "'#{ ts[ :date ] }')"
             }
 
             sql = "INSERT INTO timesheet_dates ( #{ fields } ) VALUES #{ sql_values[1..-1] }"
@@ -217,10 +214,8 @@ class Institution::TimesheetsController < Institution::BaseController
     reasons_absence_id = data[ :reasons_absence_id ]
 
     if data.present?
-      now = Time.now.to_s( :db )
       sql = "UPDATE timesheet_dates SET " +
-              "reasons_absence_id = #{ reasons_absence_id }, " +
-              "updated_at = '#{ now }' " +
+              "reasons_absence_id = #{ reasons_absence_id } " +
             "FROM UNNEST(ARRAY" +
               "#{ data[ :ids ].map { | o | o.to_i }.to_s }" +
             ") as ids " +

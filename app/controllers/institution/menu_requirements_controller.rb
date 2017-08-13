@@ -124,8 +124,6 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .order( :id, 'products.name' )
       .to_json, symbolize_names: true )
 
-    now = Time.now.to_s( :db )
-
     sql_add_values = ''
     sql_del_values = ''
     menu_meals_dishes.each do | mmd |
@@ -133,16 +131,14 @@ class Institution::MenuRequirementsController < Institution::BaseController
         pcc.each { | o |
           sql_add_values += ",(#{ mmd[ :id ] }," +
                             "#{ o[ :children_category_id ] }," +
-                            "#{ o[ :product_id ] },"+
-                            "'#{ now }','#{ now }')"
+                            "#{ o[ :product_id ] })"
           }
       end
 
       sql_del_values += ",#{ mmd[ :id ] }" if mmd[ :is_enabled ] == false && mmd[ :count ].nonzero?
     end
 
-    fieds = %w( menu_meals_dish_id children_category_id product_id
-                created_at updated_at ).join( ',' )
+    fieds = %w( menu_meals_dish_id children_category_id product_id ).join( ',' )
 
     sql = ( sql_add_values.present? ? "INSERT INTO menu_products ( #{ fieds } ) VALUES #{ sql_add_values[1..-1] }" : '' ) +
       ( sql_add_values.present? && sql_del_values.present? ? ';' : '' ) +
@@ -174,8 +170,6 @@ class Institution::MenuRequirementsController < Institution::BaseController
                    branch_id: current_institution[ :branch_id ] )
           .id
 
-        now = Time.now.to_s( :db )
-
         # Создание запроса для блюд
         mmd_sql_values = ''
 
@@ -183,21 +177,21 @@ class Institution::MenuRequirementsController < Institution::BaseController
         empty_dish_id = Dish.find_by( code: '' ).id
 
         meals_dishes.each{ | md |
-          mmd_sql_values += ",(#{ id },#{ md[ :meal_id ] },#{ md[ :dish_id ] },'#{ now }','#{ now }')" if
+          mmd_sql_values += ",(#{ id },#{ md[ :meal_id ] },#{ md[ :dish_id ] })" if
               md[ :meal_id ] != empty_meal_id && md[ :dish_id ] != empty_dish_id ||
               md[ :meal_id ] == empty_meal_id && md[ :dish_id ] == empty_dish_id
         }
 
-        mmd_fieds = %w( menu_requirement_id meal_id dish_id created_at updated_at ).join( ',' )
+        mmd_fieds = %w( menu_requirement_id meal_id dish_id ).join( ',' )
         mmd_sql = "INSERT INTO menu_meals_dishes ( #{ mmd_fieds } ) VALUES #{ mmd_sql_values[1..-1] }"
 
         # Создание запроса для категорий
         cc_sql_values = ''
         children_categories.each{ | cc |
-          cc_sql_values += ",(#{ id },#{ cc[ :id ] },'#{ now }','#{ now }')"
+          cc_sql_values += ",(#{ id },#{ cc[ :id ] })"
         }
 
-        cc_fieds = %w( menu_requirement_id children_category_id created_at updated_at ).join( ',' )
+        cc_fieds = %w( menu_requirement_id children_category_id ).join( ',' )
         cc_sql = "INSERT INTO menu_children_categories ( #{ cc_fieds } ) VALUES #{ cc_sql_values[1..-1] }"
 
         ActiveRecord::Base.connection.execute( "#{ mmd_sql };#{ cc_sql }" )

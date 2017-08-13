@@ -110,18 +110,15 @@ class Institution::ReceiptsController < Institution::BaseController
       id = Receipt.create( data ).id
 
       causes_deviation_id = CausesDeviation.select( :id ).find_by( code:  '' ).id
-      now = Time.now.to_s( :db )
 
-      fields = %w( receipt_id causes_deviation_id date product_id
-                   count_order price created_at updated_at ).join( ',' )
+      fields = %w( receipt_id causes_deviation_id date product_id count_order price ).join( ',' )
       sql = "INSERT INTO receipt_products (#{ fields}) " +
               "SELECT #{ id },"+
                      "#{ causes_deviation_id }," +
                      "date," +
                      "product_id," +
                      "count," +
-                     "price," +
-                     "'#{ now }','#{ now }' " +
+                     "price " +
             "FROM supplier_order_products " +
             "WHERE supplier_order_id = #{ supplier_order_id } AND " +
 	                "institution_id = #{ institution_id } AND " +

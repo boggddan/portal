@@ -1472,7 +1472,6 @@ class SyncCatalogsController < ApplicationController
           end
 
           id = menu_requirement.id
-          now = Time.now.to_s( :db )
 
           ### menu_children_categories
           menu_children_categories = menu_requirement.menu_children_categories
@@ -1496,13 +1495,12 @@ class SyncCatalogsController < ApplicationController
           mmd_sql_values = ''
           meals_dishes.each{ | md |
             mmd_sql_values += ",(#{ id },#{ md[ :meal_id ] },#{ md[ :dish_id ] }, " +
-              "#{ md[ :meal_id ] == empty_meal.id && md[ :dish_id ] == empty_dish.id }," +
-              "'#{ now }','#{ now }')" if
+              "#{ md[ :meal_id ] == empty_meal.id && md[ :dish_id ] == empty_dish.id })" if
                  md[ :meal_id ] != empty_meal.id && md[ :dish_id ] != empty_dish.id ||
                  md[ :meal_id ] == empty_meal.id && md[ :dish_id ] == empty_dish.id
           }
 
-          mmd_fieds = %w( menu_requirement_id meal_id dish_id is_enabled created_at updated_at ).join( ',' )
+          mmd_fieds = %w( menu_requirement_id meal_id dish_id is_enabled ).join( ',' )
           mmd_sql = "INSERT INTO menu_meals_dishes ( #{ mmd_fieds } ) VALUES #{ mmd_sql_values[1..-1] }"
           ActiveRecord::Base.connection.execute( "#{ sql_delete };#{ mmd_sql }" )
 
