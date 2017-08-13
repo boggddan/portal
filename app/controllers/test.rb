@@ -1,6 +1,13 @@
-# require "awesome_print"
+# tables =['meals', 'dishes']
+# #table = 'meals'
 
-# a = []
-# 5.times { |i| a<<i }
+# # triggers = tables.map { | table |
+# #   "CREATE TRIGGER #{ table }_update_at " +
+# #     "BEFORE UPDATE ON #{ table } " +
+# #       "FOR EACH ROW EXECUTE PROCEDURE update_at_timestamp();"
+# # }.join('')
 
-# ap (a)
+# dd = "55 #{ triggers }"
+
+# puts dd
+

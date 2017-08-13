@@ -161,7 +161,7 @@ GEM
       nokogiri (>= 1.4.0)
       nori (~> 2.4)
       wasabi (~> 3.4)
-    selenium-webdriver (3.4.4)
+    selenium-webdriver (3.5.0)
       childprocess (~> 0.5)
       rubyzip (~> 1.0)
     slim (3.0.8)

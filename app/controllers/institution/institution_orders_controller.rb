@@ -52,8 +52,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
 
           id = InstitutionOrder.create( data ).id
 
-          fields = %w( institution_order_id product_id date
-                       description created_at updated_at ).join( ',' )
+          fields = %w( institution_order_id product_id date description ).join( ',' )
 
           sql_values = ''
 
@@ -62,8 +61,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
             sql_values += ",(#{ id }," +
                           "#{ product_id }," +
                           "'#{ food[ :date ] }'," +
-                          "'#{ food[ :description ] }'," +
-                          "'#{ now }','#{ now }')"
+                          "'#{ food[ :description ] }')"
           }
 
           sql = "INSERT INTO institution_order_products ( #{ fields } ) VALUES #{ sql_values[1..-1] }"
