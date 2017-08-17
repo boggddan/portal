@@ -29,6 +29,10 @@ class TimesheetDates {
     btnSend.disabled = disabled;
     btnSend.addEventListener( 'click', ( ) => this.clickSend( ) );
 
+    const btnRefresh = parentElem.querySelector( '.btn_refresh' );
+    btnRefresh.disabled = disabled;
+    btnRefresh.addEventListener( 'click', ( ) => this.clickRefresh( ) );
+
     const colTd = parentElem.querySelector( '#col_td' );
 
     parentElem.querySelectorAll( 'button[data-reasons-absence-id]' ).forEach( child => {
@@ -71,6 +75,11 @@ class TimesheetDates {
         this.cellMarkKeyDown( event );
         event.stopPropagation();
       }
+    } );
+
+    parentElem.querySelectorAll( 'input[data-date]' ).forEach( child => {
+      const elemChild = child;
+      elemChild.value = MyLib.toDateFormat( elemChild.dataset.date );
     } );
 
     const menuItem = document.querySelector( '#main_menu li[data-page=timesheets]' );
@@ -140,6 +149,14 @@ class TimesheetDates {
     const data = { id: this.dataId };
     const successAjax = ( ) => window.location.reload( );
     MyLib.ajax( caption, url, 'post', data, 'json', successAjax, true );
+  }
+
+  clickRefresh( ) {
+    const caption = `Оновлення данних з 1С [id: ${ this.dataId }]`;
+    const { parentElem: { dataset: { pathRefresh: url } } } = this;
+    const data = { id: this.dataId };
+    const successAjax = ( ) => window.location.reload( );
+    MyLib.ajax( caption, url, 'post', data, 'json', null, true );
   }
 
   filterGroups( event ) { // фильтрация категории / группы

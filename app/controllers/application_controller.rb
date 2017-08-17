@@ -31,12 +31,14 @@
 
   def update_base_with_id( table, id, data )
     if id && data.present?
-      sql = "UPDATE #{ table } SET " +
-        data
-          .merge!( updated_at: Time.now.to_s( :db ) )
-          .map { | k, v | "#{ k }=#{ ['String', 'Date' ].include?( v.class.name ) ? "'#{ v }'" : v }" }
-          .join( ',' ) +
-        " WHERE id = #{ id }"
+      values = data
+        .map { | k, v | "#{ k }=#{ add_quotes( v ) }" }
+        .join( ',' )
+
+      sql = <<-SQL
+          UPDATE #{ table } SET #{ values } WHERE id = #{ id }
+        SQL
+
       ActiveRecord::Base.connection.execute( sql )
 
       result = true
@@ -45,44 +47,23 @@
     end
   end
 
-  # def insert_base_single( table, data )
-  #   if data.present?
-  #     now = Time.now.to_s( :db )
-  #     data.merge!( { created_at: now, updated_at: now } )
+  def add_quotes( value )
+    [ 'String', 'Date' ].include?( value.class.name ) ? "'#{ value }'" : value
+  end
 
-  #     fields = data.map { | k, v | k }.join( ',' )
-  #     values = data.map { | k, v | [ 'String', 'Date' ].include?( v.class.name ) ? "'#{ v }'" : v }
-  #       .join( ',' )
+  def insert_base_single( table, data )
+    if data.present?
+      fields = data.keys.join( ',' )
+      values = data.map { | _, v | add_quotes( v ) }.join( ',' )
 
-  #     sql = "INSERT INTO #{ table } (#{ fields }) VALUES (#{ values }) RETURNING *"
-  #     record = JSON.parse( ActiveRecord::Base.connection.execute( sql )
-  #       .to_json, symbolize_names: true )
+      sql = <<-SQL
+          INSERT INTO #{ table } (#{ fields }) VALUES (#{ values }) RETURNING id
+        SQL
 
-  #     id = record[ 0 ]
-  #     puts id
-  #   else
-  #     id = -1
-  #   end
-  # end
-
-  # def number_next( table, where )
-  #   sql = "SELECT number FROM #{ table }" +
-  #     "WHERE "+
-  #       where.map { | k, v | "#{ k }=#{ ['String', 'Date' ].include?( v.class.name ) ? "'#{ v }'" : v }" }
-  #     "ORDER BY id DESC LIMIT 1"
-
-  #     record = JSON.parse( ActiveRecord::Base.connection.execute( sql )
-  #       .to_json, symbolize_names: true )
-
-
-  #     prefix = institution.prefix.strip
-  #   prefix_length = prefix.length
-
-
-  #   record_last = institution.try( model_name.table_name ).select( :number ).last
-
-  #   number = record_last.number if record_last.number.to( prefix_length - 1 ) == prefix if record_last
-
-  #   ( number ||= "#{ prefix }-#{ '0'.rjust(model_name.type_for_attribute( 'number' ).limit - prefix_length - 1, '0' ) }" ).succ
-  # end
+      JSON.parse( ActiveRecord::Base.connection.execute( sql )
+        .to_json, symbolize_names: true )[ 0 ][ :id ]
+    else
+      nil
+    end
+  end
 end

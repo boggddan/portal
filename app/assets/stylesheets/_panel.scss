@@ -73,6 +73,15 @@ $ffIcon: 'Glyphicons Halflings';
      border: none;
   }
 
+  .btn_refresh {
+    @include button-text( #fff, #46b8da, #fff, #269abc, '' );
+    background-image: linear-gradient(to right, #CC95C0 0%, #DBD4B4 51%, #CC95C0 100%);
+    background-size: 200% auto;
+    &:hover { background-position: right center; };
+    transition: 0.5s;
+    border: none;
+  }
+
   & > .hide {
     display: none;
   }

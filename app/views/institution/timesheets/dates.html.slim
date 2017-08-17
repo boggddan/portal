@@ -1,37 +1,39 @@
 / Отображение документа табеля
-- disabled = @timesheet.number_sa.present?
+- disabled = @timesheet[ :number_sa ].present?
 - label_text = 'layouts/label_text'
 
 main#timesheet_dates *{ data: { \
-  id: @timesheet.id, disabled: disabled.to_s,
+  id: @timesheet[ :id ], disabled: disabled.to_s,
   reasons_absences: @reasons_absences.map { | o | o[ :id ] },
   path: { \
-  send: institution_timesheets_send_sa_path,
-  exit: institution_timesheets_index_path,
-  update: institution_timesheets_update_path } } }
+    send: institution_timesheets_send_sa_path,
+    exit: institution_timesheets_index_path,
+    refresh: institution_timesheets_refresh_path,
+    update: institution_timesheets_update_path } } }
 
   h1.icon
   .panel_main.row_2
     .panel
+      button.btn_refresh Оновити з 1С
       button.btn_send
       button.btn_exit
       - if disabled
         = render label_text, label_attr: { class: :icon_number }, text: 'Надіслано документ:',
-          input_attr: { value: @timesheet.number_sa, disabled: true }
+          input_attr: { value: @timesheet[ :number_sa ], disabled: true }
 
         = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
-          input_attr: { value: date_str( @timesheet.date_sa ), disabled: true }
+          input_attr: { date: @timesheet[ :date_sa ], disabled: true }
 
     .panel
       = render label_text, label_attr: { class: :icon_number }, text: 'Табель №',
-        input_attr: { id: :number, value: @timesheet.number, disabled: true }
+        input_attr: { id: :number, value: @timesheet[ :number ], disabled: true }
       = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
-        input_attr: { id: :date, value:  date_str( @timesheet.date ), readonly: true }
+        input_attr: { id: :date, date: @timesheet[ :date ], readonly: true }
 
       = render label_text, label_attr: { class: :icon_сalendar }, text: 'З',
-        input_attr: { value:  date_str( @timesheet.date_eb ), disabled: true }
+        input_attr: { date:  @timesheet[ :date_eb ], disabled: true }
       = render label_text, label_attr: { class: :icon_сalendar }, text: 'по',
-        input_attr: { value:  date_str( @timesheet.date_ee ), disabled: true }
+        input_attr: { date:  @timesheet[ :date_ee ], disabled: true }
 
       = select_tag :group_timesheet, options_for_select( @group_timesheet ), prompt: 'Категорія / Група'
 

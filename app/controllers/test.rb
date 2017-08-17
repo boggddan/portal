@@ -1,13 +1,14 @@
-# tables =['meals', 'dishes']
-# #table = 'meals'
+require 'awesome_print'
+require 'json'
+require 'active_support/core_ext/string'
 
-# # triggers = tables.map { | table |
-# #   "CREATE TRIGGER #{ table }_update_at " +
-# #     "BEFORE UPDATE ON #{ table } " +
-# #       "FOR EACH ROW EXECUTE PROCEDURE update_at_timestamp();"
-# # }.join('')
+hash_data = JSON.parse( [ {id: 1, upd: false}, {id: 2, upd: false} ]
+  .to_json( ), symbolize_names: true )
 
-# dd = "55 #{ triggers }"
+dd = hash_data.select{ |o| o[:id] == 1 }
+dd[0][:upds] = 4
+ap hash_data.select{ |o| o[:upds].nil?  }
 
-# puts dd
+#dd = 'fffddf'
 
+#ap dd << 'aaaaaf'

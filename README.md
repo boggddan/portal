@@ -26,7 +26,7 @@
   - [*Замовлення постачальнику* - `supplier_orders`](#Замовлення-постачальнику---supplier_orders-top)
   - [*Надходження ТМЦ* - `receipts`](#Надходження-ТМЦ---receipts-top)
   - [*Замовлення продуктів харчування* - `institution_orders`](#Замовлення-продуктів-харчування---institution_orders-top)
-  - [*Коректування замовлення продуктів харчування* - `io_corrections`](#Коректування-замовлення-продуктів-харчування---io_corrections-top)
+  - [*Коригування замовлення продуктів харчування* - `io_corrections`](#Коригування-замовлення-продуктів-харчування---io_corrections-top)
   - [*Меню-вимога* - `menu_requirements`](#Меню-вимога---menu_requirements-top)
   - [*Табель* - `timesheets`](#Табель---timesheets-top)
 
@@ -220,7 +220,7 @@ GET api/institution_order?institution_code=14&number=000000000002
 DELETE api/institution_order { "institution_code": "14", "number": "KL-000000013", "type": 1 }
 ```
 
-### *Коректування замовлення продуктів харчування* - `io_corrections` [:top:](#Зміст)
+### *Коригування замовлення продуктів харчування* - `io_corrections` [:top:](#Зміст)
 
 ```json
 POST /api/cu_institution_order_correction { "institution_code": "14", "institution_order_number": "KL-000000058", "number": "000000000004", "date": "1485296673", "date_sa": "1485296673", "number_sa": "000000000001",

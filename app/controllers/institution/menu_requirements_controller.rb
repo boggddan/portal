@@ -158,17 +158,19 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .order( 'meals.priority', 'meals.name', 'dishes.priority', 'dishes.name' )
       .to_json, symbolize_names: true )
 
-    children_categories = JSON.parse( Institution
-        .find( current_user[ :userable_id ] )
-        .children_categories
-        .select( :id ).order( :name ).to_json, symbolize_names: true )
+    children_categories = JSON.parse( ChildrenCategory
+      .joins( :children_groups )
+      .select( :id )
+      .where( 'children_groups.institution_id = ?', current_user[ :userable_id ] )
+      .group( :id )
+      .order( :name )
+      .to_json, symbolize_names: true )
 
     if meals_dishes.present? && children_categories.present?
       ActiveRecord::Base.transaction do
-        id = MenuRequirement
-          .create( institution_id: current_user[ :userable_id ],
-                   branch_id: current_institution[ :branch_id ] )
-          .id
+        data = { institution_id: current_user[ :userable_id ],
+                 branch_id: current_institution[ :branch_id ] }
+        id = insert_base_single( 'menu_requirements', data )
 
         # Создание запроса для блюд
         mmd_sql_values = ''

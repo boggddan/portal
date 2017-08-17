@@ -107,7 +107,7 @@ class Institution::ReceiptsController < Institution::BaseController
       data = { institution_id: institution_id,
                supplier_order_id: supplier_order_id,
                contract_number: contract_number }
-      id = Receipt.create( data ).id
+      id = insert_base_single( 'receipts', data )
 
       causes_deviation_id = CausesDeviation.select( :id ).find_by( code:  '' ).id
 

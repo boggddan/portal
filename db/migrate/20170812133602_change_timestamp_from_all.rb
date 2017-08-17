@@ -10,9 +10,11 @@ class ChangeTimestampFromAll < ActiveRecord::Migration[5.1]
 
     reversible do |direction|
       triggers = tables.map { | table |
-        "CREATE TRIGGER #{ table }_update_at " +
-          "BEFORE UPDATE ON #{ table } " +
-            "FOR EACH ROW EXECUTE PROCEDURE update_at_timestamp();"
+        <<-SQL
+          CREATE TRIGGER #{ table }_update_at
+            BEFORE UPDATE ON #{ table }
+              FOR EACH ROW EXECUTE PROCEDURE update_at_timestamp();
+        SQL
       }.join('')
 
       direction.up {

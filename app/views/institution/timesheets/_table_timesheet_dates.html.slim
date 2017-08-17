@@ -26,32 +26,35 @@ table.table
     - group_id = 0
 
     - @timesheet_dates \
-     .group_by{ | o | [ o.children_category_id, o.children_group_id, o.child_id ] } \
-     .each do | k, v |
-        - child_id = k[ 2 ]
+      .group_by{ | o | { \
+        category_id: o[ :children_category_id ],
+        group_id: o[ :children_group_id ],
+        child_id: o[ :child_id ] \
+      } } \
+      .each do | k, v |
+        - child_id = k[ :child_id ]
 
-        - if category_id != k[ 0 ]
-          - category_id = k[ 0 ]
+        - if category_id != k[ :category_id ]
+          - category_id = k[ :category_id ]
           - group_id = 0
 
-          == render( partial_tr, name: v[ 0 ].category_name, type: :category, category_id: category_id )
+          == render( partial_tr, name: v[ 0 ][ :category_name ], type: :category, category_id: category_id )
 
-        - if group_id != k[ 1 ]
-          - group_id = k[ 1 ]
+        - if group_id != k[ :group_id ]
+          - group_id = k[ :group_id ]
 
-          == render( partial_tr, name: v[ 0 ].group_name, type: :group, category_id: category_id, group_id: group_id )
+          == render( partial_tr, name: v[ 0 ][ :group_name ], type: :group, category_id: category_id, group_id: group_id )
 
         tr *{ class: :row_data, data: { category_id: category_id, group_id: group_id, child_id: child_id } }
-          td.name = v[ 0 ].child_name
+          td.name = v[ 0 ][ :child_name ]
           - @sum_names.each do |sum_name|
             td *{class: :cell_sum, id: "child_#{ category_id }_#{ group_id }_#{ child_id }_#{ sum_name }" }
 
-          - index = 0
-          - ( date_eb..date_ee ).each do | v1 |
-            - if index < v.size && v[ index ].date == v1
-              - v2 = v[ index ]
-              td *{ class: :cell_mark, data: { id: v2.id, date_id: index, reasons_absence_id: v2.reasons_absence_id },
-                spellcheck: :false, contenteditable: true } = v2.mark
-              - index = index + 1
-            - else
-              td NULL
+          - ( date_eb..date_ee ).each_with_index do | date, index |
+            - child_day = v \
+              .select{ | o | o[ :date ] == date.to_s( :db ) } \
+              .fetch( 0, { id: nil, reasons_absence_id: nil, mark: 'NULL' } )
+
+            td *{ class: :cell_mark, data: { id: child_day[ :id ], date_id: index,
+              reasons_absence_id: child_day[ :reasons_absence_id ] },
+              spellcheck: :false, contenteditable: true } = child_day[ :mark ]

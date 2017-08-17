@@ -48,7 +48,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
                    date_start: date_start,
                    date_end: date_end }
 
-          id = InstitutionOrder.create( data ).id
+          id = insert_base_single( 'institution_orders', data )
 
           fields = %w( institution_order_id product_id date description ).join( ',' )
 
@@ -134,7 +134,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
 
         ActiveRecord::Base.transaction do
           data = { institution_order_id: institution_order_id }
-          id = IoCorrection.create( data ).id
+          id = insert_base_single( 'io_corrections', data )
 
           fields = %w( io_correction_id product_id date amount_order
                        amount description ).join( ',' )
