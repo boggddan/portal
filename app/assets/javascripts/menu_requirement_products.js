@@ -31,7 +31,7 @@ class MenuRequirementProducts {
 
   clickSend( event ) {
     const pf = `pathSend${ MyLib.capitalize( event.currentTarget.dataset.pf ) }`;
-    const caption = `Відправка данних в 1С [id: ${ this.dataId }]`;
+    const caption = `Відправка данних в ІС [id: ${ this.dataId }]`;
     const data = { id: this.dataId };
     const successAjax = ( ) => window.location.reload( );
     const { parentElem: { dataset: { [ pf ]: url } } } = this;
@@ -39,7 +39,7 @@ class MenuRequirementProducts {
   }
 
   clickBtnPrint( ) {
-    const caption = `Відправка данних в 1С [id: ${ this.dataId }]`;
+    const caption = `Відправка данних в ІС [id: ${ this.dataId }]`;
     const data = { id: this.dataId };
     const { parentElem: { dataset: { pathPrint: url } } } = this;
     MyLib.ajax( caption, url, 'post', data, 'json', null, true );

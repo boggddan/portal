@@ -79,6 +79,7 @@ class TimesheetDates {
 
     parentElem.querySelectorAll( 'input[data-date]' ).forEach( child => {
       const elemChild = child;
+      console.log('fdfdf')
       elemChild.value = MyLib.toDateFormat( elemChild.dataset.date );
     } );
 
@@ -144,7 +145,7 @@ class TimesheetDates {
   }
 
   clickSend( ) {
-    const caption = `Відправка данних в 1С [id: ${ this.dataId }]`;
+    const caption = `Відправка данних в ІС [id: ${ this.dataId }]`;
     const { parentElem: { dataset: { pathSend: url } } } = this;
     const data = { id: this.dataId };
     const successAjax = ( ) => window.location.reload( );
@@ -152,11 +153,11 @@ class TimesheetDates {
   }
 
   clickRefresh( ) {
-    const caption = `Оновлення данних з 1С [id: ${ this.dataId }]`;
+    const caption = `Оновлення данних з ІС [id: ${ this.dataId }]`;
     const { parentElem: { dataset: { pathRefresh: url } } } = this;
     const data = { id: this.dataId };
     const successAjax = ( ) => window.location.reload( );
-    MyLib.ajax( caption, url, 'post', data, 'json', null, true );
+    MyLib.ajax( caption, url, 'post', data, 'json', successAjax, true );
   }
 
   filterGroups( event ) { // фильтрация категории / группы

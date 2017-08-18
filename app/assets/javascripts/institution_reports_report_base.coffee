@@ -14,7 +14,7 @@ $( document ).on 'turbolinks:load', ->
           $dateStart = $( '#date_start' )
           $dateEnd = $( '#date_end' )
           MyLib.ajax(
-            "Формування звіта в 1С"
+            "Формування звіта в ІС"
             $parentElem.data( 'path-view' )
             'post'
               date_start: $dateStart.val( )

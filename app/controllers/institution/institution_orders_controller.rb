@@ -74,7 +74,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
                    message: { error: error }.merge!( web_service ) }
       end
     else
-      result = { status: false, caption: 'За вибраний період даних немає в 1С',
+      result = { status: false, caption: 'За вибраний період даних немає в ІС',
                  message: web_service.merge!( response: response ) }
     end
 
@@ -168,7 +168,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
                   message: { error: error }.merge!( web_service ) }
       end
     else
-      result = { status: false, caption: 'За вибраний період даних немає в 1С',
+      result = { status: false, caption: 'За вибраний період даних немає в ІС',
                   message: web_service.merge!( response: response ) }
     end
 
@@ -245,7 +245,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
           result = { status: true }
         end
       else
-        result = { status: false, caption: 'Неуспішна сихронізація з 1С',
+        result = { status: false, caption: 'Неуспішна сихронізація з ІС',
                    message: web_service.merge!( response: response ) }
       end
     else
@@ -272,7 +272,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
     render json: response[ :interface_state ] == 'OK' ?
       { status: true, href: response[ :respond ] }
       :
-      { status: false, caption: 'Неуспішна сихронізація з 1С',
+      { status: false, caption: 'Неуспішна сихронізація з ІС',
         message: web_service.merge!( response: response ) }
   end
 
@@ -348,7 +348,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
           result = { status: true }
         end
       else
-        result = { status: false, caption: 'Неуспішна сихронізація з 1С',
+        result = { status: false, caption: 'Неуспішна сихронізація з ІС',
                    message: web_service.merge!( response: response ) }
       end
     else

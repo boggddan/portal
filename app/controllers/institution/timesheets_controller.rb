@@ -105,7 +105,7 @@ class Institution::TimesheetsController < Institution::BaseController
                     message: { error: error }.merge!( web_service ) }
         end
       else
-        result = { status: false, caption: 'За вибраний період даних немає в 1С',
+        result = { status: false, caption: 'За вибраний період даних немає в ІС',
                   message: web_service.merge!( response: response ) }
       end
     end
@@ -156,7 +156,7 @@ class Institution::TimesheetsController < Institution::BaseController
         update_base_with_id( :timesheets, timesheet_id, data )
         result = { status: true }
       else
-        result = { status: false, caption: 'Неуспішна сихронізація з 1С',
+        result = { status: false, caption: 'Неуспішна сихронізація з ІС',
                    message: web_service.merge!( response: response ) }
       end
     else
@@ -200,7 +200,7 @@ class Institution::TimesheetsController < Institution::BaseController
       error.merge!( reasons_absences[ :error ] ) unless reasons_absences[ :status ]
 
       if error.empty?
-        reasons_absence = ReasonsAbsence.select( :id ).find_by( code: '' ).id
+        reasons_absence_id_empty = ReasonsAbsence.select( :id ).find_by( code: '' ).id
 
         timesheet_dates = JSON.parse( TimesheetDate
           .select( :id, :children_group_id, :child_id, :reasons_absence_id, :date )
@@ -215,49 +215,55 @@ class Institution::TimesheetsController < Institution::BaseController
             children_group_id = children_groups[ :obj ][ ( ts[ :children_group_code ] || '' ).strip ]
             child_id = children[ :obj ][ ( ts[ :child_code ] || '' ).strip ]
             reasons_absence_id = reasons_absences[ :obj ][ ( ts[ :reasons_absence_code ] || '' ).strip ]
-            date = ts[ :date ]
+            date = ts[ :date ].to_s( :db )
+
+            p children_group_id, child_id, reasons_absence_id, date
 
             child_day = timesheet_dates.select{ | o |
               o[ :children_group_id ] == children_group_id &&
               o[ :child_id ] == child_id &&
               o[ :date ] == date }
-            if child_day
+
+            unless child_day.present?
               sql_ins_val += ",(#{ id },#{ children_group_id },#{ child_id },#{ reasons_absence_id },'#{ date }')"
             else
-              child_day[ :update ] = true
-              ( sql_update << <<-SQL
-                  UPDATE SET timesheet_dates
+              child_day[ 0 ][ :update ] = true
+              ( sql_update << <<-SQL.squish
+                  UPDATE timesheet_dates
                     SET reasons_absence_id = #{ reasons_absence_id }
-                    WHERE id = child_day[ :id ];
+                    WHERE id = #{ child_day[ 0 ][ :id ] };
                 SQL
-              ) if reasons_absence_id != reasons_absence && child_day[ :reasons_absence_id ] != reasons_absence_id
+              ) if reasons_absence_id != reasons_absence_id_empty && child_day[ 0 ][ :reasons_absence_id ] != reasons_absence_id
             end
           }
 
-
           sql_insert = ''
-          if sql_ins_val
+          if sql_ins_val.present?
             fields = %w( timesheet_id children_group_id child_id reasons_absence_id date ).join( ',' )
-            sql_insert = "INSERT INTO timesheet_dates ( #{ fields } ) VALUES #{ sql_ins_val[1..-1] };"
+            sql_insert = <<-SQL.squish
+                INSERT INTO timesheet_dates ( #{ fields } ) VALUES #{ sql_ins_val[1..-1] };
+              SQL
           end
 
           sql_del_val = timesheet_dates.select { | o | o[ :update].nil? }.map{ | o | o[ :id ] }.join( ',' )
-          sql_delete = sql_del_val ?
-            "DELETE FROM timesheet_dates WHERE id IN ( #{ sql_del_val } );"
+
+          sql_delete = sql_del_val.present? ?
+            <<-SQL.squish
+                DELETE FROM timesheet_dates WHERE id IN ( #{ sql_del_val } );
+              SQL
             : ''
 
-          sql = sql_insert + sql_update + sql_delete
-          #ActiveRecord::Base.connection.execute( sql )
+          sql = "#{ sql_insert } #{ sql_update } #{ sql_delete }"
+          ActiveRecord::Base.connection.execute( sql ) if sql.present?
 
           result = { status: true }
-          result = { status: false, message: sql }
         end
       else
         result = { status: false, caption: 'Неможливо створити документ',
                   message: { error: error }.merge!( web_service ) }
       end
     else
-      result = { status: false, caption: 'За вибраний період даних немає в 1С',
+      result = { status: false, caption: 'За вибраний період даних немає в ІС',
                 message: web_service.merge!( response: response ) }
     end
 

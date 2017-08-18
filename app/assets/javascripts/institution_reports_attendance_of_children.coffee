@@ -17,7 +17,7 @@ $( document ).on 'turbolinks:load', ->
           $dateEnd = $( '#date_end' )
           $childrenGroupCode = $( '#children_group_code' )
           MyLib.ajax(
-            "Формування табеля в 1С"
+            "Формування табеля в ІС"
             $parentElem.data( 'path-view' )
             'post'
               date_start: $dateStart.val( )

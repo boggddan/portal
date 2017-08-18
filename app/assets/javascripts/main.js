@@ -223,14 +223,14 @@ class MyLib {
 
   static btnSendClick( elem ) {
     const { dataset: { id, pathSend: url } } = elem[ 0 ].closest( 'main' );
-    const caption = `Відправка данних в 1С [id: ${ id }]`;
+    const caption = `Відправка данних в ІС [id: ${ id }]`;
     const successAjax = ( ) => window.location.reload( );
     this.ajax( caption, url, 'post', { id }, 'json', successAjax, true );
   }
 
   static btnPrintClick( elem ) {
     const { dataset: { id, pathPrint: url } } = elem[ 0 ].closest( 'main' );
-    const caption = `Формування звіта в 1С [id: ${ id }]`;
+    const caption = `Формування звіта в ІС [id: ${ id }]`;
     this.ajax( caption, url, 'post', { id }, 'json', null, true );
   }
 

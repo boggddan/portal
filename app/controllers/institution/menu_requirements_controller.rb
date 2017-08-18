@@ -301,7 +301,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
           end
         result = { status: true }
       else
-        result = { status: false, caption: 'Неуспішна сихронізація з 1С',
+        result = { status: false, caption: 'Неуспішна сихронізація з ІС',
                    message: web_service.merge!( response: response ) }
       end
     else
@@ -391,7 +391,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
           end
         result = { status: true }
       else
-        result = { status: false, caption: 'Неуспішна сихронізація з 1С',
+        result = { status: false, caption: 'Неуспішна сихронізація з ІС',
                    message: web_service.merge!( response: response ) }
       end
     else
@@ -446,7 +446,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
     render json: response[ :interface_state ] == 'OK' ?
       { status: true, href: response[ :respond ] }
       :
-      { status: false, caption: 'Неуспішна сихронізація з 1С',
+      { status: false, caption: 'Неуспішна сихронізація з ІС',
         message: web_service.merge!( response: response ) }
   end
 

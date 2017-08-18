@@ -14,7 +14,7 @@ main#timesheet_dates *{ data: { \
   h1.icon
   .panel_main.row_2
     .panel
-      button.btn_refresh Оновити з 1С
+      button.btn_refresh Оновити з ІС
       button.btn_send
       button.btn_exit
       - if disabled
@@ -22,27 +22,27 @@ main#timesheet_dates *{ data: { \
           input_attr: { value: @timesheet[ :number_sa ], disabled: true }
 
         = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
-          input_attr: { date: @timesheet[ :date_sa ], disabled: true }
+          input_attr: { data: { date: @timesheet[ :date_sa ] }, disabled: true }
 
     .panel
       = render label_text, label_attr: { class: :icon_number }, text: 'Табель №',
         input_attr: { id: :number, value: @timesheet[ :number ], disabled: true }
       = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
-        input_attr: { id: :date, date: @timesheet[ :date ], readonly: true }
+        input_attr: { id: :date, data: { date: @timesheet[ :date ] }, readonly: true }
 
       = render label_text, label_attr: { class: :icon_сalendar }, text: 'З',
-        input_attr: { date:  @timesheet[ :date_eb ], disabled: true }
+        input_attr: { data: { date: @timesheet[ :date_eb ] }, disabled: true }
       = render label_text, label_attr: { class: :icon_сalendar }, text: 'по',
-        input_attr: { date:  @timesheet[ :date_ee ], disabled: true }
+        input_attr: { data: { date: @timesheet[ :date_ee ] }, disabled: true }
 
       = select_tag :group_timesheet, options_for_select( @group_timesheet ), prompt: 'Категорія / Група'
 
 
   .clmn_main: #col_td.clmn *{ data: { reasons_absences: @reasons_absences.map { | v | v[ :id ] },
     path: { \
-    filter: institution_timesheets_ajax_filter_timesheet_dates_path,
-    update: institution_timesheets_dates_update_path,
-    updates: institution_timesheets_dates_updates_path } } }
+      filter: institution_timesheets_ajax_filter_timesheet_dates_path,
+      update: institution_timesheets_dates_update_path,
+      updates: institution_timesheets_dates_updates_path } } }
 
     .panel
       label Групова відмітка ( стати на потрібну комірку та зажати клавішу Alt )

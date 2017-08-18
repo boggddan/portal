@@ -15,7 +15,7 @@ class Institution::ReportsController < Institution::BaseController
     render json: response[ :interface_state ] == 'OK' ?
       { status: true, ( is_pdf && is_pdf == true ? :href : :view ) => respond = response[ :respond ] }
       :
-      { status: false, caption: 'Неуспішна сихронізація з 1С',
+      { status: false, caption: 'Неуспішна сихронізація з ІС',
         message: web_service.merge!( response: response ) }
   end
 
@@ -56,7 +56,7 @@ class Institution::ReportsController < Institution::BaseController
     render json: response[ :interface_state ] == 'OK' ?
       { status: true, ( is_pdf == true ? :href : :view ) => response[ :respond ] }
       :
-      { status: false, caption: 'Неуспішна сихронізація з 1С',
+      { status: false, caption: 'Неуспішна сихронізація з ІС',
         message: web_service.merge!( response: response ) }
   end
 
