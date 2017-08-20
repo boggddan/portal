@@ -1,9 +1,5 @@
 @ECHO OFF
 
-SET PathPortal=D:\ProjectRuby\portal
-
-CD %PathPortal%
-
 REM В переменную записывем с файла "env" активный режим
 SET /P Env=< env
 
