@@ -217,8 +217,6 @@ class Institution::TimesheetsController < Institution::BaseController
             reasons_absence_id = reasons_absences[ :obj ][ ( ts[ :reasons_absence_code ] || '' ).strip ]
             date = ts[ :date ].to_s( :db )
 
-            p children_group_id, child_id, reasons_absence_id, date
-
             child_day = timesheet_dates.select{ | o |
               o[ :children_group_id ] == children_group_id &&
               o[ :child_id ] == child_id &&

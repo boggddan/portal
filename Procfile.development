@@ -1,1 +1,1 @@
-web: rails log:clear assets:clobber tmp:clear && rails server webrick
+web: rails db:migrate log:clear assets:clobber tmp:clear && rails server webrick
