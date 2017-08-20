@@ -14,7 +14,6 @@ main#timesheet_dates *{ data: { \
   h1.icon
   .panel_main.row_2
     .panel
-      button.btn_refresh Оновити з ІС
       button.btn_send
       button.btn_exit
       - if disabled
@@ -49,5 +48,6 @@ main#timesheet_dates *{ data: { \
       - @reasons_absences.each do | v |
         button.btn_gradient *{ data: { reasons_absence_id: v[ :id ], next_id: v[ :next_id ],
           next_val: v[ :next_mark ] } } = v[ :mark ]
+      button.btn_refresh Оновити дітей
 
     .parent_table
