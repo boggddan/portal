@@ -24,4 +24,4 @@
 /config/savon.yml
 /db/schema.rb
 
-start.bat
+env
