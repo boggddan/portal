@@ -3,8 +3,8 @@
 CD ..
 
 IF EXIST log RMDIR log /s /q
-IF EXIST public/assets RMDIR public/assets /s /q
-IF EXIST public/pack RMDIR public/pack /s /q
+IF EXIST public\assets RMDIR public\assets /s /q
+IF EXIST public\pack RMDIR public\pack /s /q
 IF EXIST tmp RMDIR tmp /s /q
 
 ECHO Delete file was complete!
