@@ -5,7 +5,7 @@ class Institution::ReportsController < Institution::BaseController
     message = { 'CreateRequest' => { 'Institutions_id' => current_institution[ :code ],
                                     'StartDate' => params[ :date_start ].to_date,
                                     'EndDate' => params[ :date_end ].to_date }
-                                  .merge!( is_pdf.nil? ? { } : { 'IsPDF' => is_pdf } )
+                                  .merge!( is_pdf.nil? ? { } : { 'IsPDF' => is_pdf.to_s } )
     }
 
     savon_return = get_savon( params[ :method_name ].to_sym, message )
@@ -17,6 +17,9 @@ class Institution::ReportsController < Institution::BaseController
       :
       { status: false, caption: 'Неуспішна сихронізація з ІС',
         message: web_service.merge!( response: response ) }
+    # render json:
+    #   { status: false, caption: 'Неуспішна сихронізація з ІС',
+    #     message: message }
   end
 
   # Вартість дітодня за меню-вимогами
@@ -47,7 +50,7 @@ class Institution::ReportsController < Institution::BaseController
                                      'EndDate' => params[ :date_end ].to_date,
                                      'Institutions_id' => current_institution[ :code ],
                                      'Children_group_id' => params[ :children_group_code ] || '',
-                                     'IsPDF' => is_pdf } }
+                                     'IsPDF' => is_pdf.to_s } }
 
     savon_return = get_savon( :get_report_the_record_of_attendance_of_children, message )
     response = savon_return[ :response ]
