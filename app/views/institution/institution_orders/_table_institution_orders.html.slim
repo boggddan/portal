@@ -27,6 +27,6 @@ table.table *{ data: { type: :list_doc }  }
           td *{ class: ( io.is_del_1c ? :is_del : '' ) } = io.number_sa
           td = date_str( io.date_start )
           td = date_str( io.date_end )
-          td : button.btn_view *{ disabled: !io.number_sa }
-          td : button.btn_edit *{ disabled: io.number_sa }
-          td : button.btn_del *{ disabled: io.number_sa }
+          td : button.btn_view *{ disabled: !io.number_sa.present? }
+          td : button.btn_edit *{ disabled: io.number_sa.present? }
+          td : button.btn_del *{ disabled: io.number_sa.present? }

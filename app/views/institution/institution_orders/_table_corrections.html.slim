@@ -21,6 +21,6 @@ table.table *{ data: { type: :list_doc }  }
           td = date_str( ioc.date )
           td *{ data: { delete: true } } = ioc.number
           td *{ class: ( ioc.is_del_1c ? :is_del : '' ) } = ioc.number_sa
-          td : button.btn_view *{ disabled: !ioc.number_sa }
-          td : button.btn_edit *{ disabled: ioc.number_sa }
-          td : button.btn_del *{ disabled: ioc.number_sa }
+          td : button.btn_view *{ disabled: !ioc.number_sa.present? }
+          td : button.btn_edit *{ disabled: ioc.number_sa.present? }
+          td : button.btn_del *{ disabled: ioc.number_sa.present? }

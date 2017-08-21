@@ -122,7 +122,7 @@ class Institution::TimesheetsController < Institution::BaseController
       .to_json, symbolize_names: true )
 
     timesheet_dates = JSON.parse( TimesheetDate
-      .joins( :children_category, :children_group, :child, :reasons_absence )
+      .joins( { children_group: :children_category }, :child, :reasons_absence )
       .select( :id, :date,
                'children_categories.code AS category_code',
                'children_groups.code AS group_code',
