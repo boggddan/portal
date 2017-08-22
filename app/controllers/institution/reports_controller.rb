@@ -17,9 +17,6 @@ class Institution::ReportsController < Institution::BaseController
       :
       { status: false, caption: 'Неуспішна сихронізація з ІС',
         message: web_service.merge!( response: response ) }
-    # render json:
-    #   { status: false, caption: 'Неуспішна сихронізація з ІС',
-    #     message: message }
   end
 
   # Вартість дітодня за меню-вимогами
