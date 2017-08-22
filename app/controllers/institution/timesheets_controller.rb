@@ -203,7 +203,9 @@ class Institution::TimesheetsController < Institution::BaseController
         reasons_absence_id_empty = ReasonsAbsence.select( :id ).find_by( code: '' ).id
 
         timesheet_dates = JSON.parse( TimesheetDate
-          .select( :id, :children_group_id, :child_id, :reasons_absence_id, :date )
+          .joins( :reasons_absence )
+          .select( :id, :children_group_id, :child_id, :reasons_absence_id, :date,
+                   'reasons_absences.priority AS ra_priority' )
           .where( timesheet_id: id )
           .to_json, symbolize_names: true )
 
@@ -231,7 +233,7 @@ class Institution::TimesheetsController < Institution::BaseController
                     SET reasons_absence_id = #{ reasons_absence_id }
                     WHERE id = #{ child_day[ 0 ][ :id ] };
                 SQL
-              ) if reasons_absence_id != reasons_absence_id_empty && child_day[ 0 ][ :reasons_absence_id ] != reasons_absence_id
+              ) if ( child_day[ 0 ][ :ra_priority ] == -1 || reasons_absence_id != reasons_absence_id_empty ) && child_day[ 0 ][ :reasons_absence_id ] != reasons_absence_id
             end
           }
 
