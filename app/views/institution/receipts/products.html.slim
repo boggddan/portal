@@ -34,7 +34,7 @@ main#receipt_products *{data: {\
       = render label_text, label_attr: {class: :icon_number}, text: 'Накладна №',
         input_attr: { id: :invoice_number, name: :invoice_number, value: @receipt.invoice_number, disabled: disabled }
       = render label_text, label_attr: {class: :icon_number}, text: 'за замовленням №',
-        input_attr: { value: @receipt.supplier_order.number_manual || @receipt.supplier_order.number, disabled: true }
+        input_attr: { value: @receipt.supplier_order.number, disabled: true }
 
     .panel
       = render label_text, label_attr: {class: :icon_filter}, text: 'Постачальник',

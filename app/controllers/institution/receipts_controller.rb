@@ -3,12 +3,8 @@ class Institution::ReceiptsController < Institution::BaseController
   def index ; end
 
   def ajax_filter_supplier_orders # Фильтрация заявок поставщикам
-    # Номер в зависит от двох полей поэтому сортируем его по номеру, а не имени поля
-    sort_field = params[ :sort_field ] == 'number' ?  2 : params[ :sort_field ]
-
     @supplier_orders = SupplierOrder
-      .select( :id, "( CASE WHEN number_manual = '' THEN number ELSE number_manual END ) AS number",
-      :date, :is_del_1c, 'suppliers.name AS name' )
+      .select( :id, :number, :date, :is_del_1c, 'suppliers.name AS name' )
       .joins( :supplier )
       .where( branch_id: current_institution[ :branch_id ],
               date: params[ :date_start ]..params[ :date_end ] )
@@ -18,9 +14,9 @@ class Institution::ReceiptsController < Institution::BaseController
   def ajax_filter_contracts # Фильтрация списка договоров
     @supplier_order = SupplierOrder.find( params[ :supplier_order_id ] )
     @contracts = @supplier_order.supplier_order_products
-                     .select( :contract_number )
-                     .distinct( :contract_number )
-                     .where( institution_id: current_user[ :userable_id ] )
+      .select( "( CASE WHEN contract_number_manual = '' THEN contract_number ELSE contract_number_manual END ) AS contract_number", )
+      .distinct( :contract_number )
+      .where( institution_id: current_user[ :userable_id ] )
   end
 
   def ajax_filter_receipts # Фильтрация документов поставок
@@ -116,17 +112,21 @@ class Institution::ReceiptsController < Institution::BaseController
       causes_deviation_id = CausesDeviation.select( :id ).find_by( code:  '' ).id
 
       fields = %w( receipt_id causes_deviation_id date product_id count_order price ).join( ',' )
-      sql = "INSERT INTO receipt_products (#{ fields}) " +
-              "SELECT #{ id },"+
-                     "#{ causes_deviation_id }," +
-                     "date," +
-                     "product_id," +
-                     "count," +
-                     "price " +
-            "FROM supplier_order_products " +
-            "WHERE supplier_order_id = #{ supplier_order_id } AND " +
-	                "institution_id = #{ institution_id } AND " +
-	                "contract_number = '#{ contract_number }'"
+      sql = <<-SQL.squish
+          INSERT INTO receipt_products (#{ fields})
+            SELECT #{ id },
+                   #{ causes_deviation_id },
+                   date,
+                   product_id,
+                   count,
+                   price
+            FROM supplier_order_products
+            WHERE supplier_order_id = #{ supplier_order_id } AND
+                  institution_id = #{ institution_id } AND
+                  ( contract_number_manual = '#{ contract_number }' OR
+                    contract_number = '#{ contract_number }')
+        SQL
+
       ActiveRecord::Base.connection.execute( sql )
 
       href = institution_receipts_products_path( { id: id } )

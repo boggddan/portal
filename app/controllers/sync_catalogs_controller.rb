@@ -879,7 +879,6 @@ class SyncCatalogsController < ApplicationController
     error = { branch_code: 'Не знайдений параметр [branch_code]',
               supplier_code: 'Не знайдений параметр [supplier_code]',
               number: 'Не знайдений параметр [number]',
-              number_manual: 'Не знайдений параметр [number_manual]',
               date: 'Не знайдений параметр [date]',
               date_start: 'Не знайдений параметр [date_start]',
               date_end: 'Не знайдений параметр [date_end]',
@@ -896,7 +895,6 @@ class SyncCatalogsController < ApplicationController
       if error.empty?
         ActiveRecord::Base.transaction do
           update_fields = { supplier: supplier,
-                            number_manual: params[ :number_manual ],
                             is_del_1c: false,
                             date: date_int_to_str( params[ :date ] ),
                             date_start: date_int_to_str( params[ :date_start ] ),
@@ -919,6 +917,7 @@ class SyncCatalogsController < ApplicationController
             error = { institution_code: 'Не знайдений параметр [institution_code]',
                       product_code: 'Не знайдений параметр [product_code]',
                       contract_number: 'Не знайдений параметр [contract_number]',
+                      contract_number_manual: 'Не знайдений параметр [contract_number_manual]',
                       date: 'Не знайдений параметр [date]',
                       count: 'Не знайдений параметр [count]',
                       price: 'Не знайдений параметр [price]' }.stringify_keys!.except( *product_par.keys )
@@ -933,7 +932,9 @@ class SyncCatalogsController < ApplicationController
               if error.empty?
                 supplier_order_products.create_with( count: product_par[ :count ] )
                   .find_or_create_by( institution: institution, product: product,
-                    contract_number: product_par[ :contract_number ].strip, date: date_int_to_str( product_par[ :date ] ) )
+                                      contract_number: product_par[ :contract_number ].strip,
+                                      contract_number_manual: product_par[ :contract_number_manual ].strip,
+                                      date: date_int_to_str( product_par[ :date ] ) )
                   .update( count: product_par[ :count ], price: product_par[ :price ] )
               end
             end
