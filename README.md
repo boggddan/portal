@@ -199,7 +199,7 @@ GET /api/meals
 ### *Замовлення постачальнику* - `supplier_orders` [:top:](#Зміст)
 
 ```json
-POST /api/cu_supplier_order { "branch_code": "00000000006", "supplier_code": "00000000023", "number": "00000011", "date": 1495542284, "date_start": 1498867200, "date_end": 1519862400, "products": [ { "institution_code": "14", "product_code": "000000079", "contract_number": "BX-0000001", "date": 1495542284, "count": 12, "price": 10.05}, {"institution_code": "14", "product_code": "000000046  ", "contract_number": "BX-0000001", "date": 1495628684, "count": 15, "price": 17.12 } ] }
+POST /api/cu_supplier_order { "branch_code": "00000000007", "supplier_code": "00000000023", "number": "ІС000000001", "number_manual": "РР000000001", "date": 1504001724, "date_start": 1498867200, "date_end": 1519862400, "products": [ { "institution_code": "14", "product_code": "000000079", "contract_number": "BX-0000001", "date": 1495542284, "count": 12, "price": 10.05}, {"institution_code": "14", "product_code": "000000046  ", "contract_number": "BX-0000001", "date": 1495628684, "count": 15, "price": 17.12 } ] }
 GET api/supplier_order?supplier_order?branch_code=0003&number=00000011
 DELETE api/supplier_order { "branch_code": "00000000003", "number": "000000000006", "type": 1 }
 ```

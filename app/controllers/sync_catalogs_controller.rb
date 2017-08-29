@@ -874,14 +874,12 @@ class SyncCatalogsController < ApplicationController
 
   ###############################################################################################
   # POST /api/cu_supplier_order
-  # { "branch_code": "0003", "supplier_code": "15", "number": "00000011", "date": 1504224000, "date_start": 1498867200, "date_end": 1519862400,
-  #   "products": [{"institution_code": "14", "product_code": "000000079", "contract_number": "BX-0000001", "date": 1504224000, "count": 12, "price": 10.05},
-  #                {"institution_code": "14", "product_code": "000000046  ", "contract_number": "BX-0000001", "date": 1504224000, "count": 15, "price": 17.12}]
-  # }
+  # { "branch_code": "00000000007", "supplier_code": "00000000023", "number": "ІС000000001", "number_manual": "РР000000001", "date": 1504001724, "date_start": 1498867200, "date_end": 1519862400, "products": [ { "institution_code": "14", "product_code": "000000079", "contract_number": "BX-0000001", "date": 1495542284, "count": 12, "price": 10.05}, {"institution_code": "14", "product_code": "000000046  ", "contract_number": "BX-0000001", "date": 1495628684, "count": 15, "price": 17.12 } ] }
   def supplier_order_update
     error = { branch_code: 'Не знайдений параметр [branch_code]',
               supplier_code: 'Не знайдений параметр [supplier_code]',
               number: 'Не знайдений параметр [number]',
+              number_manual: 'Не знайдений параметр [number_manual]',
               date: 'Не знайдений параметр [date]',
               date_start: 'Не знайдений параметр [date_start]',
               date_end: 'Не знайдений параметр [date_end]',
@@ -898,6 +896,7 @@ class SyncCatalogsController < ApplicationController
       if error.empty?
         ActiveRecord::Base.transaction do
           update_fields = { supplier: supplier,
+                            number_manual: params[ :number_manual ],
                             is_del_1c: false,
                             date: date_int_to_str( params[ :date ] ),
                             date_start: date_int_to_str( params[ :date_start ] ),

@@ -3,8 +3,12 @@ class Institution::ReceiptsController < Institution::BaseController
   def index ; end
 
   def ajax_filter_supplier_orders # Фильтрация заявок поставщикам
+    # Номер в зависит от двох полей поэтому сортируем его по номеру, а не имени поля
+    sort_field = params[ :sort_field ] == 'number' ?  2 : params[ :sort_field ]
+
     @supplier_orders = SupplierOrder
-      .select( :id, :date, :number, :is_del_1c, 'suppliers.name AS name' )
+      .select( :id, "( CASE WHEN number_manual = '' THEN number ELSE number_manual END ) AS number",
+      :date, :is_del_1c, 'suppliers.name AS name' )
       .joins( :supplier )
       .where( branch_id: current_institution[ :branch_id ],
               date: params[ :date_start ]..params[ :date_end ] )
