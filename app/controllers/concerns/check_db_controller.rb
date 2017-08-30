@@ -48,7 +48,6 @@ module CheckDbController
       end
     end
 
-
     def exists_codes( table, codes )
       sql = "SELECT code, COALESCE( bb.id, -1 ) as id " +
       "FROM UNNEST(ARRAY"+

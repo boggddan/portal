@@ -14,7 +14,7 @@ class Institution::ReceiptsController < Institution::BaseController
   def ajax_filter_contracts # Фильтрация списка договоров
     @supplier_order = SupplierOrder.find( params[ :supplier_order_id ] )
     @contracts = @supplier_order.supplier_order_products
-      .select( "( CASE WHEN contract_number_manual = '' THEN contract_number ELSE contract_number_manual END ) AS contract_number", )
+      .select( "( CASE WHEN contract_number_manual = '' THEN contract_number ELSE contract_number_manual END ) AS contract_number" )
       .distinct( :contract_number )
       .where( institution_id: current_user[ :userable_id ] )
   end
@@ -24,7 +24,7 @@ class Institution::ReceiptsController < Institution::BaseController
     @receipts = Receipt
       .where( institution_id: current_user[ :userable_id ] )
       .where( supplier_order_id: params[ :supplier_order_id ] )
-      .where( ( { contract_number: ( contract_number ) } if contract_number && !contract_number.blank? ) )
+      .where( ( { contract_number_manual: ( contract_number ) } if contract_number && !contract_number.blank? ) )
       .order( "#{ params[ :sort_field ] } #{ params[ :sort_order ] }" )
   end
 
@@ -98,14 +98,22 @@ class Institution::ReceiptsController < Institution::BaseController
 
   def create # создание поступления
     supplier_order_id = params[ :supplier_order_id ]
-    contract_number = params[ :contract_number ]
+    contract_number_manual = params[ :contract_number ]
     institution_id = current_user[ :userable_id ]
+
+    sop = SupplierOrderProduct
+      .select( :contract_number )
+      .find_by( supplier_order_id: supplier_order_id,
+                contract_number_manual: contract_number_manual )
+
+    contract_number = sop ? sop.contract_number : contract_number_manual
 
     result = { }
 
     ActiveRecord::Base.transaction do
       data = { institution_id: institution_id,
                supplier_order_id: supplier_order_id,
+               contract_number_manual: contract_number_manual,
                contract_number: contract_number }
       id = insert_base_single( 'receipts', data )
 
@@ -123,8 +131,7 @@ class Institution::ReceiptsController < Institution::BaseController
             FROM supplier_order_products
             WHERE supplier_order_id = #{ supplier_order_id } AND
                   institution_id = #{ institution_id } AND
-                  ( contract_number_manual = '#{ contract_number }' OR
-                    contract_number = '#{ contract_number }')
+                  contract_number = '#{ contract_number }'
         SQL
 
       ActiveRecord::Base.connection.execute( sql )

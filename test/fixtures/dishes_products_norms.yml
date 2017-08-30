@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  dishesproducts: one
+  children_categories: one
+  amount: 9.99
+
+two:
+  dishesproducts: two
+  children_categories: two
+  amount: 9.99
