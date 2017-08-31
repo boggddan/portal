@@ -2091,4 +2091,75 @@ class SyncCatalogsController < ApplicationController
   end
   ###############################################################################################
 
+  ###############################################################################################
+  # POST /api/cu_dishes_products_norms
+  # { "dishes_products_norms":
+  #   [
+  #     { "dish_code": "000000002", "product_code": "000000054", "children_category_code": "000000001", "amount": 0.01 },
+  #     { "dish_code": "000000002", "product_code": "000000047", "children_category_code": "000000001", "amount": 0.05 }
+  #   ]
+  # }
+  def dishes_products_norms_update
+    errors = [ ]
+
+    dishes_products_norms = params[ :dishes_products_norms ]
+
+    dishes_codes = dishes_products_norms.group_by { | o | o[ :dish_code ] }.keys
+    dishes = exists_codes( :dishes, dishes_codes )
+    errors << dishes[ :error ] unless dishes[ :status ]
+
+    products_codes = dishes_products_norms.group_by { | o | o[ :product_code ] }.keys
+    products = exists_codes( :products, products_codes )
+    errors << products[ :error ] unless products[ :status ]
+
+    children_categories_codes = dishes_products_norms.group_by { | o | o[ :children_category_code ] }.keys
+    children_categories = exists_codes( :children_categories, children_categories_codes )
+    errors << children_categories[ :error ] unless children_categories[ :status ]
+
+    if errors.empty?
+      values = [ ]
+
+      dishes_products_norms.each_with_index do | obj, index |
+        error = { dish_code: 'Не знайдений параметр [dish_code]',
+          product_code: 'Не знайдений параметр [product_code]',
+          children_category_code: 'Не знайдений параметр [children_category_code]',
+          amount: 'Не знайдений параметр [amount]' }.stringify_keys!.except( *obj.keys )
+
+        if error.empty?
+          values << [ ].tap { | value |
+            value << dishes[ :obj ][ ( obj[ :dish_code]  || '' ).strip ]
+            value << products[ :obj ][ ( obj[ :product_code]  || '' ).strip ]
+            value << children_categories[ :obj ][ ( obj[ :children_category_code]  || '' ).strip ]
+            value << obj[ :amount ] || 0
+          }
+        else
+          errors << { index: "Рядок [#{ index + 1 }]" }.merge!( error )
+        end
+      end
+
+      if errors.empty?
+        fields = %w( dish_id product_id children_category_id amount ).join( ',' )
+
+        sql = <<-SQL.squish
+            INSERT INTO  dishes_products_norms ( #{ fields } )
+              VALUES #{ values.map { | o | "( #{ o.join( ',' ) } )" }.join( ',' ) }
+              ON CONFLICT ( dish_id, product_id, children_category_id )
+                DO UPDATE SET amount = EXCLUDED.amount
+              RETURNING id ;
+          SQL
+        ids = JSON.parse( ActiveRecord::Base.connection.execute( sql )
+         .to_json, symbolize_names: true )
+         .map{ | o | o[ :id ] }
+
+        result = { status: true, ids: ids }
+      else
+        result = { status: false, errors: errors }
+      end
+    else
+      result = { status: false, errors: errors }
+    end
+
+    render json: result
+  end
+
 end

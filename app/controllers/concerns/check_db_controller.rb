@@ -49,11 +49,13 @@ module CheckDbController
     end
 
     def exists_codes( table, codes )
-      sql = "SELECT code, COALESCE( bb.id, -1 ) as id " +
-      "FROM UNNEST(ARRAY"+
-          codes.map { | o | ( o || '' ).strip }.to_s.gsub( '"', '\'' ) +
-        ") AS code " +
-      "LEFT JOIN #{ table } bb USING( code )"
+      codes_str = codes.map { | o | ( o || '' ).strip }.to_s.gsub( '"', '\'' )
+
+      sql = <<-SQL.squish
+          SELECT code, COALESCE( bb.id, -1 ) as id
+            FROM UNNEST( ARRAY #{ codes_str } ) AS code
+            LEFT JOIN #{ table } bb USING( code )
+        SQL
 
       obj = JSON.parse( ActiveRecord::Base.connection.execute( sql ).to_json, symbolize_names: true )
       error_codes = obj.select { | o | o[ :id ] == -1 }.map{ | o | o[ :code ] }
@@ -62,6 +64,7 @@ module CheckDbController
         obj: obj.map { | o | [ o[ :code ], o[ :id ] ] }.to_h,
         error: { table => "Не знайдені кода: #{ error_codes.to_s.gsub( '"', '\'' ) }" } }
     end
+
 
   end
 

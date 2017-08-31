@@ -73,6 +73,8 @@ scope :api, controller: :sync_catalogs do
   get :dish_view, path: :dish
   get :dishes_view, path: :dishes
 
+  post :dishes_products_norms_update, path: :cu_dishes_products_norms
+
   # Обновление документов
   post :supplier_order_update, path: :cu_supplier_order
   get :supplier_order_view, path: :supplier_order
