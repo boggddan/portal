@@ -22,7 +22,7 @@
   - [*Категорії страв* - `dishes_categories`](#Категорії-страв---dishes_categories-top)
   - [*Страви* - `dishes`](#Страви---dishes-top)
   - [*Прийоми їжі* - `meals`](#Прийоми-їжі---meals-top)
-  - [*Норми продуктів по категоріях дітей в стравах* - `dishes_products_norms`](#Норми-продуктів-по-категоріях-в-стравах---dishes_products_norms-top)
+  - [*Норми продуктів по категоріях дітей в стравах* - `dishes_products_norms`](#Норми-продуктів-по-категоріях-дітей-в-стравах---dishes_products_norms-top)
 - [Документи](#Документи-top)
   - [*Замовлення постачальнику* - `supplier_orders`](#Замовлення-постачальнику---supplier_orders-top)
   - [*Надходження ТМЦ* - `receipts`](#Надходження-ТМЦ---receipts-top)
