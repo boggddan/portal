@@ -553,7 +553,7 @@ class MenuRequirementProducts {
     arrPlanFact.forEach( pf => {
       trRowGroup.querySelector( `.count_all_${ pf }` ).textContent = MyLib.numToStr( sumAll[ pf ].countAll, -1 );
       trRowGroup.querySelector( `.count_exemption_${ pf }` ).textContent = MyLib.numToStr( sumAll[ pf ].countExemption, -1 );
-      trRowGroup.querySelector( `.sum_products_${ pf }` ).textContent = MyLib.numToStr( sumAll[ pf ].sumProducts, -1 );
+      trRowGroup.querySelector( `.sum_products_${ pf }` ).textContent = MyLib.toRound( sumAll[ pf ].sumProducts, 2 );
     } );
   }
 }
