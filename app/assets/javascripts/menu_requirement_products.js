@@ -293,7 +293,8 @@ class MenuRequirementProducts {
     [ this.dataId, this.disabledPlan, this.disabledFact ] =
       [ +parentElem.dataset.id, disabledPlan, disabledFact ];
 
-    parentElem.querySelector( '.panel_main button[data-clmn="#col_cc"]' ).click( );
+    // parentElem.querySelector( '.panel_main button[data-clmn="#col_cc"]' ).click( );
+    parentElem.querySelector( '.panel_main button[data-clmn="#col_norm"]' ).click( );
     this.headerText( );
     this.checkMdExists( );
     this.colCcInit( );

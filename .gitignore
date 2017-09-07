@@ -24,4 +24,6 @@
 /config/savon.yml
 /db/schema.rb
 
+/mytest
+
 env
