@@ -24,83 +24,25 @@ table.table
         - dishes_category_id = dp[ :dishes_category_id ]
         - dish_id = 0
         tr.row_group.dishes_category
-          td = dp[ :dishes_category_name ]
+          td *{ colspan: @children_categories.size + 2 } = dp[ :dishes_category_name ]
 
       - if dish_id != dp[ :dish_id ]
         - dish_id = dp[ :dish_id ]
         - products_type_id = 0
         tr.row_group.dish
-          td = dp[ :dish_name ]
+          td *{ colspan: @children_categories.size + 2 } = dp[ :dish_name ]
 
       - if products_type_id != dp[ :products_type_id ]
         - products_type_id = dp[ :products_type_id ]
         tr.row_group.products_type
-          td = dp[ :products_type_name ]
+          td *{ colspan: @children_categories.size + 2 } = dp[ :products_type_name ]
 
       tr.row_data
-        / td.name = dp[ :product_name ]
-        td.name = dp[ :dishes_category_name ]
-        - @children_categories.each do | o |
-          td = 1
-        td T
+        td.name = dp[ :product_name ]
+        - @children_categories.each do | cc |
+          td = @dpn.select{ | o | o[ :children_category_id ] == cc[ :id ] && \
+                                  o[ :dish_id ] == dp[ :dish_id ] && \
+                                  o[ :product_id ] == dp[ :product_id ] } \
+                   .fetch( 0, { amount: '-' } )[ :amount ]
+        td.cell_mark *{ class: true ? :check : '' }
 
-
-
-/
-/     - @menu_products.each do | pr |
-
-/       - if products_type_id != pr[ :type_id ]
-/           - products_type_id = pr[ :type_id ]
-/           tr.row_group.type
-/             td = pr[ :type_name ]
-/             td.price
-
-/             - @mp_meals.each do | ml |
-/               - @mp_meals_dishes.select{ | o | o[ :meal_id ] == ml[ :id ] }.each_with_index do | md, mdIndex |
-/                 - @mp_categories.each_with_index do | cc, ccIndex |
-/                   - last_dish = cats_size == ccIndex + 1 ? :last_dish : nil
-/                   - last_meal = cats_size == ccIndex + 1 && ml[ :count ] == mdIndex + 1 ? :last_meal : nil
-/                   td *{ class: last_meal || last_dish, data: { meal_id: md[ :meal_id ] } }
-/             - for i in 0...cats_size
-/               td *{ data: { meal_id: 0 } }
-/             td.last_cat
-/             td.last_plan
-/             - for i in 0...cats_size * 2
-/               td *{ class: i.odd? ? :last_diff : '', data: { meal_id: 0 } }
-/             td.last_cat
-/             td
-/             td
-
-/       tr.row_data
-/         td.name = pr[ :name ]
-/         td.count.price = pr[ :price ]
-/         - @mp_meals.each do | ml |
-/           - @mp_meals_dishes.select{ | o | o[ :meal_id ] == ml[ :id ] }.each_with_index do | md, mdIndex |
-/             - @mp_categories.each_with_index do | cc, ccIndex |
-/               - children_category_id = cc [ :id ]
-/               - last_dish = cats_size == ccIndex + 1 ? :last_dish : nil
-/               - last_meal = cats_size == ccIndex + 1 && ml[ :count ] == mdIndex + 1 ? :last_meal : nil
-/               - meal_id = md[ :meal_id ]
-/               - value = @mp.select { | mp | mp[ :product_id ] == pr[ :id ] \
-/               && mp[ :meal_id ] == meal_id && mp[ :dish_id ] == md[ :dish_id ] \
-/               && mp[ :children_category_id ] == children_category_id } \
-/               .fetch( 0, { id: 0, count_plan: 0, count_fact: 0 } ).slice( :id, :count_plan, :count_fact )
-
-/               td.count.cell_data *{ class: last_meal || last_dish,
-/               data: { meal_id: md[ :meal_id ], children_category_id: children_category_id,
-/               count_plan: value[ :count_plan ], count_fact: value[ :count_fact ] } }
-
-/                 &text *{ data: { id: value[ :id ] } }
-
-/         - @mp_categories.each do | o |
-/           td *{ data: { meal_id: 0, count_pf: :plan, count_type: :count, children_category_id: o[ :id ] } }
-/         td.count.cell_count.last_cat *{ data: { meal_id: 0, count_pf: :plan } }
-/         td.count.cell_sum.last_plan *{ data: { meal_id: 0, count_pf: :plan } }
-
-/         - @mp_categories.each_with_index do | o, i |
-/           td.count *{ data: { meal_id: 0, count_pf: :fact, count_type: :diff, children_category_id: o[ :id ] } }
-/           td.count.last_diff *{ data: { meal_id: 0, count_pf: :fact, count_type: :count, children_category_id: o[ :id ] } }
-/         td.count.cell_diff.last_cat *{ data: { meal_id: 0, count_pf: :fact } }
-/         td.count.cell_count *{ data: { meal_id: 0, count_pf: :fact } }
-/         td.count.cell_sum *{ data: { meal_id: 0, count_pf: :fact } }
-/ /

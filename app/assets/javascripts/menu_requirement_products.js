@@ -86,6 +86,22 @@ class MenuRequirementProducts {
     }
   }
 
+  clickNormCell( target ) {
+    const elem = target;
+    // const dataId = +elem.dataset.id;
+    // const countPlan = +elem.dataset.countPlan;
+    const isCheck = elem.classList.contains( 'check' );
+
+    elem.classList.toggle( 'check' );
+    // this.mdUpdate( dataId, !isCheck );
+  }
+
+  contextmenuNormCell( event ) {
+    event.preventDefault( );
+    const { target: elem } = event;
+    // this.mdUpdate( elem.dataset.id, false );
+  }
+
   static clickRow( elem ) {
     const className = 'selected';
 
@@ -278,6 +294,32 @@ class MenuRequirementProducts {
         event.stopPropagation( );
       }
     } );
+
+    //-----------------------------------
+    const colNorm = parentElem.querySelector( '#col_norm' );
+    colMd.querySelector( 'h2' ).addEventListener( 'click', event => this.clickHeader( event.currentTarget ) );
+
+    const colNormTable = colNorm.querySelector( 'table' );
+
+    if ( colNormTable ) {
+      colNormTable.addEventListener( 'click', event => {
+        if ( event.target.matches( 'td.cell_mark' ) ) {
+          this.clickNormCell( event.target );
+          event.stopPropagation();
+        }
+      } );
+
+      colNormTable.addEventListener( 'click', event => {
+        const tr = event.target.closest( ' tr ' );
+        if ( tr && tr.matches( '.row_data:not(.selected)' ) ) {
+          this.constructor.clickRow( tr );
+          event.stopPropagation();
+        }
+      } );
+
+      $( colMdTable ).tableHeadFixer( );
+    }
+    //-----------------------------------
 
     const menuItem = document.querySelector( '#main_menu li[data-page=menu_requirements]' );
     if ( menuItem ) {

@@ -142,9 +142,9 @@ class Institution::MenuRequirementsController < Institution::BaseController
     @dpn_dishes_products = @dpn.group_by { | o | { dish_id: o[ :dish_id ], product_id: o[ :product_id ] } }
       .map { | k, _ | k
         .merge!( products.select { | o |
-          o[ :id ] == k[ :product_id ] }[ 0 ].extract!( :product_name, :products_type_id, :products_type_name ) )
+          o[ :id ] == k[ :product_id ] }[ 0 ].slice( :product_name, :products_type_id, :products_type_name ) )
         .merge!( dishes.select { | o |
-          o[ :id ] == k[ :dish_id ] }[ 0 ].extract!( :dish_name, :dishes_category_id, :dishes_category_name ) )
+          o[ :id ] == k[ :dish_id ] }[ 0 ].slice( :dish_name, :dishes_category_id, :dishes_category_name ) )
     }
 
 

@@ -147,10 +147,9 @@
       }
     }
 
-    button[ data-meal-id =
-     '-1' ] {
+    button[ data-meal-id = '-1' ] {
       margin-left: 50px;
-      &:not(:disabled) {
+      &:not( :disabled ) {
         background-image: linear-gradient( to right, #e49393, #ffc7c7 51%, #e49393 100% );
         color: white;
       }
@@ -160,7 +159,6 @@
 
     tr {
       &.type { @include row-group( 'td', #f1f1f1, #333, 50px, left ); }
-
 
       .price {
         border-right: 3px solid #777;
@@ -191,6 +189,13 @@
   }
 
   #col_norm {
+    .parent_table {
+      table { width: 0; }
+      col:nth-child( 1 ) { width: 350px; }
+      col:last-child { width: 60px; }
+      // col ~ col { width: 60px; }
+    }
+
     tr {
       &.dishes_category { @include row-group( 'td', #aaa, #fff, 3px, left ); }
       &.dish { @include row-group( 'td', #dadada, #333, 15px, left ); }
