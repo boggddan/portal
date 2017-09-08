@@ -4,4 +4,5 @@ class ChildrenCategory < ApplicationRecord
   has_many   :menu_products
   has_many   :children_day_costs
   has_many   :children_groups
+  has_many    :dishes_products_norms
 end

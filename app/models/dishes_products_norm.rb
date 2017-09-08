@@ -1,4 +1,5 @@
 class DishesProductsNorm < ApplicationRecord
-  belongs_to :dishesproducts
-  belongs_to :children_categories
+  belongs_to :dish
+  belongs_to :product
+  belongs_to :children_category
 end

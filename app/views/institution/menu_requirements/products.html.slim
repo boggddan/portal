@@ -63,5 +63,4 @@ main#menu_requirement_products *{ data: { \
 
     #col_norm.clmn *{ data: { path_update: institution_menu_requirements_product_update_path } }
       h2 Норми продуктів в стравах по категоріях
-
-      / = render( 'table_menu_products' ) if @menu_products.present?
+      .parent_table = render( 'table_dishes_products_norm' ) if @dpn.present?

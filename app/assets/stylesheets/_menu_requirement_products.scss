@@ -189,4 +189,21 @@
 
     }
   }
+
+  #col_norm {
+    tr {
+      &.dishes_category { @include row-group( 'td', #aaa, #fff, 3px, left ); }
+      &.dish { @include row-group( 'td', #dadada, #333, 15px, left ); }
+      &.products_type { @include row-group( 'td', #f1f1f1, #333, 27px, left ); }
+
+      &.row_data {
+        .name {
+          cursor: default;
+          padding-left: 39px;
+          text-align: left;
+        }
+      }
+    }
+  }
+
 }

@@ -7,4 +7,5 @@ class Product < ApplicationRecord
   has_many   :io_correction_products
   has_many   :price_products
   has_many   :suppliers_packages
+  has_many   :dishes_products_norms
 end

@@ -8,20 +8,22 @@ main#institution_index
     br
     span Перерва з 13:00 до 14:00
   p.contacts
-    span Контакти:
+    span Служба технічної підтримки:
     br
-    | Олексій Поліщук, менеджер проекту:
+    | Тел. 097-816-48-93
     br
-    | Тел.  097-816-48-93, e-mail &nbsp
-    a  *{ href: "mailto:a.polishchuk@reality.sh?subject=Веб-портал&body=ДНЗ №" }
-      | a.polishchuk@reality.sh
+    | Тел. 066-281-81-70
     br
+    | Тел. 044-221-19-85
     br
-    | Олександр Сіріченко, фахівець технічної підтримки:
+    | e-mail &nbsp;
+    a *{ href: "mailto:a.polishchuk@reality.sh?subject=Веб-портал&body=ДНЗ №", title: 'a.polishchuk@reality.sh' }
+      'a.polishchuk@reality.sh
     br
-    | Тел. 066-281-81-70, 044-221-19-85, e-mail &nbsp
-    a  *{ href: "mailto:alexandr.sirichenko@reality.sh?subject=Веб-портал&body=ДНЗ №" }
+    = ( '&nbsp;' * 12 ).html_safe
+    a *{ href: "mailto:alexandr.sirichenko@reality.sh?subject=Веб-портал&body=ДНЗ №",  title: 'alexandr.sirichenko@reality.sh' }
       | alexandr.sirichenko@reality.sh
+
   p
     a *{ target: '_blank', href: 'insturction_web_portal_1_0_2.pdf' } Інструкція користувача в форматі pdf
   p

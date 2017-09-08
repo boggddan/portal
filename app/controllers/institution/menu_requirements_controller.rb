@@ -14,7 +14,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
   end
 
   def menu_products
-    @menu_products = JSON.parse( MenuProduct
+    @mp = JSON.parse( MenuProduct
       .joins( { product: :products_type }, { menu_meals_dish: [ :meal, :dish ] }, :children_category )
       .select( :id, :product_id, :menu_meals_dish_id, :children_category_id,
         :count_plan, :count_fact,
@@ -37,20 +37,20 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .order( :product_id, 'price_date DESC' )
       .to_json, symbolize_names: true )
 
-    @products = @menu_products.group_by { | o | [ o[ :products_type_id ], o[ :product_id ] ] }
+    @menu_products = @mp.group_by { | o | [ o[ :products_type_id ], o[ :product_id ] ] }
       .map{ | k, v | { type_id: k[0], type_name: v[ 0 ][ :type_name ],
         id: k[ 1 ], name: v[ 0 ][ :product_name ],
         price: @price_products.select { | pp | pp[ :product_id ] == k[ 1 ] }
           .fetch( 0, { price: 0 } ).fetch( :price ) } }
 
-    @products_meals_dishes = @menu_products.group_by { | o | [ o[ :meal_id ], o[ :dish_id ] ] }
+    @mp_meals_dishes = @mp.group_by { | o | [ o[ :meal_id ], o[ :dish_id ] ] }
       .map{ | k, v | { meal_id: k[0], meal_name: v[ 0 ][ :meal_name ],
         dish_id: k[ 1 ], dish_name: v[ 0 ][ :dish_name ] } }
 
-    @products_meals = @products_meals_dishes.group_by { | o | o[ :meal_id ] }
+    @mp_meals = @mp_meals_dishes.group_by { | o | o[ :meal_id ] }
       .map { | k, v | { id: k, name: v[ 0 ][ :meal_name ], count: v.size } }
 
-    @products_categories = @menu_products.group_by { | o | o[ :children_category_id ] }
+    @mp_categories = @mp.group_by { | o | o[ :children_category_id ] }
       .map{ | k, v | { id: k, name: v[ 0 ][ :category_name ] } }
   end
 
@@ -101,6 +101,54 @@ class Institution::MenuRequirementsController < Institution::BaseController
     @menu_dishes = @menu_meals_dishes.group_by{ | o | [ o[ :category_id ], o[ :dishes_id ] ] }
       .map{ | k, v | { category_id: k[0], category_name: v[ 0 ][ :category_name ],
         id: k[ 1 ], name: v[ 0 ][ :dishes_name ] } }
+
+    #########
+    @children_categories = JSON.parse( ChildrenCategory
+      .joins( :children_groups )
+      .select( :id, :name )
+      .where( 'children_groups.institution_id = ?', current_user[ :userable_id ] )
+      .group( :id )
+      .order( :priority, :name )
+      .to_json, symbolize_names: true )
+
+    products = JSON.parse( Product
+      .joins( :products_type )
+      .select( :id, :products_type_id,
+               'products.name as product_name',
+               'products_types.name as products_type_name' )
+      .order( 'products_types.priority', 'products_types.name',
+              'products.name' )
+      .to_json, symbolize_names: true )
+
+    dishes = JSON.parse( Dish
+      .joins( :dishes_category )
+      .select( :id, :dishes_category_id,
+               'dishes.name as dish_name',
+               'dishes_categories.name as dishes_category_name' )
+      .order( 'dishes_categories.priority', 'dishes_categories.name',
+              'dishes.priority', 'dishes.name')
+      .to_json, symbolize_names: true )
+
+    @dpn = JSON.parse( DishesProductsNorm
+      .joins( dish: :dishes_category, product: :products_type, children_category: :children_groups )
+      .select( :id, :dish_id, :product_id, :children_category_id, :amount )
+      .order( 'dishes_categories.priority', 'dishes_categories.name',
+              'dishes.priority', 'dishes.name',
+              'products_types.priority', 'products_types.name',
+              'products.name' )
+      .where( 'children_groups.institution_id = ?', current_user[ :userable_id ] )
+      .to_json, symbolize_names: true )
+
+    @dpn_dishes_products = @dpn.group_by { | o | { dish_id: o[ :dish_id ], product_id: o[ :product_id ] } }
+      .map { | k, _ | k
+        .merge!( products.select { | o |
+          o[ :id ] == k[ :product_id ] }[ 0 ].extract!( :product_name, :products_type_id, :products_type_name ) )
+        .merge!( dishes.select { | o |
+          o[ :id ] == k[ :dish_id ] }[ 0 ].extract!( :dish_name, :dishes_category_id, :dishes_category_name ) )
+    }
+
+
+    #########
 
     menu_products( )
   end
