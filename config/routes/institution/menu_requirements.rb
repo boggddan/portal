@@ -5,6 +5,7 @@ namespace :menu_requirements do
   delete :delete # Удаление документа
   get :products # Отображение товаров
   post :create # Создание документа
+  post :institutions_dishes_products_update # Обновление "Продукти в стравах підрозділу"
   post :children_category_update # Обновление количества по категориям
   post :product_update # Обновление количества по продуктам
   post :meals_dish_update #

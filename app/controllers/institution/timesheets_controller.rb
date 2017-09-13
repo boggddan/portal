@@ -31,7 +31,7 @@ class Institution::TimesheetsController < Institution::BaseController
       .to_json, symbolize_names: true )
 
     if timesheet_exists.present?
-      result = { status: false, caption: 'За выбраний період уже створений табель',
+      result = { status: false, caption: 'За вибраний період уже створений табель',
                  message: timesheet_exists.map{ | v | {
                      id: v[ :id ],
                      'Номер': v[ :number ],

@@ -88,18 +88,17 @@ class MenuRequirementProducts {
 
   clickNormCell( target ) {
     const elem = target;
-    // const dataId = +elem.dataset.id;
-    // const countPlan = +elem.dataset.countPlan;
-    const isCheck = elem.classList.contains( 'check' );
+    const dataId = +elem.dataset.id;
+    const dishId = +elem.dataset.dishId;
+    const productId = +elem.dataset.productId;
 
     elem.classList.toggle( 'check' );
-    // this.mdUpdate( dataId, !isCheck );
-  }
+    const isCheck = elem.classList.contains( 'check' );
 
-  contextmenuNormCell( event ) {
-    event.preventDefault( );
-    const { target: elem } = event;
-    // this.mdUpdate( elem.dataset.id, false );
+    const caption = 'Вибір відображення продукту в стравах';
+    const data = { dishes_products: [ { id: dataId, dish_id: dishId, product_id: productId } ], enabled: isCheck };
+    const { colNorm: { dataset: { pathUpdate: url } } } = this;
+    MyLib.ajax( caption, url, 'post', data, 'json', null, true );
   }
 
   static clickRow( elem ) {
@@ -329,8 +328,8 @@ class MenuRequirementProducts {
       } );
     }
 
-    [ this.parentElem, this.colCc, this.colCcTable, this.colMd, this.colMdCreate, this.colMdTable, this.colPr ] =
-      [ parentElem, colCc, colCcTable, colMd, colMdCreate, colMdTable, colPr ];
+    [ this.parentElem, this.colCc, this.colCcTable, this.colMd, this.colMdCreate, this.colMdTable, this.colPr, this.colNorm ] =
+      [ parentElem, colCc, colCcTable, colMd, colMdCreate, colMdTable, colPr, colNorm ];
 
     [ this.dataId, this.disabledPlan, this.disabledFact ] =
       [ +parentElem.dataset.id, disabledPlan, disabledFact ];

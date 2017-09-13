@@ -8,4 +8,5 @@ class Product < ApplicationRecord
   has_many   :price_products
   has_many   :suppliers_packages
   has_many   :dishes_products_norms
+  has_many   :institutions_dishes_products
 end

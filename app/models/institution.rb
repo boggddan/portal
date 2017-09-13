@@ -8,5 +8,6 @@ class Institution < ApplicationRecord
   has_many   :price_products
   has_many   :timesheets
   has_many   :suppliers_packages
+  has_many   :institutions_dishes_products
   has_many   :users, as: :userable, source_type: 'Institution'
 end
