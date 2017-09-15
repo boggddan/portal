@@ -244,15 +244,6 @@ class MyLib {
   }
 
   // сообщение об ошибке
-  static errorMsg( header = '', message = '' ) {
-    this.pageLoader( false );
-    const elem = document.getElementById( 'error_msg' );
-    elem.classList.remove( 'hide' );
-    elem.querySelector( '.caption' ).textContent = header;
-    elem.querySelector( '.text' ).textContent = message;
-  }
-
-  // сообщение об ошибке
   static delMsg( header, callback ) {
     $( '#del_msg' )
       .removeClass( 'hide' )
@@ -459,6 +450,9 @@ let objMenuRequirementProducts = { };
 let objTimesheetDates = { };
 let objUsers = { };
 let objUserNew = { };
+let objLogIn = { };
+
+const userInfo = new UAParser( ).getResult( );
 
 $( document ).on( 'turbolinks:load', ( ) => {
   moment.locale( 'uk' );
@@ -471,13 +465,14 @@ $( document ).on( 'turbolinks:load', ( ) => {
   const elemTimesheetDates = document.getElementById( 'timesheet_dates' );
   const elemUsers = document.getElementById( 'users' );
   const elemUserNew = document.getElementById( 'user_new' );
+  const elemLogIn = document.getElementById( 'log_in' );
+
+  const elemFormSplash = document.getElementById( 'form_splash' );
+  if ( elemFormSplash ) objFormSplash = new FormSplash( elemFormSplash );
 
   if ( elemMenuRequirementProducts ) objMenuRequirementProducts = new MenuRequirementProducts( elemMenuRequirementProducts );
   else if ( elemTimesheetDates ) objTimesheetDates = new TimesheetDates( elemTimesheetDates );
   else if ( elemUsers ) objUsers = new Users( elemUsers );
   else if ( elemUserNew ) objUserNew = new UserNew( elemUserNew );
-
-  const elemFormSplash = document.getElementById( 'form_splash' );
-  if ( elemFormSplash ) objFormSplash = new FormSplash( elemFormSplash );
-
+  else if ( elemLogIn ) objLogIn = new LogIn( elemLogIn );
 } );

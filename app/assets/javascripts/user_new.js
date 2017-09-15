@@ -65,7 +65,7 @@ class UserNew {
     else if ( !password ) headerMsg = 'Не введений пароль';
     else if ( password !== passwordConfirmation ) headerMsg = 'Паролі неспівпадають';
 
-    if ( headerMsg ) MyLib.errorMsg( headerMsg );
+    if ( headerMsg ) objFormSplash.open( 'error', headerMsg, '' );
     else {
       const caption = 'Створення користувача';
       const { parentElem: { dataset: { pathCreate: url } } } = this;

@@ -1,6 +1,8 @@
 $( document ).on 'turbolinks:load', ( ) ->
+
+
   # Если объект существует
-  $logIn = $( '#log_in' )
+  $logIn = $( '#log_in1' )
   if $logIn.length
     $parentElem = $logIn
 
