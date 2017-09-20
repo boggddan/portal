@@ -49,7 +49,9 @@ module CheckDbController
     end
 
     def exists_codes( table, codes )
-      codes_str = codes.map { | o | ( o || '' ).strip }.to_s.gsub( '"', '\'' )
+      codes_str = codes.map { | o |
+        o.class.name == 'Integer' ? o : ( o || '' ).strip
+      }.to_s.gsub( '"', '\'' )
 
       sql = <<-SQL.squish
           SELECT code, COALESCE( bb.id, -1 ) as id

@@ -136,6 +136,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
               'dishes.priority', 'dishes.name',
               'products_types.priority', 'products_types.name',
               'products.name' )
+      .where( institution_id: current_user[ :userable_id ] )
       .where( 'children_groups.institution_id = ?', current_user[ :userable_id ] )
       .to_json, symbolize_names: true )
 

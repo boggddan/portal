@@ -2095,14 +2095,18 @@ class SyncCatalogsController < ApplicationController
   # POST /api/cu_dishes_products_norms
   # { "dishes_products_norms":
   #   [
-  #     { "dish_code": "000000002", "product_code": "000000054", "children_category_code": "000000001", "amount": 0.01 },
-  #     { "dish_code": "000000002", "product_code": "000000047", "children_category_code": "000000001", "amount": 0.05 }
+  #     { "institution_code": 14, "dish_code": "000000002", "product_code": "000000054", "children_category_code": "000000001", "amont": 0.01 },
+  #     { "institution_code": 14, "dish_code": "000000002", "product_code": "000000047", "children_category_code": "000000001", "amount": 0.05 }
   #   ]
   # }
   def dishes_products_norms_update
     errors = [ ]
 
     dishes_products_norms = params[ :dishes_products_norms ]
+
+    institutions_codes = dishes_products_norms.group_by { | o | o[ :institution_code ] || 0 }.keys
+    institutions = exists_codes( :institutions, institutions_codes )
+    errors << institutions[ :error ] unless institutions[ :status ]
 
     dishes_codes = dishes_products_norms.group_by { | o | o[ :dish_code ] }.keys
     dishes = exists_codes( :dishes, dishes_codes )
@@ -2120,16 +2124,18 @@ class SyncCatalogsController < ApplicationController
       values = [ ]
 
       dishes_products_norms.each_with_index do | obj, index |
-        error = { dish_code: 'Не знайдений параметр [dish_code]',
+        error = { institution_code: 'Не знайдений параметр [institution_code]',
+          dish_code: 'Не знайдений параметр [dish_code]',
           product_code: 'Не знайдений параметр [product_code]',
           children_category_code: 'Не знайдений параметр [children_category_code]',
           amount: 'Не знайдений параметр [amount]' }.stringify_keys!.except( *obj.keys )
 
         if error.empty?
           values << [ ].tap { | value |
-            value << dishes[ :obj ][ ( obj[ :dish_code]  || '' ).strip ]
-            value << products[ :obj ][ ( obj[ :product_code]  || '' ).strip ]
-            value << children_categories[ :obj ][ ( obj[ :children_category_code]  || '' ).strip ]
+            value << institutions[ :obj ][ obj[ :institution_code] || 0 ]
+            value << dishes[ :obj ][ ( obj[ :dish_code] || '' ).strip ]
+            value << products[ :obj ][ ( obj[ :product_code] || '' ).strip ]
+            value << children_categories[ :obj ][ ( obj[ :children_category_code] || '' ).strip ]
             value << obj[ :amount ] || 0
           }
         else
@@ -2138,12 +2144,12 @@ class SyncCatalogsController < ApplicationController
       end
 
       if errors.empty?
-        fields = %w( dish_id product_id children_category_id amount ).join( ',' )
+        fields = %w( institution_id dish_id product_id children_category_id amount ).join( ',' )
 
         sql = <<-SQL.squish
-            INSERT INTO  dishes_products_norms ( #{ fields } )
+            INSERT INTO dishes_products_norms ( #{ fields } )
               VALUES #{ values.map { | o | "( #{ o.join( ',' ) } )" }.join( ',' ) }
-              ON CONFLICT ( dish_id, product_id, children_category_id )
+              ON CONFLICT ( institution_id, dish_id, product_id, children_category_id )
                 DO UPDATE SET amount = EXCLUDED.amount
               RETURNING id ;
           SQL
