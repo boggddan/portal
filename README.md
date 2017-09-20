@@ -22,7 +22,7 @@
   - [*Категорії страв* - `dishes_categories`](#Категорії-страв---dishes_categories-top)
   - [*Страви* - `dishes`](#Страви---dishes-top)
   - [*Прийоми їжі* - `meals`](#Прийоми-їжі---meals-top)
-  - [*Норми продуктів по категоріях дітей в стравах* - `dishes_products_norms`](#Норми-продуктів-по-категоріях-дітей-в-стравах---dishes_products_norms-top)
+  - [*Норми продуктів підрозділу по категоріях дітей в стравах* - `dishes_products_norms`](#Норми-продуктів-підрозділу-по-категоріях-дітей-в-стравах---dishes_products_norms-top)
 - [Документи](#Документи-top)
   - [*Замовлення постачальнику* - `supplier_orders`](#Замовлення-постачальнику---supplier_orders-top)
   - [*Надходження ТМЦ* - `receipts`](#Надходження-ТМЦ---receipts-top)
@@ -195,16 +195,16 @@ GET /api/meal?code=000000002
 GET /api/meals
 ```
 
-### *Норми продуктів по категоріях дітей в стравах* - `dishes_products_norms` [:top:](#Зміст)
+### *Норми продуктів підрозділу по категоріях дітей в стравах* - `dishes_products_norms` [:top:](#Зміст)
 
 ```json
 POST /api/cu_dishes_products_norms
-  { "dishes_products_norms":
-     [
-      { "dish_code": "000000002", "product_code": "000000054", "children_category_code": "000000001", "amount": 0.01 },
-      { "dish_code": "000000002", "product_code": "000000047", "children_category_code": "000000001", "amount": 0.05 }
-    ]
-  }
+{ "dishes_products_norms":
+  [
+    { "institution_code": 14, "dish_code": "000000002", "product_code": "000000054", "children_category_code": "000000001", "amount": 0.01 },
+    { "institution_code": 14, "dish_code": "000000002", "product_code": "000000047", "children_category_code": "000000001", "amount": 0.05 }
+  ]
+}
 ```
 
 ## Документи [:top:](#Зміст)

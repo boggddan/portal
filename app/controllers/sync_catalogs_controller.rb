@@ -2095,7 +2095,7 @@ class SyncCatalogsController < ApplicationController
   # POST /api/cu_dishes_products_norms
   # { "dishes_products_norms":
   #   [
-  #     { "institution_code": 14, "dish_code": "000000002", "product_code": "000000054", "children_category_code": "000000001", "amont": 0.01 },
+  #     { "institution_code": 14, "dish_code": "000000002", "product_code": "000000054", "children_category_code": "000000001", "amount": 0.01 },
   #     { "institution_code": 14, "dish_code": "000000002", "product_code": "000000047", "children_category_code": "000000001", "amount": 0.05 }
   #   ]
   # }
