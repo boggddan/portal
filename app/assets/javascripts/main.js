@@ -61,6 +61,14 @@ class MyLib {
       .replace( /[-_](.)/g, word => word[ 1 ].toUpperCase() );
   }
 
+  static kebab( value ) {
+    return value
+      .replace( /([A-Z])/g, '-$1' )
+      .replace( /_/g, '-' )
+      .replace( /(-+)/g, '-' )
+      .toLowerCase();
+  }
+
   // изминение значение таблице и на панели
   static changeValue( elem, parentName, callback ) {
     const name = elem.attr( 'name' ) || elem.attr( 'id' );
@@ -199,7 +207,7 @@ class MyLib {
 
     const serializeParams = params =>
       Object.keys( params ).reduce( ( acc, cur ) =>
-        acc += `&${ cur }=${ encodeURIComponent( params[ cur ] ) }`, '' )
+        `${ acc }&${ cur }=${ encodeURIComponent( params[ cur ] ) }`, '' )
         .replace( /^&/, '?' );
 
     window.location.assign( `${ siteUrl }${ serializeParams( urlParams ) }` );

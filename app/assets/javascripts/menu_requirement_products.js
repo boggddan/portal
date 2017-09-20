@@ -86,6 +86,44 @@ class MenuRequirementProducts {
     }
   }
 
+  clickNormGroup( target ) {
+    const elem = target;
+    const { parentNode: parent } = elem;
+    const { dataset: parentDataset } =
+
+    const dataCss = Object.keys( pare ).reduce( ( acc, cur ) =>
+    `${ acc }[data-${ MyLib.kebab( cur ) }="${ dataObj[ cur ] }"]`, '' );
+
+    const dataName = `${ parent.classList[ 1 ] }_id`;
+    const { dataset: { [ MyLib.camelize( dataName ) ]: id } } = parent;
+    console.log(parent.dataset)
+    // elem.classList.toggle( 'check' );
+    const className = 'check';
+    const isCheck = elem.classList.contains( className );
+    this.colNormTable.querySelectorAll(
+      `tr[ data-${ MyLib.kebab( dataName ) } = "${ id }" ] td.cell_mark${ isCheck ? `.${ className }` : `:not(.${ className })` }`
+    ).forEach(
+      child => {
+        const childElem = child;
+        if ( isCheck ) childElem.classList.remove( className ); else childElem.classList.add( className );
+        console.log(child)
+      }
+    )
+
+    // console.log( dataName, id );
+    // const elem = target;
+    // const dataId = +elem.dataset.id;
+    // const dishId = +elem.dataset.dishId;
+    // const productId = +elem.dataset.productId;
+
+    // const isCheck = elem.classList.contains( 'check' );
+
+    // const caption = 'Вибір відображення продукту в стравах';
+    // const data = { dishes_products: [ { id: dataId, dish_id: dishId, product_id: productId } ], enabled: isCheck };
+    // const { colNorm: { dataset: { pathUpdate: url } } } = this;
+    // MyLib.ajax( caption, url, 'post', data, 'json', null, true );
+  }
+
   clickNormCell( target ) {
     const elem = target;
     const dataId = +elem.dataset.id;
@@ -302,7 +340,12 @@ class MenuRequirementProducts {
 
     if ( colNormTable ) {
       colNormTable.addEventListener( 'click', event => {
-        if ( event.target.matches( 'td.cell_mark' ) ) {
+        if ( event.target.matches( 'tr.row_group td.cell_mark' ) ) {
+          this.clickNormGroup( event.target );
+          event.stopPropagation();
+        }
+
+        if ( event.target.matches( 'tr.row_data td.cell_mark' ) ) {
           this.clickNormCell( event.target );
           event.stopPropagation();
         }
@@ -316,7 +359,7 @@ class MenuRequirementProducts {
         }
       } );
 
-      $( colMdTable ).tableHeadFixer( );
+      $( colNormTable ).tableHeadFixer( );
     }
     //-----------------------------------
 
@@ -328,8 +371,8 @@ class MenuRequirementProducts {
       } );
     }
 
-    [ this.parentElem, this.colCc, this.colCcTable, this.colMd, this.colMdCreate, this.colMdTable, this.colPr, this.colNorm ] =
-      [ parentElem, colCc, colCcTable, colMd, colMdCreate, colMdTable, colPr, colNorm ];
+    [ this.parentElem, this.colCc, this.colCcTable, this.colMd, this.colMdCreate, this.colMdTable, this.colPr, this.colNorm, this.colNormTable ] =
+      [ parentElem, colCc, colCcTable, colMd, colMdCreate, colMdTable, colPr, colNorm, colNormTable ];
 
     [ this.dataId, this.disabledPlan, this.disabledFact ] =
       [ +parentElem.dataset.id, disabledPlan, disabledFact ];

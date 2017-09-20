@@ -7,6 +7,8 @@ class LogIn {
     this.constructor.checkBrowser( );
 
     this.parentElem.querySelector( 'button' ).addEventListener( 'click', ( ) => this.clickEnter( ) );
+    this.parentElem.querySelector( '#password' )
+      .addEventListener( 'keyup', event => { if ( event.keyCode === 13 ) this.clickEnter( ); } );
   }
 
   static checkBrowser( ) {
@@ -65,7 +67,7 @@ class LogIn {
       password.value = '';
       const caption = `Авторизація [${ usernameVal }]`;
       const data = { username: usernameVal, password: passwordVal };
-      const { dataset: { pathSend: url } } = this;
+      const { parentElem: { dataset: { pathSend: url } } } = this;
       MyLib.ajax( caption, url, 'post', data, 'json', null, false );
     } else {
       let header = '';
