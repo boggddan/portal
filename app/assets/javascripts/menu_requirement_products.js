@@ -89,10 +89,10 @@ class MenuRequirementProducts {
   clickNormGroup( target ) {
     const elem = target;
     const { parentNode: parent } = elem;
-    const { dataset: parentDataset } =
+    const { dataset: parentDataset } = parent;
 
     const dataCss = Object.keys( pare ).reduce( ( acc, cur ) =>
-    `${ acc }[data-${ MyLib.kebab( cur ) }="${ dataObj[ cur ] }"]`, '' );
+    `${ acc }[data-${ MyLib.kebab( cur ) }="${ parentDataset[ cur ] }"]`, '' );
 
     const dataName = `${ parent.classList[ 1 ] }_id`;
     const { dataset: { [ MyLib.camelize( dataName ) ]: id } } = parent;

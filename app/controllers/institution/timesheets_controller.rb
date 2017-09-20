@@ -22,11 +22,13 @@ class Institution::TimesheetsController < Institution::BaseController
     timesheet_exists = JSON.parse( Timesheet
       .select( :id, :number, :date, :date_eb, :date_ee )
       .where( institution_id: current_user[ :userable_id ],
-              date_eb: date_start..date_end )
+              date_eb: date_start..date_end,
+              is_del_1c: false )
       .or( Timesheet
         .select( :id, :number, :date, :date_eb, :date_ee )
         .where( institution_id: current_user[ :userable_id ],
-                date_ee: date_start..date_end ) )
+                date_ee: date_start..date_end,
+                is_del_1c: false ) )
       .order( :number )
       .to_json, symbolize_names: true )
 

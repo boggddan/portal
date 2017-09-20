@@ -2,15 +2,13 @@
 ( function ajax( ) {
   const clmn = document.getElementById( 'col_io' );
   const parentTable = clmn.querySelector( '.parent_table' );
-  let disabled = false;
 
   <% if @institution_orders.present? %>
     parentTable.innerHTML = '<%= j render( "table_institution_orders" ) %>';
     MyLib.tableSetSession( parentTable );
-    disabled = true;
   <% else %>
     parentTable.innerHTML = '';
   <% end %>
 
-  clmn.querySelector( '.btn_create' ).disabled = disabled;
+  clmn.querySelector( '.btn_create' ).disabled = '<%= @all_is_del_1c %>' === 'false' ;
 }( ) );

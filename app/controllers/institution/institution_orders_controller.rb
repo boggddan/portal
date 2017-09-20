@@ -22,6 +22,8 @@ class Institution::InstitutionOrdersController < Institution::BaseController
         .where( institution_id: current_user[ :userable_id ],
                 date_end: date_start..date_end ) )
       .order( "#{ params[ :sort_field ] } #{ params[ :sort_order ] }" )
+
+    @all_is_del_1c = @institution_orders.select { | o | o[ :is_del_1c ] == false }.empty?
   end
 
   def create # Создание заявки
