@@ -4,7 +4,7 @@ SET PathToBackup=C:\Arhiv_portal\
 SET Util="C:\Program Files\7-Zip\7z.exe"
 
 REM Чистим файлы и перемещаемся в каталог выше
-CALL clean.bat 1
+CALL clear.bat 1
 
 @ECHO OFF
 
