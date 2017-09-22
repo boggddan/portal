@@ -25,7 +25,7 @@ table.table
         - dish_id = 0
         tr.row_group.dishes_category *{ data: { dishes_category_id: dishes_category_id } }
           td *{ colspan: @children_categories.size + 1 } = dp[ :dishes_category_name ]
-          td.cell_mark
+          td
 
       - if dish_id != dp[ :dish_id ]
         - dish_id = dp[ :dish_id ]
@@ -39,7 +39,7 @@ table.table
         tr.row_group.products_type *{ data: { dishes_category_id: dishes_category_id,
                                              dish_id: dish_id, products_type_id: products_type_id } }
           td *{ colspan: @children_categories.size + 1 } = dp[ :products_type_name ]
-          td.cell_mark
+          td
 
       - product_id = dp[ :product_id ]
       tr.row_data *{ data: { dishes_category_id: dishes_category_id,

@@ -91,52 +91,79 @@ class MenuRequirementProducts {
     const { parentNode: parent } = elem;
     const { dataset: parentDataset } = parent;
 
-    const dataCss = Object.keys( pare ).reduce( ( acc, cur ) =>
-    `${ acc }[data-${ MyLib.kebab( cur ) }="${ parentDataset[ cur ] }"]`, '' );
+    const dataForCss = Object.keys( parentDataset ).reduce( ( acc, cur ) =>
+      `${ acc }[data-${ MyLib.kebab( cur ) }="${ parentDataset[ cur ] }"]`, '' );
 
-    const dataName = `${ parent.classList[ 1 ] }_id`;
-    const { dataset: { [ MyLib.camelize( dataName ) ]: id } } = parent;
-    console.log(parent.dataset)
-    // elem.classList.toggle( 'check' );
     const className = 'check';
+    elem.classList.toggle( className );
     const isCheck = elem.classList.contains( className );
-    this.colNormTable.querySelectorAll(
-      `tr[ data-${ MyLib.kebab( dataName ) } = "${ id }" ] td.cell_mark${ isCheck ? `.${ className }` : `:not(.${ className })` }`
-    ).forEach(
-      child => {
-        const childElem = child;
-        if ( isCheck ) childElem.classList.remove( className ); else childElem.classList.add( className );
-        console.log(child)
-      }
-    )
 
-    // console.log( dataName, id );
-    // const elem = target;
-    // const dataId = +elem.dataset.id;
-    // const dishId = +elem.dataset.dishId;
-    // const productId = +elem.dataset.productId;
+    const dishesProducts = [ ];
+    const existsClass = isCheck ? `:not(.${ className })` : `.${ className }`;
 
-    // const isCheck = elem.classList.contains( 'check' );
+    this.colNormTable.querySelectorAll( `tr.row_data${ dataForCss } td.cell_mark${ existsClass }` )
+      .forEach(
+        child => {
+          const childElem = child;
+          const { dataset: childDataset } = childElem;
 
-    // const caption = 'Вибір відображення продукту в стравах';
-    // const data = { dishes_products: [ { id: dataId, dish_id: dishId, product_id: productId } ], enabled: isCheck };
-    // const { colNorm: { dataset: { pathUpdate: url } } } = this;
-    // MyLib.ajax( caption, url, 'post', data, 'json', null, true );
+          childElem.classList.toggle( className );
+
+          dishesProducts.push( {
+            id: +childDataset.id,
+            dish_id: +childDataset.dishId,
+            product_id: +childDataset.productId
+          } );
+        }
+      );
+
+    this.sendNormtoServer( dishesProducts, isCheck );
+  }
+
+  sendNormtoServer( dishesProducts, isCheck ) {
+    const caption = 'Вибір відображення продукту в стравах';
+    const { colNorm: { dataset: { pathUpdate: url } } } = this;
+    const preloaderVisible = dishesProducts.length > 10;
+    const data = { dishes_products: dishesProducts, enabled: isCheck };
+
+    MyLib.ajax( caption, url, 'post', data, 'json', null, preloaderVisible );
   }
 
   clickNormCell( target ) {
     const elem = target;
-    const dataId = +elem.dataset.id;
-    const dishId = +elem.dataset.dishId;
-    const productId = +elem.dataset.productId;
+    const { dataset: elemDataset } = elem;
+    const dishId = +elemDataset.dishId;
 
-    elem.classList.toggle( 'check' );
-    const isCheck = elem.classList.contains( 'check' );
+    const className = 'check';
+    elem.classList.toggle( className );
+    const isCheck = elem.classList.contains( className );
 
-    const caption = 'Вибір відображення продукту в стравах';
-    const data = { dishes_products: [ { id: dataId, dish_id: dishId, product_id: productId } ], enabled: isCheck };
-    const { colNorm: { dataset: { pathUpdate: url } } } = this;
-    MyLib.ajax( caption, url, 'post', data, 'json', null, true );
+    const dishesProducts = [
+      {
+        id: +elemDataset.id,
+        dish_id: dishId,
+        product_id: +elemDataset.productId
+      }
+    ];
+
+    this.sendNormtoServer( dishesProducts, isCheck );
+    this.checkDishChoose( dishId );
+  }
+
+  checkDishChoose( dishId ) {
+    const className = 'check';
+    const elems = this.colNormTable.querySelectorAll(
+      `tr.row_data[ data-dish-id = "${ dishId }" ] td.cell_mark:not(.${ className })` );
+
+    const { classList: elemDishClassList } = this.colNormTable.querySelector(
+      `tr.row_group.dish[ data-dish-id = "${ dishId }" ] td.cell_mark` );
+
+    if ( elems.length ) elemDishClassList.remove( className ); else elemDishClassList.add( className );
+  }
+
+  colNormInit( ) {
+    this.colNormTable.querySelectorAll( 'tr.row_group.dish' )
+      .forEach( child => this.checkDishChoose( child.dataset.dishId ) );
   }
 
   static clickRow( elem ) {
@@ -147,6 +174,43 @@ class MenuRequirementProducts {
       if ( child === elem ) classList.add( className ); else classList.remove( 'selected' );
     } );
   }
+
+  colPrTablePf( currentPf ) {
+    this.colPrCurrentPf = currentPf;
+    const currentDisabled = this.colPrCurrentPf === 'plan' ? this.disabledPlan : this.disabledFact;
+    const dataCurrentPf = `count${ MyLib.capitalize( currentPf ) }`;
+    const nameCurrentPf = `count_${ currentPf }`;
+
+    if ( this.disabledPlan ) {
+      const buttonPf = this.colPr.querySelector( `button[data-pf=${ currentPf }]` );
+      this.colPr.querySelectorAll( 'button[data-pf]' ).forEach( child => {
+        const elemChild = child;
+        elemChild.disabled = child === buttonPf;
+      } );
+    } else {
+      this.colPr.querySelectorAll( 'button[data-pf]' ).forEach( child => {
+        const elemChild = child;
+        if ( child.dataset.pf === 'plan' ) elemChild.classList.remove( 'nav' );
+        elemChild.disabled = true;
+      } );
+    }
+
+    this.colPrTable
+      .querySelectorAll( '.cell_data input' )
+      .forEach( child => {
+        const elem = child;
+        const { parentElement: { dataset: parentData } } = elem;
+        const val = +parentData[ dataCurrentPf ];
+        elem.dataset.oldValue = val;
+
+        elem.disabled = currentDisabled || elem.dataset.id === '0';
+        elem.name = nameCurrentPf;
+        elem.value = MyLib.numToStr( val, -1 );
+      } );
+
+    this.calcCategories( );
+  }
+
 
   clickHeader( target ) {
     const elem = target;
@@ -382,6 +446,7 @@ class MenuRequirementProducts {
     this.checkMdExists( );
     this.colCcInit( );
     this.colPrInit( null );
+    this.colNormInit( null );
   }
 
   colPrInit( elements ) {
