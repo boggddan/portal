@@ -22,6 +22,10 @@
         background-image: linear-gradient( to right, #6db369, #91d88d 51%, #6db369 100% );
       }
     }
+
+    button[ data-clmn = '#col_norm' ] {
+      margin-left: 50px;
+    }
   }
 
   .clmn_main {

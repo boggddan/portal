@@ -175,43 +175,6 @@ class MenuRequirementProducts {
     } );
   }
 
-  colPrTablePf( currentPf ) {
-    this.colPrCurrentPf = currentPf;
-    const currentDisabled = this.colPrCurrentPf === 'plan' ? this.disabledPlan : this.disabledFact;
-    const dataCurrentPf = `count${ MyLib.capitalize( currentPf ) }`;
-    const nameCurrentPf = `count_${ currentPf }`;
-
-    if ( this.disabledPlan ) {
-      const buttonPf = this.colPr.querySelector( `button[data-pf=${ currentPf }]` );
-      this.colPr.querySelectorAll( 'button[data-pf]' ).forEach( child => {
-        const elemChild = child;
-        elemChild.disabled = child === buttonPf;
-      } );
-    } else {
-      this.colPr.querySelectorAll( 'button[data-pf]' ).forEach( child => {
-        const elemChild = child;
-        if ( child.dataset.pf === 'plan' ) elemChild.classList.remove( 'nav' );
-        elemChild.disabled = true;
-      } );
-    }
-
-    this.colPrTable
-      .querySelectorAll( '.cell_data input' )
-      .forEach( child => {
-        const elem = child;
-        const { parentElement: { dataset: parentData } } = elem;
-        const val = +parentData[ dataCurrentPf ];
-        elem.dataset.oldValue = val;
-
-        elem.disabled = currentDisabled || elem.dataset.id === '0';
-        elem.name = nameCurrentPf;
-        elem.value = MyLib.numToStr( val, -1 );
-      } );
-
-    this.calcCategories( );
-  }
-
-
   clickHeader( target ) {
     const elem = target;
     const { parentElement } = elem;
@@ -441,7 +404,7 @@ class MenuRequirementProducts {
     [ this.dataId, this.disabledPlan, this.disabledFact ] =
       [ +parentElem.dataset.id, disabledPlan, disabledFact ];
 
-    parentElem.querySelector( '.panel_main button[data-clmn="#col_norm"]' ).click( );
+    parentElem.querySelector( '.panel_main button[data-clmn="#col_cc"]' ).click( );
     this.headerText( );
     this.checkMdExists( );
     this.colCcInit( );
