@@ -46,11 +46,11 @@ table.table
                              dish_id: dish_id, products_type_id: products_type_id } }
         td.name = dp[ :product_name ]
         - @children_categories.each do | cc |
-          td = @dpn.select{ | o | o[ :children_category_id ] == cc[ :id ] && \
+          td = @dishes_products_norms.select{ | o | o[ :children_category_id ] == cc[ :id ] && \
                                   o[ :dish_id ] == dish_id && \
                                   o[ :product_id ] == product_id } \
                   .fetch( 0, { amount: '-' } )[ :amount ]
-        - idp = @institutions_dishes_products.select { | o | o[ :dish_id ] == dish_id && \
+        - idp = @dishes_products.select { | o | o[ :dish_id ] == dish_id && \
                                                                 o[ :product_id ] == product_id } \
                                                 .fetch( 0, { id: 0, enabled: false } ) \
                                                 .slice( :id, :enabled )

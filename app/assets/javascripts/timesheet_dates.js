@@ -79,7 +79,6 @@ class TimesheetDates {
 
     parentElem.querySelectorAll( 'input[data-date]' ).forEach( child => {
       const elemChild = child;
-      console.log('fdfdf')
       elemChild.value = MyLib.toDateFormat( elemChild.dataset.date );
     } );
 

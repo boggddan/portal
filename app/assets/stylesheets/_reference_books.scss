@@ -1,0 +1,34 @@
+@mixin row-group( $el, $bgc, $c, $pl, $ta ) {
+  cursor: default;
+  text-align: center;
+
+  &:hover,
+  #{ $el }:hover,
+  #{ $el }:not(.hover) { background-color: $bgc; color: $c; }
+
+  :first-child { padding-left: $pl; text-align: $ta; }
+}
+
+#dishes_products_norms {
+
+  .parent_table {
+    table { width: 0; }
+    col:nth-child( 1 ) { width: 350px; }
+    col:last-child { width: 60px; }
+    // col ~ col { width: 60px; }
+  }
+
+  tr {
+    &.dishes_category { @include row-group( 'td', #aaa, #fff, 3px, left ); }
+    &.dish { @include row-group( 'td', #dadada, #333, 15px, left ); }
+    &.products_type { @include row-group( 'td', #f1f1f1, #333, 27px, left ); }
+
+    &.row_data {
+      .name {
+        cursor: default;
+        padding-left: 39px;
+        text-align: left;
+      }
+    }
+  }
+}

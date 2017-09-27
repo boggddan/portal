@@ -9,6 +9,5 @@ class Institution < ApplicationRecord
   has_many   :timesheets
   has_many   :suppliers_packages
   has_many   :dishes_products_norms
-  has_many   :institutions_dishes_products
   has_many   :users, as: :userable, source_type: 'Institution'
 end

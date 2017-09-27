@@ -22,10 +22,6 @@
         background-image: linear-gradient( to right, #6db369, #91d88d 51%, #6db369 100% );
       }
     }
-
-    button[ data-clmn = '#col_norm' ] {
-      margin-left: 50px;
-    }
   }
 
   .clmn_main {
@@ -188,31 +184,6 @@
       .last_diff {
         border-right: 3px solid #e7e7e7;
       }
-
     }
   }
-
-  #col_norm {
-    .parent_table {
-      table { width: 0; }
-      col:nth-child( 1 ) { width: 350px; }
-      col:last-child { width: 60px; }
-      // col ~ col { width: 60px; }
-    }
-
-    tr {
-      &.dishes_category { @include row-group( 'td', #aaa, #fff, 3px, left ); }
-      &.dish { @include row-group( 'td', #dadada, #333, 15px, left ); }
-      &.products_type { @include row-group( 'td', #f1f1f1, #333, 27px, left ); }
-
-      &.row_data {
-        .name {
-          cursor: default;
-          padding-left: 39px;
-          text-align: left;
-        }
-      }
-    }
-  }
-
 }

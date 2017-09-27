@@ -42,7 +42,6 @@ main#menu_requirement_products *{ data: { \
       button.btn_gradient.nav *{ data: { clmn: '#col_cc' } } Категорії
       button.btn_gradient.nav *{ data: { clmn: '#col_md' } } Вибір страв
       button.btn_gradient.nav *{ data: { clmn: '#col_pr' } } Продукти
-      button.btn_gradient.nav *{ data: { clmn: '#col_norm' } } Норми продуктів
 
   .clmn_main
     #col_cc.clmn *{ data: { path_update: institution_menu_requirements_children_category_update_path } }
@@ -60,7 +59,3 @@ main#menu_requirement_products *{ data: { \
 
     #col_pr.clmn *{ data: { path_update: institution_menu_requirements_product_update_path } }
       = render( 'table_menu_products' ) if @menu_products.present?
-
-    #col_norm.clmn *{ data: { path_update: institution_menu_requirements_institutions_dishes_products_update_path } }
-      h2 Норми продуктів в стравах по категоріях
-      .parent_table = render( 'table_dishes_products_norm' ) if @dpn.present?

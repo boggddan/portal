@@ -77,58 +77,6 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .order( :children_category_id, 'cost_date DESC' )
       .to_json, symbolize_names: true )
 
-    #########
-    @children_categories = JSON.parse( ChildrenCategory
-      .joins( :children_groups )
-      .select( :id, :name )
-      .where( 'children_groups.institution_id = ?', current_user[ :userable_id ] )
-      .group( :id )
-      .order( :priority, :name )
-      .to_json, symbolize_names: true )
-
-    products = JSON.parse( Product
-      .joins( :products_type )
-      .select( :id, :products_type_id,
-               'products.name as product_name',
-               'products_types.name as products_type_name' )
-      .order( 'products_types.priority', 'products_types.name',
-              'products.name' )
-      .to_json, symbolize_names: true )
-
-    dishes = JSON.parse( Dish
-      .joins( :dishes_category )
-      .select( :id, :dishes_category_id,
-               'dishes.name as dish_name',
-               'dishes_categories.name as dishes_category_name' )
-      .order( 'dishes_categories.priority', 'dishes_categories.name',
-              'dishes.priority', 'dishes.name')
-      .to_json, symbolize_names: true )
-
-    @dpn = JSON.parse( DishesProductsNorm
-      .joins( dish: :dishes_category, product: :products_type, children_category: :children_groups )
-      .select( :id, :dish_id, :product_id, :children_category_id, :amount )
-      .order( 'dishes_categories.priority', 'dishes_categories.name',
-              'dishes.priority', 'dishes.name',
-              'products_types.priority', 'products_types.name',
-              'products.name' )
-      .where( institution_id: current_user[ :userable_id ] )
-      .where( 'children_groups.institution_id = ?', current_user[ :userable_id ] )
-      .to_json, symbolize_names: true )
-
-    @dpn_dishes_products = @dpn.group_by { | o | { dish_id: o[ :dish_id ], product_id: o[ :product_id ] } }
-      .map { | k, _ | k
-        .merge!( products.select { | o |
-          o[ :id ] == k[ :product_id ] }[ 0 ].slice( :product_name, :products_type_id, :products_type_name ) )
-        .merge!( dishes.select { | o |
-          o[ :id ] == k[ :dish_id ] }[ 0 ].slice( :dish_name, :dishes_category_id, :dishes_category_name ) )
-    }
-
-    @institutions_dishes_products = JSON.parse( InstitutionsDishesProduct
-      .select( :id, :dish_id, :product_id, :enabled )
-      .where( institution_id: current_user[ :userable_id ] )
-      .to_json, symbolize_names: true )
-    #########
-
     menu_meals_dishes( )
     menu_products( )
   end
@@ -179,89 +127,74 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .order( :id, 'products.name' )
       .to_json, symbolize_names: true )
 
-    idp = JSON.parse( InstitutionsDishesProduct
-      .select( :dish_id, :product_id )
-      .where( institution_id: current_user[ :userable_id ],
-              enabled: true )
-      .order( :dish_id, :product_id )
-      .to_json, symbolize_names: true )
-
     dishes_products_norms = JSON.parse( DishesProductsNorm
-      .select( :children_category_id, :dish_id, :product_id, :amount )
-      .where( institution_id: current_user[ :userable_id ] )
-      .order( :children_category_id, :dish_id, :product_id )
+      .joins( :dishes_product )
+      .select( :children_category_id, :amount,
+               'dishes_products.dish_id', 'dishes_products.product_id' )
+      .where( 'dishes_products.institution_id = ?', current_user[ :userable_id ] )
+      .where( 'dishes_products.enabled = ?', true )
+      .order( 'dishes_products.dish_id',
+              'dishes_products.product_id',
+              :children_category_id )
       .to_json, symbolize_names: true )
 
     mcc_count = JSON.parse( MenuChildrenCategory
       .select( :children_category_id, :count_all_plan )
       .where( menu_requirement_id: @menu_requirement_id )
       .where.not( count_all_plan: 0 )
-      .to_json, symbolize_names: true )
+      .to_json( except: :id ), symbolize_names: true )
+      .map { | o | o.values }
+      .to_h
 
-    sql_add_values = ''
-    sql_del_values = ''
-    dddd = ''
+    add_values = [ ]
+    del_values = [ ]
+
     menu_meals_dishes.each do | mmd |
       dish_id = mmd[ :dish_id ]
       if mmd[ :is_enabled ] && mmd[ :count ].zero?
 
-        product_categories.each { | pc |
-          children_category_id = pc[ :children_category_id ]
-          product_id = pc[ :product_id ]
+        dishes_products_norms
+        .select{ | o | o[ :dish_id ] == dish_id }
+        .each { | dpn |
+          children_category_id = dpn[ :children_category_id ]
+          product_id = dpn[ :product_id ]
+          norm = dpn[ :amount ]
 
-          norm = dishes_products_norms.find { | o |
-            o[ :dish_id ] == dish_id &&
-            o[ :children_category_id ] == children_category_id &&
-            o[ :product_id ] == product_id
-          }.to_h.fetch( :amount, 0 )
-
-          count_children = mcc_count.find{ | o |
-            o[ :children_category_id ] == children_category_id
-          }.to_h.fetch( :count_all_plan, 0 )
+          count_children = mcc_count[ children_category_id ] || 0
 
           count_plan = norm.to_f * count_children.to_i
 
-          dddd +=  "norm = #{ norm } count_children = #{count_children} count_plan = #{count_plan} dish_id = #{ dish_id }  children_category_id = #{ children_category_id }  product_id = #{ product_id } \n"
-
-
-          sql_add_values += ",(#{ mmd[ :id ] }," +
-                            "#{ children_category_id }," +
-                            "#{ product_id },"+
-                            "#{ count_plan })"
+          add_values << [ ].tap { | value |
+            value << mmd[ :id ]
+            value << children_category_id
+            value << product_id
+            value << count_plan
+          }
         }
       end
 
-      sql_del_values += ",#{ mmd[ :id ] }" if mmd[ :is_enabled ] == false && mmd[ :count ].nonzero?
+      del_values << mmd[ :id ] if mmd[ :is_enabled ] == false && mmd[ :count ].nonzero?
     end
-          File.open( "test111", 'w' ) { | f | f.write( dddd ) }
-          File.open( "dishes_products_norms", 'w' ) { | f | f.write( dishes_products_norms.to_json ) }
-          File.open( "mcc_count", 'w' ) { | f | f.write( mcc_count.to_json ) }
 
-    # dishes_products_norms.each { | dpn |
-    #   menu_meals_dishes
-    #     .select{ | o | o[ :dish_id ] == dpn[ :dish_id ] }
-    #     .each { | mmd |
+    sql = ''
+    if add_values.any?
+      sql_add_values = add_values.map { | o | "( #{ o.join( ',' ) } )" }.join( ',' )
 
-    #     }
+      sql << <<-SQL.squish
+        INSERT INTO menu_products ( menu_meals_dish_id, children_category_id, product_id, count_plan )
+          VALUES #{ sql_add_values } ;
+        SQL
+    end
 
-    #   mmd_dish
-    #   if mmd[ :is_enabled ] && mmd[ :count ].zero?
-    #     menu_meals_dishes.find()
-    #     pcc.each { | o |
-    #       sql_add_values += ",(#{ mmd[ :id ] }," +
-    #                         "#{ o[ :children_category_id ] }," +
-    #                         "#{ o[ :product_id ] })"
-    #       }
-    #     }
+    if del_values.any?
+      sql_add_values = del_values.join( ',' )
 
-    #   sql_del_values += ",#{ mmd[ :id ] }" if mmd[ :is_enabled ] == false && mmd[ :count ].nonzero?
-    # end
+      sql << <<-SQL.squish
+          DELETE FROM menu_products WHERE menu_meals_dish_id IN (#{ sql_add_values }) ;
+        SQL
+    end
 
-    fieds = %w( menu_meals_dish_id children_category_id product_id count_plan ).join( ',' )
-
-    sql = ( sql_add_values.present? ? "INSERT INTO menu_products ( #{ fieds } ) VALUES #{ sql_add_values[1..-1] }" : '' ) +
-      ( sql_add_values.present? && sql_del_values.present? ? ';' : '' ) +
-      ( sql_del_values.present? ? "DELETE FROM menu_products WHERE menu_meals_dish_id IN (#{ sql_del_values[1..-1] })" : '' )
+    # File.open( "sql", 'w' ) { | f | f.write( sql.to_json ) }
 
     ActiveRecord::Base.connection.execute( sql )
 
@@ -285,7 +218,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .order( :name )
       .to_json, symbolize_names: true )
 
-    institutions_dishes_products = JSON.parse( InstitutionsDishesProduct
+    dishes_products = JSON.parse( DishesProduct
       .select( :dish_id )
       .where( institution_id: current_user[ :userable_id ] )
       .group( :id )
@@ -293,7 +226,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .order( :dish_id )
       .to_json, symbolize_names: true )
 
-    if meals_dishes.present? && children_categories.present? && institutions_dishes_products.present?
+    if meals_dishes.present? && children_categories.present? && dishes_products.present?
       ActiveRecord::Base.transaction do
         data = { institution_id: current_user[ :userable_id ],
                  branch_id: current_institution[ :branch_id ] }
@@ -309,20 +242,25 @@ class Institution::MenuRequirementsController < Institution::BaseController
           mmd_sql_values += ",(#{ id },#{ md[ :meal_id ] },#{ md[ :dish_id ] })" if
               ( md[ :meal_id ] != empty_meal_id && md[ :dish_id ] != empty_dish_id ||
               md[ :meal_id ] == empty_meal_id && md[ :dish_id ] == empty_dish_id )&&
-              institutions_dishes_products.find { | o | o[ :dish_id ] == md[ :dish_id ] }
+              dishes_products.find { | o | o[ :dish_id ] == md[ :dish_id ] }
         }
 
-        mmd_fieds = %w( menu_requirement_id meal_id dish_id ).join( ',' )
-        mmd_sql = "INSERT INTO menu_meals_dishes ( #{ mmd_fieds } ) VALUES #{ mmd_sql_values[1..-1] }"
+        mmd_sql = <<-SQL.squish
+            INSERT INTO menu_meals_dishes ( menu_requirement_id, meal_id, dish_id )
+              VALUES #{ mmd_sql_values[1..-1] }
+          SQL
 
         # Создание запроса для категорий
         cc_sql_values = ''
         children_categories.each{ | cc |
-          cc_sql_values += ",(#{ id },#{ cc[ :id ] })"
+          cc_sql_values << ",(#{ id },#{ cc[ :id ] })"
         }
 
         cc_fieds = %w( menu_requirement_id children_category_id ).join( ',' )
-        cc_sql = "INSERT INTO menu_children_categories ( #{ cc_fieds } ) VALUES #{ cc_sql_values[1..-1] }"
+        cc_sql = <<-SQL.squish
+            INSERT INTO menu_children_categories ( #{ cc_fieds } )
+            VALUES #{ cc_sql_values[1..-1] }
+          SQL
 
         ActiveRecord::Base.connection.execute( "#{ mmd_sql };#{ cc_sql }" )
 
@@ -330,7 +268,8 @@ class Institution::MenuRequirementsController < Institution::BaseController
         result = { status: true, href: href }
       end
     else
-      result = { status: false, message: 'Незаповенені довідники (children_categories,meals,dishes)!' }
+      result = { status: false,
+        message: 'Незаповенені довідники (children_categories,meals,dishes,institutions_dishes_products)!' }
     end
 
    render json: result
@@ -340,41 +279,6 @@ class Institution::MenuRequirementsController < Institution::BaseController
     data = params.permit( :count_all_plan, :count_exemption_plan, :count_all_fact, :count_exemption_fact ).to_h
     status = update_base_with_id( :menu_children_categories, params[ :id ], data )
     render json: { status: status }
-  end
-
-  def institutions_dishes_products_update # Обновление "Продукти в стравах підрозділу"
-    data = params.permit( { dishes_products: [ :id, :dish_id, :product_id ] }, :enabled ).to_h
-    enabled = data[ :enabled ]
-
-    if data.present?
-      sql = ''
-
-      ids = data[ :dishes_products ].select{ | o | o [ :id ].nonzero? }.map { | o | o[ :id ] }
-      sql << <<-SQL.squish if ids.any?
-          UPDATE institutions_dishes_products SET
-            enabled = #{ enabled }
-              FROM UNNEST( ARRAY #{ ids.to_s } ) as ids
-              WHERE id = ids;
-        SQL
-
-      fields = %w( institution_id dish_id product_id enabled ).join( ',' )
-      dishes_products = data[ :dishes_products ]
-        .select{ | o | o [ :id ].zero? }
-        .map{ | o | "( #{ ( [ current_user[ :userable_id ], enabled ].insert( 1, o.slice( :dish_id, :product_id ).values ) ).join( ',' ) } )" }
-        .join( ',' )
-
-      sql << <<-SQL.squish.prepend( ' ' ) if dishes_products.present?
-          INSERT INTO institutions_dishes_products ( #{ fields } )
-            VALUES #{ dishes_products }
-            ON CONFLICT ( institution_id, dish_id, product_id )
-              DO UPDATE SET enabled = EXCLUDED.enabled ;
-        SQL
-
-
-      ActiveRecord::Base.connection.execute( sql ) if sql.present?
-    end
-
-    render json: { status: true }
   end
 
   def product_update # Обновление количества по продуктам

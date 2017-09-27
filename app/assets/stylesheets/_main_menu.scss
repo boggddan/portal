@@ -197,6 +197,11 @@ nav#main_menu {
     content: '\e045';
   }
 
+  li[ data-page = 'institution_reference_books' ] > a:before {
+    content: '\e043';
+  }
+
+
   li[data-page=exit] > a:before {
     content: '\e163';
   }
@@ -206,6 +211,12 @@ nav#main_menu {
   li[data-page=institution_reports_attendance_of_children] {
     & > a::before {
       content: '\e045';
+    }
+  }
+
+  li[ data-page = 'dishes_product_norm' ] {
+    & > a::before {
+      content: '\e043';
     }
   }
 }

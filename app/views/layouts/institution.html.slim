@@ -33,6 +33,11 @@ html
               a *{ href: institution_reports_balances_in_warehouses_path } Залишки продуктів харчування
             li.item *{data: { page: :institution_reports_attendance_of_children } }
               a *{ href: institution_reports_attendance_of_children_path } Табель обліку відвідування дітей
+        li.item *{ data: { page: :institution_reference_books } }
+          a Довідники
+          ul
+            li.item *{ data: { page: :dishes_product_norm } }
+              a *{ href: institution_reference_books_dishes_products_norms_path } Технічна карта продуктів
         li.info
           span = current_user[ :username ]
           span = current_institution[ :name ]

@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class InstitutionsDishesProductTest < ActiveSupport::TestCase
+class DishesProductTest < ActiveSupport::TestCase
   # test "the truth" do
   #   assert true
   # end

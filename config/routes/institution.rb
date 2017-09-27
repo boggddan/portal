@@ -11,4 +11,5 @@ namespace :institution do
 
   draw :reports, :institution # Отчеты
 
+  draw :reference_books, :institution # Довідники
 end

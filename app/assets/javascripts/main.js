@@ -459,6 +459,7 @@ let objTimesheetDates = { };
 let objUsers = { };
 let objUserNew = { };
 let objLogIn = { };
+let objDishesProductsNorms = { };
 
 const userInfo = new UAParser( ).getResult( );
 
@@ -474,6 +475,7 @@ $( document ).on( 'turbolinks:load', ( ) => {
   const elemUsers = document.getElementById( 'users' );
   const elemUserNew = document.getElementById( 'user_new' );
   const elemLogIn = document.getElementById( 'log_in' );
+  const elemDishesProductsNorms = document.getElementById( 'dishes_products_norms' );
 
   const elemFormSplash = document.getElementById( 'form_splash' );
   if ( elemFormSplash ) objFormSplash = new FormSplash( elemFormSplash );
@@ -483,4 +485,5 @@ $( document ).on( 'turbolinks:load', ( ) => {
   else if ( elemUsers ) objUsers = new Users( elemUsers );
   else if ( elemUserNew ) objUserNew = new UserNew( elemUserNew );
   else if ( elemLogIn ) objLogIn = new LogIn( elemLogIn );
+  else if ( elemDishesProductsNorms ) objDishesProductsNorms = new DishesProductsNorms( elemDishesProductsNorms );
 } );
