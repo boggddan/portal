@@ -22,7 +22,7 @@ $( document ).on 'turbolinks:load', ->
             'post'
               date_start: $dateStart.val( )
               date_end: $dateEnd.val( )
-              children_group: $childrenGroupCode.val( )
+              children_group_code: $childrenGroupCode.val( )
               is_pdf: $( @ ).hasClass( 'btn_print' )
             'json'
             false

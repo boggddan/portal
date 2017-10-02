@@ -1,13 +1,28 @@
 @ECHO OFF
+REM Restore a PostgreSQL database from an archive file created by pg_dump
 
-SET PathUtil="C:\Program Files (x86)\pgAdmin 4\v1\runtime\"
-SET Datebase=portal
-SET Server=localhost
-SET Port=5432
-SET User=postgres
-SET FileLog=D:\portal_restore.log
-SET FileBackup=D:\portal_edu_20170817_092749.sql
+REM Read settings in variables
+call pg_read_settings.bat
 
-%PathUtil%psql -b -h %Server% -p %Port% -U %User% -d %Datebase% -f %FileBackup% -o %FileLog%
+REM File name is [database]_[current date]_[current time]
+SET cTime=%TIME: =0%
+SET RestoreFile="%BackupPath%\portal_edu_20171002_155600"
 
-EXIT
+FOR %%# IN ( "%RestoreFile%" ) DO SET LogFile="%BackupPath%%%~n#--%Database%.log"
+
+TITLE Restore file [ %RestoreFile% ] to database [ %Database% ]
+
+ECHO Please, wait...
+ECHO[
+
+%PgRestore% --clean --if-exists --format=custom --host=%Server% --port=%Port% --username=%User% --dbname=%Database% %RestoreFile% > %LogFile%
+
+REM Display result from log-file
+TYPE %LogFile%
+
+ECHO[
+ECHO ***
+ECHO Restore file [ %RestoreFile% ] to database [ %Database% ] complete!
+ECHO Read log-file [ %LogFile% ]
+ECHO ON
+PAUSE

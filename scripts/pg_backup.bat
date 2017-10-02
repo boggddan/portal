@@ -1,14 +1,19 @@
 @ECHO OFF
+REM Extract a PostgreSQL database into a script file or other archive file
+
+REM Read settings in variables
+call pg_read_settings.bat
+
+REM File name is [database]_[current date]_[current time]
 SET cTime=%TIME: =0%
+SET BackupFile="%BackupPath%%Database%_%DATE:~-4%%DATE:~3,2%%DATE:~0,2%_%cTIME:~0,2%%TIME:~3,2%%TIME:~6,2%"
 
-SET PathUtil="C:\Program Files (x86)\pgAdmin 4\v1\runtime\"
-SET Datebase=portal_edu
-SET Server=localhost
-SET Port=5432
-SET User=postgres
-SET FileBackup=C:\Arhiv_portal\%Datebase%_%DATE:~-4%%DATE:~3,2%%DATE:~0,2%_%cTIME:~0,2%%TIME:~3,2%%TIME:~6,2%.sql
-SET PGPASSWORD=6k3vddrb2v
+TITLE Create a archive file [%Database%]
 
-%PathUtil%pg_dump -v -c -h %Server% -p %Port% -U %User% -d %Datebase% -f %FileBackup%
+%PgDump% --file=%BackupFile% --format=custom --clean --verbose --host=%Server% --port=%Port% --username=%User% --dbname=%Database%
 
-EXIT
+ECHO[
+ECHO ***
+ECHO Backup File [%BackupFile%] create!
+ECHO ON
+PAUSE
