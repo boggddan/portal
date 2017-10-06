@@ -2,14 +2,26 @@
 REM Create a new PostgreSQL database
 
 REM Read settings in variables
-call pg_read_settings.bat
+CALL "%~dp0\pg_read_settings.bat"
 
-TITLE Create a new database [%Database%]
+TITLE Create a new database [%PGDATABASE%][ %PGDATABASE% ] on server [ %PGHOST%:%PGPORT% ]
 
-%CreateDB% --echo --host=%Server% --port=%Port% --username=%User% --locale=%Locale% --encoding=%Encoding% %Database%
+SET /P PGDATABASE="Put in database name [ %PGDATABASE% ]: "
+
+TITLE Remove database [ %PGDATABASE% ] on server [ %PGHOST%:%PGPORT% ]
 
 ECHO[
 ECHO ***
-ECHO Database [ %Database% ] create!
+ECHO Database [ %PGDATABASE% ] on server [ %PGHOST%:%PGPORT% ]
+
+SET /P ComfirmExec=Are you sure (Y/[N])?
+IF /I [%ComfirmExec%] NEQ [Y] GOTO :EOF
+
+createdb --echo --locale=%Locale% --encoding=%Encoding%
+
+ECHO[
+ECHO ***
+ECHO Database [ %PGDATABASE% ] on server [ %PGHOST%:%PGPORT% ] create!
+ECHO[
 ECHO ON
 PAUSE

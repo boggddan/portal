@@ -11,7 +11,5 @@
     "stylelint-order": "^0.6.0",
     "stylelint-suitcss": "^1.0.0"
   },
-  "dependencies": {
-    "ua-parser-js": "^0.7.14"
-  }
+  "dependencies": {}
 }

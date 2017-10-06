@@ -1,5 +1,10 @@
 @ECHO OFF
 
+COLOR F0
+
+REM Script folder to current folder
+CD "%~dp0"
+
 REM В переменную записывем с файла "env" активный режим
 SET /P Env=< env
 
@@ -10,9 +15,9 @@ REM Текущее имя папки
 FOR %%* in (.) DO SET CurrDirName=%%~nx*
 
 REM Заголовок для консоли
-TITLE [%CurrDirName%] -%Env%- [%Port%]
+TITLE [ %CurrDirName% ] -%Env%- [ %PGPORT% ]
 
 REM Запуск сервера
 foreman start --env .env.%Env% --procfile Procfile.%Env%
 
-@ECHO ON
+ECHO ON

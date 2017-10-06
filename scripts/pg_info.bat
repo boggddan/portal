@@ -2,12 +2,22 @@
 REM PostgreSQL server status
 
 REM Read settings in variables
-call pg_read_settings.bat
+CALL "%~dp0\pg_read_settings.bat"
 
-TITLE Server status [%Server%:%Port%]
+ECHO "%~dp0..\pg_read_settings.bat"
 
-%PgCtl% status --pgdata %DataPath%
+TITLE Service [ %PgServiceName% ] server [ %PGHOST%:%PGPORT% ] status
 
+pg_ctl status
+ECHO[
+ECHO ***
+
+sc query %PgServiceName%
+
+ECHO[
+ECHO ***
+ECHO Service [ %PgServiceName% ] server [ %PGHOST%:%PGPORT% ] info
+ECHO[
 ECHO ON
 PAUSE
 

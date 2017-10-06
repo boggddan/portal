@@ -1,19 +1,24 @@
 @ECHO OFF
-REM Extract a PostgreSQL database into a script file or other archive file
+REM Extract a PostgreSQL database into archive file
 
 REM Read settings in variables
-call pg_read_settings.bat
+CALL "%~dp0\pg_read_settings.bat"
 
-REM File name is [database]_[current date]_[current time]
-SET cTime=%TIME: =0%
-SET BackupFile="%BackupPath%%Database%_%DATE:~-4%%DATE:~3,2%%DATE:~0,2%_%cTIME:~0,2%%TIME:~3,2%%TIME:~6,2%"
+REM File name [database]_[current date]_[current time].dump
+SET BackupFile="%BackupPath%%PGDATABASE%_%CurrentDatetime%.dump"
 
-TITLE Create a archive file [%Database%]
-
-%PgDump% --file=%BackupFile% --format=custom --clean --verbose --host=%Server% --port=%Port% --username=%User% --dbname=%Database%
+TITLE Create a archive file [ %BackupFile% ] from database [ %PGDATABASE% ] on server [ %PGHOST%:%PGPORT% ]
+echo %PGDATABASE%
+pg_dump --file=%BackupFile% --format=custom --verbose
 
 ECHO[
 ECHO ***
-ECHO Backup File [%BackupFile%] create!
-ECHO ON
-PAUSE
+ECHO Backup-file [ %BackupFile% ] from database [ %PGDATABASE% ] on server [ %PGHOST%:%PGPORT% ] complete!
+ECHO[
+
+REM Наличие параметров для запуска с других батиков, что бы
+REM не останавливало программу
+IF [%1] EQU [] (
+  ECHO ON
+  PAUSE
+)

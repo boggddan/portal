@@ -345,11 +345,13 @@ class Institution::MenuRequirementsController < Institution::BaseController
 
       menu_products = JSON.parse( MenuMealsDish
         .joins( menu_products: [ :children_category, :product ] )
-        .select( 'menu_products.count_plan',
-                'products.code AS product_code',
-                'children_categories.code AS category_code' )
+        .select( 'SUM( menu_products.count_plan ) AS count_plan',
+                 'products.code AS product_code',
+                 'children_categories.code AS category_code' )
         .where( menu_requirement_id: menu_requirement_id )
         .where( 'menu_products.count_plan != ? ', 0 )
+        .group( 'products.code',
+                'children_categories.code' )
         .to_json, symbolize_names: true )
 
       if menu_children_categories.present? && menu_products.present?
@@ -372,6 +374,12 @@ class Institution::MenuRequirementsController < Institution::BaseController
         savon_return = get_savon( :create_menu_requirement_plan, message )
         response = savon_return[ :response ]
         web_service = savon_return[ :web_service ]
+
+        ###
+        File.open( 'menu_requirement_plan.txt', 'a' ) { | f |
+          f.write( "\n #{ web_service.merge!( response: response ).to_json }" )
+        }
+        ###
 
         if response[ :interface_state ] == 'OK'
           ActiveRecord::Base.transaction do
@@ -424,11 +432,13 @@ class Institution::MenuRequirementsController < Institution::BaseController
 
     menu_products = JSON.parse( MenuMealsDish
       .joins( menu_products: [ :children_category, :product ] )
-      .select( 'menu_products.count_fact',
-               'products.code AS product_code',**
+      .select( 'SUM( menu_products.count_fact ) as count_fact',
+               'products.code AS product_code',
                'children_categories.code AS category_code' )
       .where( menu_requirement_id: menu_requirement_id )
       .where( 'menu_products.count_fact != ? ', 0 )
+      .group( 'products.code',
+              'children_categories.code' )
       .to_json, symbolize_names: true )
 
     if menu_children_categories && menu_products
@@ -452,6 +462,12 @@ class Institution::MenuRequirementsController < Institution::BaseController
       savon_return = get_savon( :create_menu_requirement_fact, message )
       response = savon_return[ :response ]
       web_service = savon_return[ :web_service ]
+
+      ###
+      File.open( 'menu_requirement_fact.txt', 'a' ) { | f |
+        f.write( "\n #{ web_service.merge!( response: response ).to_json }" )
+      }
+      ###
 
       if response[ :interface_state ] == 'OK'
         ActiveRecord::Base.transaction do

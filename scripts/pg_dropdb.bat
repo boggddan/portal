@@ -2,14 +2,23 @@
 REM Remove a PostgreSQL database
 
 REM Read settings in variables
-call pg_read_settings.bat
+CALL "%~dp0\pg_read_settings.bat"
 
-TITLE Remove database [%Database%]
+TITLE Remove database [ %PGDATABASE% ] on server [ %PGHOST%:%PGPORT% ]
 
-%DropDB%  --echo --if-exists --interactive --host=%Server% --port=%Port% --username=%User% %Database%
+SET /P PGDATABASE="Put in database name [ %PGDATABASE% ]: "
+
+TITLE Remove database [ %PGDATABASE% ] on server [ %PGHOST%:%PGPORT% ]
 
 ECHO[
 ECHO ***
-ECHO Database [ %Database% ] remove!
+ECHO Database [ %PGDATABASE% ] on server [ %PGHOST%:%PGPORT% ]
+
+dropdb --echo --if-exists --interactive %PGDATABASE%
+
+ECHO[
+ECHO ***
+ECHO Database [ %PGDATABASE% ] on server [ %PGHOST%:%PGPORT% ] remove!
+ECHO[
 ECHO ON
 PAUSE

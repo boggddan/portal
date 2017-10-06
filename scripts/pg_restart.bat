@@ -2,11 +2,17 @@
 REM PostgreSQL server restart
 
 REM Read settings in variables
-call pg_read_settings.bat
+CALL "%~dp0\pg_read_settings.bat"
 
-TITLE Server restart [%Server%:%Port%]
+TITLE Service [ %PgServiceName% ] server [ %PGHOST%:%PGPORT% ] restart
 
-%PgCtl% -w restart --pgdata %PathData%
+REM pg_ctl -w restart
 
+NET STOP %PgServiceName% & NET START %PgServiceName%
+
+ECHO[
+ECHO ***
+ECHO Service [ %PgServiceName% ] server [ %PGHOST%:%PGPORT% ] restart
+ECHO[
 ECHO ON
 PAUSE
