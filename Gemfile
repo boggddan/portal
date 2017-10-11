@@ -49,5 +49,6 @@ gem 'slim'
 gem 'pg'
 gem 'savon'
 
-gem 'pry-rails'
-gem 'awesome_print'
+# it is not work in ruby 2.4. Wait maintain
+#gem 'pry-rails'
+#gem 'awesome_print'

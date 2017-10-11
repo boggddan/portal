@@ -317,11 +317,11 @@ class Institution::InstitutionOrdersController < Institution::BaseController
 
     io_correction_products = JSON.parse( IoCorrectionProduct
       .joins( :product )
-      .select( 'products.code AS code', :date, :amount, :amount_order )
+      .select( 'products.code AS code', :date,
+               'amount - amount_order AS diff_amount' )
       .where( io_correction_id: io_correction_id )
-      .where.not( amount: 0 )
-      .to_json( methods: :diff_amount ), symbolize_names: true )
-      .delete_if { | o | o[ :diff_amount ] == '0.0' }
+      .where( 'amount - amount_order != ?', 0 )
+      .to_json, symbolize_names: true )
 
     result = { }
     if io_correction_products.present?
@@ -344,7 +344,8 @@ class Institution::InstitutionOrdersController < Institution::BaseController
           update_base_with_id( :io_corrections, params[ :id ], data )
 
           IoCorrectionProduct
-            .where( io_correction_id: io_correction_id, amount: 0 )
+            .where( io_correction_id: io_correction_id )
+            .where( 'amount - amount_order = ?', 0 )
             .delete_all
 
           result = { status: true }

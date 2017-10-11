@@ -1,9 +1,7 @@
 # Первичная настройка пользователя
 
-
-Branch.create( code: '00000000006', name: 'ТВО Вознесенівського району' ) unless User.find_by( code: 14 )
-User.create( code: 14, name: '18 (ДОУ)', branch: Branch.find_by( code: '00000000006' ) ) unless User.find_by( code: 14 )
-
+Branch.create( code: '00000000006', name: 'ТВО Вознесенівського району' ) unless Branch.find_by( code: '00000000006' )
+Institution.create( code: 14, name: '18 (ДОУ)', branch: Branch.find_by( code: '00000000006' ) ) unless Institution.find_by( code: 14 )
 # Создание для табеля Явки
 ReasonsAbsence.create_with( mark: '', name: 'Явка', priority: 0 ).find_or_create_by( code: '' )
 
