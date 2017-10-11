@@ -1,8 +1,8 @@
 @ECHO OFF
-REM Extract a PostgreSQL database into archive file
+REM Autostart project - Script for task schedule
 
 REM Clear rails waste file
-CALL "proj_clear.bat" 1
+CALL "%~dp0proj_clear.bat" 1
 
-REM Папка запуска скрипта, переходим выше и чистим лог-файлы
+REM Project run
 CALL "%~dp0..\start.bat"

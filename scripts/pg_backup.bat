@@ -7,18 +7,21 @@ CALL "%~dp0\pg_read_settings.bat"
 REM File name [database]_[current date]_[current time].dump
 SET BackupFile="%BackupPath%%PGDATABASE%_%CurrentDatetime%.dump"
 
-TITLE Create a archive file [ %BackupFile% ] from database [ %PGDATABASE% ] on server [ %PGHOST%:%PGPORT% ]
-echo %PGDATABASE%
+SET Title=Create a archive file [ %BackupFile% ] from database [ %PGDATABASE% ] on server [ %PGHOST%:%PGPORT% ]
+TITLE %Title%
+
+ECHO.
+ECHO %Title%
+ECHO.
+
 pg_dump --file=%BackupFile% --format=custom --verbose
 
-ECHO[
+ECHO.
 ECHO ***
 ECHO Backup-file [ %BackupFile% ] from database [ %PGDATABASE% ] on server [ %PGHOST%:%PGPORT% ] complete!
-ECHO[
+ECHO.
 
-REM Наличие параметров для запуска с других батиков, что бы
-REM не останавливало программу
-IF [%1] EQU [] (
-  ECHO ON
-  PAUSE
-)
+REM Pause when manual start
+IF [%1] EQU [] PAUSE
+
+ECHO ON

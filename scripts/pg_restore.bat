@@ -4,69 +4,70 @@ REM Restore a PostgreSQL database from an archive file created by pg_dump
 REM Read settings in variables
 CALL "%~dp0\pg_read_settings.bat"
 
-TITLE Restore backup-file to database [ %PGDATABASE% ] on server [ %PGHOST%:%PGPORT% ]
+SET Title=Restore backup-file to database [ %PGDATABASE% ] on server [ %PGHOST%:%PGPORT% ]
+TITLE %Title%
+
+ECHO.
+ECHO %Title%
+ECHO.
 
 REM File name is [database]_[current date]_[current time]
-SET BackupFile=%BackupPath%%PGDATABASE%
-REM SET /P BackupFile="Put in path to backup-file [%BackupFile%]: "
+SET BackupFile=%BackupPath%%PGDATABASE%.dump
+SET /P BackupFile="Put in path to backup-file [ %BackupFile% ]: "
 
-REM IF NOT EXIST %BackupFile% (
-REM   ECHO ***
-REM   ECHO Error: Backup-file [%BackupFile%] is not found!
-REM   GOTO :exit
-REM )
+IF NOT EXIST %BackupFile% (
+  ECHO ***
+  ECHO Error: Backup-file [%BackupFile%] is not found!
+  GOTO :exit
+)
 
-TITLE Restore file [ %BackupFile% ] to database [ %PGDATABASE% ] on server [ %PGHOST%:%PGPORT% ]
+SET Title=Restore file [ %BackupFile% ] to database [ %PGDATABASE% ] on server [ %PGHOST%:%PGPORT% ]
 
-ECHO ***
-ECHO Server: [ %PGHOST%:%PGPORT% ]
-ECHO Database: [%PGDATABASE%]
-ECHO Backup-file: [%BackupFile%]
-ECHO[
+TITLE %Title%
 
-REM SET /P ComfirmExec=Are you sure (Y/[N])?
-REM IF /I [%ComfirmExec%] NEQ [Y] GOTO :EOF
+ECHO.
+ECHO %Title%
+ECHO.
+
+SET /P ComfirmExec=Are you sure (Y/[N])?
+IF /I [%ComfirmExec%] NEQ [Y] GOTO :EOF
 
 FOR %%* IN ( "%BackupFile%" ) DO SET LogFile="%BackupPath%%%~n*--%PGDATABASE%.log"
 
 ECHO Please, wait...
-ECHO[
+ECHO.
 
-REM ECHO ***
-REM ECHO Kill all connections
-REM SET KillConnections="SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE datname = '%PGDATABASE%' AND pid <> pg_backend_pid();"
-REM psql --echo-all --command=%KillConnections% --host=%PGHOST% --port=%PGPORT% --username=%PGUSER% --dbname=%PGDATABASE%
-REM ECHO[
+ECHO ***
+ECHO Kill all connections
+SET KillConnections="SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE datname = '%PGDATABASE%' AND pid <> pg_backend_pid();"
+psql --echo-all --command=%KillConnections%
+ECHO.
 
-REM ECHO ***
-REM ECHO Remove database
-REM dropdb  --echo --if-exists --host=%PGHOST% --port=%PGPORT% --username=%PGUSER% %PGDATABASE%
-REM ECHO[
+ECHO ***
+ECHO Remove database
+dropdb  --echo --if-exists %PGDATABASE%
+ECHO.
 
-REM ECHO ***
-REM ECHO Create database
-REM createdb --echo --host=%PGHOST% --port=%PGPORT% --username=%PGUSER% --locale=%Locale% --encoding=%Encoding% %PGDATABASE%
-REM ECHO[
+ECHO ***
+ECHO Create database
+createdb --echo --locale=%Locale% --encoding=%Encoding% %PGDATABASE%
+ECHO.
 
-REM REM "--clean --if-exists"is generate error!!!
-
-ECHO %BackupFile%
+REM "--clean --if-exists"is generate error!!!
 
 ECHO ***
 ECHO Restore database
-REM pg_restore --format=custom --dbname=%PGDATABASE% "%BackupFile%"
-REM  %LogFile% 2>&1
-
+pg_restore.exe --format=custom --exit-on-error --verbose --dbname=%PGDATABASE% "%BackupFile%" > %LogFile% 2>&1
 
 REM Display result from log-file
 TYPE %LogFile%
 
-ECHO[
+ECHO.
 ECHO ***
 ECHO Restore file [ %BackupFile% ] to database [ %PGDATABASE% ] on server [ %PGHOST%:%PGPORT% ] complete!
 ECHO Read log-file [ %LogFile% ]
-ECHO[
+ECHO.
 
-REM :exit
+:exit
 ECHO ON
 PAUSE
