@@ -436,7 +436,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
                'products.code AS product_code',
                'children_categories.code AS category_code' )
       .where( menu_requirement_id: menu_requirement_id )
-      .where( 'menu_products.count_fact != ? ', 0 )
+      .where( '( menu_products.count_fact != ? OR menu_products.count_plan != ? )', 0, 0 )
       .group( 'products.code',
               'children_categories.code' )
       .to_json, symbolize_names: true )
