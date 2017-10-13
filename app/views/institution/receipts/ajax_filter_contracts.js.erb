@@ -1,6 +1,7 @@
 // фильтрация таблицы заявок
 ( function ajax( ) {
   const clmn = document.getElementById( 'col_r' );
+  const contractNumber = clmn.querySelector( '#contract_number' );
 
   let [ id, number, contractVal, disabled ]  = [ '', '', '', true ];
 
@@ -8,7 +9,6 @@
     [ id, number ] = [ '<%= @supplier_order.id %>', '<%= @supplier_order.number %>' ];
 
     <% if @contracts.present? %>
-      const contractNumber = clmn.querySelector( '#contract_number' );
       contractNumber.innerHTML += `<%= options_from_collection_for_select( @contracts, :contract_number, :contract_number ) %>`;
 
       ( { [ contractNumber.id ]: contractVal } = MyLib.getSession( document.querySelector( 'main' ).id ) );

@@ -127,16 +127,32 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .order( :id, 'products.name' )
       .to_json, symbolize_names: true )
 
-    dishes_products_norms = JSON.parse( DishesProductsNorm
-      .joins( :dishes_product )
-      .select( :children_category_id, :amount,
-               'dishes_products.dish_id', 'dishes_products.product_id' )
-      .where( 'dishes_products.institution_id = ?', current_user[ :userable_id ] )
-      .where( 'dishes_products.enabled = ?', true )
-      .order( 'dishes_products.dish_id',
-              'dishes_products.product_id',
-              :children_category_id )
-      .to_json, symbolize_names: true )
+    if false
+      dishes_products_norms = JSON.parse( DishesProductsNorm
+        .joins( :dishes_product )
+        .select( :children_category_id, :amount,
+                'dishes_products.dish_id', 'dishes_products.product_id' )
+        .where( 'dishes_products.institution_id = ?', current_user[ :userable_id ] )
+        .where( 'dishes_products.enabled = ?', true )
+        .order( 'dishes_products.dish_id',
+                'dishes_products.product_id',
+                :children_category_id )
+        .to_json, symbolize_names: true )
+    else
+      dishes_products_norms = JSON.parse( MenuMealsDish
+        .select( :dish_id,
+                  'menu_children_categories.children_category_id AS children_category_id',
+                  'products.id AS product_id',
+                  '0 AS amount' )
+        .joins( 'LEFT JOIN products ON true' )
+        .joins( 'LEFT JOIN menu_children_categories ON menu_children_categories.menu_requirement_id = menu_meals_dishes.menu_requirement_id' )
+        .where( menu_requirement_id: @menu_requirement_id,
+                is_enabled: true )
+        .order( :dish_id,
+                'products.id',
+                'menu_children_categories.children_category_id' )
+        .to_json, symbolize_names: true )
+    end
 
     mcc_count = JSON.parse( MenuChildrenCategory
       .select( :children_category_id, :count_all_plan )

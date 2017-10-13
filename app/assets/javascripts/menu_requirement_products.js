@@ -395,7 +395,7 @@ class MenuRequirementProducts {
               .textContent = MyLib.numToStr( countCategoryPF, -1 );
 
             const diff = countCategory.fact - countCategory.plan;
-            if ( pf === 'fact' && diff ) {
+            if ( pf === 'fact' ) {
               trElem.querySelector( `${ selectorCategory }[data-count-type=diff]` )
                 .textContent = MyLib.numToStr( MyLib.toRound( diff, 3 ), -1 );
             }
@@ -412,7 +412,7 @@ class MenuRequirementProducts {
             .textContent = MyLib.numToStr( sumProduct, -1 );
 
           const diff = countProduct.fact - countProduct.plan;
-          if ( pf === 'fact' && diff ) {
+          if ( pf === 'fact' ) {
             trElem.querySelector( `td.cell_diff[data-count-pf=${ pf }]` )
               .textContent = MyLib.numToStr( MyLib.toRound( diff, 3 ), -1 );
           }

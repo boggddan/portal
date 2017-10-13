@@ -320,7 +320,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
       .select( 'products.code AS code', :date,
                'amount - amount_order AS diff_amount' )
       .where( io_correction_id: io_correction_id )
-      .where( 'amount - amount_order != ?', 0 )
+      .where( 'amount != ? OR amount_order != ? ', 0, 0 )
       .to_json, symbolize_names: true )
 
     result = { }
@@ -344,8 +344,9 @@ class Institution::InstitutionOrdersController < Institution::BaseController
           update_base_with_id( :io_corrections, params[ :id ], data )
 
           IoCorrectionProduct
-            .where( io_correction_id: io_correction_id )
-            .where( 'amount - amount_order = ?', 0 )
+            .where( io_correction_id: io_correction_id,
+                    amount: 0,
+                    amount_order: 0 )
             .delete_all
 
           result = { status: true }
