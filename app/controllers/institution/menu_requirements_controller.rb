@@ -286,7 +286,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .order( :dish_id )
       .to_json, symbolize_names: true )
 
-    if meals_dishes.present? && children_categories.present
+    if meals_dishes.present? && children_categories.present?
     # if meals_dishes.present? && children_categories.present? && dishes_products.present?
       ActiveRecord::Base.transaction do
         data = { institution_id: current_user[ :userable_id ],
