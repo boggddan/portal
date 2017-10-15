@@ -286,44 +286,69 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .order( :dish_id )
       .to_json, symbolize_names: true )
 
-    if meals_dishes.present? && children_categories.present?
-    # if meals_dishes.present? && children_categories.present? && dishes_products.present?
+    if meals_dishes.present? && children_categories.present? && ( dishes_products.present? || true )
       ActiveRecord::Base.transaction do
         data = { institution_id: current_user[ :userable_id ],
                  branch_id: current_institution[ :branch_id ] }
         id = insert_base_single( 'menu_requirements', data )
 
         # Создание запроса для блюд
-        mmd_sql_values = ''
+        mmd_values = [ ]
 
         empty_meal_id = Meal.find_by( code: '' ).id
         empty_dish_id = Dish.find_by( code: '' ).id
 
-        meals_dishes.each{ | md |
-          mmd_sql_values += ",(#{ id },#{ md[ :meal_id ] },#{ md[ :dish_id ] })" if
-              ( md[ :meal_id ] != empty_meal_id && md[ :dish_id ] != empty_dish_id ||
-              md[ :meal_id ] == empty_meal_id && md[ :dish_id ] == empty_dish_id )&&
-              dishes_products.find { | o | o[ :dish_id ] == md[ :dish_id ] }
-        }
+        meals_dishes
+          .select{ | md |
+            ( md[ :meal_id ] != empty_meal_id &&
+              md[ :dish_id ] != empty_dish_id ||
+              md[ :meal_id ] == empty_meal_id &&
+              md[ :dish_id ] == empty_dish_id
+            ) &&
+            dishes_products.find { | o |
+              o[ :dish_id ] == md[ :dish_id ] ||
+              true
+            }
+          }
+          .each{ | o |
+            mmd_values << [ ].tap { | value |
+                value << id
+                value << o[ :meal_id ]
+                value << o[ :dish_id ]
+            }
+          }
 
-        mmd_sql = <<-SQL.squish
-            INSERT INTO menu_meals_dishes ( menu_requirement_id, meal_id, dish_id )
-              VALUES #{ mmd_sql_values[1..-1] }
-          SQL
+        mmd_sql = ''
+        if mmd_values.any?
+          mmd_sql_values = mmd_values.map { | o | "( #{ o.join( ',' ) } )" }.join( ',' )
+
+          mmd_sql << <<-SQL.squish
+              INSERT INTO menu_meals_dishes ( menu_requirement_id, meal_id, dish_id )
+                VALUES #{ mmd_sql_values } ;
+            SQL
+        end
 
         # Создание запроса для категорий
-        cc_sql_values = ''
-        children_categories.each{ | cc |
-          cc_sql_values << ",(#{ id },#{ cc[ :id ] })"
+        cc_values = [ ]
+
+        children_categories.each { | o |
+          cc_values << [ ].tap { | value |
+            value << id
+            value << o[ :id ]
+          }
         }
 
-        cc_fieds = %w( menu_requirement_id children_category_id ).join( ',' )
-        cc_sql = <<-SQL.squish
-            INSERT INTO menu_children_categories ( #{ cc_fieds } )
-            VALUES #{ cc_sql_values[1..-1] }
-          SQL
+        cc_sql = ''
+        if cc_values.any?
+          cc_sql_values = cc_values.map { | o | "( #{ o.join( ',' ) } )" }.join( ',' )
 
-        ActiveRecord::Base.connection.execute( "#{ mmd_sql };#{ cc_sql }" )
+          cc_sql << <<-SQL.squish
+              INSERT INTO menu_children_categories ( menu_requirement_id, children_category_id )
+                VALUES #{ cc_sql_values } ;
+            SQL
+        end
+
+        ActiveRecord::Base.connection.execute( "#{ mmd_sql }#{ cc_sql }" )
 
         href = institution_menu_requirements_products_path( { id: id } )
         result = { status: true, href: href }
