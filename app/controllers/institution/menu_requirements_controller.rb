@@ -116,7 +116,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .find( id )
       .to_json, symbolize_names: true )
 
-    menu_products_price = JSON.parse( MenuProductsPrice.
+    menu_products_price = JSON.parse( MenuProductsPrice
       .joins( :product )
       .select( :id, :price, :balance, 'products.code AS product_code' )
       .where( menu_requirement_id: id )
