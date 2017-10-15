@@ -1,148 +1,6 @@
 /* exported MenuRequirementProducts */
 
 class MenuRequirementProducts {
-  // нажатие на кнопочку создать
-  createProducts( ) {
-    const data =  { id: this.dataId };
-    const caption = `Формування страв та прийомів їжі id = [${ this.dataId }]`;
-    const { colMd: { dataset: { pathCreate: url } } } = this;
-    MyLib.ajax( caption, url, 'post', data, 'script', false, true );
-  }
-
-  mdUpdate( mdId, value ) { // обновление маркера
-    const data = { id: mdId, is_enabled: value };
-    const caption = `Онов. позн. страви та прийоми їжі id = [${ this.dataId }]`;
-    const { colMd: { dataset: { pathUpdate: url } } } = this;
-    MyLib.ajax( caption, url, 'post', data, 'json', false, false );
-  }
-
-  // шапка формы
-  headerText( ) {
-    const { value: number } = this.parentElem.querySelector( '#number' );
-    const { value: date } = this.parentElem.querySelector( '#date' );
-    this.parentElem.querySelector( 'h1' ).textContent =
-      `Меню-вимога №  ${ number } від ${ date }`;
-  }
-
-  // нажатие на кнопочку выход
-  clickExit( ) {
-    MyLib.assignLocation( this.parentElem.dataset.pathExit );
-  }
-
-  clickSend( event ) {
-    const pf = `pathSend${ MyLib.capitalize( event.currentTarget.dataset.pf ) }`;
-    const caption = `Відправка данних в ІС [id: ${ this.dataId }]`;
-    const data = { id: this.dataId };
-    const successAjax = ( ) => window.location.reload( );
-    const { parentElem: { dataset: { [ pf ]: url } } } = this;
-    MyLib.ajax( caption, url, 'post', data, 'json', successAjax, true );
-  }
-
-  clickBtnPrint( ) {
-    const caption = `Відправка данних в ІС [id: ${ this.dataId }]`;
-    const data = { id: this.dataId };
-    const { parentElem: { dataset: { pathPrint: url } } } = this;
-    MyLib.ajax( caption, url, 'post', data, 'json', null, true );
-  }
-
-  clickMdCell( target ) {
-    const elem = target;
-    const dataId = +elem.dataset.id;
-    const countPlan = +elem.dataset.countPlan;
-    const isCheck = elem.classList.contains( 'check' );
-
-    if ( ( !this.disabledPlan || !isCheck || !countPlan ) && !this.disabledFact && dataId ) {
-      elem.classList.toggle( 'check' );
-      this.mdUpdate( dataId, !isCheck );
-      this.checkMdExists( );
-    }
-  }
-
-  checkMdExists( ) {
-    this.colMdCreate.disabled = this.disabledFact || !this.colMd.querySelector( 'td.check' );
-  }
-
-  contextmenuMdCell( event ) {
-    event.preventDefault( );
-    const { target: elem } = event;
-    if ( !this.disabled ) this.mdUpdate( elem.dataset.id, false );
-  }
-
-  mouseoverMdCell( target ) {
-    const elem = target;
-    const className = 'hover';
-    if ( !elem.classList.contains( className ) ) {
-      this.colMd.querySelectorAll( `.${ className }` ).forEach( hover => {
-        const elemHover = hover;
-        elemHover.classList.remove( className );
-      } );
-
-      this.colMd.querySelectorAll( `thead tr:nth-child(2) :nth-child(${ elem.cellIndex }), ` +
-          `tbody tr :nth-child(${ elem.cellIndex + 1 })` )
-        .forEach( hover => {
-          const elemHover = hover;
-          elemHover.classList.add( className );
-        } );
-    }
-  }
-
-  static clickRow( elem ) {
-    const className = 'selected';
-
-    Array.from( elem.parentElement.children ).forEach( child => {
-      const { classList } = child;
-      if ( child === elem ) classList.add( className ); else classList.remove( 'selected' );
-    } );
-  }
-
-  clickHeader( target ) {
-    const elem = target;
-    const { parentElement } = elem;
-    elem.classList.toggle( 'hide' );
-    const className = parentElement.id === this.parentElem.id ? '.panel_main' : '.panel';
-
-    parentElement.querySelectorAll( className ).forEach( child => child.classList.toggle( 'hide' ) );
-  }
-
-  clickBtnMeals( target ) {
-    const elem = target;
-    const { dataset: { mealId } } = elem;
-
-    elem.parentElement.querySelectorAll( 'button[data-meal-id]' ).forEach( child => {
-      const elemChild = child;
-      elemChild.disabled = elem === elemChild;
-    } );
-
-    if ( mealId === '-1' ) {
-      this.colPrTable.querySelectorAll( '.hide[data-meal-id]' )
-        .forEach( meal => {
-          const elemMeal = meal;
-          elemMeal.classList.remove( 'hide' );
-        } );
-    } else {
-      this.colPrTable.querySelectorAll( '[data-meal-id]' )
-        .forEach( meal => {
-          const elemMeal = meal;
-          if ( elemMeal.dataset.mealId === mealId ) elemMeal.classList.remove( 'hide' );
-          else elemMeal.classList.add( 'hide' );
-        } );
-    }
-  }
-
-  clickBtnClmn( event ) {
-    const { currentTarget: elem } = event;
-    elem.parentElement.querySelectorAll( 'button[data-clmn].nav' ).forEach( child => {
-      const elemChild = child;
-      elemChild.disabled = elem === elemChild;
-    } );
-
-    const clmn = this.parentElem.querySelector( elem.dataset.clmn );
-    clmn.parentElement.querySelectorAll( '.clmn' ).forEach( child => {
-      const { classList } = child;
-      if ( clmn === child ) classList.remove( 'hide' ); else classList.add( 'hide' );
-    } );
-  }
-
   constructor( elem ) {
     const self = this;
     const parentElem = elem;
@@ -182,6 +40,8 @@ class MenuRequirementProducts {
 
     if ( disabledPlan ) btnPrint.addEventListener( 'click', ( ) => this.clickBtnPrint( ) );
     else btnPrint.disabled = true;
+
+    parentElem.querySelector( '.btn_update_price' ).addEventListener( 'click', ( ) => this.clickBtnUpdatePrice( ) );
 
     parentElem.querySelectorAll( '.panel_main button[data-clmn]' ).forEach( child => {
       child.addEventListener( 'click', event => this.clickBtnClmn( event ) );
@@ -295,6 +155,155 @@ class MenuRequirementProducts {
     this.checkMdExists( );
     this.colCcInit( );
     this.colPrInit( null );
+  }
+
+  // нажатие на кнопочку создать
+  createProducts( ) {
+    const data =  { id: this.dataId };
+    const caption = `Формування страв та прийомів їжі id = [${ this.dataId }]`;
+    const { colMd: { dataset: { pathCreate: url } } } = this;
+    MyLib.ajax( caption, url, 'post', data, 'script', false, true );
+  }
+
+  mdUpdate( mdId, value ) { // обновление маркера
+    const data = { id: mdId, is_enabled: value };
+    const caption = `Онов. позн. страви та прийоми їжі id = [${ this.dataId }]`;
+    const { colMd: { dataset: { pathUpdate: url } } } = this;
+    MyLib.ajax( caption, url, 'post', data, 'json', false, false );
+  }
+
+  // шапка формы
+  headerText( ) {
+    const { value: number } = this.parentElem.querySelector( '#number' );
+    const { value: date } = this.parentElem.querySelector( '#date' );
+    this.parentElem.querySelector( 'h1' ).textContent =
+      `Меню-вимога №  ${ number } від ${ date }`;
+  }
+
+  // нажатие на кнопочку выход
+  clickExit( ) {
+    MyLib.assignLocation( this.parentElem.dataset.pathExit );
+  }
+
+  clickSend( event ) {
+    const pf = `pathSend${ MyLib.capitalize( event.currentTarget.dataset.pf ) }`;
+    const caption = `Відправка данних в ІС [id: ${ this.dataId }]`;
+    const data = { id: this.dataId };
+    const successAjax = ( ) => window.location.reload( );
+    const { parentElem: { dataset: { [ pf ]: url } } } = this;
+    MyLib.ajax( caption, url, 'post', data, 'json', successAjax, true );
+  }
+
+  clickBtnPrint( ) {
+    const caption = `Відправка данних в ІС [id: ${ this.dataId }]`;
+    const data = { id: this.dataId };
+    const { parentElem: { dataset: { pathPrint: url } } } = this;
+    MyLib.ajax( caption, url, 'post', data, 'json', null, true );
+  }
+
+  clickBtnUpdatePrice( ) {
+    const caption = `Обновлення данних цін та залишків з ІС [id: ${ this.dataId }]`;
+    const data = { id: this.dataId };
+    const { parentElem: { dataset: { pathUpdatePrice: url } } } = this;
+    MyLib.ajax( caption, url, 'post', data, 'json', null, true );
+  }
+
+  clickMdCell( target ) {
+    const elem = target;
+    const dataId = +elem.dataset.id;
+    const countPlan = +elem.dataset.countPlan;
+    const isCheck = elem.classList.contains( 'check' );
+
+    if ( ( !this.disabledPlan || !isCheck || !countPlan ) && !this.disabledFact && dataId ) {
+      elem.classList.toggle( 'check' );
+      this.mdUpdate( dataId, !isCheck );
+      this.checkMdExists( );
+    }
+  }
+
+  checkMdExists( ) {
+    this.colMdCreate.disabled = this.disabledFact || !this.colMd.querySelector( 'td.check' );
+  }
+
+  contextmenuMdCell( event ) {
+    event.preventDefault( );
+    const { target: elem } = event;
+    if ( !this.disabled ) this.mdUpdate( elem.dataset.id, false );
+  }
+
+  mouseoverMdCell( target ) {
+    const elem = target;
+    const className = 'hover';
+    if ( !elem.classList.contains( className ) ) {
+      this.colMd.querySelectorAll( `.${ className }` ).forEach( hover => {
+        const elemHover = hover;
+        elemHover.classList.remove( className );
+      } );
+
+      this.colMd.querySelectorAll( `thead tr:nth-child(2) :nth-child(${ elem.cellIndex }), ` +
+          `tbody tr :nth-child(${ elem.cellIndex + 1 })` )
+        .forEach( hover => {
+          const elemHover = hover;
+          elemHover.classList.add( className );
+        } );
+    }
+  }
+
+  static clickRow( elem ) {
+    const className = 'selected';
+
+    Array.from( elem.parentElement.children ).forEach( child => {
+      const { classList } = child;
+      if ( child === elem ) classList.add( className ); else classList.remove( 'selected' );
+    } );
+  }
+
+  clickHeader( target ) {
+    const elem = target;
+    const { parentElement } = elem;
+    elem.classList.toggle( 'hide' );
+    const className = parentElement.id === this.parentElem.id ? '.panel_main' : '.panel';
+
+    parentElement.querySelectorAll( className ).forEach( child => child.classList.toggle( 'hide' ) );
+  }
+
+  clickBtnMeals( target ) {
+    const elem = target;
+    const { dataset: { mealId } } = elem;
+
+    elem.parentElement.querySelectorAll( 'button[data-meal-id]' ).forEach( child => {
+      const elemChild = child;
+      elemChild.disabled = elem === elemChild;
+    } );
+
+    if ( mealId === '-1' ) {
+      this.colPrTable.querySelectorAll( '.hide[data-meal-id]' )
+        .forEach( meal => {
+          const elemMeal = meal;
+          elemMeal.classList.remove( 'hide' );
+        } );
+    } else {
+      this.colPrTable.querySelectorAll( '[data-meal-id]' )
+        .forEach( meal => {
+          const elemMeal = meal;
+          if ( elemMeal.dataset.mealId === mealId ) elemMeal.classList.remove( 'hide' );
+          else elemMeal.classList.add( 'hide' );
+        } );
+    }
+  }
+
+  clickBtnClmn( event ) {
+    const { currentTarget: elem } = event;
+    elem.parentElement.querySelectorAll( 'button[data-clmn].nav' ).forEach( child => {
+      const elemChild = child;
+      elemChild.disabled = elem === elemChild;
+    } );
+
+    const clmn = this.parentElem.querySelector( elem.dataset.clmn );
+    clmn.parentElement.querySelectorAll( '.clmn' ).forEach( child => {
+      const { classList } = child;
+      if ( clmn === child ) classList.remove( 'hide' ); else classList.add( 'hide' );
+    } );
   }
 
   colPrInit( elements ) {

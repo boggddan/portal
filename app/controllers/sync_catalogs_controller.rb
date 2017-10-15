@@ -538,72 +538,72 @@ class SyncCatalogsController < ApplicationController
 
   ###############################################################################################
   # POST /api/cu_price_product { "branch_code": "0003", "institution_code": "14", "product_code": "000000079  ", "price_date": "1485296673", "price": 30.25  }
-  def price_product_update
-    error = { branch_code: 'Не знайдений параметр [branch_code]',
-              institution_code: 'Не знайдений параметр [institution_code]',
-              product_code: 'Не знайдений параметр [product_code]',
-              price_date: 'Не знайдений параметр [price_date]',
-              price: 'Не знайдений параметр [price]' }.stringify_keys!.except( *params.keys )
-    if error.empty?
-      branch = branch_code( params[ :branch_code ] )
-      error.merge!( branch[ :error ] ) if branch[ :error ]
+  # def price_product_update
+  #   error = { branch_code: 'Не знайдений параметр [branch_code]',
+  #             institution_code: 'Не знайдений параметр [institution_code]',
+  #             product_code: 'Не знайдений параметр [product_code]',
+  #             price_date: 'Не знайдений параметр [price_date]',
+  #             price: 'Не знайдений параметр [price]' }.stringify_keys!.except( *params.keys )
+  #   if error.empty?
+  #     branch = branch_code( params[ :branch_code ] )
+  #     error.merge!( branch[ :error ] ) if branch[ :error ]
 
-      institution = institution_code( params[ :institution_code ] )
-      error.merge!( institution[ :error ] ) if institution[ :error ]
+  #     institution = institution_code( params[ :institution_code ] )
+  #     error.merge!( institution[ :error ] ) if institution[ :error ]
 
-      product = product_code( params[ :product_code ] )
-      error.merge!( product[ :error ] ) if product[ :error ]
+  #     product = product_code( params[ :product_code ] )
+  #     error.merge!( product[ :error ] ) if product[ :error ]
 
-      if error.empty?
-        update_fields = {  price: params[:price] }
-        PriceProduct.create_with( update_fields ).find_or_create_by( branch: branch,
-          institution: institution, product: product, price_date: date_int_to_str( params[ :price_date ] ) )
-          .update( update_fields )
-      end
-    end
+  #     if error.empty?
+  #       update_fields = {  price: params[:price] }
+  #       PriceProduct.create_with( update_fields ).find_or_create_by( branch: branch,
+  #         institution: institution, product: product, price_date: date_int_to_str( params[ :price_date ] ) )
+  #         .update( update_fields )
+  #     end
+  #   end
 
-    render json: error.any? ? { result: false, error: [ error ] } : { result: true }
-  end
+  #   render json: error.any? ? { result: false, error: [ error ] } : { result: true }
+  # end
 
-  # GET /api/price_product?branch_code=0003&institution_code=14&product_code=000000079&price_date=2017-01-25
-  def price_product_view
-    error = { branch_code: 'Не знайдений параметр [branch_code]',
-              institution_code: 'Не знайдений параметр [institution_code]',
-              product_code: 'Не знайдений параметр [product_code]',
-              price_date: 'Не знайдений параметр [price_date]' }.stringify_keys!.except( *params.keys )
+  # # GET /api/price_product?branch_code=0003&institution_code=14&product_code=000000079&price_date=2017-01-25
+  # def price_product_view
+  #   error = { branch_code: 'Не знайдений параметр [branch_code]',
+  #             institution_code: 'Не знайдений параметр [institution_code]',
+  #             product_code: 'Не знайдений параметр [product_code]',
+  #             price_date: 'Не знайдений параметр [price_date]' }.stringify_keys!.except( *params.keys )
 
-    if error.size == 4
-      error = {}
-      price_product = PriceProduct.last
-    else
-      if error.empty?
-        branch = branch_code( params[ :branch_code ].strip )
-        error.merge!( branch[ :error ] ) if branch[ :error ]
+  #   if error.size == 4
+  #     error = {}
+  #     price_product = PriceProduct.last
+  #   else
+  #     if error.empty?
+  #       branch = branch_code( params[ :branch_code ].strip )
+  #       error.merge!( branch[ :error ] ) if branch[ :error ]
 
-        institution = institution_code( params[ :institution_code ] )
-        error.merge!( institution[ :error ] ) if institution[ :error ]
+  #       institution = institution_code( params[ :institution_code ] )
+  #       error.merge!( institution[ :error ] ) if institution[ :error ]
 
-        product = product_code( params[ :product_code ].strip )
-        error.merge!( product[ :error ] ) if product[ :error ]
+  #       product = product_code( params[ :product_code ].strip )
+  #       error.merge!( product[ :error ] ) if product[ :error ]
 
-        if error.empty?
-          price_product = price_product_date( branch, institution, product, params[ :price_date ] )
-          error = price_product[ :error ]
-        end
-      end
-    end
+  #       if error.empty?
+  #         price_product = price_product_date( branch, institution, product, params[ :price_date ] )
+  #         error = price_product[ :error ]
+  #       end
+  #     end
+  #   end
 
-    render json: price_product ? price_product.to_json( include: {
-        branch: { only: [ :code, :name ] }, institution: { only: [ :code, :name ] }, product: { only: [ :code, :name ] } } )
-      : { result: false, error: [error] }
-  end
+  #   render json: price_product ? price_product.to_json( include: {
+  #       branch: { only: [ :code, :name ] }, institution: { only: [ :code, :name ] }, product: { only: [ :code, :name ] } } )
+  #     : { result: false, error: [error] }
+  # end
 
-  # GET /api/price_products
-  def price_products_view
-    render json: PriceProduct.all.order( :price_date ).to_json(
-      include: { branch: { only: [ :code, :name ] }, institution: { only: [ :code, :name ] },
-                 product: { only: [ :code, :name ] } } )
-  end
+  # # GET /api/price_products
+  # def price_products_view
+  #   render json: PriceProduct.all.order( :price_date ).to_json(
+  #     include: { branch: { only: [ :code, :name ] }, institution: { only: [ :code, :name ] },
+  #                product: { only: [ :code, :name ] } } )
+  # end
   ###############################################################################################
 
   ###############################################################################################

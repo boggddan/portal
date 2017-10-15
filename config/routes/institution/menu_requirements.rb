@@ -11,6 +11,7 @@ namespace :menu_requirements do
   post :create_products
 
   post :update # Обновление реквизитов документа
+  post :update_price # Обновление остатков і цен продуктов
   post :send_sap # Веб-сервис отправки плана меню-требования
   post :send_saf # Веб-сервис отправки факта меню-требования
   post :print

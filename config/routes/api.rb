@@ -37,9 +37,9 @@ scope :api, controller: :sync_catalogs do
   get :causes_deviation_view, path: :causes_deviation
   get :causes_deviations_view, path: :causes_deviations
 
-  post :price_product_update, path: :cu_price_product
-  get :price_product_view, path: :price_product
-  get :price_products_view, path: :price_products
+  # post :price_product_update, path: :cu_price_product
+  # get :price_product_view, path: :price_product
+  # get :price_products_view, path: :price_products
 
   post :children_day_cost_update, path: :cu_children_day_cost
   get :children_day_cost_view, path: :children_day_cost

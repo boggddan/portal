@@ -4,11 +4,12 @@
 main#menu_requirement_products *{ data: { \
   id: @menu_requirement.id, disabled_plan: @disabled_plan.to_s, disabled_fact: @disabled_fact.to_s,
   path: { \
-  send_plan: institution_menu_requirements_send_sap_path,
-  send_fact: institution_menu_requirements_send_saf_path,
-  exit: institution_menu_requirements_index_path,
-  print: institution_menu_requirements_print_path,
-  update: institution_menu_requirements_update_path } } }
+    send_plan: institution_menu_requirements_send_sap_path,
+    send_fact: institution_menu_requirements_send_saf_path,
+    exit: institution_menu_requirements_index_path,
+    print: institution_menu_requirements_print_path,
+    update: institution_menu_requirements_update_path,
+    update_price: institution_menu_requirements_update_price_path } } }
 
   h1.icon
   .panel_main.row_3
@@ -17,6 +18,7 @@ main#menu_requirement_products *{ data: { \
       button.btn_send *{ data: { pf: :fact } } = ' факт'
       button.btn_exit
       button.btn_print
+      button.btn_default.btn_update_price Оновити залишки та ціни
 
       - if @disabled_plan
         = render label_text, label_attr: { class: :icon_number }, text: 'Надіслано план:',

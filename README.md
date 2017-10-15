@@ -11,7 +11,6 @@
   - [*Упаковки* - `packages`](#Упаковки---packages-top)
   - [*Упаковки постачальників* - `suppliers_packages`](#Упаковки-постачальників---suppliers_packages-top)
   - [*Постачальники* - `suppliers`](#Постачальники---suppliers-top)
-  - [*Ціни на продукти* - `price_products`](#Ціни-на-продукти---price_products-top)
   - [*Планова вартість дітодня* - `children_day_costs`](#Планова-вартість-дітодня---children_day_costs-top)
   - [*Причини відмови поставки* - `causes_deviations`](#Причини-відмови-поставки---causes_deviations-top)
   - [*Діти* - `children`](#Діти---children-top)
@@ -105,14 +104,6 @@ GET /api/suppliers_packages
 POST /api/cu_supplier { "code": "25", "name": "ТОВ Постач № 25" }
 GET /api/supplier?code=16
 GET /api/suppliers
-```
-
-### *Ціни на продукти* - `price_products` [:top:](#Зміст)
-
-```json
-POST /api/cu_price_product { "branch_code": "0003", "institution_code": "14", "product_code": "000000079  ", "price_date": "1485296673", "price": 30.25  }
-GET /api/price_product?branch_code=0003&institution_code=14&product_code=000000079&price_date=2017-01-25
-GET /api/price_products
 ```
 
 ### *Планова вартість дітодня* - `children_day_costs` [:top:](#Зміст)

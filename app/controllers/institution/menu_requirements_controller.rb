@@ -108,6 +108,47 @@ class Institution::MenuRequirementsController < Institution::BaseController
         id: k[ 1 ], name: v[ 0 ][ :dishes_name ] } }
   end
 
+  def update_price # Обновление остатков і цен продуктов
+    id = params[ :id ]
+
+    menu_requirement = JSON.parse( MenuRequirement
+      .select( :splendingdate )
+      .find( id )
+      .to_json, symbolize_names: true )
+
+    menu_products_price = JSON.parse( MenuProductsPrice.
+      .joins( :product )
+      .select( :id, :price, :balance, 'products.code AS product_code' )
+      .where( menu_requirement_id: id )
+      .to_json, symbolize_names: true )
+
+    goods = { 'Product' => '000000029' }
+    message = {
+      'CreateRequest' => {
+        'Branch_id' => current_branch[ :code ],
+        'Institutions_id' => current_institution[ :code],
+        'Date' => menu_requirement[ :splendingdate ],
+        'ArrayOfGoods' => goods,
+      }
+    }
+
+    savon_return = get_savon( :get_actual_price, message )
+    response = savon_return[ :response ]
+    web_service = savon_return[ :web_service ]
+
+    if response[ :interface_state ] == 'OK'
+      # ActiveRecord::Base.transaction do
+
+
+       result = { status: false, message: response }
+    else
+      result = { status: false, caption: 'Неуспішна сихронізація з ІС',
+                  message: web_service.merge!( response: response ) }
+    end
+
+    render json: result
+  end
+
   def create_products
     @menu_requirement_id = params[ :id ]
     @menu_requirement = MenuRequirement.find( @menu_requirement_id )
@@ -120,12 +161,12 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .group( :id )
       .to_json, symbolize_names: true )
 
-    product_categories = JSON.parse( MenuChildrenCategory
-      .select( :children_category_id, 'products.id as product_id' )
-      .joins( 'LEFT JOIN products ON true' )
-      .where( menu_requirement_id: @menu_requirement_id )
-      .order( :id, 'products.name' )
-      .to_json, symbolize_names: true )
+    # product_categories = JSON.pars( MenuChildrenCategory
+    #   .select( :children_category_id, 'products.id as product_id' )
+    #   .joins( 'LEFT JOIN products ON true' )
+    #   .where( menu_requirement_id: @menu_requirement_id )
+    #   .order( :id, 'products.name' )
+    #   .to_json, symbolize_names: true )
 
     if false
       dishes_products_norms = JSON.parse( DishesProductsNorm
@@ -165,16 +206,19 @@ class Institution::MenuRequirementsController < Institution::BaseController
     add_values = [ ]
     del_values = [ ]
 
+    products_id_add = [ ]
+    products_id_del = [ ]
+
     menu_meals_dishes.each do | mmd |
       dish_id = mmd[ :dish_id ]
       if mmd[ :is_enabled ] && mmd[ :count ].zero?
 
         dishes_products_norms
-        .select{ | o | o[ :dish_id ] == dish_id }
-        .each { | dpn |
-          children_category_id = dpn[ :children_category_id ]
-          product_id = dpn[ :product_id ]
-          norm = dpn[ :amount ]
+          .select{ | o | o[ :dish_id ] == dish_id }
+          .each { | dpn |
+            children_category_id = dpn[ :children_category_id ]
+            product_id = dpn[ :product_id ]
+            norm = dpn[ :amount ]
 
           count_children = mcc_count[ children_category_id ] || 0
 
@@ -210,9 +254,9 @@ class Institution::MenuRequirementsController < Institution::BaseController
         SQL
     end
 
-    # File.open( "sql", 'w' ) { | f | f.write( sql.to_json ) }
-
     ActiveRecord::Base.connection.execute( sql )
+
+
 
     menu_products( )
   end

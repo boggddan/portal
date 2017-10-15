@@ -1,17 +1,26 @@
 REM Read settings in variables
 
 SET FileConfig=%~dp0..\pg.cfg
+SET BaseConfig=%~dp0..\config\database.yml
 
 REM Change codepage
 chcp 1251 > NUL
 
+FOR /F "delims=:; tokens=1,2" %%a IN ( %BaseConfig% ) DO (
+  IF /I %%a EQU database SET PGDATABASE=%%b
+  IF /I %%a EQU host SET PGHOST=%%b
+  IF /I %%a EQU port SET PGPORT=%%b
+  IF /I %%a EQU username SET PGUSER=%%b
+  IF /I %%a EQU password SET PGPASSWORD=%%b
+)
+
 FOR /F "delims==; tokens=1,2" %%a IN ( %FileConfig% ) DO (
   IF /I %%a EQU PgServiceName SET PgServiceName=%%b
-  IF /I %%a EQU PGDATABASE SET PGDATABASE=%%b
-  IF /I %%a EQU PGHOST SET PGHOST=%%b
-  IF /I %%a EQU PGPORT SET PGPORT=%%b
-  IF /I %%a EQU PGUSER SET PGUSER=%%b
-  IF /I %%a EQU PGPASSWORD SET PGPASSWORD=%%b
+  REM IF /I %%a EQU PGDATABASE SET PGDATABASE=%%b
+  REM IF /I %%a EQU PGHOST SET PGHOST=%%b
+  REM IF /I %%a EQU PGPORT SET PGPORT=%%b
+  REM IF /I %%a EQU PGUSER SET PGUSER=%%b
+  REM IF /I %%a EQU PGPASSWORD SET PGPASSWORD=%%b
 
   REM Specifies the file system location of the database configuration files
   IF /I %%a EQU PGDATA SET PGDATA=%%b

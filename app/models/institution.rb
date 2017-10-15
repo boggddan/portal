@@ -5,7 +5,7 @@ class Institution < ApplicationRecord
   has_many   :receipts
   has_many   :menu_requirements
   has_many   :institution_orders
-  has_many   :price_products
+  # has_many   :price_products
   has_many   :timesheets
   has_many   :suppliers_packages
   has_many   :dishes_products_norms

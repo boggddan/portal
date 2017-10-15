@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  menu_requirement: one
+  product: one
+  price: 9.99
+  balance: 9.99
+
+two:
+  menu_requirement: two
+  product: two
+  price: 9.99
+  balance: 9.99
