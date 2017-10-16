@@ -39,9 +39,11 @@ class Institution::MenuRequirementsController < Institution::BaseController
 
     @menu_products = @mp.group_by { | o | [ o[ :products_type_id ], o[ :product_id ] ] }
       .map{ | k, v | { type_id: k[0], type_name: v[ 0 ][ :type_name ],
-        id: k[ 1 ], name: v[ 0 ][ :product_name ],
+        id: k[ 1 ],
+        name: v[ 0 ][ :product_name ],
         price: @price_products.select { | pp | pp[ :product_id ] == k[ 1 ] }
-          .fetch( 0, { price: 0 } ).fetch( :price ) } }
+          .fetch( 0, { price: 0 } ).fetch( :price ),
+        balance: 1 } }
 
     @mp_meals_dishes = @mp.group_by { | o | [ o[ :meal_id ], o[ :dish_id ] ] }
       .map{ | k, v | { meal_id: k[0], meal_name: v[ 0 ][ :meal_name ],
@@ -220,20 +222,26 @@ class Institution::MenuRequirementsController < Institution::BaseController
             product_id = dpn[ :product_id ]
             norm = dpn[ :amount ]
 
-          count_children = mcc_count[ children_category_id ] || 0
+            count_children = mcc_count[ children_category_id ] || 0
 
-          count_plan = norm.to_f * count_children.to_i
+            count_plan = norm.to_f * count_children.to_i
 
-          add_values << [ ].tap { | value |
-            value << mmd[ :id ]
-            value << children_category_id
-            value << product_id
-            value << count_plan
+            add_values << [ ].tap { | value |
+              value << mmd[ :id ]
+              value << children_category_id
+              value << product_id
+              value << count_plan
+            }
           }
-        }
       end
 
-      del_values << mmd[ :id ] if mmd[ :is_enabled ] == false && mmd[ :count ].nonzero?
+      if mmd[ :is_enabled ] == false && mmd[ :count ].nonzero?
+        del_values << mmd[ :id ]
+
+        products_id_del << products_id_del << dishes_products_norms
+          .select{ | o | o[ :dish_id ] == dish_id }
+          .group_by{ | o | o[ :product_id ] }.keys
+      end
     end
 
     sql = ''

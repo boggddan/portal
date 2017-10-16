@@ -18,6 +18,8 @@ class MenuRequirementProducts {
     splendingdate.disabled = disabledPlan;
     $( splendingdate ).datepicker( { onSelect( ) { self.changeMenuRequirement( this ) } } );
 
+    this.splendingdate = splendingdate;
+
     const btnExit = parentElem.querySelector( '.btn_exit' );
     btnExit.addEventListener( 'click', ( ) => this.clickExit( ) );
 
@@ -315,7 +317,9 @@ class MenuRequirementProducts {
       this.buttonColPr.classList.add( 'nav' );
       this.buttonColPr.disabled = false;
 
-      $( this.colPrTable ).tableHeadFixer( { left: 2 } );
+      this.splendingdate.disabled = true;
+
+      $( this.colPrTable ).tableHeadFixer( { left: 3 } );
 
       this.colPrTable.querySelectorAll( 'td.price' ).forEach( child => {
         const elemChild = child;

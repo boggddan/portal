@@ -22,6 +22,7 @@ h2.icon Продукти харчування
   colgroup
     col
     col.number
+    col.number
     - @mp_meals_dishes.each do | md |
       - @mp_categories.each do | o |
         col.number *{ data: { meal_id: md[ :meal_id ] } }
@@ -32,6 +33,7 @@ h2.icon Продукти харчування
     tr
       th *{ rowspan: 3 } Продукт харчування
       th.price *{ rowspan: 3 } Ціна
+      th.balance *{ rowspan: 3 } Залишок
       - @mp_meals.each do | o |
         th.last_meal *{ colspan: ( o[ :count ] * cats_size ), data: { meal_id: o[ :id ] } } = o[ :name ]
       th.last_plan *{ colspan: cats_size + 2, data: { meal_id: 0 } } ПЛАН
@@ -79,6 +81,7 @@ h2.icon Продукти харчування
           tr.row_group.type
             td = pr[ :type_name ]
             td.price
+            td.balance
 
             - @mp_meals.each do | ml |
               - @mp_meals_dishes.select{ | o | o[ :meal_id ] == ml[ :id ] }.each_with_index do | md, mdIndex |
@@ -99,6 +102,7 @@ h2.icon Продукти харчування
       tr.row_data
         td.name = pr[ :name ]
         td.count.price = pr[ :price ]
+        td.count.balance = pr[ :balance ]
         - @mp_meals.each do | ml |
           - @mp_meals_dishes.select{ | o | o[ :meal_id ] == ml[ :id ] }.each_with_index do | md, mdIndex |
             - @mp_categories.each_with_index do | cc, ccIndex |
