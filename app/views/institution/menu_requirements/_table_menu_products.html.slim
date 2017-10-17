@@ -74,12 +74,12 @@ h2.icon Продукти харчування
 
   tbody
     - products_type_id = 0
-    - @menu_products.each do | pr |
+    - @menu_products_prices.each do | mpp |
 
-      - if products_type_id != pr[ :type_id ]
-          - products_type_id = pr[ :type_id ]
+      - if products_type_id != mpp[ :products_type_id ]
+          - products_type_id = mpp[ :products_type_id ]
           tr.row_group.type
-            td = pr[ :type_name ]
+            td = mpp[ :products_type_name ]
             td.price
             td.balance
 
@@ -100,9 +100,9 @@ h2.icon Продукти харчування
             td
 
       tr.row_data
-        td.name = pr[ :name ]
-        td.count.price = pr[ :price ]
-        td.count.balance = pr[ :balance ]
+        td.name = mpp[ :product_name ]
+        td.count.price = mpp[ :price ]
+        td.count.balance = mpp[ :balance ]
         - @mp_meals.each do | ml |
           - @mp_meals_dishes.select{ | o | o[ :meal_id ] == ml[ :id ] }.each_with_index do | md, mdIndex |
             - @mp_categories.each_with_index do | cc, ccIndex |
@@ -110,7 +110,7 @@ h2.icon Продукти харчування
               - last_dish = cats_size == ccIndex + 1 ? :last_dish : nil
               - last_meal = cats_size == ccIndex + 1 && ml[ :count ] == mdIndex + 1 ? :last_meal : nil
               - meal_id = md[ :meal_id ]
-              - value = @mp.select { | mp | mp[ :product_id ] == pr[ :id ] \
+              - value = @menu_products.select { | mp | mp[ :product_id ] == mpp[ :id ] \
               && mp[ :meal_id ] == meal_id && mp[ :dish_id ] == md[ :dish_id ] \
               && mp[ :children_category_id ] == children_category_id } \
               .fetch( 0, { id: 0, count_plan: 0, count_fact: 0 } ).slice( :id, :count_plan, :count_fact )

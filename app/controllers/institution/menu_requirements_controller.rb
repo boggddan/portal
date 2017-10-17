@@ -13,169 +13,36 @@ class Institution::MenuRequirementsController < Institution::BaseController
     render json: { status: true }
   end
 
-  def menu_products
-    @mp = JSON.parse( MenuProduct
-      .joins( { product: :products_type }, { menu_meals_dish: [ :meal, :dish ] }, :children_category )
-      .select( :id, :product_id, :menu_meals_dish_id, :children_category_id,
-        :count_plan, :count_fact,
-        'menu_meals_dishes.meal_id', 'meals.name as meal_name',
-        'menu_meals_dishes.dish_id', 'dishes.name as dish_name',
-        'children_categories.name AS category_name',
-        'products.products_type_id', 'products_types.name AS type_name',
-        'products.name AS product_name' )
-      .where( 'menu_meals_dishes.menu_requirement_id = ? ', @menu_requirement_id )
-      .order( 'meals.priority', 'meals.name',
-              'dishes.priority', 'dishes.name',
-              'children_categories.priority', 'children_categories.name',
-              'products_types.priority', 'products_types.name', 'products.name' )
-      .to_json, symbolize_names: true )
-
-    @price_products = JSON.parse( PriceProduct
-      .select( 'DISTINCT ON(product_id) product_id', :price )
-      .where( institution_id: current_user[ :userable_id ] )
-      .where( 'price_date <= ?', @menu_requirement.date )
-      .order( :product_id, 'price_date DESC' )
-      .to_json, symbolize_names: true )
-
-    @menu_products = @mp.group_by { | o | [ o[ :products_type_id ], o[ :product_id ] ] }
-      .map{ | k, v | { type_id: k[0], type_name: v[ 0 ][ :type_name ],
-        id: k[ 1 ],
-        name: v[ 0 ][ :product_name ],
-        price: @price_products.select { | pp | pp[ :product_id ] == k[ 1 ] }
-          .fetch( 0, { price: 0 } ).fetch( :price ),
-        balance: 1 } }
-
-    @mp_meals_dishes = @mp.group_by { | o | [ o[ :meal_id ], o[ :dish_id ] ] }
-      .map{ | k, v | { meal_id: k[0], meal_name: v[ 0 ][ :meal_name ],
-        dish_id: k[ 1 ], dish_name: v[ 0 ][ :dish_name ] } }
-
-    @mp_meals = @mp_meals_dishes.group_by { | o | o[ :meal_id ] }
-      .map { | k, v | { id: k, name: v[ 0 ][ :meal_name ], count: v.size } }
-
-    @mp_categories = @mp.group_by { | o | o[ :children_category_id ] }
-      .map{ | k, v | { id: k, name: v[ 0 ][ :category_name ] } }
-  end
-
-  def products # Отображение товаров
-    @menu_requirement = MenuRequirement.find( params[ :id ] )
-
-    @menu_requirement_id = @menu_requirement.id
-    @disabled_plan = @menu_requirement.number_sap.present?
-    @disabled_fact = @menu_requirement.number_saf.present?
-
-    @menu_children_categories = JSON.parse( MenuChildrenCategory
-      .joins( :children_category )
-      .select( :id, :children_category_id,
-               :count_all_plan, :count_exemption_plan,
-               :count_all_fact, :count_exemption_fact,
-               'children_categories.name' )
-      .where( menu_requirement_id: @menu_requirement_id )
-      .order( 'children_categories.priority', 'children_categories.name' )
-      .to_json, symbolize_names: true )
-
-    @children_day_costs = JSON.parse( ChildrenDayCost
-      .select( 'DISTINCT ON(children_category_id) children_category_id', :cost )
-      .where( 'cost_date <= ?', @menu_requirement.date )
-      .order( :children_category_id, 'cost_date DESC' )
-      .to_json, symbolize_names: true )
-
-    menu_meals_dishes( )
-    menu_products( )
-  end
-
-  def menu_meals_dishes # Отображение приемов пищи и блюд
-    @menu_meals_dishes = JSON.parse( MenuMealsDish
-      .joins( :meal, dish: :dishes_category )
-      .left_joins( :menu_products )
-      .select( :id,
-              :is_enabled,
-              'meals.id AS meals_id',
-              'meals.name AS meals_name',
-              'dishes.id AS dishes_id',
-              'dishes.name AS dishes_name',
-              'dishes_categories.id AS category_id',
-              'dishes_categories.name AS category_name',
-              'COALESCE( SUM( menu_products.count_plan ), 0) AS count_plan' )
-      .where( menu_requirement_id: @menu_requirement_id )
-      .group( :id, 'meals.id', 'dishes.id', 'dishes_categories.id' )
-      .order( 'meals.priority', 'meals.name', 'dishes_categories.priority',
-              'dishes_categories.name', 'dishes.priority', 'dishes.name' )
-      .to_json, symbolize_names: true )
-
-    @menu_meals = @menu_meals_dishes.group_by{ | o | o[ :meals_id ] }
-      .map{ | k, v | { id: k, name: v[ 0 ][ :meals_name ] } }
-
-    @menu_dishes = @menu_meals_dishes.group_by{ | o | [ o[ :category_id ], o[ :dishes_id ] ] }
-      .map{ | k, v | { category_id: k[0], category_name: v[ 0 ][ :category_name ],
-        id: k[ 1 ], name: v[ 0 ][ :dishes_name ] } }
-  end
-
-  def update_price # Обновление остатков і цен продуктов
-    id = params[ :id ]
-
-    menu_requirement = JSON.parse( MenuRequirement
-      .select( :splendingdate )
-      .find( id )
-      .to_json, symbolize_names: true )
-
-    menu_products_price = JSON.parse( MenuProductsPrice
-      .joins( :product )
-      .select( :id, :price, :balance, 'products.code AS product_code' )
-      .where( menu_requirement_id: id )
-      .to_json, symbolize_names: true )
-
-    goods = { 'Product' => '000000029' }
-    message = {
-      'CreateRequest' => {
-        'Branch_id' => current_branch[ :code ],
-        'Institutions_id' => current_institution[ :code],
-        'Date' => menu_requirement[ :splendingdate ],
-        'ArrayOfGoods' => goods,
-      }
-    }
-
-    savon_return = get_savon( :get_actual_price, message )
-    response = savon_return[ :response ]
-    web_service = savon_return[ :web_service ]
-
-    if response[ :interface_state ] == 'OK'
-      # ActiveRecord::Base.transaction do
-
-
-       result = { status: false, message: response }
-    else
-      result = { status: false, caption: 'Неуспішна сихронізація з ІС',
-                  message: web_service.merge!( response: response ) }
-    end
-
-    render json: result
-  end
-
   def create_products
-    @menu_requirement_id = params[ :id ]
-    @menu_requirement = MenuRequirement.find( @menu_requirement_id )
+    menu_requirement_id = params[ :id ]
+
+    @current_user = JSON.parse( User
+      .select( :userable_id )
+      .find_by( username: 'user' )
+      .to_json, symbolize_names: true )
+
+    @menu_requirement = JSON.parse( MenuRequirement
+      .select( :id,
+               :splendingdate )
+      .find( menu_requirement_id )
+      .to_json, symbolize_names: true )
 
     menu_meals_dishes = JSON.parse( MenuMealsDish
       .left_outer_joins( :menu_products )
       .select( :id, :dish_id, :is_enabled, 'COUNT(menu_products.id) as count' )
-      .where( menu_requirement_id: @menu_requirement_id )
+      .where( menu_requirement_id: menu_requirement_id )
       .order( :id )
       .group( :id )
       .to_json, symbolize_names: true )
 
-    # product_categories = JSON.pars( MenuChildrenCategory
-    #   .select( :children_category_id, 'products.id as product_id' )
-    #   .joins( 'LEFT JOIN products ON true' )
-    #   .where( menu_requirement_id: @menu_requirement_id )
-    #   .order( :id, 'products.name' )
-    #   .to_json, symbolize_names: true )
-
     if false
       dishes_products_norms = JSON.parse( DishesProductsNorm
         .joins( :dishes_product )
-        .select( :children_category_id, :amount,
-                'dishes_products.dish_id', 'dishes_products.product_id' )
-        .where( 'dishes_products.institution_id = ?', current_user[ :userable_id ] )
+        .select( :children_category_id,
+                 :amount,
+                'dishes_products.dish_id',
+                'dishes_products.product_id' )
+        .where( 'dishes_products.institution_id = ?', @current_user[ :userable_id ] )
         .where( 'dishes_products.enabled = ?', true )
         .order( 'dishes_products.dish_id',
                 'dishes_products.product_id',
@@ -189,7 +56,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
                   '0 AS amount' )
         .joins( 'LEFT JOIN products ON true' )
         .joins( 'LEFT JOIN menu_children_categories ON menu_children_categories.menu_requirement_id = menu_meals_dishes.menu_requirement_id' )
-        .where( menu_requirement_id: @menu_requirement_id,
+        .where( menu_requirement_id: menu_requirement_id,
                 is_enabled: true )
         .order( :dish_id,
                 'products.id',
@@ -197,22 +64,22 @@ class Institution::MenuRequirementsController < Institution::BaseController
         .to_json, symbolize_names: true )
     end
 
-    mcc_count = JSON.parse( MenuChildrenCategory
+    menu_children_category = JSON.parse( MenuChildrenCategory
       .select( :children_category_id, :count_all_plan )
-      .where( menu_requirement_id: @menu_requirement_id )
+      .where( menu_requirement_id: menu_requirement_id )
       .where.not( count_all_plan: 0 )
       .to_json( except: :id ), symbolize_names: true )
+
+    mcc_count = menu_children_category
       .map { | o | o.values }
       .to_h
 
-    add_values = [ ]
-    del_values = [ ]
-
-    products_id_add = [ ]
-    products_id_del = [ ]
+    menu_products_add_values = [ ]
+    menu_products_del_values = [ ]
 
     menu_meals_dishes.each do | mmd |
       dish_id = mmd[ :dish_id ]
+
       if mmd[ :is_enabled ] && mmd[ :count ].zero?
 
         dishes_products_norms
@@ -220,53 +87,328 @@ class Institution::MenuRequirementsController < Institution::BaseController
           .each { | dpn |
             children_category_id = dpn[ :children_category_id ]
             product_id = dpn[ :product_id ]
-            norm = dpn[ :amount ]
+            norm = dpn[ :amount ].to_f
+            count_children = mcc_count[ children_category_id ].to_i || 0
 
-            count_children = mcc_count[ children_category_id ] || 0
-
-            count_plan = norm.to_f * count_children.to_i
-
-            add_values << [ ].tap { | value |
+            menu_products_add_values << [ ].tap { | value |
               value << mmd[ :id ]
               value << children_category_id
               value << product_id
-              value << count_plan
+              value << norm * count_children
             }
           }
       end
 
       if mmd[ :is_enabled ] == false && mmd[ :count ].nonzero?
-        del_values << mmd[ :id ]
-
-        products_id_del << products_id_del << dishes_products_norms
-          .select{ | o | o[ :dish_id ] == dish_id }
-          .group_by{ | o | o[ :product_id ] }.keys
+        menu_products_del_values << mmd[ :id ]
       end
     end
 
-    sql = ''
-    if add_values.any?
-      sql_add_values = add_values.map { | o | "( #{ o.join( ',' ) } )" }.join( ',' )
+    menu_products_sql = ''
 
-      sql << <<-SQL.squish
+    if menu_products_add_values.any?
+      menu_products_sql_add_values = menu_products_add_values.map { | o | "( #{ o.join( ',' ) } )" }.join( ',' )
+
+      menu_products_sql << <<-SQL.squish
         INSERT INTO menu_products ( menu_meals_dish_id, children_category_id, product_id, count_plan )
-          VALUES #{ sql_add_values } ;
+          VALUES #{ menu_products_sql_add_values } ;
         SQL
     end
 
-    if del_values.any?
-      sql_add_values = del_values.join( ',' )
+    if menu_products_del_values.any?
+      menu_products_sql_del_values = del_values.join( ',' )
 
-      sql << <<-SQL.squish
-          DELETE FROM menu_products WHERE menu_meals_dish_id IN (#{ sql_add_values }) ;
+      menu_products_sql << <<-SQL.squish
+          DELETE FROM menu_products WHERE menu_meals_dish_id IN (#{ menu_products_sql_del_values }) ;
         SQL
     end
 
-    ActiveRecord::Base.connection.execute( sql )
+    ActiveRecord::Base.connection.execute( menu_products_sql ) if menu_products_sql
 
+    #=================================
 
+    sql_join_menu_products_price = <<-SQL.squish
+        LEFT JOIN menu_products_prices
+          ON menu_products_prices.product_id = menu_products.product_id AND
+             menu_products_prices.menu_requirement_id = menu_meals_dishes.menu_requirement_id
+      SQL
 
-    menu_products( )
+    products = JSON.parse( MenuProduct
+      .joins( :menu_meals_dish,
+              :product )
+      .joins( sql_join_menu_products_price )
+      .select( :product_id,
+              'products.code',
+              'menu_products_prices.id' )
+      .where( 'menu_meals_dishes.menu_requirement_id = ? ', menu_requirement_id )
+      .group( :product_id,
+              'products.code',
+              'menu_products_prices.id' )
+      .to_json, symbolize_names: true )
+
+    menu_products_prices_sql = ''
+    menu_products_prices_add_values = [ ]
+    menu_products_prices_not_del_product_ids = [ ]
+
+    return_prices = get_actual_price( @menu_requirement[ :splendingdate ], products )
+
+    actual_prices = return_prices[ :status ] ? return_prices[ :actual_prices ] : []
+
+    products.each { | product |
+      actual_price = actual_prices.find { | o | o[ :product ].strip == product[ :code ] }
+
+      if actual_price
+        price = actual_price[ :price ].to_f.truncate( 2 )
+        balance = actual_price[ :quantity ].to_f.truncate( 3 )
+      else
+        price = 0
+        balance = 0
+      end
+
+      menu_products_price_id = product[ :id ]
+      product_id = product[ :product_id ]
+
+      menu_products_prices_not_del_product_ids << product_id
+
+      if menu_products_price_id
+        menu_products_prices_sql << <<-SQL.squish
+            UPDATE menu_products_prices
+              SET price = #{ price },
+                  balance =#{ balance }
+              WHERE id = #{ menu_products_price_id } ;
+          SQL
+      else
+        menu_products_prices_add_values << [ ].tap { | value |
+          value << menu_requirement_id
+          value << product_id
+          value << price
+          value << balance
+        }
+      end
+     }
+
+    if menu_products_prices_add_values.any?
+      menu_products_prices_sql_add_values = menu_products_prices_add_values.map { | o | "( #{ o.join( ',' ) } )" }.join( ',' )
+      menu_products_prices_sql << <<-SQL.squish
+          INSERT INTO menu_products_prices ( menu_requirement_id, product_id, price, balance )
+            VALUES #{ menu_products_prices_sql_add_values } ;
+
+          DELETE FROM menu_products_prices WHERE NOT product_id IN ( #{ menu_products_prices_not_del_product_ids.join( ',' ) } )
+        SQL
+    end
+
+    ActiveRecord::Base.connection.execute( menu_products_prices_sql ) if menu_products_prices_sql
+
+    menu_products( menu_requirement_id )
+  end
+
+  def menu_products( menu_requirement_id )
+    @menu_products = JSON.parse( MenuProduct
+      .joins( { menu_meals_dish: [ :meal, :dish ] },
+              :children_category )
+      .select( :id,
+              :product_id,
+              :menu_meals_dish_id,
+              :children_category_id,
+              :count_plan,
+              :count_fact,
+              'menu_meals_dishes.meal_id',
+              'meals.name as meal_name',
+              'menu_meals_dishes.dish_id',
+              'dishes.name as dish_name',
+              'children_categories.name AS category_name' )
+      .where( 'menu_meals_dishes.menu_requirement_id = ? ', menu_requirement_id )
+      .order( 'meals.priority',
+              'meals.name',
+              'dishes.priority',
+              'dishes.name',
+              'children_categories.priority',
+              'children_categories.name' )
+      .to_json, symbolize_names: true )
+
+    @menu_products_prices = JSON.parse( MenuProductsPrice
+      .joins( { product: :products_type } )
+      .select( :product_id,
+                :price,
+                :balance,
+                'products.products_type_id',
+                'products_types.name AS products_type_name',
+                'products.name AS product_name' )
+      .where( menu_requirement_id: menu_requirement_id )
+      .order( 'products_types.priority',
+              'products_types.name',
+              'products.name' )
+      .to_json, symbolize_names: true )
+
+    @mp_meals_dishes = @menu_products.group_by { | o | [ o[ :meal_id ], o[ :dish_id ] ] }
+      .map{ | k, v | { meal_id: k[0], meal_name: v[ 0 ][ :meal_name ],
+        dish_id: k[ 1 ], dish_name: v[ 0 ][ :dish_name ] } }
+
+    @mp_meals = @mp_meals_dishes.group_by { | o | o[ :meal_id ] }
+      .map { | k, v | { id: k, name: v[ 0 ][ :meal_name ], count: v.size } }
+
+    @mp_categories = @menu_products.group_by { | o | o[ :children_category_id ] }
+      .map{ | k, v | { id: k, name: v[ 0 ][ :category_name ] } }
+  end
+
+  def products # Отображение товаров
+    @menu_requirement = JSON.parse( MenuRequirement
+      .select( :id,
+               :number,
+               :date,
+               :splendingdate,
+               :number_sap,
+               :number_saf,
+               :date_sap,
+               :date_saf
+                )
+      .find( params[ :id ] )
+      .to_json, symbolize_names: true )
+
+    @menu_children_categories = JSON.parse( MenuChildrenCategory
+      .joins( :children_category )
+      .select( :id,
+               :children_category_id,
+               :count_all_plan,
+               :count_exemption_plan,
+               :count_all_fact,
+               :count_exemption_fact,
+               'children_categories.name' )
+      .where( menu_requirement_id: @menu_requirement[ :id ] )
+      .order( 'children_categories.priority',
+              'children_categories.name' )
+      .to_json, symbolize_names: true )
+
+    @children_day_costs = JSON.parse( ChildrenDayCost
+      .select( 'DISTINCT ON(children_category_id) children_category_id',
+               :cost )
+      .where( 'cost_date <= ?', @menu_requirement[ :date ] )
+      .order( :children_category_id,
+              cost_date: :desc )
+      .to_json, symbolize_names: true )
+
+    menu_meals_dishes( @menu_requirement[ :id ] )
+    menu_products( @menu_requirement[ :id ] )
+  end
+
+  def menu_meals_dishes( menu_requirement_id ) # Отображение приемов пищи и блюд
+    @menu_meals_dishes = JSON.parse( MenuMealsDish
+      .joins( :meal, dish: :dishes_category )
+      .left_joins( :menu_products )
+      .select( :id,
+              :is_enabled,
+              'meals.id AS meals_id',
+              'meals.name AS meals_name',
+              'dishes.id AS dishes_id',
+              'dishes.name AS dishes_name',
+              'dishes_categories.id AS category_id',
+              'dishes_categories.name AS category_name',
+              'COALESCE( SUM( menu_products.count_plan ), 0) AS count_plan' )
+      .where( menu_requirement_id: menu_requirement_id )
+      .group( :id, 'meals.id', 'dishes.id', 'dishes_categories.id' )
+      .order( 'meals.priority', 'meals.name', 'dishes_categories.priority',
+              'dishes_categories.name', 'dishes.priority', 'dishes.name' )
+      .to_json, symbolize_names: true )
+
+    @menu_meals = @menu_meals_dishes.group_by{ | o | o[ :meals_id ] }
+      .map{ | k, v | { id: k, name: v[ 0 ][ :meals_name ] } }
+
+    @menu_dishes = @menu_meals_dishes.group_by{ | o | [ o[ :category_id ], o[ :dishes_id ] ] }
+      .map{ | k, v | { category_id: k[0], category_name: v[ 0 ][ :category_name ],
+        id: k[ 1 ], name: v[ 0 ][ :dishes_name ] } }
+  end
+
+  def get_actual_price( date, products )
+    goods = products
+      .select { | o |
+        [ "000000028", "000000063", "000000077", "000000110" ].include?( o[ :code ] )
+      }
+      .map { | o | { 'Product' => o[ :code ] } }
+
+      message = {
+      'CreateRequest' => {
+        'Branch_id' => current_branch[ :code ],
+        'Institutions_id' => current_institution[ :code],
+        'Date' => date,
+        'ArrayOfGoods' => goods
+      }
+    }
+
+    savon_return = get_savon( :get_actual_price, message )
+    response = savon_return[ :response ]
+    web_service = savon_return[ :web_service ]
+
+    actual_prices = response[ :array_of_goods ]
+    if response[ :interface_state ] == 'OK'&& actual_prices
+      result = { status: true, actual_prices: actual_prices }
+    else
+      result = { status: false, caption: 'Неуспішна сихронізація з ІС',
+                 message: web_service.merge!( response: response ) }
+    end
+
+    return result
+  end
+
+  def update_price # Обновление остатков і цен продуктов
+    menu_requirement = JSON.parse( MenuRequirement
+      .select( :id, :splendingdate )
+      .find( params[ :id ] )
+      .to_json, symbolize_names: true )
+
+    menu_products_price = JSON.parse( MenuProductsPrice
+      .joins( :product )
+      .select( :id,
+               :price,
+               :balance,
+               'products.code',
+               'products.name' )
+      .where( menu_requirement_id: menu_requirement[ :id ] )
+      .order( 'products.name' )
+      .to_json, symbolize_names: true )
+
+    return_prices = get_actual_price( menu_requirement[ :splendingdate ], menu_products_price )
+
+    if return_prices[ :status ]
+      menu_products_prices_sql = ''
+
+      actual_prices = return_prices[ :actual_prices ]
+      modify_prices = [ ]
+
+      menu_products_price.each { | mpp |
+        actual_price = actual_prices.find { | o | o[ :product ].strip == mpp[ :code ] }
+
+        if actual_price
+          price = actual_price[ :price ].to_f.truncate( 2 )
+          balance = actual_price[ :quantity ].to_f.truncate( 3 )
+
+          if price != mpp[ :price ].to_f || balance != mpp[ :balance ].to_f
+            modify_prices << {
+              'Продукт' => mpp[ :name ],
+              'Ціна' => price,
+              'Залишок' => balance
+            }
+
+            menu_products_prices_sql << <<-SQL.squish
+                UPDATE menu_products_prices
+                  SET price = #{ price },
+                      balance =#{ balance }
+                  WHERE id = #{ mpp[ :id ] } ;
+              SQL
+          end
+        end
+      }
+
+      if modify_prices.any?
+        ActiveRecord::Base.connection.execute( menu_products_prices_sql )
+        result = { status: false, caption: 'Оновлені продукти', message: modify_prices }
+      else
+        result = { status: true }
+      end
+    else
+      result =  return_prices
+    end
+
+    render json: result
   end
 
   def create # Создание документа
@@ -313,10 +455,9 @@ class Institution::MenuRequirementsController < Institution::BaseController
               md[ :meal_id ] == empty_meal_id &&
               md[ :dish_id ] == empty_dish_id
             ) &&
-            dishes_products.find { | o |
-              o[ :dish_id ] == md[ :dish_id ] ||
-              true
-            }
+            ( dishes_products.find { | o |
+              o[ :dish_id ] == md[ :dish_id ]
+            } || true )
           }
           .each{ | o |
             mmd_values << [ ].tap { | value |
@@ -326,11 +467,11 @@ class Institution::MenuRequirementsController < Institution::BaseController
             }
           }
 
-        mmd_sql = ''
+        sql = ''
         if mmd_values.any?
           mmd_sql_values = mmd_values.map { | o | "( #{ o.join( ',' ) } )" }.join( ',' )
 
-          mmd_sql << <<-SQL.squish
+          sql << <<-SQL.squish
               INSERT INTO menu_meals_dishes ( menu_requirement_id, meal_id, dish_id )
                 VALUES #{ mmd_sql_values } ;
             SQL
@@ -346,17 +487,16 @@ class Institution::MenuRequirementsController < Institution::BaseController
           }
         }
 
-        cc_sql = ''
         if cc_values.any?
           cc_sql_values = cc_values.map { | o | "( #{ o.join( ',' ) } )" }.join( ',' )
 
-          cc_sql << <<-SQL.squish
+          sql << <<-SQL.squish
               INSERT INTO menu_children_categories ( menu_requirement_id, children_category_id )
                 VALUES #{ cc_sql_values } ;
             SQL
         end
 
-        ActiveRecord::Base.connection.execute( "#{ mmd_sql }#{ cc_sql }" )
+        ActiveRecord::Base.connection.execute( sql ) if sql
 
         href = institution_menu_requirements_products_path( { id: id } )
         result = { status: true, href: href }

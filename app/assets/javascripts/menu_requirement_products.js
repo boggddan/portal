@@ -207,6 +207,7 @@ class MenuRequirementProducts {
     const caption = `Обновлення данних цін та залишків з ІС [id: ${ this.dataId }]`;
     const data = { id: this.dataId };
     const { parentElem: { dataset: { pathUpdatePrice: url } } } = this;
+    // const successAjax = ( ) => window.location.reload( );
     MyLib.ajax( caption, url, 'post', data, 'json', null, true );
   }
 
@@ -321,7 +322,7 @@ class MenuRequirementProducts {
 
       $( this.colPrTable ).tableHeadFixer( { left: 3 } );
 
-      this.colPrTable.querySelectorAll( 'td.price' ).forEach( child => {
+      this.colPrTable.querySelectorAll( 'td.price, td.balance' ).forEach( child => {
         const elemChild = child;
         elemChild.textContent = MyLib.numToStr( +elemChild.textContent, -1 );
       } );
@@ -563,7 +564,7 @@ class MenuRequirementProducts {
     arrPlanFact.forEach( pf => {
       trRowGroup.querySelector( `.count_all_${ pf }` ).textContent = MyLib.numToStr( sumAll[ pf ].countAll, -1 );
       trRowGroup.querySelector( `.count_exemption_${ pf }` ).textContent = MyLib.numToStr( sumAll[ pf ].countExemption, -1 );
-      trRowGroup.querySelector( `.sum_products_${ pf }` ).textContent = MyLib.toRound( sumAll[ pf ].sumProducts, 2 );
+      trRowGroup.querySelector( `.sum_products_${ pf }` ).textContent = MyLib.toRound( sumAll[ pf ].sumProducts, 2 ) || '';
     } );
   }
 }

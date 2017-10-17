@@ -8,6 +8,7 @@ class CreateMenuProductsPrices < ActiveRecord::Migration[5.1]
 
       t.timestamps default: -> { 'CURRENT_TIMESTAMP' }
 
+      t.index [ :menu_requirement_id, :product_id ], name: :menu_requirement_id_product_id, unique: true
     end
 
     reversible do |direction|
