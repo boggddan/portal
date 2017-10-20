@@ -35,7 +35,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .group( :id )
       .to_json, symbolize_names: true )
 
-    if false
+    if true
       dishes_products_norms = JSON.parse( DishesProductsNorm
         .joins( :dishes_product )
         .select( :children_category_id,
@@ -65,7 +65,8 @@ class Institution::MenuRequirementsController < Institution::BaseController
     end
 
     menu_children_category = JSON.parse( MenuChildrenCategory
-      .select( :children_category_id, :count_all_plan )
+      .select( :children_category_id,
+               :count_all_plan )
       .where( menu_requirement_id: menu_requirement_id )
       .where.not( count_all_plan: 0 )
       .to_json( except: :id ), symbolize_names: true )
@@ -677,9 +678,11 @@ class Institution::MenuRequirementsController < Institution::BaseController
 
     if menu_children_categories && menu_products
 
-      goods = menu_products.map{ | o | { 'CodeOfCategory' => o[ :category_code ],
+      goods = menu_products.map { | o | { 'CodeOfCategory' => o[ :category_code ],
                                         'CodeOfGoods' => o[ :product_code ],
-                                        'Quantity' => o[ :count_fact ] } }
+                                        'Quantity' => o[ :count_fact ],
+                                        'Amount' => 0 }
+    }
 
       categories = menu_children_categories.map { | o | { 'CodeOfCategory' => o[ :code ],
                                                           'QuantityAll' => o[ :count_all_fact ],

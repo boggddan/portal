@@ -1,15 +1,15 @@
 table.table
   colgroup
     col
-    - @children_categories.size.times do | md |
+    - @dpn_children_categories.size.times do | md |
       col.number
     col
 
   thead
     tr
       th Продукт харчування
-      - @children_categories.each do | o |
-        th = o[ :name ]
+      - @dpn_children_categories.each do | o |
+        th = o[ :children_category_name ]
 
       th Вибір
 
@@ -24,36 +24,32 @@ table.table
         - dishes_category_id = dp[ :dishes_category_id ]
         - dish_id = 0
         tr.row_group.dishes_category *{ data: { dishes_category_id: dishes_category_id } }
-          td *{ colspan: @children_categories.size + 1 } = dp[ :dishes_category_name ]
+          td *{ colspan: @dpn_children_categories.size + 1 } = dp[ :dishes_category_name ]
           td
 
       - if dish_id != dp[ :dish_id ]
         - dish_id = dp[ :dish_id ]
         - products_type_id = 0
         tr.row_group.dish *{ data: { dishes_category_id: dishes_category_id, dish_id: dish_id } }
-          td *{ colspan: @children_categories.size + 1 } = dp[ :dish_name ]
+          td *{ colspan: @dpn_children_categories.size + 1 } = dp[ :dish_name ]
           td.cell_mark
 
       - if products_type_id != dp[ :products_type_id ]
         - products_type_id = dp[ :products_type_id ]
         tr.row_group.products_type *{ data: { dishes_category_id: dishes_category_id,
                                              dish_id: dish_id, products_type_id: products_type_id } }
-          td *{ colspan: @children_categories.size + 1 } = dp[ :products_type_name ]
+          td *{ colspan: @dpn_children_categories.size + 1 } = dp[ :products_type_name ]
           td
 
       - product_id = dp[ :product_id ]
       tr.row_data *{ data: { dishes_category_id: dishes_category_id,
                              dish_id: dish_id, products_type_id: products_type_id } }
         td.name = dp[ :product_name ]
-        - @children_categories.each do | cc |
-          td = @dishes_products_norms.select{ | o | o[ :children_category_id ] == cc[ :id ] && \
+        - @dpn_children_categories.each do | cc |
+          td = @dishes_products_norms.select{ | o | o[ :children_category_id ] == cc[ :children_category_id ] && \
                                   o[ :dish_id ] == dish_id && \
                                   o[ :product_id ] == product_id } \
                   .fetch( 0, { amount: '-' } )[ :amount ]
-        - idp = @dishes_products.select { | o | o[ :dish_id ] == dish_id && \
-                                                                o[ :product_id ] == product_id } \
-                                                .fetch( 0, { id: 0, enabled: false } ) \
-                                                .slice( :id, :enabled )
-        td.cell_mark *{ class: idp[ :enabled ]  ? :check : '',
-          data: { id: idp[ :id ], dish_id: dish_id, product_id: product_id } }
+        td.cell_mark *{ class: dp[ :enabled ]  ? :check : '',
+          data: { id: dp[ :dishes_product_id ], dish_id: dish_id, product_id: product_id } }
 
