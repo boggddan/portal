@@ -58,8 +58,6 @@ class Institution::ReferenceBooksController < Institution::BaseController
       .order( sql_order )
       .to_json, symbolize_names: true )
 
-    p @dishes_products_norms
-
     # Только сгрупиррованые продкуты и блюда для html-таблицы
     @dpn_dishes_products = @dishes_products_norms.group_by { | o |
       { dishes_product_id: o[ :dishes_product_id ],
