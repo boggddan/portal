@@ -64,6 +64,17 @@ $ffIcon: 'Glyphicons Halflings';
     }
   }
 
+  &.info {
+    .header { color: #777 }
+    .header::before {
+      content: '\e086';
+    }
+
+    .caption {
+      color: #777;
+    }
+  }
+
   &.error {
     .header { color: red }
     .header::before {

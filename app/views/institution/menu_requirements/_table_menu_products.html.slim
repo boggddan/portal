@@ -75,6 +75,7 @@ h2.icon Продукти харчування
   tbody
     - products_type_id = 0
     - @menu_products_prices.each do | mpp |
+      - product_id = mpp[ :product_id ]
 
       - if products_type_id != mpp[ :products_type_id ]
           - products_type_id = mpp[ :products_type_id ]
@@ -104,20 +105,30 @@ h2.icon Продукти харчування
         td.count.price = mpp[ :price ]
         td.count.balance = mpp[ :balance ]
         - @mp_meals.each do | ml |
-          - @mp_meals_dishes.select{ | o | o[ :meal_id ] == ml[ :id ] }.each_with_index do | md, mdIndex |
+          - meal_id = ml[ :id ]
+
+          - @mp_meals_dishes \
+            .select{ | o | o[ :meal_id ] == meal_id } \
+            .each_with_index do | md, mdIndex |
+
             - @mp_categories.each_with_index do | cc, ccIndex |
               - children_category_id = cc [ :id ]
               - last_dish = cats_size == ccIndex + 1 ? :last_dish : nil
               - last_meal = cats_size == ccIndex + 1 && ml[ :count ] == mdIndex + 1 ? :last_meal : nil
-              - meal_id = md[ :meal_id ]
-              - value = @menu_products.select { | mp | mp[ :product_id ] == mpp[ :id ] \
-              && mp[ :meal_id ] == meal_id && mp[ :dish_id ] == md[ :dish_id ] \
-              && mp[ :children_category_id ] == children_category_id } \
-              .fetch( 0, { id: 0, count_plan: 0, count_fact: 0 } ).slice( :id, :count_plan, :count_fact )
+
+              - value = @menu_products.select { | o | \
+                  o[ :product_id ] == product_id && \
+                  o[ :meal_id ] == meal_id && \
+                  o[ :dish_id ] == md[ :dish_id ] && \
+                  o[ :children_category_id ] == children_category_id } \
+                .fetch( 0, { id: 0, count_plan: 0, count_fact: 0 } ) \
+                .slice( :id, :count_plan, :count_fact )
 
               td.count.cell_data *{ class: last_meal || last_dish,
-              data: { meal_id: md[ :meal_id ], children_category_id: children_category_id,
-              count_plan: value[ :count_plan ], count_fact: value[ :count_fact ] } }
+                data: { meal_id: meal_id,
+                  children_category_id: children_category_id,
+                  count_plan: value[ :count_plan ],
+                  count_fact: value[ :count_fact ] } }
 
                 &text *{ data: { id: value[ :id ] } }
 

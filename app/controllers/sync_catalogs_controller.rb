@@ -2127,7 +2127,7 @@ class SyncCatalogsController < ApplicationController
       dishes_products_norms: [ :institution_code, :dish_code, :product_code, :children_category_code, :amount]
     )[ :dishes_products_norms ]
 
-    institutions_codes = dishes_products_norms.group_by { | o | o[ :institution_code ] || 0 }.keys
+    institutions_codes = dishes_products_norms.group_by { | o | o[ :institution_code ].to_i || 0 }.keys
     institutions = exists_codes( :institutions, institutions_codes )
     errors << institutions[ :error ] unless institutions[ :status ]
 
@@ -2153,7 +2153,7 @@ class SyncCatalogsController < ApplicationController
             t[ :product_id ] == products[ :obj ][ o[ :product_code ] ] }
           .fetch(0, { # Если не нашло ничего значит добавляем ID = 0, это те записи которые будут вставлени в таблицу <dishes_products>
             id: 0,
-            institution_id: institutions[ :obj ][ o[ :institution_code ] ],
+            institution_id: institutions[ :obj ][ o[ :institution_code ].to_i ],
             dish_id: dishes[ :obj ][ o[ :dish_code ] ],
             product_id: products[ :obj ][ o[ :product_code ] ] } )
           .merge!(

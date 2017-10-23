@@ -14,14 +14,26 @@ class FormSplash {
     const iframe = this.parentElem.querySelector( 'iframe' );
 
     this.parentElem.classList.remove( 'print' );
+    this.parentElem.classList.remove( 'info' );
     this.parentElem.classList.remove( 'error' );
 
     this.parentElem.classList.add( type );
-    header.firstChild.textContent = type === 'print' ? 'Друк документа:' : 'Помилка:';
     this.parentElem.querySelector( '.caption' ).textContent = caption;
 
-    if ( type === 'error' ) iframe.srcdoc = data; else iframe.src = data;
+    let captionType = '';
 
+    if ( type === 'error' ) {
+      iframe.srcdoc = data;
+      captionType = 'Помилка:';
+    } else if ( type === 'info' ) {
+      iframe.srcdoc = data;
+      captionType = 'Інформація:';
+    } else if ( type === 'print' ) {
+      iframe.src = data;
+      captionType = 'Друк документа:';
+    }
+
+    header.firstChild.textContent = captionType;
     this.parentElem.classList.remove( 'hide' );
   }
 

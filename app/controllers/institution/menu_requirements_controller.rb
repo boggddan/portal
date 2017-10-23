@@ -255,11 +255,11 @@ class Institution::MenuRequirementsController < Institution::BaseController
     @menu_products_prices = JSON.parse( MenuProductsPrice
       .joins( { product: :products_type } )
       .select( :product_id,
-                :price,
-                :balance,
-                'products.products_type_id',
-                'products_types.name AS products_type_name',
-                'products.name AS product_name' )
+               :price,
+               :balance,
+               'products.products_type_id',
+               'products_types.name AS products_type_name',
+               'products.name AS product_name' )
       .where( menu_requirement_id: menu_requirement_id )
       .order( 'products_types.priority',
               'products_types.name',
@@ -384,6 +384,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
     menu_products_price = JSON.parse( MenuProductsPrice
       .joins( :product )
       .select( :id,
+               :product_id,
                :price,
                :balance,
                'products.code',
@@ -398,7 +399,8 @@ class Institution::MenuRequirementsController < Institution::BaseController
       menu_products_prices_sql = ''
 
       actual_prices = return_prices[ :actual_prices ]
-      modify_prices = [ ]
+      prices_message = [ ]
+      prices_data = [ ]
 
       menu_products_price.each { | mpp |
         actual_price = actual_prices.find { | o | o[ :product ].strip == mpp[ :code ] }
@@ -408,10 +410,16 @@ class Institution::MenuRequirementsController < Institution::BaseController
           balance = actual_price[ :quantity ].to_f.truncate( 3 )
 
           if price != mpp[ :price ].to_f || balance != mpp[ :balance ].to_f
-            modify_prices << {
+            prices_message << {
               'Продукт' => mpp[ :name ],
               'Ціна' => price,
               'Залишок' => balance
+            }
+
+            prices_data << {
+              product_id: mpp[ :product_id ],
+              price: price,
+              balance: balance
             }
 
             menu_products_prices_sql << <<-SQL.squish
@@ -424,9 +432,9 @@ class Institution::MenuRequirementsController < Institution::BaseController
         end
       }
 
-      if modify_prices.any?
-        ActiveRecord::Base.connection.execute( menu_products_prices_sql )
-        result = { status: false, caption: 'Оновлені продукти', message: modify_prices }
+      if prices_data.any?
+        # ActiveRecord::Base.connection.execute( menu_products_prices_sql )
+        result = { status: true, caption: 'Оновлені продукти', message: prices_message, data: prices_data }
       else
         result = { status: true }
       end

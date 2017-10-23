@@ -208,7 +208,12 @@ class MenuRequirementProducts {
     const data = { id: this.dataId };
     const { parentElem: { dataset: { pathUpdatePrice: url } } } = this;
     // const successAjax = ( ) => window.location.reload( );
-    MyLib.ajax( caption, url, 'post', data, 'json', null, true );
+
+    ( async () => {
+      const prices = await MyLib.ajax( caption, url, 'post', data, 'json', null, true );
+
+    // console.log( prices );
+    } )();
   }
 
   clickMdCell( target ) {

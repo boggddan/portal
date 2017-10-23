@@ -128,6 +128,7 @@ class MyLib {
   }
 
   static ajax( caption, url, type, dataValue, dataType, callSuccess, loader = true ) {
+    let result = null;
     this.pageLoader( loader );
 
     const scriptRun = text => {
@@ -137,27 +138,37 @@ class MyLib {
     };
 
     const success = data => {
+      let returnSuccess = null;
+
       if ( dataType === 'json' ) {
-        if ( data.status ) {
-          const { href, view, data: dataText } = data;
+        const { caption: dataCaption = caption, message: dataMessage, status: dataStatus } = data;
+
+        let dataMessageContent = '';
+        if ( dataMessage ) dataMessageContent = `<pre>${ JSON.stringify( dataMessage, null, 2 ) }</pre>`;
+
+        if ( dataStatus ) {
+          const { href, view, data: dataData } = data;
           if ( href ) {
             if ( href.search( /.pdf$/i ) === -1 ) this.assignLocation( href );
             else objFormSplash.open( 'print', caption, href );
           } else if ( view ) {
             document.getElementById( 'view' ).innerHTML = view;
+          } else if ( dataMessage ) {
+            objFormSplash.open( 'info', dataCaption, dataMessageContent );
+            returnSuccess = dataData;
           }
 
           if ( callSuccess ) callSuccess( );
         } else {
-          let dataMessage = '';
-          if ( data.message ) dataMessage = `<pre>${ JSON.stringify( data.message, null, 2 ) }</pre>`;
-          objFormSplash.open( 'error', data.caption || caption, dataMessage );
+          objFormSplash.open( 'error', dataCaption, dataMessageContent );
         }
       } else if ( dataType === 'script' ) {
         scriptRun( data );
       }
 
       if ( loader ) this.pageLoader( false );
+
+      return returnSuccess;
     };
 
     const sendAjax = async ( ) => {
@@ -182,7 +193,7 @@ class MyLib {
       return data;
     };
 
-    sendAjax( )
+    return sendAjax( )
       .then( data => success( data ) )
       .catch( reason => objFormSplash.open( 'error', caption, reason ) );
   }
