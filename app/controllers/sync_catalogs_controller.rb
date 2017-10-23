@@ -2148,7 +2148,7 @@ class SyncCatalogsController < ApplicationController
         .map.with_index { | o, i | o.merge!( index: i + 1 ) } # нумеруем индексы что бы в случае несоотвествия структуры вывести номер строки
         .group_by { | o | dishes_products_all # группируем с одновременным добавлением :id по :code
           .select { | t |
-            t[ :institution_id ] == institutions[ :obj ][ o[ :institution_code ] ] &&
+            t[ :institution_id ] == institutions[ :obj ][ o[ :institution_code ].to_i ] &&
             t[ :dish_id ] == dishes[ :obj ][ o[ :dish_code ] ] &&
             t[ :product_id ] == products[ :obj ][ o[ :product_code ] ] }
           .fetch(0, { # Если не нашло ничего значит добавляем ID = 0, это те записи которые будут вставлени в таблицу <dishes_products>
@@ -2166,6 +2166,7 @@ class SyncCatalogsController < ApplicationController
       dishes_products_new = dishes_products_norms_update.select { | k, _ | k[ :id ].zero? }
 
       if dishes_products_new.present? # Вставка недостающих записей в <dishes_products>
+
         fields_dp = %w( institution_id dish_id product_id ).join( ',' )
         values_dp = dishes_products_new
           .map { | k, _ | "( #{ k
