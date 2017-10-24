@@ -34,7 +34,6 @@ class Institution::MenuRequirementsController < Institution::BaseController
 
     if true
       # Нормы
-
       sql_fields_distinct = %w(
         dishes_products_norms.children_category_id
         dishes_products.dish_id
@@ -448,6 +447,8 @@ class Institution::MenuRequirementsController < Institution::BaseController
   def create # Создание документа
     result = { }
 
+    institution_id = current_user[ :userable_id ]
+
     meals_dishes = JSON.parse( Meal
       .select( 'meals.id as meal_id', 'dishes.id as dish_id' )
       .joins( 'LEFT JOIN dishes ON true' )
@@ -457,22 +458,40 @@ class Institution::MenuRequirementsController < Institution::BaseController
     children_categories = JSON.parse( ChildrenCategory
       .joins( :children_groups )
       .select( :id )
-      .where( 'children_groups.institution_id = ?', current_user[ :userable_id ] )
+      .where( 'children_groups.institution_id = ?', institution_id )
       .group( :id )
       .order( :name )
       .to_json, symbolize_names: true )
 
-    dishes_products = JSON.parse( DishesProduct
-      .select( :dish_id )
-      .where( institution_id: current_user[ :userable_id ] )
-      .group( :id )
-      .having( 'bool_or( enabled ) = true' )
-      .order( :dish_id )
-      .to_json, symbolize_names: true )
+    # Нормы
+    sql_institution_empty = <<-SQL
+        dishes_products.institution_id = ( SELECT id FROM institutions WHERE code = 0 )
+      SQL
 
-    if meals_dishes.present? && children_categories.present? && ( dishes_products.present? || false )
+    sql_where = <<-SQL
+        ( dishes_products.institution_id = #{ institution_id }
+          OR #{ sql_institution_empty } )
+        AND
+          dishes_products_norms.children_category_id IN
+            ( SELECT DISTINCT children_category_id FROM children_groups
+              WHERE institution_id = #{ institution_id } )
+      SQL
+
+    dishes_products = JSON.parse( DishesProduct
+      .joins( :dishes_products_norms )
+      .select( 'DISTINCT ON( dishes_products.dish_id ) bool_or( enabled ) AS enabled',
+               :dish_id )
+      .where( sql_where )
+      .group( :institution_id, :dish_id )
+      .order( :dish_id,
+             "CASE WHEN #{ sql_institution_empty } THEN 0 ELSE 1 END DESC" )
+      .to_json, symbolize_names: true )
+      .select{ | o | o[ :enabled ] }
+    ###
+
+    if children_categories.present? && ( dishes_products.present? || false )
       ActiveRecord::Base.transaction do
-        data = { institution_id: current_user[ :userable_id ],
+        data = { institution_id: institution_id,
                  branch_id: current_institution[ :branch_id ] }
         id = insert_base_single( 'menu_requirements', data )
 
@@ -537,7 +556,10 @@ class Institution::MenuRequirementsController < Institution::BaseController
       end
     else
       result = { status: false,
-        message: 'Незаповенені довідники (children_categories,meals,dishes,institutions_dishes_products)!' }
+        message:
+          "#{ children_categories.present? ? '' : 'Немає групп у підрозділі, заповнненя через ІС або web-servis <children_groups>. ' }" +
+          "#{ dishes_products.present? ? '' : 'Невибрано жодної страви у <Довіднии -> Технологічна карта>. ' } "
+      }
     end
 
    render json: result
