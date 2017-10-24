@@ -20,6 +20,8 @@
 .byebug_history
 
 /public/assets
+/public/web_send
+
 /config/database.yml
 /config/savon.yml
 /db/schema.rb

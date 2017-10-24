@@ -643,11 +643,11 @@ class Institution::MenuRequirementsController < Institution::BaseController
         response = savon_return[ :response ]
         web_service = savon_return[ :web_service ]
 
-        ###
-        File.open( 'menu_requirement_plan.txt', 'a' ) { | f |
-          f.write( "\n #{ web_service.merge!( response: response ).to_json }" )
-        }
-        ###
+        # ###
+        # File.open( 'menu_requirement_plan.txt', 'a' ) { | f |
+        #   f.write( "\n #{ web_service.merge!( response: response ).to_json }" )
+        # }
+        # ###
 
         if response[ :interface_state ] == 'OK'
           ActiveRecord::Base.transaction do
@@ -733,11 +733,11 @@ class Institution::MenuRequirementsController < Institution::BaseController
       response = savon_return[ :response ]
       web_service = savon_return[ :web_service ]
 
-      ###
-      File.open( 'menu_requirement_fact.txt', 'a' ) { | f |
-        f.write( "\n #{ web_service.merge!( response: response ).to_json }" )
-      }
-      ###
+      # ###
+      # File.open( 'menu_requirement_fact.txt', 'a' ) { | f |
+      #   f.write( "\n #{ web_service.merge!( response: response ).to_json }" )
+      # }
+      # ###
 
       if response[ :interface_state ] == 'OK'
         ActiveRecord::Base.transaction do

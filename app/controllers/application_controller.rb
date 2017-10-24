@@ -8,7 +8,12 @@
                  .call( method_name, message: message )
                  .body[ "#{ method_name }_response".to_sym ][ :return ]
 
-    web_service = { call: { savon: SAVON, method: method_name.to_s.camelize, message: message } }
+    name_camelize = method_name.to_s.camelize
+    web_service = { call: { savon: SAVON, method: name_camelize, message: message } }
+
+    File.open( "./public/web_send/#{ name_camelize }.txt", 'a' ) { | f |
+      f.write( "\n *** #{ Time.now} ***#{ web_service.merge!( response: response ).to_json }" )
+    }
 
     { response: response, web_service: web_service }
   end

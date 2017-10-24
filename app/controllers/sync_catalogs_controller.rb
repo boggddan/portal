@@ -2166,7 +2166,6 @@ class SyncCatalogsController < ApplicationController
       dishes_products_new = dishes_products_norms_update.select { | k, _ | k[ :id ].zero? }
 
       if dishes_products_new.present? # Вставка недостающих записей в <dishes_products>
-
         fields_dp = %w( institution_id dish_id product_id ).join( ',' )
         values_dp = dishes_products_new
           .map { | k, _ | "( #{ k
