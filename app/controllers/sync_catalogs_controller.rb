@@ -1565,7 +1565,13 @@ class SyncCatalogsController < ApplicationController
           error.merge!( children_categories: error_children_categories ) if error_children_categories.any?
           error.merge!( error_products: error_products ) if error_products.any?
 
-          raise ActiveRecord::Rollback unless error.empty?
+          if error.empty?
+            File.open( "./public/web_get/cu_menu_requirement_plan.txt", 'a' ) { | f |
+              f.write( "\n *** #{ Time.now} ***#{ params.to_json }" )
+            }
+          else
+            raise ActiveRecord::Rollback
+          end
         end
       end
     end
@@ -1685,8 +1691,12 @@ class SyncCatalogsController < ApplicationController
                                               count_exemption_fact: 0 ).delete_all
 
               menu_products.where( count_plan: 0, count_fact: 0 ).delete_all
-              menu_meals_dish.update_all( is_enabled: true )
+              menu_meals_dish.update( is_enabled: true )
               menu_requirement.menu_meals_dishes.where( is_enabled: false ).delete_all
+
+              File.open( "./public/web_get/cu_menu_requirement_fact.txt", 'a' ) { | f |
+                f.write( "\n *** #{ Time.now} ***#{ params.to_json }" )
+              }
             else
               raise ActiveRecord::Rollback
             end

@@ -347,8 +347,11 @@ class Institution::MenuRequirementsController < Institution::BaseController
     #   .select { | o |
     #   [ "000000028", "000000063", "000000077", "000000110" ].include?( o[ :code ] )
     # }
+
+    products<< { code: "000000028" }
     goods = products
       .map { | o | { 'Product' => o[ :code ] } }
+
 
       message = {
       'CreateRequest' => {
@@ -364,6 +367,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
     web_service = savon_return[ :web_service ]
 
     actual_prices = response[ :array_of_goods ]
+
     if response[ :interface_state ] == 'OK'&& actual_prices
       result = { status: true, actual_prices: actual_prices }
     else
@@ -635,7 +639,9 @@ class Institution::MenuRequirementsController < Institution::BaseController
 
       menu_products = JSON.parse( MenuMealsDish
         .joins( menu_products: [ :children_category, :product ] )
+        .joins( 'LEFT JOIN menu_products_prices ON menu_products_prices.product_id = menu_products.product_id' )
         .select( 'SUM( menu_products.count_plan ) AS count_plan',
+                 'SUM( menu_products.count_plan * menu_products_prices.price ) AS amount',
                  'products.code AS product_code',
                  'children_categories.code AS category_code' )
         .where( menu_requirement_id: menu_requirement_id )
@@ -651,7 +657,8 @@ class Institution::MenuRequirementsController < Institution::BaseController
 
         goods = menu_products.map { | o | { 'CodeOfCategory' => o[ :category_code ],
                                           'CodeOfGoods' => o[ :product_code ],
-                                          'Quantity' => o[ :count_plan ] } }
+                                          'Quantity' => o[ :count_plan ],
+                                          'Amount' => o[ :amount ] } }
 
         message = { 'CreateRequest' => { 'Branch_id' => current_branch[ :code ],
                                         'Institutions_id' =>  current_institution[ :code ],
@@ -664,12 +671,6 @@ class Institution::MenuRequirementsController < Institution::BaseController
         savon_return = get_savon( :create_menu_requirement_plan, message )
         response = savon_return[ :response ]
         web_service = savon_return[ :web_service ]
-
-        # ###
-        # File.open( 'menu_requirement_plan.txt', 'a' ) { | f |
-        #   f.write( "\n #{ web_service.merge!( response: response ).to_json }" )
-        # }
-        # ###
 
         if response[ :interface_state ] == 'OK'
           ActiveRecord::Base.transaction do
@@ -754,12 +755,6 @@ class Institution::MenuRequirementsController < Institution::BaseController
       savon_return = get_savon( :create_menu_requirement_fact, message )
       response = savon_return[ :response ]
       web_service = savon_return[ :web_service ]
-
-      # ###
-      # File.open( 'menu_requirement_fact.txt', 'a' ) { | f |
-      #   f.write( "\n #{ web_service.merge!( response: response ).to_json }" )
-      # }
-      # ###
 
       if response[ :interface_state ] == 'OK'
         ActiveRecord::Base.transaction do
