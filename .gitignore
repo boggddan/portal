@@ -21,6 +21,7 @@
 
 /public/assets
 /public/web_send
+/public/web_get
 
 /config/database.yml
 /config/savon.yml
