@@ -348,12 +348,10 @@ class Institution::MenuRequirementsController < Institution::BaseController
     #   [ "000000028", "000000063", "000000077", "000000110" ].include?( o[ :code ] )
     # }
 
-    products<< { code: "000000028" }
     goods = products
       .map { | o | { 'Product' => o[ :code ] } }
 
-
-      message = {
+    message = {
       'CreateRequest' => {
         'Branch_id' => current_branch[ :code ],
         'Institutions_id' => current_institution[ :code ],
@@ -366,9 +364,10 @@ class Institution::MenuRequirementsController < Institution::BaseController
     response = savon_return[ :response ]
     web_service = savon_return[ :web_service ]
 
-    actual_prices = response[ :array_of_goods ]
+    array_of_goods = response[ :array_of_goods ]
 
-    if response[ :interface_state ] == 'OK'&& actual_prices
+    if response[ :interface_state ] == 'OK'&& array_of_goods
+      actual_prices = array_of_goods.class == Hash ? [ ] << array_of_goods : array_of_goods
       result = { status: true, actual_prices: actual_prices }
     else
       result = { status: false, caption: 'Неуспішна сихронізація з ІС',
@@ -637,11 +636,18 @@ class Institution::MenuRequirementsController < Institution::BaseController
           .where.not( count_exemption_plan: 0 ) )
         .to_json, symbolize_names: true )
 
+      joins_menu_products_prices = <<-SQL.squish
+            LEFT JOIN menu_products_prices ON
+                menu_products_prices.product_id = menu_products.product_id
+              AND
+                menu_products_prices.menu_requirement_id = menu_meals_dishes.menu_requirement_id
+          SQL
+
       menu_products = JSON.parse( MenuMealsDish
         .joins( menu_products: [ :children_category, :product ] )
-        .joins( 'LEFT JOIN menu_products_prices ON menu_products_prices.product_id = menu_products.product_id' )
+        .joins( joins_menu_products_prices )
         .select( 'SUM( menu_products.count_plan ) AS count_plan',
-                 'SUM( menu_products.count_plan * menu_products_prices.price ) AS amount',
+                 'SUM( ROUND( menu_products.count_plan * menu_products_prices.price, 2 ) ) AS amount',
                  'products.code AS product_code',
                  'children_categories.code AS category_code' )
         .where( menu_requirement_id: menu_requirement_id )
@@ -651,23 +657,27 @@ class Institution::MenuRequirementsController < Institution::BaseController
         .to_json, symbolize_names: true )
 
       if menu_children_categories.present? && menu_products.present?
-        categories = menu_children_categories.map { | o | { 'CodeOfCategory' => o[ :code ],
-                                                            'QuantityAll' => o[ :count_all_plan ].to_s,
-                                                            'QuantityExemption' => o[ :count_exemption_plan ].to_s } }
+        categories = menu_children_categories.map { | o |
+          { 'CodeOfCategory' => o[ :code ],
+            'QuantityAll' => o[ :count_all_plan ].to_s,
+            'QuantityExemption' => o[ :count_exemption_plan ].to_s } }
 
-        goods = menu_products.map { | o | { 'CodeOfCategory' => o[ :category_code ],
-                                          'CodeOfGoods' => o[ :product_code ],
-                                          'Quantity' => o[ :count_plan ],
-                                          'Amount' => o[ :amount ] } }
+        goods = menu_products.map { | o | {
+          'CodeOfCategory' => o[ :category_code ],
+          'CodeOfGoods' => o[ :product_code ],
+          'Quantity' => o[ :count_plan ],
+          'Amount' => o[ :amount ] } }
 
-        message = { 'CreateRequest' => { 'Branch_id' => current_branch[ :code ],
-                                        'Institutions_id' =>  current_institution[ :code ],
-                                        'SplendingDate' => menu_requirement[ :splendingdate ],
-                                        'Date' => menu_requirement[ :date ],
-                                        'Goods' => goods,
-                                        'Categories' =>  categories,
-                                        'NumberFromWebPortal' => menu_requirement[ :number ],
-                                        'User' => current_user[ :username ] } }
+        message = { 'CreateRequest' =>
+          { 'Branch_id' => current_branch[ :code ],
+            'Institutions_id' =>  current_institution[ :code ],
+            'SplendingDate' => menu_requirement[ :splendingdate ],
+            'Date' => menu_requirement[ :date ],
+            'Goods' => goods,
+            'Categories' =>  categories,
+            'NumberFromWebPortal' => menu_requirement[ :number ],
+            'User' => current_user[ :username ] } }
+
         savon_return = get_savon( :create_menu_requirement_plan, message )
         response = savon_return[ :response ]
         web_service = savon_return[ :web_service ]
@@ -721,10 +731,19 @@ class Institution::MenuRequirementsController < Institution::BaseController
         .where.not( count_exemption_fact: 0 ) )
       .to_json, symbolize_names: true )
 
+    joins_menu_products_prices = <<-SQL.squish
+        LEFT JOIN menu_products_prices ON
+            menu_products_prices.product_id = menu_products.product_id
+          AND
+            menu_products_prices.menu_requirement_id = menu_meals_dishes.menu_requirement_id
+      SQL
+
     menu_products = JSON.parse( MenuMealsDish
       .joins( menu_products: [ :children_category, :product ] )
-      .select( 'SUM( menu_products.count_fact ) as count_fact',
-               'products.code AS product_code',
+      .joins( joins_menu_products_prices )
+      .select( 'SUM( menu_products.count_fact ) AS count_fact',
+               'SUM( ROUND( menu_products.count_fact * menu_products_prices.price, 2 ) ) AS amount',
+             'products.code AS product_code',
                'children_categories.code AS category_code' )
       .where( menu_requirement_id: menu_requirement_id )
       .where( '( menu_products.count_fact != ? OR menu_products.count_plan != ? )', 0, 0 )
@@ -734,24 +753,31 @@ class Institution::MenuRequirementsController < Institution::BaseController
 
     if menu_children_categories && menu_products
 
-      goods = menu_products.map { | o | { 'CodeOfCategory' => o[ :category_code ],
-                                        'CodeOfGoods' => o[ :product_code ],
-                                        'Quantity' => o[ :count_fact ],
-                                        'Amount' => 0 }
+      goods = menu_products.map { | o |
+        { 'CodeOfCategory' => o[ :category_code ],
+          'CodeOfGoods' => o[ :product_code ],
+          'Quantity' => o[ :count_fact ],
+          'Amount' => o[ :amount ] }
     }
 
-      categories = menu_children_categories.map { | o | { 'CodeOfCategory' => o[ :code ],
-                                                          'QuantityAll' => o[ :count_all_fact ],
-                                                          'QuantityExemption' => o[ :count_exemption_fact ] } }
+      categories = menu_children_categories.map { | o |
+        { 'CodeOfCategory' => o[ :code ],
+          'QuantityAll' => o[ :count_all_fact ],
+          'QuantityExemption' => o[ :count_exemption_fact ] } }
 
-      message = { 'CreateRequest' => { 'Branch_id' => current_branch[ :code ],
-                                       'Institutions_id' =>  current_institution[ :code],
-                                       'SplendingDate' =>menu_requirement[ :splendingdate ],
-                                       'Date' => menu_requirement[ :date ],
-                                       'Goods' => goods,
-                                       'Categories' => categories,
-                                       'NumberFromWebPortal' => menu_requirement[ :number ],
-                                       'User' => current_user[ :username ] } }
+      message = {
+        'CreateRequest' => {
+          'Branch_id' => current_branch[ :code ],
+          'Institutions_id' =>  current_institution[ :code],
+          'SplendingDate' =>menu_requirement[ :splendingdate ],
+          'Date' => menu_requirement[ :date ],
+          'Goods' => goods,
+          'Categories' => categories,
+          'NumberFromWebPortal' => menu_requirement[ :number ],
+          'User' => current_user[ :username ]
+        }
+      }
+
       savon_return = get_savon( :create_menu_requirement_fact, message )
       response = savon_return[ :response ]
       web_service = savon_return[ :web_service ]
