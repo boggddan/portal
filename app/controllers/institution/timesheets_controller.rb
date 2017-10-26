@@ -13,6 +13,7 @@ class Institution::TimesheetsController < Institution::BaseController
   def delete # Удаление документа
     Timesheet.find( params[ :id ] ).destroy
     render json: { status: true }
+
   end
 
   def create
@@ -51,6 +52,8 @@ class Institution::TimesheetsController < Institution::BaseController
 
       result = { }
       ts_data = response[ :ts ]
+
+      ts_data.map { | o | }
 
       if response[ :interface_state ] == 'OK' && ts_data && ts_data.present?
         error = { }

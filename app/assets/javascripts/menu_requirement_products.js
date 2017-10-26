@@ -211,8 +211,7 @@ class MenuRequirementProducts {
 
     ( async () => {
       const prices = await MyLib.ajax( caption, url, 'post', data, 'json', null, true );
-
-    // console.log( prices );
+      console.log( prices );
     } )();
   }
 
