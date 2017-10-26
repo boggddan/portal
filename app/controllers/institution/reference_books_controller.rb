@@ -81,39 +81,39 @@ class Institution::ReferenceBooksController < Institution::BaseController
       .keys
   end
 
-  def dishes_products_update # Обновление "Продукти в стравах підрозділу"
-    data = params.permit( { dishes_products: [ :id, :dish_id, :product_id ] }, :enabled ).to_h
-    enabled = data[ :enabled ]
+  # def dishes_products_update # Обновление "Продукти в стравах підрозділу"
+  #   data = params.permit( { dishes_products: [ :id, :dish_id, :product_id ] }, :enabled ).to_h
+  #   enabled = data[ :enabled ]
 
-    if data.present?
-      sql = ''
+  #   if data.present?
+  #     sql = ''
 
-      ids = data[ :dishes_products ].select{ | o | o [ :id ].nonzero? }.map { | o | o[ :id ] }
+  #     ids = data[ :dishes_products ].select{ | o | o [ :id ].nonzero? }.map { | o | o[ :id ] }
 
-      sql << <<-SQL.squish if ids.any?
-          UPDATE dishes_products SET
-            enabled = #{ enabled }
-              FROM UNNEST( ARRAY #{ ids.to_s } ) as ids
-              WHERE id = ids;
-        SQL
+  #     sql << <<-SQL.squish if ids.any?
+  #         UPDATE dishes_products SET
+  #           enabled = #{ enabled }
+  #             FROM UNNEST( ARRAY #{ ids.to_s } ) as ids
+  #             WHERE id = ids;
+  #       SQL
 
-      fields = %w( institution_id dish_id product_id enabled ).join( ',' )
-      dishes_products = data[ :dishes_products ]
-        .select{ | o | o [ :id ].zero? }
-        .map{ | o | "( #{ ( [ current_user[ :userable_id ], enabled ].insert( 1, o.slice( :dish_id, :product_id ).values ) ).join( ',' ) } )" }
-        .join( ',' )
+  #     fields = %w( institution_id dish_id product_id enabled ).join( ',' )
+  #     dishes_products = data[ :dishes_products ]
+  #       .select{ | o | o [ :id ].zero? }
+  #       .map{ | o | "( #{ ( [ current_user[ :userable_id ], enabled ].insert( 1, o.slice( :dish_id, :product_id ).values ) ).join( ',' ) } )" }
+  #       .join( ',' )
 
-      sql << <<-SQL.squish.prepend( ' ' ) if dishes_products.present?
-          INSERT INTO dishes_products ( #{ fields } )
-            VALUES #{ dishes_products }
-            ON CONFLICT ( institution_id, dish_id, product_id )
-              DO UPDATE SET enabled = EXCLUDED.enabled ;
-        SQL
+  #     sql << <<-SQL.squish.prepend( ' ' ) if dishes_products.present?
+  #         INSERT INTO dishes_products ( #{ fields } )
+  #           VALUES #{ dishes_products }
+  #           ON CONFLICT ( institution_id, dish_id, product_id )
+  #             DO UPDATE SET enabled = EXCLUDED.enabled ;
+  #       SQL
 
-      ActiveRecord::Base.connection.execute( sql ) if sql.present?
-    end
+  #     ActiveRecord::Base.connection.execute( sql ) if sql.present?
+  #   end
 
-    render json: { status: true }
-  end
+  #   render json: { status: true }
+  # end
 
 end

@@ -19,6 +19,14 @@ table.table
     - products_type_id = 0
 
     - @dpn_dishes_products.each do | dp |
+      - product_name = dp[ :product_name ]
+      - koef_measure = 1
+
+      - product_name = dp[ :product_name ]
+
+      - if /(кг|л)$/.match( product_name )
+        - product_name.gsub!( /(кг|л)$/, 'кг' => 'гр', 'л' => 'мл')
+        - koef_measure = 1000
 
       - if dishes_category_id != dp[ :dishes_category_id ]
         - dishes_category_id = dp[ :dishes_category_id ]
@@ -49,7 +57,7 @@ table.table
           td = @dishes_products_norms.select{ | o | o[ :children_category_id ] == cc[ :children_category_id ] && \
                                   o[ :dish_id ] == dish_id && \
                                   o[ :product_id ] == product_id } \
-                  .fetch( 0, { amount: '-' } )[ :amount ]
+                  .fetch( 0, { amount: '-' } )[ :amount ].to_i * koef_measure
         td.cell_mark *{ class: dp[ :enabled ]  ? :check : '',
           data: { id: dp[ :dishes_product_id ], dish_id: dish_id, product_id: product_id } }
 
