@@ -13,6 +13,46 @@ class Institution::MenuRequirementsController < Institution::BaseController
     render json: { status: true }
   end
 
+  def get_dishes_products_norms( institution_id )
+    # Нормы
+    sql_fields_distinct = %w(
+      dishes_products_norms.children_category_id
+      dishes_products.dish_id
+      dishes_products.product_id
+    ).join( ',' )
+
+    sql_institution_empty = <<-SQL
+        dishes_products.institution_id = ( SELECT id FROM institutions WHERE code = 0 )
+      SQL
+
+    sql_where = <<-SQL
+        ( dishes_products.institution_id = #{ institution_id }
+          OR #{ sql_institution_empty } )
+        AND
+          dishes_products_norms.children_category_id IN
+            ( SELECT DISTINCT children_category_id FROM children_groups
+              WHERE institution_id = #{ institution_id } )
+        AND dishes_products.enabled = true
+      SQL
+
+    sql_order = <<-SQL
+        #{ sql_fields_distinct },
+        CASE WHEN #{ sql_institution_empty } THEN 0 ELSE 1 END DESC
+      SQL
+
+    dishes_products_norms = JSON.parse( DishesProduct
+      .joins( :dishes_products_norms )
+      .select(
+        "DISTINCT ON( #{ sql_fields_distinct } ) dishes_products.dish_id",
+        :product_id,
+        'dishes_products_norms.children_category_id',
+        'dishes_products_norms.amount'
+      )
+      .where( sql_where )
+      .order( sql_order )
+      .to_json, symbolize_names: true )
+  end
+
   def create_products
     menu_requirement_id = params[ :id ]
 
@@ -33,47 +73,9 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .to_json, symbolize_names: true )
 
     if true
-      # Нормы
-      sql_fields_distinct = %w(
-        dishes_products_norms.children_category_id
-        dishes_products.dish_id
-        dishes_products.product_id
-      ).join( ',' )
-
-      sql_institution_empty = <<-SQL
-          dishes_products.institution_id = ( SELECT id FROM institutions WHERE code = 0 )
-        SQL
-
-      sql_where = <<-SQL
-          ( dishes_products.institution_id = #{ institution_id }
-            OR #{ sql_institution_empty } )
-          AND
-            dishes_products_norms.children_category_id IN
-              ( SELECT DISTINCT children_category_id FROM children_groups
-                WHERE institution_id = #{ institution_id } )
-          AND dishes_products.enabled = true
-        SQL
-
-      sql_order = <<-SQL
-          #{ sql_fields_distinct },
-          CASE WHEN #{ sql_institution_empty } THEN 0 ELSE 1 END DESC
-        SQL
-
-      dishes_products_norms = JSON.parse( DishesProduct
-        .joins( :dishes_products_norms )
-        .select(
-          "DISTINCT ON( #{ sql_fields_distinct } ) dishes_products.dish_id",
-          :product_id,
-          'dishes_products_norms.children_category_id',
-          'dishes_products_norms.amount'
-        )
-        .where( sql_where )
-        .order( sql_order )
-        .to_json, symbolize_names: true )
-
-      ###
+      @dishes_products_norms = get_dishes_products_norms( institution_id )
     else
-      dishes_products_norms = JSON.parse( MenuMealsDish
+      @dishes_products_norms = JSON.parse( MenuMealsDish
         .select( :dish_id,
                   'menu_children_categories.children_category_id AS children_category_id',
                   'products.id AS product_id',
@@ -107,7 +109,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
 
       if mmd[ :is_enabled ] && mmd[ :count ].zero?
 
-        dishes_products_norms
+        @dishes_products_norms
           .select{ | o | o[ :dish_id ] == dish_id }
           .each { | dpn |
             children_category_id = dpn[ :children_category_id ]
@@ -231,7 +233,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
     @menu_products = JSON.parse( MenuProduct
       .joins( { menu_meals_dish: [ :meal, :dish ] },
               :children_category )
-      .select( :id,
+              .select( :id,
               :product_id,
               :menu_meals_dish_id,
               :children_category_id,
@@ -285,7 +287,8 @@ class Institution::MenuRequirementsController < Institution::BaseController
                :number_sap,
                :number_saf,
                :date_sap,
-               :date_saf
+               :date_saf,
+               :institution_id
                 )
       .find( params[ :id ] )
       .to_json, symbolize_names: true )
@@ -311,6 +314,8 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .order( :children_category_id,
               cost_date: :desc )
       .to_json, symbolize_names: true )
+
+    @dishes_products_norms = get_dishes_products_norms( @menu_requirement[ :institution_id ] )
 
     menu_meals_dishes( @menu_requirement[ :id ] )
     menu_products( @menu_requirement[ :id ] )
@@ -344,10 +349,6 @@ class Institution::MenuRequirementsController < Institution::BaseController
   end
 
   def get_actual_price( date, products )
-    #   .select { | o |
-    #   [ "000000028", "000000063", "000000077", "000000110" ].include?( o[ :code ] )
-    # }
-
     goods = products
       .map { | o | { 'Product' => o[ :code ] } }
 

@@ -101,7 +101,9 @@ h2.icon Продукти харчування
             td
 
       tr.row_data
-        td.name = mpp[ :product_name ]
+        - product_name = mpp[ :product_name ]
+        - measure = (/, (.*)$/.match( product_name ) || Array.new( 2, '' ))[ 1 ].concat('/дитина')
+        td.name = product_name
         td.count.price = mpp[ :price ]
         td.count.balance = mpp[ :balance ]
         - @mp_meals.each do | ml |
@@ -124,13 +126,19 @@ h2.icon Продукти харчування
                 .fetch( 0, { id: 0, count_plan: 0, count_fact: 0 } ) \
                 .slice( :id, :count_plan, :count_fact )
 
+              - norm = @dishes_products_norms.find { | o | \
+                  o[ :product_id ] == product_id && \
+                  o[ :dish_id ] == md[ :dish_id ] && \
+                  o[ :children_category_id ] == children_category_id }
+
               td.count.cell_data *{ class: last_meal || last_dish,
                 data: { meal_id: meal_id,
                   children_category_id: children_category_id,
                   count_plan: value[ :count_plan ],
                   count_fact: value[ :count_fact ] } }
 
-                &text *{ data: { id: value[ :id ] } }
+                &text *{ data: { id: value[ :id ] },
+                  title: norm.present? ? "Норма #{ '%g' % norm[ :amount] } #{ measure }" : '' }
 
         - @mp_categories.each do | o |
           td *{ data: { meal_id: 0, count_pf: :plan, count_type: :count, children_category_id: o[ :id ] } }
