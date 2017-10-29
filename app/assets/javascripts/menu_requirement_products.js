@@ -207,12 +207,13 @@ class MenuRequirementProducts {
     const caption = `Обновлення данних цін та залишків з ІС [id: ${ this.dataId }]`;
     const data = { id: this.dataId };
     const { parentElem: { dataset: { pathUpdatePrice: url } } } = this;
-    // const successAjax = ( ) => window.location.reload( );
+    const successAjax = ( ) => setTimeout( ( ) => window.location.reload( ), 3000 );
 
-    ( async () => {
-      const prices = await MyLib.ajax( caption, url, 'post', data, 'json', null, true );
-      console.log( prices );
-    } )();
+    MyLib.ajax( caption, url, 'post', data, 'json', successAjax, true );
+
+    // ( async () => {
+    //   console.log( prices );
+    // } )();
   }
 
   clickMdCell( target ) {
