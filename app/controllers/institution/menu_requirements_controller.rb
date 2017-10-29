@@ -716,7 +716,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
         .joins( menu_products: [ :children_category, :product ] )
         .joins( joins_menu_products_prices )
         .select( 'SUM( menu_products.count_plan ) AS count_plan',
-                 'SUM( ROUND( menu_products.count_plan * menu_products_prices.price, 2 ) ) AS amount',
+                 'SUM( ROUND( menu_products.count_plan * menu_products_prices.price, 5 ) ) AS amount',
                  'products.code AS product_code',
                  'children_categories.code AS category_code' )
         .where( menu_requirement_id: menu_requirement_id )
@@ -813,7 +813,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .joins( menu_products: [ :children_category, :product ] )
       .joins( joins_menu_products_prices )
       .select( 'SUM( menu_products.count_fact ) AS count_fact',
-               'SUM( ROUND( menu_products.count_fact * menu_products_prices.price, 2 ) ) AS amount',
+               'SUM( ROUND( menu_products.count_fact * menu_products_prices.price, 5 ) ) AS amount',
              'products.code AS product_code',
                'children_categories.code AS category_code' )
       .where( menu_requirement_id: menu_requirement_id )
