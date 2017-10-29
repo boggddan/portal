@@ -378,6 +378,72 @@ class Institution::MenuRequirementsController < Institution::BaseController
     return result
   end
 
+
+
+  def update_price2( menu_requirement_id ) # Обновление остатков і цен продуктов
+    menu_requirement = JSON.parse( MenuRequirement
+    .select( :id, :splendingdate )
+    .find( menu_requirement_id )
+    .to_json, symbolize_names: true )
+
+    menu_products_price = JSON.parse( MenuProductsPrice
+      .joins( :product )
+      .select( :id,
+               :product_id,
+               :price,
+               :balance,
+               'products.code',
+               'products.name' )
+      .where( menu_requirement_id: menu_requirement[ :id ])
+      .order( 'products.name' )
+      .to_json, symbolize_names: true )
+
+    return_prices = get_actual_price( menu_requirement[ :splendingdate ], menu_products_price )
+
+    if return_prices[ :status ]
+      menu_products_prices_sql = ''
+
+      actual_prices = return_prices[ :actual_prices ]
+      prices_message = [ ]
+      prices_data = [ ]
+
+      menu_products_price.each { | mpp |
+        actual_price = actual_prices.find { | o | o[ :product ].strip == mpp[ :code ] }
+
+        if actual_price
+          price = actual_price[ :price ].to_f.truncate( 2 )
+          balance = actual_price[ :quantity ].to_f.truncate( 3 )
+
+          if price != mpp[ :price ].to_f || balance != mpp[ :balance ].to_f
+            prices_message << {
+              'Продукт' => mpp[ :name ],
+              'Ціна' => price,
+              'Залишок' => balance
+            }
+
+            prices_data << {
+              product_id: mpp[ :product_id ],
+              price: price,
+              balance: balance
+            }
+
+            menu_products_prices_sql << <<-SQL.squish
+                UPDATE menu_products_prices
+                  SET price = #{ price },
+                      balance =#{ balance }
+                  WHERE id = #{ mpp[ :id ] } ;
+              SQL
+          end
+        end
+      }
+
+      if prices_data.any?
+        ActiveRecord::Base.connection.execute( menu_products_prices_sql )
+      end
+    end
+  end
+
+
   def update_price # Обновление остатков і цен продуктов
     menu_requirement = JSON.parse( MenuRequirement
       .select( :id, :splendingdate )
@@ -603,6 +669,8 @@ class Institution::MenuRequirementsController < Institution::BaseController
 
     splendingdate = menu_requirement[ :splendingdate  ]
 
+    update_price2( menu_requirement_id )
+
     menu_requirement_exists = JSON.parse( MenuRequirement
       .select( :id, :number, :date, :number_sap, :date_sap, :number_saf, :date_saf )
       .where( splendingdate: splendingdate,
@@ -714,6 +782,8 @@ class Institution::MenuRequirementsController < Institution::BaseController
 
   def send_saf # Веб-сервис отправки факта меню-требования
     menu_requirement_id = params[ :id ]
+
+    update_price2( menu_requirement_id )
 
     menu_requirement = JSON.parse( MenuRequirement
       .select( :number, :splendingdate, :date )
