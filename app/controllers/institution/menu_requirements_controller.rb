@@ -185,7 +185,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       actual_price = actual_prices.find { | o | o[ :product ].strip == product[ :code ] }
 
       if actual_price
-        price = actual_price[ :price ].to_f.truncate( 2 )
+        price = actual_price[ :price ].to_f.truncate( 5 )
         balance = actual_price[ :quantity ].to_f.truncate( 3 )
       else
         price = 0
@@ -411,7 +411,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
         actual_price = actual_prices.find { | o | o[ :product ].strip == mpp[ :code ] }
 
         if actual_price
-          price = actual_price[ :price ].to_f.truncate( 2 )
+          price = actual_price[ :price ].to_f.truncate( 5 )
           balance = actual_price[ :quantity ].to_f.truncate( 3 )
 
           if price != mpp[ :price ].to_f || balance != mpp[ :balance ].to_f
@@ -475,7 +475,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
         actual_price = actual_prices.find { | o | o[ :product ].strip == mpp[ :code ] }
 
         if actual_price
-          price = actual_price[ :price ].to_f.truncate( 2 )
+          price = actual_price[ :price ].to_f.truncate( 5 )
           balance = actual_price[ :quantity ].to_f.truncate( 3 )
 
           if price != mpp[ :price ].to_f || balance != mpp[ :balance ].to_f
