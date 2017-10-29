@@ -436,7 +436,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       }
 
       if prices_data.any?
-        # ActiveRecord::Base.connection.execute( menu_products_prices_sql )
+        ActiveRecord::Base.connection.execute( menu_products_prices_sql )
         result = { status: true, caption: 'Оновлені продукти', message: prices_message, data: prices_data }
       else
         result = { status: true }
