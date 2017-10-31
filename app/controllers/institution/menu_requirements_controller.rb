@@ -152,7 +152,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
 
     ActiveRecord::Base.connection.execute( menu_products_sql ) if menu_products_sql
 
-    #=================================
+    #================================
 
     sql_join_menu_products_price = <<-SQL.squish
         LEFT JOIN menu_products_prices
@@ -166,7 +166,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .joins( sql_join_menu_products_price )
       .select( :product_id,
               'products.code',
-              'menu_products_prices.id' )
+              'menu_products_prices.id AS menu_products_price_id' )
       .where( 'menu_meals_dishes.menu_requirement_id = ? ', menu_requirement_id )
       .group( :product_id,
               'products.code',
@@ -192,7 +192,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
         balance = 0
       end
 
-      menu_products_price_id = product[ :id ]
+      menu_products_price_id = product[ :menu_products_price_id ]
       product_id = product[ :product_id ]
 
       menu_products_prices_not_del_product_ids << product_id
@@ -378,14 +378,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
     return result
   end
 
-
-
-  def update_price2( menu_requirement_id ) # Обновление остатков і цен продуктов
-    menu_requirement = JSON.parse( MenuRequirement
-    .select( :id, :splendingdate )
-    .find( menu_requirement_id )
-    .to_json, symbolize_names: true )
-
+  def update_prices( menu_requirement_id, splendingdate ) # Обновление остатков і цен продуктов
     menu_products_price = JSON.parse( MenuProductsPrice
       .joins( :product )
       .select( :id,
@@ -394,11 +387,11 @@ class Institution::MenuRequirementsController < Institution::BaseController
                :balance,
                'products.code',
                'products.name' )
-      .where( menu_requirement_id: menu_requirement[ :id ])
+      .where( menu_requirement_id: menu_requirement_id )
       .order( 'products.name' )
       .to_json, symbolize_names: true )
 
-    return_prices = get_actual_price( menu_requirement[ :splendingdate ], menu_products_price )
+    return_prices = get_actual_price( splendingdate, menu_products_price )
 
     if return_prices[ :status ]
       menu_products_prices_sql = ''
@@ -438,71 +431,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       }
 
       if prices_data.any?
-        ActiveRecord::Base.connection.execute( menu_products_prices_sql )
-      end
-    end
-  end
-
-
-  def update_price # Обновление остатков і цен продуктов
-    menu_requirement = JSON.parse( MenuRequirement
-      .select( :id, :splendingdate )
-      .find( params[ :id ] )
-      .to_json, symbolize_names: true )
-
-    menu_products_price = JSON.parse( MenuProductsPrice
-      .joins( :product )
-      .select( :id,
-               :product_id,
-               :price,
-               :balance,
-               'products.code',
-               'products.name' )
-      .where( menu_requirement_id: menu_requirement[ :id ] )
-      .order( 'products.name' )
-      .to_json, symbolize_names: true )
-
-    return_prices = get_actual_price( menu_requirement[ :splendingdate ], menu_products_price )
-
-    if return_prices[ :status ]
-      menu_products_prices_sql = ''
-
-      actual_prices = return_prices[ :actual_prices ]
-      prices_message = [ ]
-      prices_data = [ ]
-
-      menu_products_price.each { | mpp |
-        actual_price = actual_prices.find { | o | o[ :product ].strip == mpp[ :code ] }
-
-        if actual_price
-          price = actual_price[ :price ].to_f.truncate( 5 )
-          balance = actual_price[ :quantity ].to_f.truncate( 3 )
-
-          if price != mpp[ :price ].to_f || balance != mpp[ :balance ].to_f
-            prices_message << {
-              'Продукт' => mpp[ :name ],
-              'Ціна' => price,
-              'Залишок' => balance
-            }
-
-            prices_data << {
-              product_id: mpp[ :product_id ],
-              price: price,
-              balance: balance
-            }
-
-            menu_products_prices_sql << <<-SQL.squish
-                UPDATE menu_products_prices
-                  SET price = #{ price },
-                      balance =#{ balance }
-                  WHERE id = #{ mpp[ :id ] } ;
-              SQL
-          end
-        end
-      }
-
-      if prices_data.any?
-        ActiveRecord::Base.connection.execute( menu_products_prices_sql )
+        # ActiveRecord::Base.connection.execute( menu_products_prices_sql )
         result = { status: true, caption: 'Оновлені продукти', message: prices_message, data: prices_data }
       else
         result = { status: true }
@@ -510,6 +439,15 @@ class Institution::MenuRequirementsController < Institution::BaseController
     else
       result =  return_prices
     end
+  end
+
+  def prices # Обновление остатков і цен продуктов
+    menu_requirement = JSON.parse( MenuRequirement
+      .select( :id, :splendingdate )
+      .find( params[ :id ] )
+      .to_json, symbolize_names: true )
+
+    result = update_prices( menu_requirement[ :id ], menu_requirement[ :splendingdate ] ) # Обновление остатков і цен продуктов
 
     render json: result
   end
@@ -669,8 +607,6 @@ class Institution::MenuRequirementsController < Institution::BaseController
 
     splendingdate = menu_requirement[ :splendingdate  ]
 
-    update_price2( menu_requirement_id )
-
     menu_requirement_exists = JSON.parse( MenuRequirement
       .select( :id, :number, :date, :number_sap, :date_sap, :number_saf, :date_saf )
       .where( splendingdate: splendingdate,
@@ -716,9 +652,9 @@ class Institution::MenuRequirementsController < Institution::BaseController
         .joins( menu_products: [ :children_category, :product ] )
         .joins( joins_menu_products_prices )
         .select( 'SUM( menu_products.count_plan ) AS count_plan',
-                 'SUM( ROUND( menu_products.count_plan * menu_products_prices.price, 5 ) ) AS amount',
-                 'products.code AS product_code',
-                 'children_categories.code AS category_code' )
+                'SUM( ROUND( menu_products.count_plan * menu_products_prices.price, 5 ) ) AS amount',
+                'products.code AS product_code',
+                'children_categories.code AS category_code' )
         .where( menu_requirement_id: menu_requirement_id )
         .where( 'menu_products.count_plan != ? ', 0 )
         .group( 'products.code',
@@ -726,64 +662,73 @@ class Institution::MenuRequirementsController < Institution::BaseController
         .to_json, symbolize_names: true )
 
       if menu_children_categories.present? && menu_products.present?
-        categories = menu_children_categories.map { | o |
-          { 'CodeOfCategory' => o[ :code ],
-            'QuantityAll' => o[ :count_all_plan ].to_s,
-            'QuantityExemption' => o[ :count_exemption_plan ].to_s } }
+        result_update_prices = update_prices( menu_requirement, splendingdate ) # Обновление остатков і цен продуктов
 
-        goods = menu_products.map { | o | {
-          'CodeOfCategory' => o[ :category_code ],
-          'CodeOfGoods' => o[ :product_code ],
-          'Quantity' => o[ :count_plan ],
-          'Amount' => o[ :amount ] } }
+        result = { status: true, caption: 'Оновлені продукти', message: prices_message, data: prices_data }
 
-        message = { 'CreateRequest' =>
-          { 'Branch_id' => current_branch[ :code ],
-            'Institutions_id' =>  current_institution[ :code ],
-            'SplendingDate' => menu_requirement[ :splendingdate ],
-            'Date' => menu_requirement[ :date ],
-            'Goods' => goods,
-            'Categories' =>  categories,
-            'NumberFromWebPortal' => menu_requirement[ :number ],
-            'User' => current_user[ :username ] } }
-
-        savon_return = get_savon( :create_menu_requirement_plan, message )
-        response = savon_return[ :response ]
-        web_service = savon_return[ :web_service ]
-
-        if response[ :interface_state ] == 'OK'
-          ActiveRecord::Base.transaction do
-            data_menu_requirement = { date_sap: Date.today, number_sap: response[ :respond ].to_s }
-            update_base_with_id( :menu_requirements, menu_requirement_id, data_menu_requirement )
-
-            sql = 'UPDATE menu_children_categories ' +
-                  'SET count_all_fact = count_all_plan, ' +
-                      'count_exemption_fact = count_exemption_plan ' +
-                      "WHERE menu_requirement_id = #{ menu_requirement_id };" +
-                  'UPDATE menu_products ' +
-                  'SET count_fact = count_plan ' +
-                    'FROM menu_meals_dishes bb ' +
-                    'WHERE menu_meals_dish_id = bb.id '+
-                      "AND bb.menu_requirement_id = #{ menu_requirement_id }"
-
-              ActiveRecord::Base.connection.execute( sql )
-            end
-          result = { status: true }
+        if result_update_prices[ :status ] && result_update_prices[ :data ].present?
+          result = result_update_prices
         else
-          result = { status: false, caption: 'Неуспішна сихронізація з ІС',
-                    message: web_service.merge!( response: response ) }
+          categories = menu_children_categories.map { | o |
+            { 'CodeOfCategory' => o[ :code ],
+              'QuantityAll' => o[ :count_all_plan ].to_s,
+              'QuantityExemption' => o[ :count_exemption_plan ].to_s } }
+
+          goods = menu_products.map { | o | {
+            'CodeOfCategory' => o[ :category_code ],
+            'CodeOfGoods' => o[ :product_code ],
+            'Quantity' => o[ :count_plan ],
+            'Amount' => o[ :amount ] } }
+
+          message = { 'CreateRequest' =>
+            { 'Branch_id' => current_branch[ :code ],
+              'Institutions_id' =>  current_institution[ :code ],
+              'SplendingDate' => menu_requirement[ :splendingdate ],
+              'Date' => menu_requirement[ :date ],
+              'Goods' => goods,
+              'Categories' =>  categories,
+              'NumberFromWebPortal' => menu_requirement[ :number ],
+              'User' => current_user[ :username ] } }
+
+          savon_return = get_savon( :create_menu_requirement_plan, message )
+          response = savon_return[ :response ]
+          web_service = savon_return[ :web_service ]
+
+          if response[ :interface_state ] == 'OK'
+            ActiveRecord::Base.transaction do
+              data_menu_requirement = { date_sap: Date.today, number_sap: response[ :respond ].to_s }
+              update_base_with_id( :menu_requirements, menu_requirement_id, data_menu_requirement )
+
+              sql = 'UPDATE menu_children_categories ' +
+                    'SET count_all_fact = count_all_plan, ' +
+                        'count_exemption_fact = count_exemption_plan ' +
+                        "WHERE menu_requirement_id = #{ menu_requirement_id };" +
+                    'UPDATE menu_products ' +
+                    'SET count_fact = count_plan ' +
+                      'FROM menu_meals_dishes bb ' +
+                      'WHERE menu_meals_dish_id = bb.id '+
+                        "AND bb.menu_requirement_id = #{ menu_requirement_id }"
+
+                ActiveRecord::Base.connection.execute( sql )
+              end
+            result = { status: true }
+          else
+            result = { status: false, caption: 'Неуспішна сихронізація з ІС',
+                      message: web_service.merge!( response: response ) }
+          end
         end
       else
         result = { status: false, caption: 'Кількість не проставлена' }
       end
     end
+
     render json: result
   end
 
   def send_saf # Веб-сервис отправки факта меню-требования
     menu_requirement_id = params[ :id ]
 
-    update_price2( menu_requirement_id )
+    # update_price2( menu_requirement_id )
 
     menu_requirement = JSON.parse( MenuRequirement
       .select( :number, :splendingdate, :date )

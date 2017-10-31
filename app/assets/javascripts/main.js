@@ -48,6 +48,8 @@ class MyLib {
     if ( scale === 0 ) result = Math.round( value );
     if ( scale === 2 ) result = Math.round( value * 100 ) / 100;
     if ( scale === 3 ) result = Math.round( value * 1000 ) / 1000;
+    if ( scale === 4 ) result = Math.round( value * 10000 ) / 10000;
+    if ( scale === 5 ) result = Math.round( value * 100000 ) / 100000;
 
     return result;
   }

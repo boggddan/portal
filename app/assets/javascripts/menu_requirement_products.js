@@ -43,7 +43,10 @@ class MenuRequirementProducts {
     if ( disabledPlan ) btnPrint.addEventListener( 'click', ( ) => this.clickBtnPrint( ) );
     else btnPrint.disabled = true;
 
-    parentElem.querySelector( '.btn_update_price' ).addEventListener( 'click', ( ) => this.clickBtnUpdatePrice( ) );
+    const btnPrices = parentElem.querySelector( '.btn_prices' );
+    btnPrices.disabled = disabledFact;
+
+    btnPrices.addEventListener( 'click', ( ) => this.clickBtnPrices( ) );
 
     parentElem.querySelectorAll( '.panel_main button[data-clmn]' ).forEach( child => {
       child.addEventListener( 'click', event => this.clickBtnClmn( event ) );
@@ -203,17 +206,27 @@ class MenuRequirementProducts {
     MyLib.ajax( caption, url, 'post', data, 'json', null, true );
   }
 
-  clickBtnUpdatePrice( ) {
+  clickBtnPrices( ) {
     const caption = `Обновлення данних цін та залишків з ІС [id: ${ this.dataId }]`;
     const data = { id: this.dataId };
     const { parentElem: { dataset: { pathUpdatePrice: url } } } = this;
-    const successAjax = ( ) => setTimeout( ( ) => window.location.reload( ), 3000 );
+    // const successAjax = ( ) => setTimeout( ( ) => window.location.reload( ), 3000 );
+    // const successAjax = ( ) => true;
 
-    MyLib.ajax( caption, url, 'post', data, 'json', successAjax, true );
+    ( async () => {
+      const prices = await MyLib.ajax( caption, url, 'post', data, 'json', null, true );
+      if ( prices ) this.calcPrPrices( prices );
+    } )();
+  }
 
-    // ( async () => {
-    //   console.log( prices );
-    // } )();
+  calcPrPrices( prices ) {
+    prices.forEach( value => {
+      const row = this.colPrTable.querySelector( `tbody tr.row_data[ data-product-id = "${ value.product_id }" ] ` );
+      row.querySelector( 'td.balance' ).textContent = MyLib.numToStr( value.balance, -1 );
+      row.querySelector( 'td.price' ).textContent = MyLib.numToStr( value.price, -1 );
+    } );
+
+    this.calcPrSum();
   }
 
   clickMdCell( target ) {
@@ -385,13 +398,11 @@ class MenuRequirementProducts {
 
   calcProducts( ) {
     if ( this.colPrTable ) {
-      const sumAll = this.categories.reduce( ( prev, cur ) => Object.assign( prev, { [ cur ]: { plan: 0, fact: 0 } } ), { } );
       const arrPlanFact = [ 'plan' ].concat( this.disabledPlan ? 'fact' : [] );
 
       this.colPrTable.querySelectorAll( 'tbody tr.row_data' ).forEach( tr => {
         const trElem = tr;
         const countProduct = { plan: 0, fact: 0 };
-        const price = +trElem.querySelector( 'td.price' ).textContent;
 
         this.categories.forEach( categoryId => {
           const countCategory = { plan: 0, fact: 0 };
@@ -408,7 +419,6 @@ class MenuRequirementProducts {
             const selectorCategory = `td[data-meal-id='0'][data-count-pf=${ pf }][data-children-category-id='${ categoryId }']`;
 
             countProduct[ pf ] += countCategoryPF;
-            if ( price ) sumAll[ categoryId ][ pf ] += MyLib.toRound( price * countCategoryPF, 3 );
 
             trElem.querySelector( `${ selectorCategory }[data-count-type=count]` )
               .textContent = MyLib.numToStr( countCategoryPF, -1 );
@@ -423,12 +433,9 @@ class MenuRequirementProducts {
 
         arrPlanFact.forEach( pf => {
           const countProductPF = MyLib.toRound( countProduct[ pf ], 3 );
-          const sumProduct = MyLib.toRound( price * countProductPF, 2 );
 
           trElem.querySelector( `td.cell_count[data-count-pf=${ pf }]` )
             .textContent = MyLib.numToStr( countProductPF, -1 );
-          trElem.querySelector( `td.cell_sum[data-count-pf=${ pf }]` )
-            .textContent = MyLib.numToStr( sumProduct, -1 );
 
           const diff = countProduct.fact - countProduct.plan;
           if ( pf === 'fact' ) {
@@ -438,12 +445,40 @@ class MenuRequirementProducts {
         } );
       } );
 
+      this.calcPrSum( );
+    }
+  }
+
+  calcPrSum( ) {
+    if ( this.colPrTable ) {
+      const sumAll = this.categories.reduce( ( prev, cur ) => Object.assign( prev, { [ cur ]: { plan: 0, fact: 0 } } ), { } );
+      const arrPlanFact = [ 'plan' ].concat( this.disabledPlan ? 'fact' : [] );
+
+      this.colPrTable.querySelectorAll( 'tbody tr.row_data' ).forEach( tr => {
+        const trElem = tr;
+        const price = +trElem.querySelector( 'td.price' ).textContent;
+
+        arrPlanFact.forEach( pf => {
+          let sumProductPf = 0;
+          this.categories.forEach( categoryId => {
+            const countCategoryPF = +trElem.querySelector( `td[ data-children-category-id = "${ categoryId }"][data-count-pf='${ pf }']` ).textContent;
+            const sumCategoryPf = MyLib.toRound( price * countCategoryPF, 5 );
+            sumProductPf += sumCategoryPf;
+            if ( price ) sumAll[ categoryId ][ pf ] += sumCategoryPf;
+          } );
+
+          trElem.querySelector( `td.cell_sum[ data-count-pf = "${ pf }" ]` )
+            .textContent = MyLib.numToStr( sumProductPf, -1 );
+        } );
+      } );
+
       this.categories.forEach( categoryId => {
         arrPlanFact.forEach( pf => {
           this.colCcTable.querySelector( `tr[data-id='${ categoryId }'] .sum_products_${ pf }` )
             .textContent = MyLib.numToStr( MyLib.toRound( sumAll[ categoryId ][ pf ], 2 ), -1 );
         } );
       } );
+
       this.calcCategories( );
     }
   }

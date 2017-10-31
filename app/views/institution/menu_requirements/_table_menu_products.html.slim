@@ -100,7 +100,7 @@ h2.icon Продукти харчування
             td
             td
 
-      tr.row_data
+      tr.row_data *{ data: { product_id: mpp[ :product_id] } }
         - product_name = mpp[ :product_name ]
         - measure = (/, (.*)$/.match( product_name ) || Array.new( 2, '' ))[ 1 ].concat('/дитина')
         td.name = product_name
