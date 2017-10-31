@@ -431,7 +431,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       }
 
       if prices_data.any?
-        # ActiveRecord::Base.connection.execute( menu_products_prices_sql )
+        ActiveRecord::Base.connection.execute( menu_products_prices_sql )
         result = { status: true, caption: 'Оновлені продукти', message: prices_message, data: prices_data }
       else
         result = { status: true }
@@ -662,60 +662,52 @@ class Institution::MenuRequirementsController < Institution::BaseController
         .to_json, symbolize_names: true )
 
       if menu_children_categories.present? && menu_products.present?
-        result_update_prices = update_prices( menu_requirement, splendingdate ) # Обновление остатков і цен продуктов
+        categories = menu_children_categories.map { | o |
+          { 'CodeOfCategory' => o[ :code ],
+            'QuantityAll' => o[ :count_all_plan ].to_s,
+            'QuantityExemption' => o[ :count_exemption_plan ].to_s } }
 
-        result = { status: true, caption: 'Оновлені продукти', message: prices_message, data: prices_data }
+        goods = menu_products.map { | o | {
+          'CodeOfCategory' => o[ :category_code ],
+          'CodeOfGoods' => o[ :product_code ],
+          'Quantity' => o[ :count_plan ],
+          'Amount' => o[ :amount ] } }
 
-        if result_update_prices[ :status ] && result_update_prices[ :data ].present?
-          result = result_update_prices
+        message = { 'CreateRequest' =>
+          { 'Branch_id' => current_branch[ :code ],
+            'Institutions_id' =>  current_institution[ :code ],
+            'SplendingDate' => menu_requirement[ :splendingdate ],
+            'Date' => menu_requirement[ :date ],
+            'Goods' => goods,
+            'Categories' =>  categories,
+            'NumberFromWebPortal' => menu_requirement[ :number ],
+            'User' => current_user[ :username ] } }
+
+        savon_return = get_savon( :create_menu_requirement_plan, message )
+        response = savon_return[ :response ]
+        web_service = savon_return[ :web_service ]
+
+        if response[ :interface_state ] == 'OK'
+          ActiveRecord::Base.transaction do
+            data_menu_requirement = { date_sap: Date.today, number_sap: response[ :respond ].to_s }
+            update_base_with_id( :menu_requirements, menu_requirement_id, data_menu_requirement )
+
+            sql = 'UPDATE menu_children_categories ' +
+                  'SET count_all_fact = count_all_plan, ' +
+                      'count_exemption_fact = count_exemption_plan ' +
+                      "WHERE menu_requirement_id = #{ menu_requirement_id };" +
+                  'UPDATE menu_products ' +
+                  'SET count_fact = count_plan ' +
+                    'FROM menu_meals_dishes bb ' +
+                    'WHERE menu_meals_dish_id = bb.id '+
+                      "AND bb.menu_requirement_id = #{ menu_requirement_id }"
+
+              ActiveRecord::Base.connection.execute( sql )
+            end
+          result = { status: true }
         else
-          categories = menu_children_categories.map { | o |
-            { 'CodeOfCategory' => o[ :code ],
-              'QuantityAll' => o[ :count_all_plan ].to_s,
-              'QuantityExemption' => o[ :count_exemption_plan ].to_s } }
-
-          goods = menu_products.map { | o | {
-            'CodeOfCategory' => o[ :category_code ],
-            'CodeOfGoods' => o[ :product_code ],
-            'Quantity' => o[ :count_plan ],
-            'Amount' => o[ :amount ] } }
-
-          message = { 'CreateRequest' =>
-            { 'Branch_id' => current_branch[ :code ],
-              'Institutions_id' =>  current_institution[ :code ],
-              'SplendingDate' => menu_requirement[ :splendingdate ],
-              'Date' => menu_requirement[ :date ],
-              'Goods' => goods,
-              'Categories' =>  categories,
-              'NumberFromWebPortal' => menu_requirement[ :number ],
-              'User' => current_user[ :username ] } }
-
-          savon_return = get_savon( :create_menu_requirement_plan, message )
-          response = savon_return[ :response ]
-          web_service = savon_return[ :web_service ]
-
-          if response[ :interface_state ] == 'OK'
-            ActiveRecord::Base.transaction do
-              data_menu_requirement = { date_sap: Date.today, number_sap: response[ :respond ].to_s }
-              update_base_with_id( :menu_requirements, menu_requirement_id, data_menu_requirement )
-
-              sql = 'UPDATE menu_children_categories ' +
-                    'SET count_all_fact = count_all_plan, ' +
-                        'count_exemption_fact = count_exemption_plan ' +
-                        "WHERE menu_requirement_id = #{ menu_requirement_id };" +
-                    'UPDATE menu_products ' +
-                    'SET count_fact = count_plan ' +
-                      'FROM menu_meals_dishes bb ' +
-                      'WHERE menu_meals_dish_id = bb.id '+
-                        "AND bb.menu_requirement_id = #{ menu_requirement_id }"
-
-                ActiveRecord::Base.connection.execute( sql )
-              end
-            result = { status: true }
-          else
-            result = { status: false, caption: 'Неуспішна сихронізація з ІС',
-                      message: web_service.merge!( response: response ) }
-          end
+          result = { status: false, caption: 'Неуспішна сихронізація з ІС',
+                    message: web_service.merge!( response: response ) }
         end
       else
         result = { status: false, caption: 'Кількість не проставлена' }
@@ -727,8 +719,6 @@ class Institution::MenuRequirementsController < Institution::BaseController
 
   def send_saf # Веб-сервис отправки факта меню-требования
     menu_requirement_id = params[ :id ]
-
-    # update_price2( menu_requirement_id )
 
     menu_requirement = JSON.parse( MenuRequirement
       .select( :number, :splendingdate, :date )
@@ -768,13 +758,12 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .to_json, symbolize_names: true )
 
     if menu_children_categories && menu_products
-
       goods = menu_products.map { | o |
         { 'CodeOfCategory' => o[ :category_code ],
           'CodeOfGoods' => o[ :product_code ],
           'Quantity' => o[ :count_fact ],
           'Amount' => o[ :amount ] }
-    }
+      }
 
       categories = menu_children_categories.map { | o |
         { 'CodeOfCategory' => o[ :code ],
@@ -825,10 +814,10 @@ class Institution::MenuRequirementsController < Institution::BaseController
 
             ActiveRecord::Base.connection.execute( sql )
           end
-        result = { status: true }
+        result = { status: true, reload: true }
       else
         result = { status: false, caption: 'Неуспішна сихронізація з ІС',
-                   message: web_service.merge!( response: response ) }
+                  message: web_service.merge!( response: response ) }
       end
     else
       result = { status: false, caption: 'Кількість не проставлена' }

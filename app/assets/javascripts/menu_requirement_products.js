@@ -191,12 +191,25 @@ class MenuRequirementProducts {
   }
 
   clickSend( event ) {
-    const pf = `pathSend${ MyLib.capitalize( event.currentTarget.dataset.pf ) }`;
-    const caption = `Відправка данних в ІС [id: ${ this.dataId }]`;
+    const captionPrices = `Обновлення данних цін та залишків з ІС [id: ${ this.dataId }]`;
     const data = { id: this.dataId };
-    const successAjax = ( ) => window.location.reload( );
-    const { parentElem: { dataset: { [ pf ]: url } } } = this;
-    MyLib.ajax( caption, url, 'post', data, 'json', successAjax, true );
+    const { parentElem: { dataset: { pathUpdatePrice: urlPrices } } } = this;
+
+    const pf = `pathSend${ MyLib.capitalize( event.currentTarget.dataset.pf ) }`;
+    const captionSend = `Відправка данних в ІС [id: ${ this.dataId }]`;
+
+    const successAjaxSend = ( ) => window.location.reload( );
+    const { parentElem: { dataset: { [ pf ]: urlSend } } } = this;
+
+    ( async () => {
+      const prices = await MyLib.ajax( captionPrices, urlPrices, 'post', data, 'json', null, true );
+      if ( prices ) {
+        this.calcPrPrices( prices );
+      } else {
+        MyLib.ajax( captionSend, urlSend, 'post', data, 'json', successAjaxSend, true );
+      }
+    } )();
+
   }
 
   clickBtnPrint( ) {
@@ -210,8 +223,6 @@ class MenuRequirementProducts {
     const caption = `Обновлення данних цін та залишків з ІС [id: ${ this.dataId }]`;
     const data = { id: this.dataId };
     const { parentElem: { dataset: { pathUpdatePrice: url } } } = this;
-    // const successAjax = ( ) => setTimeout( ( ) => window.location.reload( ), 3000 );
-    // const successAjax = ( ) => true;
 
     ( async () => {
       const prices = await MyLib.ajax( caption, url, 'post', data, 'json', null, true );

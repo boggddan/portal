@@ -149,7 +149,7 @@ class MyLib {
         if ( dataMessage ) dataMessageContent = `<pre>${ JSON.stringify( dataMessage, null, 2 ) }</pre>`;
 
         if ( dataStatus ) {
-          const { href, view, data: dataData } = data;
+          const { href, view, reload, data: dataData } = data;
           if ( href ) {
             if ( href.search( /.pdf$/i ) === -1 ) this.assignLocation( href );
             else objFormSplash.open( 'print', caption, href );
@@ -158,6 +158,8 @@ class MyLib {
           } else if ( dataMessage ) {
             objFormSplash.open( 'info', dataCaption, dataMessageContent );
             returnSuccess = dataData;
+          } else if ( reload ) {
+            window.location.reload( );
           }
 
           if ( callSuccess ) callSuccess( );
