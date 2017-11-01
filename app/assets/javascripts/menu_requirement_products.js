@@ -164,6 +164,7 @@ class MenuRequirementProducts {
 
   // нажатие на кнопочку создать
   createProducts( ) {
+
     const data =  { id: this.dataId };
     const caption = `Формування страв та прийомів їжі id = [${ this.dataId }]`;
     const { colMd: { dataset: { pathCreate: url } } } = this;

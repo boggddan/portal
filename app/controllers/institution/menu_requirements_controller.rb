@@ -153,79 +153,31 @@ class Institution::MenuRequirementsController < Institution::BaseController
     ActiveRecord::Base.connection.execute( menu_products_sql ) if menu_products_sql
 
     #================================
-
-    sql_join_menu_products_price = <<-SQL.squish
-        LEFT JOIN menu_products_prices
-          ON menu_products_prices.product_id = menu_products.product_id AND
-             menu_products_prices.menu_requirement_id = menu_meals_dishes.menu_requirement_id
+    sql_menu_products_price = <<-SQL.squish
+      INSERT INTO menu_products_prices ( menu_requirement_id, product_id )
+        SELECT menu_meals_dishes.menu_requirement_id,
+               menu_products.product_id
+          FROM menu_products
+          LEFT JOIN menu_meals_dishes ON menu_products.menu_meals_dish_id = menu_meals_dishes.id
+          LEFT JOIN menu_products_prices ON
+            menu_products.product_id = menu_products_prices.product_id AND
+            menu_meals_dishes.menu_requirement_id = menu_products_prices.menu_requirement_id
+          WHERE menu_products_prices.id isnull AND
+            menu_meals_dishes.menu_requirement_id = #{ menu_requirement_id }
+          GROUP BY 1, 2;
+        DELETE FROM menu_products_prices WHERE
+          product_id NOT IN (
+            SELECT DISTINCT product_id
+              FROM menu_products
+              LEFT JOIN menu_meals_dishes ON
+                menu_products.menu_meals_dish_id = menu_meals_dishes.id
+              WHERE menu_meals_dishes.menu_requirement_id = menu_products_prices.menu_requirement_id
+          ) AND
+          menu_requirement_id = #{ menu_requirement_id }
       SQL
 
-    products = JSON.parse( MenuProduct
-      .joins( :menu_meals_dish,
-              :product )
-      .joins( sql_join_menu_products_price )
-      .select( :product_id,
-              'products.code',
-              'menu_products_prices.id AS menu_products_price_id' )
-      .where( 'menu_meals_dishes.menu_requirement_id = ? ', menu_requirement_id )
-      .group( :product_id,
-              'products.code',
-              'menu_products_prices.id' )
-      .to_json, symbolize_names: true )
-
-    menu_products_prices_sql = ''
-    menu_products_prices_add_values = [ ]
-    menu_products_prices_not_del_product_ids = [ ]
-
-    return_prices = get_actual_price( @menu_requirement[ :splendingdate ], products )
-
-    actual_prices = return_prices[ :status ] ? return_prices[ :actual_prices ] : []
-
-    products.each { | product |
-      actual_price = actual_prices.find { | o | o[ :product ].strip == product[ :code ] }
-
-      if actual_price
-        price = actual_price[ :price ].to_f.truncate( 5 )
-        balance = actual_price[ :quantity ].to_f.truncate( 3 )
-      else
-        price = 0
-        balance = 0
-      end
-
-      menu_products_price_id = product[ :menu_products_price_id ]
-      product_id = product[ :product_id ]
-
-      menu_products_prices_not_del_product_ids << product_id
-
-      if menu_products_price_id
-        menu_products_prices_sql << <<-SQL.squish
-            UPDATE menu_products_prices
-              SET price = #{ price },
-                  balance =#{ balance }
-              WHERE id = #{ menu_products_price_id } ;
-          SQL
-      else
-        menu_products_prices_add_values << [ ].tap { | value |
-          value << menu_requirement_id
-          value << product_id
-          value << price
-          value << balance
-        }
-      end
-     }
-
-    if menu_products_prices_add_values.any?
-      menu_products_prices_sql_add_values = menu_products_prices_add_values.map { | o | "( #{ o.join( ',' ) } )" }.join( ',' )
-      menu_products_prices_sql << <<-SQL.squish
-          INSERT INTO menu_products_prices ( menu_requirement_id, product_id, price, balance )
-            VALUES #{ menu_products_prices_sql_add_values } ;
-
-          DELETE FROM menu_products_prices WHERE NOT product_id IN ( #{ menu_products_prices_not_del_product_ids.join( ',' ) } )
-        SQL
-    end
-
-    ActiveRecord::Base.connection.execute( menu_products_prices_sql ) if menu_products_prices_sql
-
+    ActiveRecord::Base.connection.execute( sql_menu_products_price )
+    update_prices( menu_requirement_id, @menu_requirement[ :splendingdate ] ) # Обновление остатков і цен продуктов
     menu_products( menu_requirement_id )
   end
 
