@@ -757,12 +757,23 @@ class Institution::MenuRequirementsController < Institution::BaseController
                       is_enabled: false )
               .delete_all
 
-            sql = 'DELETE FROM menu_products ' +
-                    'USING menu_meals_dishes bb ' +
-                    'WHERE menu_meals_dish_id = bb.id '+
-                      "AND bb.menu_requirement_id = #{ menu_requirement_id } " +
-                      'AND count_plan = 0 '+
-                      'AND count_fact = 0'
+            sql = <<-SQL.squish
+                DELETE FROM menu_products
+                    USING menu_meals_dishes bb
+                    WHERE menu_meals_dish_id = bb.id
+                          AND bb.menu_requirement_id = #{ menu_requirement_id }
+                          AND count_plan = 0
+                          AND count_fact = 0;
+                DELETE FROM menu_products_prices WHERE
+                  product_id NOT IN (
+                    SELECT DISTINCT product_id
+                      FROM menu_products
+                      LEFT JOIN menu_meals_dishes ON
+                        menu_products.menu_meals_dish_id = menu_meals_dishes.id
+                      WHERE menu_meals_dishes.menu_requirement_id = menu_products_prices.menu_requirement_id
+                  ) AND
+                  menu_requirement_id = #{ menu_requirement_id }
+              SQL
 
             ActiveRecord::Base.connection.execute( sql )
           end
