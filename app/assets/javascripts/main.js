@@ -495,6 +495,10 @@ $( document ).on( 'turbolinks:load', ( ) => {
   const elemFormSplash = document.getElementById( 'form_splash' );
   if ( elemFormSplash ) objFormSplash = new FormSplash( elemFormSplash );
 
+  const elemFormChoice = document.getElementById( 'form_choice' );
+  if ( elemFormChoice ) objFormChoice = new FormChoice( elemFormChoice );
+
+
   if ( elemMenuRequirementProducts ) objMenuRequirementProducts = new MenuRequirementProducts( elemMenuRequirementProducts );
   else if ( elemTimesheetDates ) objTimesheetDates = new TimesheetDates( elemTimesheetDates );
   else if ( elemUsers ) objUsers = new Users( elemUsers );

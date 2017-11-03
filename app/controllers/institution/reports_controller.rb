@@ -28,10 +28,34 @@ class Institution::ReportsController < Institution::BaseController
 
   # Залишки продуктів харчування
   def balances_in_warehouses
-    @main_params = { h1_text: 'Звіт "Залишки продуктів харчування"', is_pdf: true,
-      path_view: institution_reports_ajax_report_base_path( method_name: :get_report_statement_on_balances_in_warehouses ) }
-    render 'report_base' #, h1_text: 'Звіт "Залишки продуктів харчування"'
+    render 'balances_in_warehouses'
   end
+
+  # Залишки продуктів харчування
+  def ajax_balances_in_warehouses
+    is_pdf = params[ :is_pdf ]
+
+    message = {
+      'CreateRequest' => {
+        'StartDate' => params[ :date_start ].to_date,
+        'EndDate' => params[ :date_end ].to_date,
+        'Institutions_id' => current_institution[ :code ],
+        'ShowTheAmount' => params[ :show_amount ].to_s,
+        'ShowThePeriod' => params[ :show_period ].to_s
+      }
+    }
+
+    savon_return = get_savon( :get_report_statement_on_balances_in_warehouses, message )
+    response = savon_return[ :response ]
+    web_service = savon_return[ :web_service ]
+
+    render json: response[ :interface_state ] == 'OK' ?
+      { status: true, ( is_pdf == true ? :href : :view ) => response[ :respond ] }
+      :
+      { status: false, caption: 'Неуспішна сихронізація з ІС',
+        message: web_service.merge!( response: response ) }
+  end
+
 
   # Табель обліку відвідування дітей
   def attendance_of_children
@@ -43,11 +67,15 @@ class Institution::ReportsController < Institution::BaseController
   def ajax_attendance_of_children
     is_pdf = params[ :is_pdf ]
 
-    message = { 'CreateRequest' => { 'StartDate' => params[ :date_start ].to_date,
-                                     'EndDate' => params[ :date_end ].to_date,
-                                     'Institutions_id' => current_institution[ :code ],
-                                     'Children_group_id' => params[ :children_group_code ] || '',
-                                     'IsPDF' => is_pdf.to_s } }
+    message = {
+      'CreateRequest' => {
+        'StartDate' => params[ :date_start ].to_date,
+        'EndDate' => params[ :date_end ].to_date,
+        'Institutions_id' => current_institution[ :code ],
+        'Children_group_id' => params[ :children_group_code ] || '',
+         'IsPDF' => is_pdf.to_s
+      }
+    }
 
     savon_return = get_savon( :get_report_the_record_of_attendance_of_children, message )
     response = savon_return[ :response ]

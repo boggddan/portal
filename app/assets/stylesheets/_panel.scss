@@ -150,6 +150,11 @@ $ffIcon: 'Glyphicons Halflings';
   // > label.radio
   //---------------------------
 
+
+  input[ type = 'checkbox' ] {
+    height: 18px;
+    width: 18px;
+  }
   //!!! Всегда снизу что бы перебивать другие стили
   // Первый елемент который будет толкать вправо
   .right_first {

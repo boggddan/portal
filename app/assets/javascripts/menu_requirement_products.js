@@ -152,6 +152,8 @@ class MenuRequirementProducts {
     [ this.parentElem, this.colCc, this.colCcTable, this.colMd, this.colMdCreate, this.colMdTable, this.colPr ] =
       [ parentElem, colCc, colCcTable, colMd, colMdCreate, colMdTable, colPr ];
 
+    [ this.splendingdate ] = [ splendingdate ];
+
     [ this.dataId, this.disabledPlan, this.disabledFact ] =
       [ +parentElem.dataset.id, disabledPlan, disabledFact ];
 
@@ -164,7 +166,10 @@ class MenuRequirementProducts {
 
   // нажатие на кнопочку создать
   createProducts( ) {
-
+    const { value: dateValue } = this.parentElem.querySelector( '#date' );
+    // if ( this.splendingdate.value === dateValue ) {
+    //   objFormChoice.open( 'attention', caption, '' );
+    // }
     const data =  { id: this.dataId };
     const caption = `Формування страв та прийомів їжі id = [${ this.dataId }]`;
     const { colMd: { dataset: { pathCreate: url } } } = this;
@@ -465,7 +470,7 @@ class MenuRequirementProducts {
     if ( this.colPrTable ) {
       const sumAll = this.categories.reduce( ( prev, cur ) => Object.assign( prev, { [ cur ]: { plan: 0, fact: 0 } } ), { } );
       const arrPlanFact = [ 'plan' ].concat( this.disabledPlan ? 'fact' : [] );
-
+      const arrPlanFact = [ ].concat( this.disabledPlan ? 'fact' : [] );
       this.colPrTable.querySelectorAll( 'tbody tr.row_data' ).forEach( tr => {
         const trElem = tr;
         const price = +trElem.querySelector( 'td.price' ).textContent;
@@ -473,14 +478,17 @@ class MenuRequirementProducts {
         arrPlanFact.forEach( pf => {
           let sumProductPf = 0;
           this.categories.forEach( categoryId => {
-            const countCategoryPF = +trElem.querySelector( `td[ data-children-category-id = "${ categoryId }"][data-count-pf='${ pf }']` ).textContent;
-            const sumCategoryPf = MyLib.toRound( price * countCategoryPF, 5 );
-            sumProductPf += sumCategoryPf;
-            if ( price ) sumAll[ categoryId ][ pf ] += sumCategoryPf;
+            const countCategoryPF = +trElem.querySelector( `td.count[ data-count-type = 'count' ][ data-children-category-id = "${ categoryId }"][data-count-pf='${ pf }']` ).textContent;
+            let sumCategoryPf = 0;
+            if ( price ) {
+              sumCategoryPf = MyLib.toRound( price * countCategoryPF, 5 );
+              sumProductPf += sumCategoryPf;
+              sumAll[ categoryId ][ pf ] += sumCategoryPf;
+            }
           } );
 
           trElem.querySelector( `td.cell_sum[ data-count-pf = "${ pf }" ]` )
-            .textContent = MyLib.numToStr( sumProductPf, -1 );
+            .textContent = MyLib.numToStr( MyLib.toRound( sumProductPf, 5 ), -1 );
         } );
       } );
 
