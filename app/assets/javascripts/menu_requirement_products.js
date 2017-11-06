@@ -470,7 +470,6 @@ class MenuRequirementProducts {
     if ( this.colPrTable ) {
       const sumAll = this.categories.reduce( ( prev, cur ) => Object.assign( prev, { [ cur ]: { plan: 0, fact: 0 } } ), { } );
       const arrPlanFact = [ 'plan' ].concat( this.disabledPlan ? 'fact' : [] );
-      const arrPlanFact = [ ].concat( this.disabledPlan ? 'fact' : [] );
       this.colPrTable.querySelectorAll( 'tbody tr.row_data' ).forEach( tr => {
         const trElem = tr;
         const price = +trElem.querySelector( 'td.price' ).textContent;
@@ -478,7 +477,7 @@ class MenuRequirementProducts {
         arrPlanFact.forEach( pf => {
           let sumProductPf = 0;
           this.categories.forEach( categoryId => {
-            const countCategoryPF = +trElem.querySelector( `td.count[ data-count-type = 'count' ][ data-children-category-id = "${ categoryId }"][data-count-pf='${ pf }']` ).textContent;
+            const countCategoryPF = +trElem.querySelector( `td[ data-count-type = "count" ][ data-children-category-id = "${ categoryId }"][data-count-pf='${ pf }']` ).textContent;
             let sumCategoryPf = 0;
             if ( price ) {
               sumCategoryPf = MyLib.toRound( price * countCategoryPF, 5 );

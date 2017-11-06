@@ -37,9 +37,10 @@ class Institution::ReportsController < Institution::BaseController
 
     message = {
       'CreateRequest' => {
+        'Institutions_id' => current_institution[ :code ],
         'StartDate' => params[ :date_start ].to_date,
         'EndDate' => params[ :date_end ].to_date,
-        'Institutions_id' => current_institution[ :code ],
+        'IsPDF' => params[ :is_pdf ].to_s,
         'ShowTheAmount' => params[ :show_amount ].to_s,
         'ShowThePeriod' => params[ :show_period ].to_s
       }
