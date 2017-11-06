@@ -27,8 +27,8 @@ $( document ).on( 'turbolinks:load', ( ) => {
             date_start: parentElem.querySelector( '#date_start' ).value,
             date_end: parentElem.querySelector( '#date_end' ).value,
             is_pdf: event.currentTarget.classList.contains( 'btn_print' ),
-            show_amount: true,
-            show_period: true
+            show_amount: parentElem.querySelector( '#show_amount' ).checked,
+            show_period: parentElem.querySelector( '#show_period' ).checked
           };
 
           const { dataset: { pathView: url } } = parentElem;

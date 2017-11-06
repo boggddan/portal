@@ -6,7 +6,11 @@ main#balances_in_warehouses *{ data: { path_view: institution_reports_ajax_atten
 
     button.btn_create
     button.btn_print
-    input *{ type: :checkbox } Відображати суму
-    input *{ type: :checkbox } Відображати період
+    label.check
+      input *{ type: :checkbox, id: :show_amount }
+      | Відображати суму
+    label.check
+      input *{ type: :checkbox, id: :show_period }
+      | Відображати період
 
   #view
