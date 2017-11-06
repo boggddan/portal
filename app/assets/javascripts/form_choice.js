@@ -3,12 +3,14 @@
 class FormChoice {
   constructor( elem ) {
     const parentElem = elem;
-    parentElem.querySelector( '.close, .success, .cancel' ).addEventListener( 'click', ( ) => this.close( ) );
+    parentElem.querySelector( '.close' ).addEventListener( 'click', ( ) => this.close( ) );
+    parentElem.querySelector( '.success' ).addEventListener( 'click', ( ) => this.success( ) );
+    parentElem.querySelector( '.cancel' ).addEventListener( 'click', ( ) => this.cancel( ) );
 
     this.parentElem = parentElem;
   }
 
-  open( type, caption, text ) {
+  open( type, caption, text, fnSuccess, fnCancel ) {
     MyLib.pageLoader( false );
     const header = this.parentElem.querySelector( '.header' );
     const main = this.parentElem.querySelector( '.main' );
@@ -38,6 +40,19 @@ class FormChoice {
 
     header.firstChild.textContent = captionType;
     this.parentElem.classList.remove( 'hide' );
+
+    this.fnSuccess = fnSuccess;
+    this.fnCancel = fnCancel;
+  }
+
+  success( ) {
+    if ( this.fnSuccess ) this.fnSuccess( );
+    this.close( );
+  }
+
+  cancel( ) {
+    if ( this.fnCancel ) this.fnCancel( );
+    this.close( );
   }
 
   close( ) {

@@ -1,4 +1,5 @@
 /* exported MenuRequirementProducts */
+/* global objFormChoice */
 
 class MenuRequirementProducts {
   constructor( elem ) {
@@ -167,13 +168,22 @@ class MenuRequirementProducts {
   // нажатие на кнопочку создать
   createProducts( ) {
     const { value: dateValue } = this.parentElem.querySelector( '#date' );
-    // if ( this.splendingdate.value === dateValue ) {
-    //   objFormChoice.open( 'attention', caption, '' );
-    // }
-    const data =  { id: this.dataId };
-    const caption = `Формування страв та прийомів їжі id = [${ this.dataId }]`;
-    const { colMd: { dataset: { pathCreate: url } } } = this;
-    MyLib.ajax( caption, url, 'post', data, 'script', false, true );
+
+    const success = ( ) => {
+      const data =  { id: this.dataId };
+      const caption = `Формування страв та прийомів їжі id = [${ this.dataId }]`;
+      const { colMd: { dataset: { pathCreate: url } } } = this;
+      MyLib.ajax( caption, url, 'post', data, 'script', false, true );
+    };
+
+    if ( this.splendingdate.value === dateValue ) {
+      const captionChoice = 'Створення продуктів';
+      const textChoice = `Ви погоджуєтесь на створення з датою списання ${ dateValue }? ` +
+                         'Вона буде закрита для редагування!';
+      objFormChoice.open( 'attention', captionChoice, textChoice, success, null );
+    } else {
+      success( );
+    }
   }
 
   mdUpdate( mdId, value ) { // обновление маркера
@@ -215,7 +225,6 @@ class MenuRequirementProducts {
         MyLib.ajax( captionSend, urlSend, 'post', data, 'json', successAjaxSend, true );
       }
     } )();
-
   }
 
   clickBtnPrint( ) {
@@ -359,7 +368,11 @@ class MenuRequirementProducts {
 
       this.colPrTable.querySelectorAll( 'td.price, td.balance' ).forEach( child => {
         const elemChild = child;
-        elemChild.textContent = MyLib.numToStr( +elemChild.textContent, -1 );
+        const value = +elemChild.textContent;
+        const { classList } = elemChild;
+        const classNegative = 'negative';
+        if ( value < 0 ) classList.add( classNegative ); else classList.remove( classNegative );
+        elemChild.textContent = MyLib.numToStr( value, -1 );
       } );
 
       const buttonMealAll = this.colPr.querySelector( 'button[data-meal-id="-1"]' );
@@ -408,6 +421,7 @@ class MenuRequirementProducts {
         elem.disabled = currentDisabled || elem.dataset.id === '0';
         elem.name = nameCurrentPf;
         elem.value = MyLib.numToStr( val, -1 );
+        this.productCheckBalance( elem );
       } );
 
     this.calcCategories( );
@@ -527,6 +541,16 @@ class MenuRequirementProducts {
       const { colPr: { dataset: { pathUpdate: url } } } = this;
       MyLib.ajax( caption, url, 'post', data, 'json', successAjax, false );
     }
+
+    this.productCheckBalance( elem );
+  }
+
+  productCheckBalance( elem ) {
+    const balanceValue = +elem.closest( 'tr' ).querySelector( '.balance' ).textContent;
+
+    const { value, classList } = elem;
+    const classNegative = 'negative';
+    if ( +value > balanceValue ) classList.add( classNegative ); else classList.remove( classNegative );
   }
 
   changeMenuRequirement( target ) {

@@ -237,8 +237,6 @@ table.table {
     &:hover:not(:focus) {
       background-color: #a1caec;
     }
-
-
   }
 
   // Базовая кнопка
@@ -296,4 +294,10 @@ table.table {
     font-weight: bold;
     color: red;
   }
+
+  .negative {
+    font-weight: bold;
+    color: red;
+  }
+
 }
