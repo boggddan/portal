@@ -553,11 +553,14 @@ class Institution::MenuRequirementsController < Institution::BaseController
     menu_requirement_id = params[ :id ]
 
     menu_requirement = JSON.parse( MenuRequirement
-      .select( :number, :splendingdate, :date )
+      .select( :number,
+               :splendingdate,
+               :date,
+               :number_sap )
       .find( menu_requirement_id )
     .to_json, symbolize_names: true )
 
-    splendingdate = menu_requirement[ :splendingdate  ]
+    splendingdate = menu_requirement[ :splendingdate ]
 
     menu_requirement_exists = JSON.parse( MenuRequirement
       .select( :id, :number, :date, :number_sap, :date_sap, :number_saf, :date_saf )
@@ -585,12 +588,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
         .joins( :children_category )
         .select( :count_all_plan, :count_exemption_plan, 'children_categories.code as code' )
         .where( menu_requirement_id: menu_requirement_id )
-        .where.not( count_all_plan: 0 )
-        .or( MenuChildrenCategory
-          .joins( :children_category )
-          .select( :count_all_plan, :count_exemption_plan, 'children_categories.code as code' )
-          .where( menu_requirement_id: menu_requirement_id )
-          .where.not( count_exemption_plan: 0 ) )
+        .where( '( count_all_plan != 0 OR count_exemption_plan != 0 )' )
         .to_json, symbolize_names: true )
 
       joins_menu_products_prices = <<-SQL.squish
@@ -604,9 +602,9 @@ class Institution::MenuRequirementsController < Institution::BaseController
         .joins( menu_products: [ :children_category, :product ] )
         .joins( joins_menu_products_prices )
         .select( 'SUM( menu_products.count_plan ) AS count_plan',
-                'SUM( ROUND( menu_products.count_plan * menu_products_prices.price, 5 ) ) AS amount',
-                'products.code AS product_code',
-                'children_categories.code AS category_code' )
+                 'SUM( ROUND( menu_products.count_plan * menu_products_prices.price, 5 ) ) AS amount',
+                 'products.code AS product_code',
+                 'children_categories.code AS category_code' )
         .where( menu_requirement_id: menu_requirement_id )
         .where( 'menu_products.count_plan != ? ', 0 )
         .group( 'products.code',
@@ -625,15 +623,19 @@ class Institution::MenuRequirementsController < Institution::BaseController
           'Quantity' => o[ :count_plan ],
           'Amount' => o[ :amount ] } }
 
-        message = { 'CreateRequest' =>
-          { 'Branch_id' => current_branch[ :code ],
-            'Institutions_id' =>  current_institution[ :code ],
+        message = {
+          'CreateRequest' => {
+            'Branch_id' => current_branch[ :code ],
+            'Institutions_id' => current_institution[ :code ],
             'SplendingDate' => menu_requirement[ :splendingdate ],
             'Date' => menu_requirement[ :date ],
             'Goods' => goods,
             'Categories' =>  categories,
             'NumberFromWebPortal' => menu_requirement[ :number ],
-            'User' => current_user[ :username ] } }
+            'Number1C' => menu_requirement[ :number_sap ],
+            'User' => current_user[ :username ]
+          }
+        }
 
         savon_return = get_savon( :create_menu_requirement_plan, message )
         response = savon_return[ :response ]
@@ -673,20 +675,18 @@ class Institution::MenuRequirementsController < Institution::BaseController
     menu_requirement_id = params[ :id ]
 
     menu_requirement = JSON.parse( MenuRequirement
-      .select( :number, :splendingdate, :date )
+      .select( :number,
+               :splendingdate,
+               :date,
+               :number_saf )
       .find( menu_requirement_id )
-    .to_json, symbolize_names: true )
+      .to_json, symbolize_names: true )
 
     menu_children_categories = JSON.parse( MenuChildrenCategory
       .joins( :children_category )
       .select( :count_all_fact, :count_exemption_fact, 'children_categories.code as code' )
       .where( menu_requirement_id: menu_requirement_id )
-      .where.not( count_all_fact: 0 )
-      .or( MenuChildrenCategory
-        .joins( :children_category )
-        .select( :count_all_fact, :count_exemption_fact, 'children_categories.code as code' )
-        .where( menu_requirement_id: menu_requirement_id )
-        .where.not( count_exemption_fact: 0 ) )
+      .where( '( count_all_fact != 0 OR count_exemption_fact != 0 )' )
       .to_json, symbolize_names: true )
 
     joins_menu_products_prices = <<-SQL.squish
@@ -725,12 +725,13 @@ class Institution::MenuRequirementsController < Institution::BaseController
       message = {
         'CreateRequest' => {
           'Branch_id' => current_branch[ :code ],
-          'Institutions_id' =>  current_institution[ :code],
-          'SplendingDate' =>menu_requirement[ :splendingdate ],
+          'Institutions_id' => current_institution[ :code],
+          'SplendingDate' => menu_requirement[ :splendingdate ],
           'Date' => menu_requirement[ :date ],
           'Goods' => goods,
           'Categories' => categories,
           'NumberFromWebPortal' => menu_requirement[ :number ],
+          'Number1C' => menu_requirement[ :number_saf ],
           'User' => current_user[ :username ]
         }
       }

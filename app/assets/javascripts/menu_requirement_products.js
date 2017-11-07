@@ -34,8 +34,11 @@ class MenuRequirementProducts {
     parentElem.querySelectorAll( '.btn_send' ).forEach( child => {
       const elemChild = child;
       const { dataset: { pf } } = elemChild;
-      elemChild.disabled = ( pf === 'plan' && disabledPlan ) ||
-        ( pf === 'fact' && ( !disabledPlan || disabledFact ) );
+
+      if ( document.querySelector( '#main_menu li.info span:first-child' ).textContent !== 'user' ) {
+        elemChild.disabled = ( pf === 'plan' && disabledPlan ) ||
+          ( pf === 'fact' && ( !disabledPlan || disabledFact ) );
+      }
       elemChild.addEventListener( 'click', event => this.clickSend( event ) );
     } );
 
