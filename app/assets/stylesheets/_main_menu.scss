@@ -206,7 +206,7 @@ nav#main_menu {
     content: '\e163';
   }
 
-  li[data-page=institution_reports_children_day_cost],
+  li[data-page=institution_reports_cost_baby_day],
   li[data-page=institution_reports_balances_in_warehouses],
   li[data-page=institution_reports_attendance_of_children] {
     & > a::before {

@@ -222,9 +222,14 @@ class MenuRequirementProducts {
       if ( prices ) {
         this.calcPrPrices( prices );
       } else {
+
         MyLib.ajax( captionSend, urlSend, 'post', data, 'json', successAjaxSend, true );
       }
     } )();
+  }
+
+  countGtrBalance() {
+
   }
 
   clickBtnPrint( ) {

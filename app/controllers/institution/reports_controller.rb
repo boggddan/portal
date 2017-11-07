@@ -26,6 +26,33 @@ class Institution::ReportsController < Institution::BaseController
     render 'report_base'
   end
 
+  #
+  def cost_baby_day
+    @main_params = { h1_text: 'Звіт "Вартість дітодня за меню-вимогами"', is_pdf: false,
+      path_view: institution_reports_ajax_cost_baby_day_path }
+    render 'report_base'
+  end
+
+  def ajax_cost_baby_day
+    message = {
+      'CreateRequest' => {
+        'Branch_id' => current_branch[ :code ],
+        'Institutions_id' => current_institution[ :code ],
+        'StartDate' => params[ :date_start ].to_date,
+        'EndDate' => params[ :date_end ].to_date
+      }
+    }
+    savon_return = get_savon( :get_report_cost_baby_day, message )
+    response = savon_return[ :response ]
+    web_service = savon_return[ :web_service ]
+
+    render json: response[ :interface_state ] == 'OK' ?
+      { status: true, view: response[ :respond ] }
+      :
+      { status: false, caption: 'Неуспішна сихронізація з ІС',
+        message: web_service.merge!( response: response ) }
+  end
+
   # Залишки продуктів харчування
   def balances_in_warehouses
     render 'balances_in_warehouses'
@@ -88,5 +115,6 @@ class Institution::ReportsController < Institution::BaseController
       { status: false, caption: 'Неуспішна сихронізація з ІС',
         message: web_service.merge!( response: response ) }
   end
+
 
 end
