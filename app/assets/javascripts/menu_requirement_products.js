@@ -19,12 +19,12 @@ class MenuRequirementProducts {
     splendingdate.disabled = disabledPlan;
     $( splendingdate ).datepicker( {
       onSelect( ) {
-        const self = this;
-        const { value } = self;
+        const that = this;
+        const { value } = that;
         if ( moment( value, 'DD.MM.YYYY' ).isAfter( moment( '2017-10-31' ) ) ) {
-          self.changeMenuRequirement( self );
+          self.changeMenuRequirement( that );
         } else {
-          ( { dataset: { oldValue: self.value } } = self );
+          ( { dataset: { oldValue: that.value } } = that );
           const caption = 'Дата списання';
           const message = 'Списання до 01.11.2017 не формується! Виберіть іншу дату.';
           objFormSplash.open( 'error', caption, message );
@@ -463,6 +463,8 @@ class MenuRequirementProducts {
 
             countCategory.plan += +tdCellElem.dataset.countPlan || 0;
             countCategory.fact += +tdCellElem.dataset.countFact || 0;
+
+            this.productCheckBalance( tdCellElem );
           } );
 
           arrPlanFact.forEach( pf => {

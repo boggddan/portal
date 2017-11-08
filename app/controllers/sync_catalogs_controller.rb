@@ -1626,7 +1626,7 @@ class SyncCatalogsController < ApplicationController
             menu_children_categories.update_all( count_all_fact: 0, count_exemption_fact: 0 )
 
             menu_meals_dish = menu_requirement.menu_meals_dishes
-              .find_by( meal: Meal.find_by( code: '' ), dish: Dish.find_by( code: '' ) )
+              .find_or_create_by( meal: Meal.find_by( code: '' ), dish: Dish.find_by( code: '' ) )
 
             error_children_categories = []
             params[ :children_categories ].each_with_index do | children_category_par, index |
