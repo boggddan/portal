@@ -17,7 +17,18 @@ class MenuRequirementProducts {
     const splendingdate = parentElem.querySelector( '#splendingdate' );
     ( { value: splendingdate.dataset.oldValue } = splendingdate );
     splendingdate.disabled = disabledPlan;
-    $( splendingdate ).datepicker( { onSelect( ) { self.changeMenuRequirement( this ) } } );
+    $( splendingdate ).datepicker( { onSelect( ) {
+      const self = this;
+      const { value } = self;
+      if ( moment( value, 'DD.MM.YYYY' ).isAfter( moment( '2017-10-31' ) ) ) {
+        self.changeMenuRequirement( self );
+      } else {
+        ( { dataset: { oldValue: self.value } } = self );
+        const caption = 'Дата списання';
+        const message = 'Списання до 01.11.2017 не формується! Виберіть іншу дату.';
+        objFormSplash.open( 'error', caption, message );
+      };
+    } } );
 
     this.splendingdate = splendingdate;
 
@@ -564,6 +575,7 @@ class MenuRequirementProducts {
   changeMenuRequirement( target ) {
     const elem = target;
     const { id: nameVal, dataset: { oldValue: valOld }, value: val } = elem;
+
     if ( val !== valOld ) {
       elem.dataset.oldValue = val;
       const { dataId } = this;
