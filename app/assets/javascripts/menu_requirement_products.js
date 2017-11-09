@@ -1,5 +1,5 @@
 /* exported MenuRequirementProducts */
-/* global objFormChoice */
+/* global objFormChoice, objFormSplash */
 
 class MenuRequirementProducts {
   constructor( elem ) {
@@ -48,10 +48,11 @@ class MenuRequirementProducts {
       const elemChild = child;
       const { dataset: { pf } } = elemChild;
 
-      if ( document.querySelector( '#main_menu li.info span:first-child' ).textContent !== 'user' ) {
-        elemChild.disabled = ( pf === 'plan' && disabledPlan ) ||
-          ( pf === 'fact' && ( !disabledPlan || disabledFact ) );
-      }
+      elemChild.disabled = ( pf === 'plan' && disabledPlan ) ||
+        ( pf === 'fact' && ( !disabledPlan || disabledFact ) );
+
+      // if ( document.querySelector( '#main_menu li.info span:first-child' ).textContent !== 'user' ) {
+      // }
       elemChild.addEventListener( 'click', event => this.clickSend( event ) );
     } );
 
@@ -226,25 +227,48 @@ class MenuRequirementProducts {
     const captionPrices = `Обновлення данних цін та залишків з ІС [id: ${ this.dataId }]`;
     const data = { id: this.dataId };
     const { parentElem: { dataset: { pathUpdatePrice: urlPrices } } } = this;
-
-    const pf = `pathSend${ MyLib.capitalize( event.currentTarget.dataset.pf ) }`;
-    const captionSend = `Відправка данних в ІС [id: ${ this.dataId }]`;
-
-    const successAjaxSend = ( ) => window.location.reload( );
-    const { parentElem: { dataset: { [ pf ]: urlSend } } } = this;
+    const { currentTarget: { dataset: { pf } } } = event;
 
     ( async () => {
       const prices = await MyLib.ajax( captionPrices, urlPrices, 'post', data, 'json', null, true );
       if ( prices ) {
         this.calcPrPrices( prices );
       } else {
-        MyLib.ajax( captionSend, urlSend, 'post', data, 'json', successAjaxSend, true );
+        const isCountGtrBalance = pf === 'plan' || await this.countGtrBalance( pf );
+        if ( isCountGtrBalance ) {
+          const pfData = `pathSend${ MyLib.capitalize( pf ) }`;
+          const captionSend = `Відправка данних в ІС [id: ${ this.dataId }]`;
+
+          const successAjaxSend = ( ) => window.location.reload( );
+          const { parentElem: { dataset: { [ pfData ]: urlSend } } } = this;
+
+          MyLib.ajax( captionSend, urlSend, 'post', data, 'json', successAjaxSend, true );
+          console.log(this.parentElem)
+        }
       }
-    } )();
+    } )( );
   }
 
-  countGtrBalance() {
+  countGtrBalance( pf ) {
+    let status = true;
 
+    const balanceLess = [ ];
+    this.colPrTable.querySelectorAll( `tr[ data-${ pf }-negative = 'true' ]` ).forEach( child => {
+      const { textContent: product } = child.querySelector( 'td.name' );
+      const balance = +child.querySelector( 'td.balance' ).textContent;
+      const count = +child.querySelector( `td.cell_count[ data-count-pf = '${ pf }' ]` ).textContent;
+
+      balanceLess.push( { 'Продукт:': product, 'Залишок:': balance, 'Кількість:': count } );
+    } );
+
+    if ( balanceLess.length ) {
+      const caption = 'Загальна кількість по продукту перевищує залишок';
+      const message = balanceLess;
+      objFormSplash.open( 'error', caption, message );
+      status = false;
+    }
+
+    return status;
   }
 
   clickBtnPrint( ) {
@@ -389,20 +413,17 @@ class MenuRequirementProducts {
       this.colPrTable.querySelectorAll( 'td.price, td.balance' ).forEach( child => {
         const elemChild = child;
         const value = +elemChild.textContent;
-        const { classList } = elemChild;
-        const classNegative = 'negative';
-        if ( value < 0 ) classList.add( classNegative ); else classList.remove( classNegative );
         elemChild.textContent = MyLib.numToStr( value, -1 );
       } );
 
       const buttonMealAll = this.colPr.querySelector( 'button[data-meal-id="-1"]' );
       buttonMealAll.click( );
 
-      this.colPrTablePf( this.disabledPlan ? 'fact' : 'plan' );
-
       this.categories = JSON.parse( this.colPrTable.dataset.categories || '[ ]' );
 
       this.calcProducts( );
+
+      this.colPrTablePf( this.disabledPlan ? 'fact' : 'plan' );
     } else {
       this.buttonColPr.classList.remove( 'nav' );
       this.buttonColPr.disabled = true;
@@ -430,9 +451,8 @@ class MenuRequirementProducts {
       } );
     }
 
-    this.colPrTable
-      .querySelectorAll( '.cell_data input' )
-      .forEach( child => {
+    this.colPrTable.querySelectorAll( 'tbody tr.row_data' ).forEach( tr => {
+      tr.querySelectorAll( '.cell_data input' ).forEach( child => {
         const elem = child;
         const { parentElement: { dataset: parentData } } = elem;
         const val = +parentData[ dataCurrentPf ];
@@ -441,8 +461,8 @@ class MenuRequirementProducts {
         elem.disabled = currentDisabled || elem.dataset.id === '0';
         elem.name = nameCurrentPf;
         elem.value = MyLib.numToStr( val, -1 );
-        this.productCheckBalance( elem );
       } );
+    } );
 
     this.calcCategories( );
   }
@@ -463,8 +483,6 @@ class MenuRequirementProducts {
 
             countCategory.plan += +tdCellElem.dataset.countPlan || 0;
             countCategory.fact += +tdCellElem.dataset.countFact || 0;
-
-            this.productCheckBalance( tdCellElem );
           } );
 
           arrPlanFact.forEach( pf => {
@@ -483,19 +501,6 @@ class MenuRequirementProducts {
             }
           } );
         } );
-
-        arrPlanFact.forEach( pf => {
-          const countProductPF = MyLib.toRound( countProduct[ pf ], 3 );
-
-          trElem.querySelector( `td.cell_count[data-count-pf=${ pf }]` )
-            .textContent = MyLib.numToStr( countProductPF, -1 );
-
-          const diff = countProduct.fact - countProduct.plan;
-          if ( pf === 'fact' ) {
-            trElem.querySelector( `td.cell_diff[data-count-pf=${ pf }]` )
-              .textContent = MyLib.numToStr( MyLib.toRound( diff, 3 ), -1 );
-          }
-        } );
       } );
 
       this.calcPrSum( );
@@ -505,22 +510,43 @@ class MenuRequirementProducts {
   calcPrSum( ) {
     if ( this.colPrTable ) {
       const sumAll = this.categories.reduce( ( prev, cur ) => Object.assign( prev, { [ cur ]: { plan: 0, fact: 0 } } ), { } );
+      const countAll = this.categories.reduce( ( prev, cur ) => Object.assign( prev, { [ cur ]: { plan: 0, fact: 0 } } ), { } );
       const arrPlanFact = [ 'plan' ].concat( this.disabledPlan ? 'fact' : [] );
+
       this.colPrTable.querySelectorAll( 'tbody tr.row_data' ).forEach( tr => {
         const trElem = tr;
+
         const price = +trElem.querySelector( 'td.price' ).textContent;
+        const balance = +trElem.querySelector( 'td.balance' ).textContent;
 
         arrPlanFact.forEach( pf => {
           let sumProductPf = 0;
+          let countProductPf = 0;
+
           this.categories.forEach( categoryId => {
-            const countCategoryPF = +trElem.querySelector( `td[ data-count-type = "count" ][ data-children-category-id = "${ categoryId }"][data-count-pf='${ pf }']` ).textContent;
             let sumCategoryPf = 0;
+            const countCategoryPF = MyLib.toRound( +trElem.querySelector( `td[ data-count-type = "count" ][ data-children-category-id = "${ categoryId }"][data-count-pf='${ pf }']` ).textContent, 3 );
+
+            countProductPf += countCategoryPF;
+            countAll[ categoryId ][ pf ] += countCategoryPF;
+
             if ( price ) {
               sumCategoryPf = MyLib.toRound( price * countCategoryPF, 5 );
               sumProductPf += sumCategoryPf;
               sumAll[ categoryId ][ pf ] += sumCategoryPf;
             }
           } );
+
+          if ( pf === 'fact' ) {
+            const countPlan = +trElem.querySelector( 'td.cell_count[ data-count-pf= "plan" ]' ).textContent;
+            const diff =  MyLib.numToStr( MyLib.toRound( countProductPf - countPlan, 3 ), -1 );
+            trElem.querySelector( `td.cell_diff[data-count-pf=${ pf }]` ).textContent = diff;
+
+            trElem.dataset[ `${ pf }Negative` ] = countProductPf > balance;
+          }
+
+          trElem.querySelector( `td.cell_count[data-count-pf=${ pf }]` )
+            .textContent = MyLib.numToStr( MyLib.toRound( countProductPf, 3 ), -1 );
 
           trElem.querySelector( `td.cell_sum[ data-count-pf = "${ pf }" ]` )
             .textContent = MyLib.numToStr( MyLib.toRound( sumProductPf, 5 ), -1 );
@@ -563,16 +589,6 @@ class MenuRequirementProducts {
       const { colPr: { dataset: { pathUpdate: url } } } = this;
       MyLib.ajax( caption, url, 'post', data, 'json', successAjax, false );
     }
-
-    this.productCheckBalance( elem );
-  }
-
-  productCheckBalance( elem ) {
-    const balanceValue = +elem.closest( 'tr' ).querySelector( '.balance' ).textContent;
-
-    const { value, classList } = elem;
-    const classNegative = 'negative';
-    if ( +value > balanceValue ) classList.add( classNegative ); else classList.remove( classNegative );
   }
 
   changeMenuRequirement( target ) {

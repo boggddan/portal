@@ -753,12 +753,8 @@ class Institution::MenuRequirementsController < Institution::BaseController
                       count_exemption_fact: 0 )
               .delete_all
 
-            MenuMealsDish
-              .where( menu_requirement_id: menu_requirement_id,
-                      is_enabled: false )
-              .delete_all
-
             sql = <<-SQL.squish
+                DELETE FROM menu_meals_dishes WHERE is_enabled = false AND menu_requirement_id = #{ menu_requirement_id };
                 DELETE FROM menu_products
                     USING menu_meals_dishes bb
                     WHERE menu_meals_dish_id = bb.id

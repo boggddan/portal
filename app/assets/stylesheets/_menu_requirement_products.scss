@@ -158,6 +158,17 @@
     col:nth-child( 1 ) { width: 250px; }
 
     tr {
+
+      &[ data-fact-negative = 'true' ] {
+        td.name,
+        input[ name = 'count_fact' ],
+        td[ data-count-type = 'count' ][ data-count-pf = 'fact' ],
+        td.cell_count[ data-count-pf = 'fact' ] {
+          font-weight: bold;
+          color: red;
+        }
+      }
+
       &.type { @include row-group( 'td', #f1f1f1, #333, 50px, left ); }
 
       .balance {

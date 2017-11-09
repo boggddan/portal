@@ -22,14 +22,17 @@ class FormSplash {
 
     let captionType = '';
 
+    let message = '';
+    if ( typeof data === 'object' ) message = `<pre>${ JSON.stringify( data, null, 2 ) }</pre>`; else message = data;
+
     if ( type === 'error' ) {
-      iframe.srcdoc = data;
+      iframe.srcdoc = message;
       captionType = 'Помилка:';
     } else if ( type === 'info' ) {
-      iframe.srcdoc = data;
+      iframe.srcdoc = message;
       captionType = 'Інформація:';
     } else if ( type === 'print' ) {
-      iframe.src = data;
+      iframe.src = message;
       captionType = 'Друк документа:';
     }
 
