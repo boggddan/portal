@@ -9,6 +9,8 @@ class MenuRequirementProducts {
     const disabledPlan = parentElem.dataset.disabledPlan === 'true';
     const disabledFact = parentElem.dataset.disabledFact === 'true';
 
+    this.user = ( document.querySelector( '#main_menu li.info span:first-child' ).textContent !== 'user';
+
     parentElem.querySelectorAll( 'input[data-date]' ).forEach( child => {
       const elemChild = child;
       elemChild.value = MyLib.toDateFormat( elemChild.dataset.date );
@@ -51,8 +53,6 @@ class MenuRequirementProducts {
       elemChild.disabled = ( pf === 'plan' && disabledPlan ) ||
         ( pf === 'fact' && ( !disabledPlan || disabledFact ) );
 
-      // if ( document.querySelector( '#main_menu li.info span:first-child' ).textContent !== 'user' ) {
-      // }
       elemChild.addEventListener( 'click', event => this.clickSend( event ) );
     } );
 
@@ -193,7 +193,7 @@ class MenuRequirementProducts {
       MyLib.ajax( caption, url, 'post', data, 'script', false, true );
     };
 
-    if ( this.splendingdate.value === dateValue ) {
+    if ( !this.splendingdate.disabled && this.splendingdate.value === dateValue ) {
       const captionChoice = 'Створення продуктів';
       const textChoice = `Ви погоджуєтесь на створення з датою списання ${ dateValue }? ` +
                          'Вона буде закрита для редагування!';
@@ -234,7 +234,7 @@ class MenuRequirementProducts {
       if ( prices ) {
         this.calcPrPrices( prices );
       } else {
-        const isCountGtrBalance = pf === 'plan' || await this.countGtrBalance( pf );
+        const isCountGtrBalance = this.user !== 'user' || pf === 'plan' || await this.countGtrBalance( pf );
         if ( isCountGtrBalance ) {
           const pfData = `pathSend${ MyLib.capitalize( pf ) }`;
           const captionSend = `Відправка данних в ІС [id: ${ this.dataId }]`;
@@ -243,7 +243,6 @@ class MenuRequirementProducts {
           const { parentElem: { dataset: { [ pfData ]: urlSend } } } = this;
 
           MyLib.ajax( captionSend, urlSend, 'post', data, 'json', successAjaxSend, true );
-          console.log(this.parentElem)
         }
       }
     } )( );
