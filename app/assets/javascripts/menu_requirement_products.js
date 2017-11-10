@@ -9,7 +9,7 @@ class MenuRequirementProducts {
     const disabledPlan = parentElem.dataset.disabledPlan === 'true';
     const disabledFact = parentElem.dataset.disabledFact === 'true';
 
-    this.user = ( document.querySelector( '#main_menu li.info span:first-child' ).textContent !== 'user';
+    ( { textContent: this.user } = document.querySelector( '#main_menu li.info span:first-child' ) );
 
     parentElem.querySelectorAll( 'input[data-date]' ).forEach( child => {
       const elemChild = child;
@@ -234,7 +234,7 @@ class MenuRequirementProducts {
       if ( prices ) {
         this.calcPrPrices( prices );
       } else {
-        const isCountGtrBalance = this.user !== 'user' || pf === 'plan' || await this.countGtrBalance( pf );
+        const isCountGtrBalance = pf === 'plan' || await this.countGtrBalance( pf );
         if ( isCountGtrBalance ) {
           const pfData = `pathSend${ MyLib.capitalize( pf ) }`;
           const captionSend = `Відправка данних в ІС [id: ${ this.dataId }]`;

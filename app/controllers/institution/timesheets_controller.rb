@@ -178,9 +178,13 @@ class Institution::TimesheetsController < Institution::BaseController
       .find( id )
       .to_json, symbolize_names: true )
 
-    message = { 'CreateRequest' => { 'StartDate' => timesheet[ :date_eb ].to_date,
-                                     'EndDate' => timesheet[ :date_ee ].to_date,
-                                     'Institutions_id' => current_institution[ :code ] } }
+    message = {
+      'CreateRequest' => {
+        'StartDate' => timesheet[ :date_eb ].to_date,
+        'EndDate' => timesheet[ :date_ee ].to_date,
+        'Institutions_id' => current_institution[ :code ]
+      }
+    }
 
     savon_return = get_savon( :get_data_time_sheet, message )
     response = savon_return[ :response ]
@@ -209,7 +213,11 @@ class Institution::TimesheetsController < Institution::BaseController
 
         timesheet_dates = JSON.parse( TimesheetDate
           .joins( :reasons_absence )
-          .select( :id, :children_group_id, :child_id, :reasons_absence_id, :date,
+          .select( :id,
+                   :children_group_id,
+                   :child_id,
+                   :reasons_absence_id,
+                   :date,
                    'reasons_absences.priority AS ra_priority' )
           .where( timesheet_id: id )
           .to_json, symbolize_names: true )

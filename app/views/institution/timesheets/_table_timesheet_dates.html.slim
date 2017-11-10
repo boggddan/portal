@@ -53,8 +53,10 @@ table.table
           - ( date_eb..date_ee ).each_with_index do | date, index |
             - child_day = v \
               .select{ | o | o[ :date ] == date.to_s( :db ) } \
-              .fetch( 0, { id: nil, reasons_absence_id: nil, mark: 'NULL' } )
+              .fetch( 0, { id: nil, reasons_absence_id: nil, mark: 'NULL', reason_code: '' } )
 
-            td *{ class: :cell_mark, data: { id: child_day[ :id ], date_id: index,
-              reasons_absence_id: child_day[ :reasons_absence_id ] },
+            td *{ class: :cell_mark, data: { id: child_day[ :id ],
+            date_id: index,
+              reasons_absence_id: child_day[ :reasons_absence_id ],
+              reason_code: child_day[ :reason_code ] },
               spellcheck: :false, contenteditable: true } = child_day[ :mark ]

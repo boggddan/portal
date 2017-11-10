@@ -562,13 +562,27 @@ class Institution::MenuRequirementsController < Institution::BaseController
 
     splendingdate = menu_requirement[ :splendingdate ]
 
+    sql_where_exists = <<-SQL.squish
+        menu_requirements.splendingdate = '#{ splendingdate }'
+        AND
+        menu_requirements.institution_id = #{ current_user[ :userable_id ] }
+        AND
+        menu_requirements.id != #{ menu_requirement_id }
+        AND
+        ( ( menu_requirements.number_sap != '' AND is_del_plan_1c = false )
+          OR
+          ( menu_requirements.number_saf != '' AND is_del_fact_1c = false ) )
+      SQL
+
     menu_requirement_exists = JSON.parse( MenuRequirement
-      .select( :id, :number, :date, :number_sap, :date_sap, :number_saf, :date_saf )
-      .where( splendingdate: splendingdate,
-              institution_id: current_user[ :userable_id ],
-              is_del_plan_1c: false )
-      .where.not( id: menu_requirement_id,
-                  number_saf: '' )
+      .select( :id,
+               :number,
+               :date,
+               :number_sap,
+               :date_sap,
+               :number_saf,
+               :date_saf )
+      .where( sql_where_exists )
       .to_json, symbolize_names: true )
 
     if menu_requirement_exists.present?
