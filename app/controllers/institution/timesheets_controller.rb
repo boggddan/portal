@@ -102,7 +102,7 @@ class Institution::TimesheetsController < Institution::BaseController
             COALESCE( cc.id, 0 ) AS children_group_id,
             COALESCE( cc.name, 'Не знайдений код групи' ) AS children_group_name,
             COALESCE( dd.id, 0 ) AS reasons_absence_id,
-            COALESCE( dd.name, 'Не знайдений код причини відсутності' ) AS reasons_absence_name,
+            COALESCE( dd.name, 'Не знайденишй код причини відсутності' ) AS reasons_absence_name,
             aa.child_code,
             aa.children_group_code,
             aa.reasons_absence_code,
