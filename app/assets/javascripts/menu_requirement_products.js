@@ -516,7 +516,7 @@ class MenuRequirementProducts {
         const trElem = tr;
 
         const price = +trElem.querySelector( 'td.price' ).textContent;
-        const balance = +trElem.querySelector( 'td.balance' ).textContent;
+        const balance = MyLib.toRound( +trElem.querySelector( 'td.balance' ).textContent, 3 );
 
         arrPlanFact.forEach( pf => {
           let sumProductPf = 0;
@@ -540,8 +540,7 @@ class MenuRequirementProducts {
             const countPlan = +trElem.querySelector( 'td.cell_count[ data-count-pf= "plan" ]' ).textContent;
             const diff =  MyLib.numToStr( MyLib.toRound( countProductPf - countPlan, 3 ), -1 );
             trElem.querySelector( `td.cell_diff[data-count-pf=${ pf }]` ).textContent = diff;
-
-            trElem.dataset[ `${ pf }Negative` ] = countProductPf > balance;
+            trElem.dataset[ `${ pf }Negative` ] = MyLib.toRound( countProductPf, 3) > balance;
           }
 
           trElem.querySelector( `td.cell_count[data-count-pf=${ pf }]` )
