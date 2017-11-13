@@ -60,77 +60,77 @@ class Institution::TimesheetsController < Institution::BaseController
       if response[ :interface_state ] == 'OK' && ts_data && ts_data.present?
         error = { }
 
-        # children_codes = ts_data.group_by { | o | o[ :child_code ] }.map { | k, v | k }
-        # children = exists_codes( :children, children_codes )
-        # error.merge!( children[ :error ] ) unless children[ :status ]
+        children_codes = ts_data.group_by { | o | o[ :child_code ] }.map { | k, v | k }
+        children = exists_codes( :children, children_codes )
+        error.merge!( children[ :error ] ) unless children[ :status ]
 
-        # children_groups_codes = ts_data.group_by { | o | o[ :children_group_code ] }.map { | k, v | k }
-        # children_groups = exists_codes( :children_groups, children_groups_codes )
-        # error.merge!( children_groups[ :error ] ) unless children_groups[ :status ]
+        children_groups_codes = ts_data.group_by { | o | o[ :children_group_code ] }.map { | k, v | k }
+        children_groups = exists_codes( :children_groups, children_groups_codes )
+        error.merge!( children_groups[ :error ] ) unless children_groups[ :status ]
 
-        # reasons_absences_code = ts_data.group_by { | o | o[ :reasons_absence_code ] }.map { | k, v | k }
-        # reasons_absences = exists_codes( :reasons_absences, reasons_absences_code )
-        # error.merge!( reasons_absences[ :error ] ) unless reasons_absences[ :status ]
+        reasons_absences_code = ts_data.group_by { | o | o[ :reasons_absence_code ] }.map { | k, v | k }
+        reasons_absences = exists_codes( :reasons_absences, reasons_absences_code )
+        error.merge!( reasons_absences[ :error ] ) unless reasons_absences[ :status ]
 
-        values = ts_data.map.with_index { | o, row |
-          "( #{ id + 1 }, #{ o.values_at( :child_code, :children_group_code, :reasons_absence_code, :date )
-                  if i==0 || i==1 then "::VARCHAR(9)" elsif i==2 then "::VARCHAR(2)" elsif i==3 then "::DATE" else "" end
-                    : "" }"  }
-          .join( ',' ) } )" }.join( ',' )
+        # values = ts_data.map.with_index { | o, row |
+        #   "( #{ id + 1 }, #{ o.values_at( :child_code, :children_group_code, :reasons_absence_code, :date )
+        #           if i==0 || i==1 then "::VARCHAR(9)" elsif i==2 then "::VARCHAR(2)" elsif i==3 then "::DATE" else "" end
+        #             : "" }"  }
+        #   .join( ',' ) } )" }.join( ',' )
 
-        sql_create_table = <<-SQL.squish
-            ROLLBACK;
-            BEGIN;
+        # sql_create_table = <<-SQL.squish
+        #     ROLLBACK;
+        #     BEGIN;
 
-            CREATE TEMP TABLE timesheets_get (
-                id,
-                child_code,
-                children_group_code,
-                reasons_absence_code,
-                date
-              )
-            ON COMMIT DROP
-            AS ( VALUES #{ values } );
+        #     CREATE TEMP TABLE timesheets_get (
+        #         id,
+        #         child_code,
+        #         children_group_code,
+        #         reasons_absence_code,
+        #         date
+        #       )
+        #     ON COMMIT DROP
+        #     AS ( VALUES #{ values } );
 
-            CREATE INDEX ON timesheets_get( child_code );
-            CREATE INDEX ON timesheets_get( children_group_code );
-            CREATE INDEX ON timesheets_get( reasons_absence_code );
-          SQL
+        #     CREATE INDEX ON timesheets_get( child_code );
+        #     CREATE INDEX ON timesheets_get( children_group_code );
+        #     CREATE INDEX ON timesheets_get( reasons_absence_code );
+        #   SQL
 
-        sql_select = <<-SQL.squish
-          SELECT
-            COALESCE( bb.id, 0 ) AS child_id,
-            COALESCE( bb.name, 'Не знайдений код дитини' ) AS child_name,
-            COALESCE( cc.id, 0 ) AS children_group_id,
-            COALESCE( cc.name, 'Не знайдений код групи' ) AS children_group_name,
-            COALESCE( dd.id, 0 ) AS reasons_absence_id,
-            COALESCE( dd.name, 'Не знайденишй код причини відсутності' ) AS reasons_absence_name,
-            aa.child_code,
-            aa.children_group_code,
-            aa.reasons_absence_code,
-            aa.date
-            FROM timesheets_get aa
-            LEFT JOIN children bb ON aa.child_code = bb.code
-            LEFT JOIN children_groups cc ON aa.children_group_code = cc.code
-            LEFT JOIN reasons_absences dd ON aa.reasons_absence_code = dd.code
-            ORDER BY aa.child_code,
-                     aa.children_group_code,
-                     aa.reasons_absence_code,
-                     aa.date;
-        SQL
+        # sql_select = <<-SQL.squish
+        #   SELECT
+        #     COALESCE( bb.id, 0 ) AS child_id,
+        #     COALESCE( bb.name, 'Не знайдений код дитини' ) AS child_name,
+        #     COALESCE( cc.id, 0 ) AS children_group_id,
+        #     COALESCE( cc.name, 'Не знайдений код групи' ) AS children_group_name,
+        #     COALESCE( dd.id, 0 ) AS reasons_absence_id,
+        #     COALESCE( dd.name, 'Не знайденишй код причини відсутності' ) AS reasons_absence_name,
+        #     aa.child_code,
+        #     aa.children_group_code,
+        #     aa.reasons_absence_code,
+        #     aa.date
+        #     FROM timesheets_get aa
+        #     LEFT JOIN children bb ON aa.child_code = bb.code
+        #     LEFT JOIN children_groups cc ON aa.children_group_code = cc.code
+        #     LEFT JOIN reasons_absences dd ON aa.reasons_absence_code = dd.code
+        #     ORDER BY aa.child_code,
+        #              aa.children_group_code,
+        #              aa.reasons_absence_code,
+        #              aa.date;
+        # SQL
 
-        timesheets_get = nil
+        # timesheets_get = nil
 
-        ActiveRecord::Base.connection_pool
-          .with_connection { | connection |
-            connection.execute( sql_create_table )
-            timesheets_get = JSON.parse( connection.execute( sql_select ).to_json, symbolize_names: true )
-            connection.exec_query( 'COMMIT;' )
-          }
+        # ActiveRecord::Base.connection_pool
+        #   .with_connection { | connection |
+        #     connection.execute( sql_create_table )
+        #     timesheets_get = JSON.parse( connection.execute( sql_select ).to_json, symbolize_names: true )
+        #     connection.exec_query( 'COMMIT;' )
+        #   }
 
-        error = timesheets_get
-          .select { | o | o[ :child_id ] || o[ :children_group_id ] || o[ :reasons_absence_id ] }
-          .group_by { | o | { o[]}
+        # error = timesheets_get
+        #   .select { | o | o[ :child_id ] || o[ :children_group_id ] || o[ :reasons_absence_id ] }
+        #   .group_by { | o | { o[]}
 
         if error.empty?
           ActiveRecord::Base.transaction do
