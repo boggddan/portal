@@ -22,6 +22,7 @@
   - [*Страви* - `dishes`](#Страви---dishes-top)
   - [*Прийоми їжі* - `meals`](#Прийоми-їжі---meals-top)
   - [*Норми продуктів підрозділу по категоріях дітей в стравах* - `dishes_products_norms`](#Норми-продуктів-підрозділу-по-категоріях-дітей-в-стравах---dishes_products_norms-top)
+  - [*Дата блокування документів* - `date_blocks`](#Дата-блокування-документів---`date_blocks-top`)
 - [Документи](#Документи-top)
   - [*Замовлення постачальнику* - `supplier_orders`](#Замовлення-постачальнику---supplier_orders-top)
   - [*Надходження ТМЦ* - `receipts`](#Надходження-ТМЦ---receipts-top)
@@ -196,6 +197,24 @@ POST /api/cu_dishes_products_norms
     { "institution_code": 14, "dish_code": "000000002", "product_code": "000000047", "children_category_code": "000000001", "amount": 0.05 }
   ]
 }
+```
+
+### *Дата блокування документів* - `date_blocks` [:top:](#Зміст)
+
+```json
+  POST /api/cu_date_blocks
+  { "date_blocks":
+    [
+      { "institution_code": 14, "date_start": 1509494400, "date_end": 1510576706 }
+    ]
+  }
+
+  DELETE /api/date_blocks
+  { "date_blocks":
+    [
+      { "institution_code": 14, "date_start": 1509494400, "date_end": 1510576706 }
+    ]
+  }
 ```
 
 ## Документи [:top:](#Зміст)

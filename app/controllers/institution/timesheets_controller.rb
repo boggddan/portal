@@ -20,6 +20,8 @@ class Institution::TimesheetsController < Institution::BaseController
     date_start = params[ :date_start ].to_date
     date_end = params[ :date_end ].to_date
 
+
+
     timesheet_exists = JSON.parse( Timesheet
       .select( :id, :number, :date, :date_eb, :date_ee )
       .where( institution_id: current_user[ :userable_id ],

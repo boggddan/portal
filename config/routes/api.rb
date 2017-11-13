@@ -37,10 +37,6 @@ scope :api, controller: :sync_catalogs do
   get :causes_deviation_view, path: :causes_deviation
   get :causes_deviations_view, path: :causes_deviations
 
-  # post :price_product_update, path: :cu_price_product
-  # get :price_product_view, path: :price_product
-  # get :price_products_view, path: :price_products
-
   post :children_day_cost_update, path: :cu_children_day_cost
   get :children_day_cost_view, path: :children_day_cost
   get :children_day_costs_view, path: :children_day_costs
@@ -74,6 +70,9 @@ scope :api, controller: :sync_catalogs do
   get :dishes_view, path: :dishes
 
   post :dishes_products_norms_update, path: :cu_dishes_products_norms
+
+  post :date_blocks_update, path: :cu_date_blocks
+  delete :date_blocks_delete, path: :date_blocks
 
   # Обновление документов
   post :supplier_order_update, path: :cu_supplier_order
