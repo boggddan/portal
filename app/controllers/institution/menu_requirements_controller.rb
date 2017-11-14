@@ -705,7 +705,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
     splendingdate =  menu_requirement[ :splendingdate ]
 
     date_blocks = check_date_block( splendingdate )
-    if date_blocks
+    if date_blocks.present?
       caption = 'Блокування документів'
       message = "Дата списання #{ date_blocks } закрита для відправлення!"
       result = { status: false, message: message, caption: caption }

@@ -195,7 +195,7 @@ class Institution::TimesheetsController < Institution::BaseController
     date_end = timesheet[ :date_ee ]
 
     date_blocks = check_date_block( date_start, date_end )
-    if date_blocks
+    if date_blocks.present?
       caption = 'Блокування документів'
       message = "Дата [ #{ date_blocks } ] в табелі закрита для відправлення!"
       result = { status: false, message: message, caption: caption }

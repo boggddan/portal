@@ -43,7 +43,7 @@ class Institution::ReceiptsController < Institution::BaseController
 
     date = receipt[ :date ]
     date_blocks = check_date_block( date )
-    if date_blocks
+    if date_blocks.present?
       caption = 'Блокування документів'
       message = "Дата поставки [ #{ date_blocks } ] закрита для відправлення!"
       result = { status: false, message: message, caption: caption }

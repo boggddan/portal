@@ -216,7 +216,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
     date_end = institution_order[ :date_end ]
 
     date_blocks = check_date_block( date_start, date_end )
-    if date_blocks
+    if date_blocks.present?
       caption = 'Блокування документів'
       message = "Дата [ #{ date_blocks } ] в заявці закрита для відправлення!"
       result = { status: false, message: message, caption: caption }
@@ -332,7 +332,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
     date_end = io_correction[ :date_end ]
 
     date_blocks = check_date_block( date_start, date_end )
-    if date_blocks
+    if date_blocks.present?
       caption = 'Блокування документів'
       message = "Дата [ #{ date_blocks } ] в заявці закрита для відправлення!"
       result = { status: false, message: message, caption: caption }
