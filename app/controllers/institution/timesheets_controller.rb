@@ -20,8 +20,6 @@ class Institution::TimesheetsController < Institution::BaseController
     date_start = params[ :date_start ].to_date
     date_end = params[ :date_end ].to_date
 
-
-
     timesheet_exists = JSON.parse( Timesheet
       .select( :id, :number, :date, :date_eb, :date_ee )
       .where( institution_id: current_user[ :userable_id ],
@@ -184,50 +182,73 @@ class Institution::TimesheetsController < Institution::BaseController
     timesheet_id = params[ :id ]
 
     timesheet = JSON.parse( Timesheet
-      .select( :id, :number, :date_vb, :date_ve, :date_eb, :date_ee )
+      .select( :id,
+                :number,
+                :date_vb,
+                :date_ve,
+                :date_eb,
+                :date_ee )
       .find( timesheet_id )
       .to_json, symbolize_names: true )
 
-    timesheet_dates = JSON.parse( TimesheetDate
-      .joins( { children_group: :children_category }, :child, :reasons_absence )
-      .select( :id, :date,
-               'children_categories.code AS category_code',
-               'children_groups.code AS group_code',
-               'children.code AS child_code',
-               'reasons_absences.code AS reason_code' )
-      .where( timesheet_id: timesheet_id )
-      .order( 'category_code', 'group_code', 'child_code', :date )
-      .to_json, symbolize_names: true )
+    date_start = timesheet[ :date_eb ]
+    date_end = timesheet[ :date_ee ]
 
-    result = { }
-    if timesheet_dates.present?
-      ts = timesheet_dates.map{ | o | { 'Child_code' => o[ :child_code ],
-                                        'Children_group_code' => o[ :group_code ],
-                                        'Reasons_absence_code' => o[ :reason_code ],
-                                        'Date' => o[ :date ] } }
-
-      message = { 'CreateRequest' => { 'Institutions_id' => current_institution[ :code ],
-                                       'NumberFromWebPortal' => timesheet[ :number ],
-                                       'StartDate' => timesheet[ :date_vb ],
-                                       'EndDate' => timesheet[ :date_ve ],
-                                       'StartDateOfTheFill' => timesheet[ :date_eb ],
-                                       'EndDateOfTheFill' => timesheet[ :date_ee ],
-                                       'TS' => ts,
-                                       'User' => current_user[ :username ] } }
-      savon_return = get_savon( :creation_time_sheet, message )
-      response = savon_return[ :response ]
-      web_service = savon_return[ :web_service ]
-
-      if response[ :interface_state ] == 'OK'
-        data = { date_sa: Date.today, number_sa: response[ :respond ].to_s }
-        update_base_with_id( :timesheets, timesheet_id, data )
-        result = { status: true }
-      else
-        result = { status: false, caption: 'Неуспішна сихронізація з ІС',
-                   message: web_service.merge!( response: response ) }
-      end
+    date_blocks = check_date_block( date_start, date_end )
+    if date_blocks
+      caption = 'Блокування документів'
+      message = "Дата [ #{ date_blocks } ] в табелі закрита для відправлення!"
+      result = { status: false, message: message, caption: caption }
     else
-      result = { status: false, caption: 'Немає данних' }
+      timesheet_dates = JSON.parse( TimesheetDate
+        .joins( { children_group: :children_category }, :child, :reasons_absence )
+        .select( :id, :date,
+                'children_categories.code AS category_code',
+                'children_groups.code AS group_code',
+                'children.code AS child_code',
+                'reasons_absences.code AS reason_code' )
+        .where( timesheet_id: timesheet_id )
+        .order( 'category_code', 'group_code', 'child_code', :date )
+        .to_json, symbolize_names: true )
+
+      result = { }
+      if timesheet_dates.present?
+        ts = timesheet_dates.map{ | o | {
+          'Child_code' => o[ :child_code ],
+          'Children_group_code' => o[ :group_code ],
+          'Reasons_absence_code' => o[ :reason_code ],
+          'Date' => o[ :date ]
+          }
+        }
+
+        message = {
+          'CreateRequest' => {
+            'Institutions_id' => current_institution[ :code ],
+            'NumberFromWebPortal' => timesheet[ :number ],
+            'StartDate' => timesheet[ :date_vb ],
+            'EndDate' => timesheet[ :date_ve ],
+            'StartDateOfTheFill' => date_start,
+            'EndDateOfTheFill' => date_end,
+            'TS' => ts,
+            'User' => current_user[ :username ]
+         }
+        }
+
+        savon_return = get_savon( :creation_time_sheet, message )
+        response = savon_return[ :response ]
+        web_service = savon_return[ :web_service ]
+
+        if response[ :interface_state ] == 'OK'
+          data = { date_sa: Date.today, number_sa: response[ :respond ].to_s }
+          update_base_with_id( :timesheets, timesheet_id, data )
+          result = { status: true }
+        else
+          result = { status: false, caption: 'Неуспішна сихронізація з ІС',
+                    message: web_service.merge!( response: response ) }
+        end
+      else
+        result = { status: false, caption: 'Немає данних' }
+      end
     end
 
     render json: result

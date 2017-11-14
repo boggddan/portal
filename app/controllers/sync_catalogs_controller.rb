@@ -1535,7 +1535,7 @@ class SyncCatalogsController < ApplicationController
             .joins( :menu_meals_dish )
             .where( 'menu_meals_dishes.menu_requirement_id = ? ', id )
 
-          #menu_products.update_all( count_plan: 0, count_fact: 0 )
+          # menu_products.update_all( count_plan: 0, count_fact: 0 )
 
           error_products = []
           params[:products].each_with_index do | product_par, index |
@@ -1554,7 +1554,8 @@ class SyncCatalogsController < ApplicationController
                 MenuProduct.create( children_category: children_category,
                                     product: product,
                                     menu_meals_dish: menu_meals_dish,
-                                    count_plan: product_par[ :count_plan ] )
+                                    count_plan: product_par[ :count_plan ],
+                                    count_fact: product_par[ :count_plan ] )
               end
             end
 

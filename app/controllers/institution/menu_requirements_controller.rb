@@ -562,123 +562,129 @@ class Institution::MenuRequirementsController < Institution::BaseController
 
     splendingdate = menu_requirement[ :splendingdate ]
 
-    sql_where_exists = <<-SQL.squish
-        menu_requirements.splendingdate = '#{ splendingdate }'
-        AND
-        menu_requirements.institution_id = #{ current_user[ :userable_id ] }
-        AND
-        menu_requirements.id != #{ menu_requirement_id }
-        AND
-        ( ( menu_requirements.number_sap != '' AND is_del_plan_1c = false )
-          OR
-          ( menu_requirements.number_saf != '' AND is_del_fact_1c = false ) )
-      SQL
-
-    menu_requirement_exists = JSON.parse( MenuRequirement
-      .select( :id,
-               :number,
-               :date,
-               :number_sap,
-               :date_sap,
-               :number_saf,
-               :date_saf )
-      .where( sql_where_exists )
-      .to_json, symbolize_names: true )
-
-    if menu_requirement_exists.present?
-      result = { status: false, caption: "За вибрану дату списання #{ date_str( splendingdate.to_date ) } уже відправлені в ІС документи",
-        message: menu_requirement_exists.map { | v | {
-            id: v[ :id ],
-            'Номер': v[ :number ],
-            'Дата:': date_str( v[ :date ].to_date ),
-            'Номер IC план': v[ :number_sap ],
-            'Дата IC план': date_str( v[ :date_sap ].to_date ),
-            'Номер IC факт': v[ :number_saf ],
-            'Дата IC факт': date_str( v[ :date_saf ].to_date )
-        } }
-      }
+    if check_date_block( splendingdate )
+      caption = 'Блокування документів'
+      message = "Дата списання #{ splendingdate.to_date.strftime( '%d.%m.%Y' ) } закрита для відправлення!"
+      result = { status: false, message: message, caption: caption }
     else
-      menu_children_categories = JSON.parse( MenuChildrenCategory
-        .joins( :children_category )
-        .select( :count_all_plan, :count_exemption_plan, 'children_categories.code as code' )
-        .where( menu_requirement_id: menu_requirement_id )
-        .where( '( count_all_plan != 0 OR count_exemption_plan != 0 )' )
+      sql_where_exists = <<-SQL.squish
+          menu_requirements.splendingdate = '#{ splendingdate }'
+          AND
+          menu_requirements.institution_id = #{ current_user[ :userable_id ] }
+          AND
+          menu_requirements.id != #{ menu_requirement_id }
+          AND
+          ( ( menu_requirements.number_sap != '' AND is_del_plan_1c = false )
+            OR
+            ( menu_requirements.number_saf != '' AND is_del_fact_1c = false ) )
+        SQL
+
+      menu_requirement_exists = JSON.parse( MenuRequirement
+        .select( :id,
+                :number,
+                :date,
+                :number_sap,
+                :date_sap,
+                :number_saf,
+                :date_saf )
+        .where( sql_where_exists )
         .to_json, symbolize_names: true )
 
-      joins_menu_products_prices = <<-SQL.squish
-            LEFT JOIN menu_products_prices ON
-                menu_products_prices.product_id = menu_products.product_id
-              AND
-                menu_products_prices.menu_requirement_id = menu_meals_dishes.menu_requirement_id
-          SQL
-
-      menu_products = JSON.parse( MenuMealsDish
-        .joins( menu_products: [ :children_category, :product ] )
-        .joins( joins_menu_products_prices )
-        .select( 'SUM( menu_products.count_plan ) AS count_plan',
-                 'SUM( ROUND( menu_products.count_plan * menu_products_prices.price, 5 ) ) AS amount',
-                 'products.code AS product_code',
-                 'children_categories.code AS category_code' )
-        .where( menu_requirement_id: menu_requirement_id )
-        .where( 'menu_products.count_plan != ? ', 0 )
-        .group( 'products.code',
-                'children_categories.code' )
-        .to_json, symbolize_names: true )
-
-      if menu_children_categories.present? && menu_products.present?
-        categories = menu_children_categories.map { | o |
-          { 'CodeOfCategory' => o[ :code ],
-            'QuantityAll' => o[ :count_all_plan ].to_s,
-            'QuantityExemption' => o[ :count_exemption_plan ].to_s } }
-
-        goods = menu_products.map { | o | {
-          'CodeOfCategory' => o[ :category_code ],
-          'CodeOfGoods' => o[ :product_code ],
-          'Quantity' => o[ :count_plan ],
-          'Amount' => o[ :amount ] } }
-
-        message = {
-          'CreateRequest' => {
-            'Branch_id' => current_branch[ :code ],
-            'Institutions_id' => current_institution[ :code ],
-            'SplendingDate' => menu_requirement[ :splendingdate ],
-            'Date' => menu_requirement[ :date ],
-            'Goods' => goods,
-            'Categories' =>  categories,
-            'NumberFromWebPortal' => menu_requirement[ :number ],
-            'Number1C' => menu_requirement[ :number_sap ],
-            'User' => current_user[ :username ]
-          }
+      if menu_requirement_exists.present?
+        result = { status: false, caption: "За вибрану дату списання #{ date_str( splendingdate.to_date ) } уже відправлені в ІС документи",
+          message: menu_requirement_exists.map { | v | {
+              id: v[ :id ],
+              'Номер': v[ :number ],
+              'Дата:': date_str( v[ :date ].to_date ),
+              'Номер IC план': v[ :number_sap ],
+              'Дата IC план': date_str( v[ :date_sap ].to_date ),
+              'Номер IC факт': v[ :number_saf ],
+              'Дата IC факт': date_str( v[ :date_saf ].to_date )
+          } }
         }
-
-        savon_return = get_savon( :create_menu_requirement_plan, message )
-        response = savon_return[ :response ]
-        web_service = savon_return[ :web_service ]
-
-        if response[ :interface_state ] == 'OK'
-          ActiveRecord::Base.transaction do
-            data_menu_requirement = { date_sap: Date.today, number_sap: response[ :respond ].to_s }
-            update_base_with_id( :menu_requirements, menu_requirement_id, data_menu_requirement )
-
-            sql = 'UPDATE menu_children_categories ' +
-                  'SET count_all_fact = count_all_plan, ' +
-                      'count_exemption_fact = count_exemption_plan ' +
-                      "WHERE menu_requirement_id = #{ menu_requirement_id };" +
-                  'UPDATE menu_products ' +
-                  'SET count_fact = count_plan ' +
-                    'FROM menu_meals_dishes bb ' +
-                    'WHERE menu_meals_dish_id = bb.id '+
-                      "AND bb.menu_requirement_id = #{ menu_requirement_id }"
-
-              ActiveRecord::Base.connection.execute( sql )
-            end
-          result = { status: true }
-        else
-          result = { status: false, caption: 'Неуспішна сихронізація з ІС',
-                    message: web_service.merge!( response: response ) }
-        end
       else
-        result = { status: false, caption: 'Кількість не проставлена' }
+        menu_children_categories = JSON.parse( MenuChildrenCategory
+          .joins( :children_category )
+          .select( :count_all_plan, :count_exemption_plan, 'children_categories.code as code' )
+          .where( menu_requirement_id: menu_requirement_id )
+          .where( '( count_all_plan != 0 OR count_exemption_plan != 0 )' )
+          .to_json, symbolize_names: true )
+
+        joins_menu_products_prices = <<-SQL.squish
+              LEFT JOIN menu_products_prices ON
+                  menu_products_prices.product_id = menu_products.product_id
+                AND
+                  menu_products_prices.menu_requirement_id = menu_meals_dishes.menu_requirement_id
+            SQL
+
+        menu_products = JSON.parse( MenuMealsDish
+          .joins( menu_products: [ :children_category, :product ] )
+          .joins( joins_menu_products_prices )
+          .select( 'SUM( menu_products.count_plan ) AS count_plan',
+                  'SUM( ROUND( menu_products.count_plan * menu_products_prices.price, 5 ) ) AS amount',
+                  'products.code AS product_code',
+                  'children_categories.code AS category_code' )
+          .where( menu_requirement_id: menu_requirement_id )
+          .where( 'menu_products.count_plan != ? ', 0 )
+          .group( 'products.code',
+                  'children_categories.code' )
+          .to_json, symbolize_names: true )
+
+        if menu_children_categories.present? && menu_products.present?
+          categories = menu_children_categories.map { | o |
+            { 'CodeOfCategory' => o[ :code ],
+              'QuantityAll' => o[ :count_all_plan ].to_s,
+              'QuantityExemption' => o[ :count_exemption_plan ].to_s } }
+
+          goods = menu_products.map { | o | {
+            'CodeOfCategory' => o[ :category_code ],
+            'CodeOfGoods' => o[ :product_code ],
+            'Quantity' => o[ :count_plan ],
+            'Amount' => o[ :amount ] } }
+
+          message = {
+            'CreateRequest' => {
+              'Branch_id' => current_branch[ :code ],
+              'Institutions_id' => current_institution[ :code ],
+              'SplendingDate' => menu_requirement[ :splendingdate ],
+              'Date' => menu_requirement[ :date ],
+              'Goods' => goods,
+              'Categories' =>  categories,
+              'NumberFromWebPortal' => menu_requirement[ :number ],
+              'Number1C' => menu_requirement[ :number_sap ],
+              'User' => current_user[ :username ]
+            }
+          }
+
+          savon_return = get_savon( :create_menu_requirement_plan, message )
+          response = savon_return[ :response ]
+          web_service = savon_return[ :web_service ]
+
+          if response[ :interface_state ] == 'OK'
+            ActiveRecord::Base.transaction do
+              data_menu_requirement = { date_sap: Date.today, number_sap: response[ :respond ].to_s }
+              update_base_with_id( :menu_requirements, menu_requirement_id, data_menu_requirement )
+
+              sql = 'UPDATE menu_children_categories ' +
+                    'SET count_all_fact = count_all_plan, ' +
+                        'count_exemption_fact = count_exemption_plan ' +
+                        "WHERE menu_requirement_id = #{ menu_requirement_id };" +
+                    'UPDATE menu_products ' +
+                    'SET count_fact = count_plan ' +
+                      'FROM menu_meals_dishes bb ' +
+                      'WHERE menu_meals_dish_id = bb.id '+
+                        "AND bb.menu_requirement_id = #{ menu_requirement_id }"
+
+                ActiveRecord::Base.connection.execute( sql )
+              end
+            result = { status: true }
+          else
+            result = { status: false, caption: 'Неуспішна сихронізація з ІС',
+                      message: web_service.merge!( response: response ) }
+          end
+        else
+          result = { status: false, caption: 'Кількість не проставлена' }
+        end
       end
     end
 
@@ -696,105 +702,114 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .find( menu_requirement_id )
       .to_json, symbolize_names: true )
 
-    menu_children_categories = JSON.parse( MenuChildrenCategory
-      .joins( :children_category )
-      .select( :count_all_fact, :count_exemption_fact, 'children_categories.code as code' )
-      .where( menu_requirement_id: menu_requirement_id )
-      .where( '( count_all_fact != 0 OR count_exemption_fact != 0 )' )
-      .to_json, symbolize_names: true )
+    splendingdate =  menu_requirement[ :splendingdate ]
 
-    joins_menu_products_prices = <<-SQL.squish
-        LEFT JOIN menu_products_prices ON
-            menu_products_prices.product_id = menu_products.product_id
-          AND
-            menu_products_prices.menu_requirement_id = menu_meals_dishes.menu_requirement_id
-      SQL
-
-    menu_products = JSON.parse( MenuMealsDish
-      .joins( menu_products: [ :children_category, :product ] )
-      .joins( joins_menu_products_prices )
-      .select( 'SUM( menu_products.count_fact ) AS count_fact',
-               'SUM( ROUND( menu_products.count_fact * menu_products_prices.price, 5 ) ) AS amount',
-             'products.code AS product_code',
-               'children_categories.code AS category_code' )
-      .where( menu_requirement_id: menu_requirement_id )
-      .where( '( menu_products.count_fact != ? OR menu_products.count_plan != ? )', 0, 0 )
-      .group( 'products.code',
-              'children_categories.code' )
-      .to_json, symbolize_names: true )
-
-    if menu_children_categories && menu_products
-      goods = menu_products.map { | o |
-        { 'CodeOfCategory' => o[ :category_code ],
-          'CodeOfGoods' => o[ :product_code ],
-          'Quantity' => o[ :count_fact ],
-          'Amount' => o[ :amount ] }
-      }
-
-      categories = menu_children_categories.map { | o |
-        { 'CodeOfCategory' => o[ :code ],
-          'QuantityAll' => o[ :count_all_fact ],
-          'QuantityExemption' => o[ :count_exemption_fact ] } }
-
-      message = {
-        'CreateRequest' => {
-          'Branch_id' => current_branch[ :code ],
-          'Institutions_id' => current_institution[ :code],
-          'SplendingDate' => menu_requirement[ :splendingdate ],
-          'Date' => menu_requirement[ :date ],
-          'Goods' => goods,
-          'Categories' => categories,
-          'NumberFromWebPortal' => menu_requirement[ :number ],
-          'Number1C' => menu_requirement[ :number_saf ],
-          'User' => current_user[ :username ]
-        }
-      }
-
-      savon_return = get_savon( :create_menu_requirement_fact, message )
-      response = savon_return[ :response ]
-      web_service = savon_return[ :web_service ]
-
-      if response[ :interface_state ] == 'OK'
-        ActiveRecord::Base.transaction do
-          data_menu_requirement = { date_saf: Date.today, number_saf: response[ :respond ].to_s }
-          update_base_with_id( :menu_requirements, menu_requirement_id, data_menu_requirement )
-
-            MenuChildrenCategory
-              .where( menu_requirement_id: menu_requirement_id,
-                      count_all_plan: 0,
-                      count_exemption_plan: 0,
-                      count_all_fact: 0,
-                      count_exemption_fact: 0 )
-              .delete_all
-
-            sql = <<-SQL.squish
-                DELETE FROM menu_meals_dishes WHERE is_enabled = false AND menu_requirement_id = #{ menu_requirement_id };
-                DELETE FROM menu_products
-                    USING menu_meals_dishes bb
-                    WHERE menu_meals_dish_id = bb.id
-                          AND bb.menu_requirement_id = #{ menu_requirement_id }
-                          AND count_plan = 0
-                          AND count_fact = 0;
-                DELETE FROM menu_products_prices WHERE
-                  product_id NOT IN (
-                    SELECT DISTINCT product_id
-                      FROM menu_products
-                      LEFT JOIN menu_meals_dishes ON
-                        menu_products.menu_meals_dish_id = menu_meals_dishes.id
-                      WHERE menu_meals_dishes.menu_requirement_id = menu_products_prices.menu_requirement_id
-                  ) AND
-                  menu_requirement_id = #{ menu_requirement_id }
-              SQL
-
-            ActiveRecord::Base.connection.execute( sql )
-          end
-        result = { status: true, reload: true }
-      else
-        result = { status: false, caption: 'Неуспішна сихронізація з ІС',
-                  message: web_service.merge!( response: response ) }
-      end
+    date_blocks = check_date_block( splendingdate )
+    if date_blocks
+      caption = 'Блокування документів'
+      message = "Дата списання #{ date_blocks } закрита для відправлення!"
+      result = { status: false, message: message, caption: caption }
     else
-      result = { status: false, caption: 'Кількість не проставлена' }
+      menu_children_categories = JSON.parse( MenuChildrenCategory
+        .joins( :children_category )
+        .select( :count_all_fact, :count_exemption_fact, 'children_categories.code as code' )
+        .where( menu_requirement_id: menu_requirement_id )
+        .where( '( count_all_fact != 0 OR count_exemption_fact != 0 )' )
+        .to_json, symbolize_names: true )
+
+      joins_menu_products_prices = <<-SQL.squish
+          LEFT JOIN menu_products_prices ON
+              menu_products_prices.product_id = menu_products.product_id
+            AND
+              menu_products_prices.menu_requirement_id = menu_meals_dishes.menu_requirement_id
+        SQL
+
+      menu_products = JSON.parse( MenuMealsDish
+        .joins( menu_products: [ :children_category, :product ] )
+        .joins( joins_menu_products_prices )
+        .select( 'SUM( menu_products.count_fact ) AS count_fact',
+                'SUM( ROUND( menu_products.count_fact * menu_products_prices.price, 5 ) ) AS amount',
+              'products.code AS product_code',
+                'children_categories.code AS category_code' )
+        .where( menu_requirement_id: menu_requirement_id )
+        .where( '( menu_products.count_fact != ? OR menu_products.count_plan != ? )', 0, 0 )
+        .group( 'products.code',
+                'children_categories.code' )
+        .to_json, symbolize_names: true )
+
+      if menu_children_categories && menu_products
+        goods = menu_products.map { | o |
+          { 'CodeOfCategory' => o[ :category_code ],
+            'CodeOfGoods' => o[ :product_code ],
+            'Quantity' => o[ :count_fact ],
+            'Amount' => o[ :amount ] }
+        }
+
+        categories = menu_children_categories.map { | o |
+          { 'CodeOfCategory' => o[ :code ],
+            'QuantityAll' => o[ :count_all_fact ],
+            'QuantityExemption' => o[ :count_exemption_fact ] } }
+
+        message = {
+          'CreateRequest' => {
+            'Branch_id' => current_branch[ :code ],
+            'Institutions_id' => current_institution[ :code],
+            'SplendingDate' => splendingdate,
+            'Date' => menu_requirement[ :date ],
+            'Goods' => goods,
+            'Categories' => categories,
+            'NumberFromWebPortal' => menu_requirement[ :number ],
+            'Number1C' => menu_requirement[ :number_saf ],
+            'User' => current_user[ :username ]
+          }
+        }
+
+        savon_return = get_savon( :create_menu_requirement_fact, message )
+        response = savon_return[ :response ]
+        web_service = savon_return[ :web_service ]
+
+        if response[ :interface_state ] == 'OK'
+          ActiveRecord::Base.transaction do
+            data_menu_requirement = { date_saf: Date.today, number_saf: response[ :respond ].to_s }
+            update_base_with_id( :menu_requirements, menu_requirement_id, data_menu_requirement )
+
+              MenuChildrenCategory
+                .where( menu_requirement_id: menu_requirement_id,
+                        count_all_plan: 0,
+                        count_exemption_plan: 0,
+                        count_all_fact: 0,
+                        count_exemption_fact: 0 )
+                .delete_all
+
+              sql = <<-SQL.squish
+                  DELETE FROM menu_meals_dishes WHERE is_enabled = false AND menu_requirement_id = #{ menu_requirement_id };
+                  DELETE FROM menu_products
+                      USING menu_meals_dishes bb
+                      WHERE menu_meals_dish_id = bb.id
+                            AND bb.menu_requirement_id = #{ menu_requirement_id }
+                            AND count_plan = 0
+                            AND count_fact = 0;
+                  DELETE FROM menu_products_prices WHERE
+                    product_id NOT IN (
+                      SELECT DISTINCT product_id
+                        FROM menu_products
+                        LEFT JOIN menu_meals_dishes ON
+                          menu_products.menu_meals_dish_id = menu_meals_dishes.id
+                        WHERE menu_meals_dishes.menu_requirement_id = menu_products_prices.menu_requirement_id
+                    ) AND
+                    menu_requirement_id = #{ menu_requirement_id }
+                SQL
+
+              ActiveRecord::Base.connection.execute( sql )
+            end
+          result = { status: true, reload: true }
+        else
+          result = { status: false, caption: 'Неуспішна сихронізація з ІС',
+                    message: web_service.merge!( response: response ) }
+        end
+      else
+        result = { status: false, caption: 'Кількість не проставлена' }
+      end
     end
 
     render json: result

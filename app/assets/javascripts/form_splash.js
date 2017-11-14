@@ -23,7 +23,7 @@ class FormSplash {
     let captionType = '';
 
     let message = '';
-    if ( typeof data === 'object' ) message = `<pre>${ JSON.stringify( data, null, 2 ) }</pre>`; else message = data;
+    if ( typeof data === 'object' && !data.message ) message = `<pre>${ JSON.stringify( data, null, 2 ) }</pre>`; else message = data;
 
     if ( type === 'error' ) {
       iframe.srcdoc = message;
