@@ -276,6 +276,12 @@ DELETE api/menu_requirement { "institution_code": "14", "number": "KL-000000024"
   GET api/menu_requirement?institution_code=14&number=000000000028
 ```
 
+- Друк документа
+
+```json
+  GET /api/print_menu_requirement?institution_code=14&number=018В-0000121
+```
+
 ### *Табель* - `timesheets` [:top:](#Зміст)
 
 ```json

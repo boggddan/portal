@@ -95,6 +95,7 @@ scope :api, controller: :sync_catalogs do
   post :menu_requirement_fact_update, path: :cu_menu_requirement_fact
   get :menu_requirement_view, path: :menu_requirement
   delete :menu_requirement_delete, path: :menu_requirement
+  get :menu_requirement_print, path: :print_menu_requirement
 
   post :timesheet_update, path: :cu_timesheet
   get :timesheet_view, path: :timesheet

@@ -2381,4 +2381,59 @@ class SyncCatalogsController < ApplicationController
     render json: result
   end
 
+  ###############################################################################################
+  # GET /api/print_menu_requirement?institution_code=14&number=018В-0000121
+
+  def menu_requirement_print
+    error = {
+      institution_code: 'Не знайдений параметр [institution_code]',
+      number: 'Не знайдений параметр [number]'
+    }.stringify_keys!.except( *params.keys )
+
+    if error.empty?
+      menu_requirement = MenuRequirement
+        .joins( institution: :branch )
+        .select( :id, :number, :date, :splendingdate, :date_sap, :date_saf,
+                 'branches.name AS branch_name',
+                 'institutions.name AS institution_name' )
+        .find_by( institutions: { code: params[ :institution_code ] },
+                  number: params[ :number ] )
+        .as_json
+
+      if menu_requirement
+        menu_requirement_id = menu_requirement[ 'id' ]
+
+        menu_requirement.merge!( children_categories: MenuChildrenCategory
+          .joins( :children_category )
+          .select( 'children_categories.name',
+                  :count_all_plan, :count_exemption_plan,
+                  :count_all_fact, :count_exemption_fact )
+          .where( menu_requirement_id: menu_requirement_id )
+          .order( 'children_categories.priority', 'children_categories.name' )
+          .as_json( except: :id ) )
+        .merge!( products: MenuProduct
+          .joins( { product: :products_type },
+                  { menu_meals_dish: [ :meal, :dish ] },
+                  :children_category )
+          .select( 'meals.name as meal_name',
+                    'dishes.name as dish_name',
+                    'children_categories.name AS category_name',
+                    'products_types.name AS type_name',
+                    'products.name AS product_name',
+                    :count_plan, :count_fact )
+          .where( menu_meals_dishes: { menu_requirement_id: menu_requirement_id } )
+          .order( 'meals.priority', 'meals.name',
+                  'dishes.priority', 'dishes.name',
+                  'children_categories.priority', 'children_categories.name',
+                  'products_types.priority', 'products_types.name', 'products.name' )
+          .as_json( except: :id ) )
+        .to_json
+      else
+        error = { error: { menu_requirement: "Не знайдена меню-вимога [#{ params[ :number ] }]" } }
+      end
+    end
+      render json: error && error.any? ? { result: false, error: [ error ] }
+      : { result: true, json: menu_requirement }
+  end
+
 end
