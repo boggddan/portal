@@ -323,7 +323,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
       .joins( :institution_order )
       .select( :number,
                'institution_orders.number AS io_number',
-               'institution_orders.date_star',
+               'institution_orders.date_start',
                'institution_orders.date_end' )
       .find( io_correction_id )
       .to_json, symbolize_names: true )

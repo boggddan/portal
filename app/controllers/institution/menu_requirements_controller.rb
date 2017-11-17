@@ -556,15 +556,16 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .select( :number,
                :splendingdate,
                :date,
-               :number_sap )
+               :number_sap
       .find( menu_requirement_id )
     .to_json, symbolize_names: true )
 
     splendingdate = menu_requirement[ :splendingdate ]
 
-    if check_date_block( splendingdate )
+    date_blocks = check_date_block( splendingdate )
+    if date_blocks.present?
       caption = 'Блокування документів'
-      message = "Дата списання #{ splendingdate.to_date.strftime( '%d.%m.%Y' ) } закрита для відправлення!"
+      message = "Дата списання #{ date_blocks } закрита для відправлення!"
       result = { status: false, message: message, caption: caption }
     else
       sql_where_exists = <<-SQL.squish
