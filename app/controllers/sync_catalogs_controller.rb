@@ -1410,7 +1410,12 @@ class SyncCatalogsController < ApplicationController
           number = params[ :number ]
           io_correction = io_correction_number( institution_order, number )
           unless error = io_correction[ :error ]
-            type = params[ :type ]
+            type = params[
+
+
+
+
+            :type ]
             case type
             when 0 then io_correction.destroy
             when 1 then io_correction.update( is_del_1c: true )
@@ -1533,7 +1538,7 @@ class SyncCatalogsController < ApplicationController
           ### menu_products
           menu_products = MenuProduct
             .joins( :menu_meals_dish )
-            .where( 'menu_meals_dishes.menu_requirement_id = ? ', id )
+            .where( menu_meals_dishes: { menu_requirement_id:  id } )
 
           # menu_products.update_all( count_plan: 0, count_fact: 0 )
 
@@ -1567,6 +1572,32 @@ class SyncCatalogsController < ApplicationController
           error.merge!( error_products: error_products ) if error_products.any?
 
           if error.empty?
+            #================================
+            sql_menu_products_price = <<-SQL.squish
+                INSERT INTO menu_products_prices ( menu_requirement_id, product_id )
+                  SELECT menu_meals_dishes.menu_requirement_id,
+                        menu_products.product_id
+                    FROM menu_products
+                    LEFT JOIN menu_meals_dishes ON menu_products.menu_meals_dish_id = menu_meals_dishes.id
+                    LEFT JOIN menu_products_prices ON
+                      menu_products.product_id = menu_products_prices.product_id AND
+                      menu_meals_dishes.menu_requirement_id = menu_products_prices.menu_requirement_id
+                    WHERE menu_products_prices.id isnull AND
+                      menu_meals_dishes.menu_requirement_id = #{ id }
+                    GROUP BY 1, 2;
+                  DELETE FROM menu_products_prices WHERE
+                    product_id NOT IN (
+                      SELECT DISTINCT product_id
+                        FROM menu_products
+                        LEFT JOIN menu_meals_dishes ON
+                          menu_products.menu_meals_dish_id = menu_meals_dishes.id
+                        WHERE menu_meals_dishes.menu_requirement_id = menu_products_prices.menu_requirement_id
+                    ) AND
+                    menu_requirement_id = #{ id }
+                SQL
+
+            ActiveRecord::Base.connection.execute( sql_menu_products_price )
+
             File.open( "./public/web_get/cu_menu_requirement_plan.txt", 'a' ) { | f |
               f.write( "\n *** #{ Time.now} ***#{ params.to_json }" )
             }
