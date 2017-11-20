@@ -556,7 +556,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .select( :number,
                :splendingdate,
                :date,
-               :number_sap
+               :number_sap )
       .find( menu_requirement_id )
     .to_json, symbolize_names: true )
 
