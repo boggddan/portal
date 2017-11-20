@@ -1,5 +1,5 @@
 class SyncCatalogsController < ApplicationController
-  #skip_before_action :verify_log_in # Отключение фильтра проверки пользователя
+  # skip_before_action :verify_log_in # Отключение фильтра проверки пользователя
 
   def branch_code( code )
     code = code.nil? ? '' : code.strip
