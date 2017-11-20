@@ -114,7 +114,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
           .each { | dpn |
             children_category_id = dpn[ :children_category_id ]
             product_id = dpn[ :product_id ]
-            norm = dpn[ :amount ].to_d
+            norm = dpn[ :amount ].to_f
             count_children = mcc_count[ children_category_id ].to_i || 0
 
             menu_products_add_values << [ ].tap { | value |
@@ -356,10 +356,10 @@ class Institution::MenuRequirementsController < Institution::BaseController
         actual_price = actual_prices.find { | o | o[ :product ].strip == mpp[ :code ] }
 
         if actual_price
-          price = actual_price[ :price ].to_d.truncate( 5 )
-          balance = actual_price[ :quantity ].to_d.truncate( 3 )
+          price = actual_price[ :price ].to_f.truncate( 5 )
+          balance = actual_price[ :quantity ].to_f.truncate( 3 )
 
-          if price != mpp[ :price ].to_d || balance != mpp[ :balance ].to_d
+          if price != mpp[ :price ].to_f || balance != mpp[ :balance ].to_f
             prices_message << {
               'Продукт' => mpp[ :name ],
               'Ціна' => price,
