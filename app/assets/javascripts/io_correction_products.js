@@ -25,14 +25,14 @@ $( document ).on( 'turbolinks:load', ( ) => {
       if ( $this.attr( 'name' ) === 'diff' ) {
         MyLib.changeValue( $this );
         $diff = +$this.val( );
-        $amount = $amountOrder + $diff;
+        $diff = MyLib.toRound( $amountOrder + $diff, 3 );
         const $amountElem = $tr.find( '[name=amount]' );
         $amountElem.val( $amount );
         MyLib.changeValue( $amountElem, 'tr' );
       } else {
         MyLib.changeValue( $this, 'tr' );
         $amount = +$this.val( );
-        $diff = $amount - $amountOrder;
+        $diff = MyLib.toRound( $amount - $amountOrder, 3 );
         const $diffElem = $tr.find( '[name=diff]' );
         $diffElem.val( $diff );
         MyLib.changeValue( $diffElem );
@@ -75,7 +75,7 @@ $( document ).on( 'turbolinks:load', ( ) => {
         const $tr = $this.closest( 'tr' );
         const $amountOrder = +$tr.children( '[name=amount_order]' ).text( );
         const $amount = +$tr.find( '[name=amount]' ).val( );
-        const $diff = $amount - $amountOrder;
+        const $diff = MyLib.toRound( $amount - $amountOrder, 3 );
         $this.val( $diff ).attr( 'value', $diff );
         MyLib.initValue( $this );
       } )
