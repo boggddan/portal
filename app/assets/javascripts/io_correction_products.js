@@ -25,7 +25,7 @@ $( document ).on( 'turbolinks:load', ( ) => {
       if ( $this.attr( 'name' ) === 'diff' ) {
         MyLib.changeValue( $this );
         $diff = +$this.val( );
-        $diff = MyLib.toRound( $amountOrder + $diff, 3 );
+        $amount = MyLib.toRound( $amountOrder + $diff, 3 );
         const $amountElem = $tr.find( '[name=amount]' );
         $amountElem.val( $amount );
         MyLib.changeValue( $amountElem, 'tr' );
