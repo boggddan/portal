@@ -68,7 +68,7 @@ class Institution::TimesheetsController < Institution::BaseController
         values = ts_data.map.with_index { | o, row |
           "( #{ row + 1 }#{ row.zero? ? '::INTEGER' : '' },
             #{ o.values_at( :child_code, :children_group_code, :reasons_absence_code, :date )
-                .map.with_index { | v, i | "'#{ v.strip }'#{ row.zero? ?
+                .map.with_index { | v, i | "'#{ v.class.name == 'Nori::StringWithAttributes' ? v.strip : v }'#{ row.zero? ?
                   if i.between?( 0, 1 ) then '::VARCHAR(9)' elsif i==2 then '::VARCHAR(2)' elsif i==3 then '::DATE' else '' end
                     : '' }"  }
           .join( ',' ) } )" }.join( ',' )
