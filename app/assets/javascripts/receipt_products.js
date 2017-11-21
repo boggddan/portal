@@ -35,7 +35,15 @@ $( document ).on( 'turbolinks:load', ( ) => {
       .on( 'click', function( ) { MyLib.clickHeader( $( this ) ) } )
       .end( )
       .find( '.btn_send' )
-      .on( 'click', function( ) { MyLib.btnSendClick( $( this ) ) } )
+      .on( 'click', function( ) {
+        const { value: valueInvoiceNumber }  = $parentElem[ 0 ].querySelector( '#invoice_number' );
+        if ( valueInvoiceNumber ) {
+          MyLib.btnSendClick( $( this ) );
+        } else {
+          const caption =  'Не заповнений номер накладної';
+          objFormSplash.open( 'error', caption, caption );
+        }
+      } )
       .end( )
       .find( '.btn_exit, .btn_save' )
       .on( 'click', function( ) { MyLib.btnExitClick( $( this ) ) } )
