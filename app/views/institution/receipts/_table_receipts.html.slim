@@ -12,7 +12,7 @@ table.table *{ data: { type: :list_doc }  }
 
   thead
     tr
-      th *{ data: { sort: :date } } Дата
+      th *{ data: { sort: :date_sa } } Дата постач.
       th *{ data: { sort: :number } } Номер
       th *{ data: { sort: :contract_number } } Договір
       th *{ data: { sort: :invoice_number } } № постачання
@@ -21,12 +21,13 @@ table.table *{ data: { type: :list_doc }  }
 
     tbody
       - @receipts.each do | rc |
-        tr *{ data:{ id: rc.id } }
-          td = date_str( rc.date )
-          td *{ data: { delete: true } } = rc.number
-          td = rc.contract_number
-          td = rc.invoice_number
-          td *{ class: ( rc.is_del_1c ? :is_del : '' ) } = rc.number_sa
-          td : button.btn_view *{ disabled: !rc.number_sa.present? }
-          td : button.btn_edit *{ disabled: rc.number_sa.present? }
-          td : button.btn_del *{ disabled: rc.number_sa.present? }
+        - number_sa = rc[ :number_sa ]
+        tr *{ data:{ id: rc [ :id ] } }
+          td = date_str( rc[ :date_sa ].to_date )
+          td *{ data: { delete: true } } = rc[ :number ]
+          td = rc[ :contract_number ]
+          td = rc[ :invoice_number ]
+          td *{ class: ( rc[ :is_del_1c ] ? :is_del : '' ) } = number_sa
+          td : button.btn_view *{ disabled: !number_sa.present? }
+          td : button.btn_edit *{ disabled: number_sa.present? }
+          td : button.btn_del *{ disabled: number_sa.present? }

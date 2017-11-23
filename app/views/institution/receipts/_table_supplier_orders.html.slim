@@ -3,17 +3,23 @@ table.table *{ data: { type: :list_doc }  }
   colgroup
     col.date
     col.number
+    col.date
+    col.date
     col
 
   thead
     tr
       th *{ data: { sort: :date } } Дата
       th *{ data: { sort: :number } } Замовлення
+      th *{ data: { sort: :date_start } } З
+      th *{ data: { sort: :date_end } } ПО
       th *{ data: { sort: :name } } Постачальник
 
     tbody
       - @supplier_orders.each do | so |
-        tr *{ data:{ id: so.id } }
-          td = date_str( so.date )
-          td *{ class: ( so.is_del_1c ? :is_del  : '' ), data: { delete: true } } = so.number
-          td *{ data: { delete: true } } = so.name
+        tr *{ data:{ id: so[ :id ] } }
+          td = date_str( so[ :date ].to_date )
+          td *{ class: ( so[ :is_del_1c ] ? :is_del  : '' ), data: { delete: true } } = so[ :number ]
+          td = date_str( so[ :date_start ].to_date )
+          td = date_str( so[ :date_end ].to_date )
+          td *{ data: { delete: true } } = so[ :name ]

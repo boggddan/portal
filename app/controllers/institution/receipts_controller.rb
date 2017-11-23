@@ -3,12 +3,19 @@ class Institution::ReceiptsController < Institution::BaseController
   def index ; end
 
   def ajax_filter_supplier_orders # Фильтрация заявок поставщикам
-    @supplier_orders = SupplierOrder
-      .select( :id, :number, :date, :is_del_1c, 'suppliers.name AS name' )
+    @supplier_orders =  JSON.parse( SupplierOrder
       .joins( :supplier )
+      .select( :id,
+               :number,
+               :date,
+               :date_start,
+               :date_end,
+               :is_del_1c,
+               'suppliers.name AS name' )
       .where( branch_id: current_institution[ :branch_id ],
               date: params[ :date_start ]..params[ :date_end ] )
       .order( "#{ params[ :sort_field ] } #{ params[ :sort_order ] }" )
+      .to_json, symbolize_names: true )
   end
 
   def ajax_filter_contracts # Фильтрация списка договоров
@@ -21,11 +28,20 @@ class Institution::ReceiptsController < Institution::BaseController
 
   def ajax_filter_receipts # Фильтрация документов поставок
     contract_number = params[ :contract_number ]
-    @receipts = Receipt
-      .where( institution_id: current_user[ :userable_id ] )
-      .where( supplier_order_id: params[ :supplier_order_id ] )
-      .where( ( { contract_number_manual: ( contract_number ) } if contract_number && !contract_number.blank? ) )
+    where = contract_number.present? ? { contract_number_manual: contract_number }: ''
+    @receipts = JSON.parse( Receipt
+      .select( :id,
+               :number,
+               :number_sa,
+               :date_sa,
+               :contract_number,
+               :invoice_number,
+               :is_del_1c )
+      .where( institution_id: current_user[ :userable_id ],
+              supplier_order_id: params[ :supplier_order_id ] )
+      .where( where )
       .order( "#{ params[ :sort_field ] } #{ params[ :sort_order ] }" )
+      .to_json, symbolize_names: true )
   end
 
   def send_sa # Веб-сервис отправки поступления
@@ -170,11 +186,18 @@ class Institution::ReceiptsController < Institution::BaseController
   def products # Отображение товаров поступления
     @receipt = Receipt.find( params[ :id ] )
     @receipt_products = @receipt.receipt_products
-      .select( :id, :product_id, :causes_deviation_id, :date,
-               :price, :count_order, :count_invoice, :count,
+      .select( :id,
+               :product_id,
+               :causes_deviation_id,
+               :date,
+               :price,
+               :count_order,
+               :count_invoice,
+               :count,
                'products.name AS name' )
       .joins( :product )
-      .order( :date, 'products.name' )
+      .order( :date,
+              'products.name' )
   end
 
   def product_update # Обновление количества
