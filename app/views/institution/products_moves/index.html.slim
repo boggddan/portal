@@ -1,0 +1,17 @@
+/ Отображение табелей
+main#products_moves
+
+  #col_pm.clmn *{ data: { caption: 'Табель',
+    path: { \
+      filter: institution_products_moves_filter_path,
+      create: institution_products_moves_create_path,
+      view: institution_products_moves_products_path,
+      del: institution_products_moves_delete_path } } }
+
+    h1 Переміщення продуктів між садами
+    .panel
+      = render 'layouts/label_text', label_attr: {class: :icon_сalendar}, text: 'З', input_attr: {id: :date_start}
+      = render 'layouts/label_text', label_attr: {class: :icon_сalendar}, text: 'ПО', input_attr: {id: :date_end}
+      button.btn_create.right_first
+
+    .parent_table

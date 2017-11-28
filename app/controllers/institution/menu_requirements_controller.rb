@@ -72,23 +72,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .group( :id )
       .to_json, symbolize_names: true )
 
-    if true
-      @dishes_products_norms = get_dishes_products_norms( institution_id )
-    else
-      @dishes_products_norms = JSON.parse( MenuMealsDish
-        .select( :dish_id,
-                  'menu_children_categories.children_category_id AS children_category_id',
-                  'products.id AS product_id',
-                  '0 AS amount' )
-        .joins( 'LEFT JOIN products ON true' )
-        .joins( 'LEFT JOIN menu_children_categories ON menu_children_categories.menu_requirement_id = menu_meals_dishes.menu_requirement_id' )
-        .where( menu_requirement_id: menu_requirement_id,
-                is_enabled: true )
-        .order( :dish_id,
-                'products.id',
-                'menu_children_categories.children_category_id' )
-        .to_json, symbolize_names: true )
-    end
+    @dishes_products_norms = get_dishes_products_norms( institution_id )
 
     menu_children_category = JSON.parse( MenuChildrenCategory
       .select( :children_category_id,

@@ -1,0 +1,16 @@
+#products_moves {
+  flex-direction: row;
+
+  #col_pm {
+    flex-basis: 1000px;
+    table {
+      col:first-child { width: 100px; }
+
+      td:first-child {
+        font-weight: bold;
+        &[ data-tip = '1' ] { color: green; }
+        &[ data-tip = '0' ] { color: red; }
+      }
+    }
+  }
+}

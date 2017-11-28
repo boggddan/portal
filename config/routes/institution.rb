@@ -9,6 +9,8 @@ namespace :institution do
 
   draw :timesheets, :institution # Табель
 
+  draw :products_moves, :institution # Переміщення
+
   draw :reports, :institution # Отчеты
 
   draw :reference_books, :institution # Довідники

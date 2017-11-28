@@ -1,0 +1,11 @@
+( function ajax( ) {
+  const parentTable = document.querySelector( '#col_pm .parent_table' );
+
+  <% if @products_moves.present? %>
+    parentTable.innerHTML = '<%= j render( "table_products_moves" ) %>';
+    MyLib.tableSetSession( parentTable );
+  <% else %>
+    parentTable.innerHTML = '';
+  <% end %>
+
+}( ) );

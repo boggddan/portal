@@ -9,5 +9,6 @@ class Institution < ApplicationRecord
   has_many   :suppliers_packages
   has_many   :dishes_products_norms
   has_many   :date_blocks
+  has_many   :institution_moves
   has_many   :users, as: :userable, source_type: 'Institution'
 end

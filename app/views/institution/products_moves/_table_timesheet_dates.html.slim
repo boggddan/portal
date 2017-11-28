@@ -1,0 +1,62 @@
+ruby:
+  partial_tr = 'dates_tr'
+  date_ee = @timesheet.date_ee
+  date_eb = @timesheet.date_eb
+  @sum_names = [ 'appearance', 'absence' ]
+  @count_days = ( date_ee - date_eb).to_i + 1
+
+table.table
+  colgroup
+    col
+    - for i in 0..@count_days + 1
+      col
+
+  thead
+    tr
+      th.name Дитина
+      th Явок
+      th Неявок
+      - ( date_eb..date_ee ).each do | v |
+        th *{ data: { date: v } }
+
+    == render( partial_tr, name: 'Всього:', type: :all )
+
+  tbody
+    - category_id = 0
+    - group_id = 0
+
+    - @timesheet_dates \
+      .group_by{ | o | { \
+        category_id: o[ :children_category_id ],
+        group_id: o[ :children_group_id ],
+        child_id: o[ :child_id ] \
+      } } \
+      .each do | k, v |
+        - child_id = k[ :child_id ]
+
+        - if category_id != k[ :category_id ]
+          - category_id = k[ :category_id ]
+          - group_id = 0
+
+          == render( partial_tr, name: v[ 0 ][ :category_name ], type: :category, category_id: category_id )
+
+        - if group_id != k[ :group_id ]
+          - group_id = k[ :group_id ]
+
+          == render( partial_tr, name: v[ 0 ][ :group_name ], type: :group, category_id: category_id, group_id: group_id )
+
+        tr *{ class: :row_data, data: { category_id: category_id, group_id: group_id, child_id: child_id } }
+          td.name = v[ 0 ][ :child_name ]
+          - @sum_names.each do |sum_name|
+            td *{class: :cell_sum, id: "child_#{ category_id }_#{ group_id }_#{ child_id }_#{ sum_name }" }
+
+          - ( date_eb..date_ee ).each_with_index do | date, index |
+            - child_day = v \
+              .select{ | o | o[ :date ] == date.to_s( :db ) } \
+              .fetch( 0, { id: nil, reasons_absence_id: nil, mark: 'NULL', reason_code: '' } )
+
+            td *{ class: :cell_mark, data: { id: child_day[ :id ],
+            date_id: index,
+              reasons_absence_id: child_day[ :reasons_absence_id ],
+              reason_code: child_day[ :reason_code ] },
+              spellcheck: :false, contenteditable: true } = child_day[ :mark ]

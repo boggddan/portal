@@ -1,0 +1,10 @@
+//  Фильтрация таблицы содержимого документа табеля
+( function ajax( ) {
+  let elements = '';
+
+  <% if @timesheet_dates.present?  %>
+    elements = '<%= j render( 'table_timesheet_dates' ) %>';
+  <% end %>
+
+  objTimesheetDates.colTbInit( elements );
+}( ) );

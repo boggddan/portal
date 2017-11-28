@@ -242,7 +242,7 @@ class MenuRequirementProducts {
           const successAjaxSend = ( ) => window.location.reload( );
           const { parentElem: { dataset: { [ pfData ]: urlSend } } } = this;
 
-          MyLib.ajax( captionSend, urlSend, 'post', data, 'json', successAjaxSend, true );
+          await MyLib.ajax( captionSend, urlSend, 'post', data, 'json', successAjaxSend, true );
         }
       }
     } )( );
@@ -540,7 +540,7 @@ class MenuRequirementProducts {
             const countPlan = +trElem.querySelector( 'td.cell_count[ data-count-pf= "plan" ]' ).textContent;
             const diff =  MyLib.numToStr( MyLib.toRound( countProductPf - countPlan, 3 ), -1 );
             trElem.querySelector( `td.cell_diff[data-count-pf=${ pf }]` ).textContent = diff;
-            trElem.dataset[ `${ pf }Negative` ] = MyLib.toRound( countProductPf, 3) > balance;
+            trElem.dataset[ `${ pf }Negative` ] = MyLib.toRound( countProductPf, 3 ) > balance;
           }
 
           trElem.querySelector( `td.cell_count[data-count-pf=${ pf }]` )

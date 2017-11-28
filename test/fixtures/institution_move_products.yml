@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  institution_moves: one
+  products: one
+  amount: 
+  amount: 
+
+two:
+  institution_moves: two
+  products: two
+  amount: 
+  amount: 

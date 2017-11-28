@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  institutions: 
+  number: MyString
+  date: 2017-11-27
+  date_sa: 2017-11-27
+  number_sa: MyString
+  is_confirmed: false
+  is_del_1c: false
+
+two:
+  institutions: 
+  number: MyString
+  date: 2017-11-27
+  date_sa: 2017-11-27
+  number_sa: MyString
+  is_confirmed: false
+  is_del_1c: false

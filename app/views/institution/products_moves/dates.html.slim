@@ -1,0 +1,53 @@
+/ Отображение документа табеля
+- disabled = @timesheet[ :number_sa ].present?
+- label_text = 'layouts/label_text'
+
+main#timesheet_dates *{ data: { \
+  id: @timesheet[ :id ], disabled: disabled.to_s,
+  reasons_absences: @reasons_absences.map { | o | o[ :id ] },
+  path: { \
+    send: institution_timesheets_send_sa_path,
+    exit: institution_timesheets_index_path,
+    refresh: institution_timesheets_refresh_path,
+    update: institution_timesheets_update_path } } }
+
+  h1.icon
+  .panel_main.row_2
+    .panel
+      button.btn_send
+      button.btn_exit
+      - if disabled
+        = render label_text, label_attr: { class: :icon_number }, text: 'Надіслано документ:',
+          input_attr: { value: @timesheet[ :number_sa ], disabled: true }
+
+        = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
+          input_attr: { data: { date: @timesheet[ :date_sa ] }, disabled: true }
+
+    .panel
+      = render label_text, label_attr: { class: :icon_number }, text: 'Табель №',
+        input_attr: { id: :number, value: @timesheet[ :number ], disabled: true }
+      = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
+        input_attr: { id: :date, data: { date: @timesheet[ :date ] }, readonly: true }
+
+      = render label_text, label_attr: { class: :icon_сalendar }, text: 'З',
+        input_attr: { data: { date: @timesheet[ :date_eb ] }, disabled: true }
+      = render label_text, label_attr: { class: :icon_сalendar }, text: 'по',
+        input_attr: { data: { date: @timesheet[ :date_ee ] }, disabled: true }
+
+      = select_tag :group_timesheet, options_for_select( @group_timesheet ), prompt: 'Категорія / Група'
+
+
+  .clmn_main: #col_td.clmn *{ data: { reasons_absences: @reasons_absences.map { | v | v[ :id ] },
+    path: { \
+      filter: institution_timesheets_ajax_filter_timesheet_dates_path,
+      update: institution_timesheets_dates_update_path,
+      updates: institution_timesheets_dates_updates_path } } }
+
+    .panel
+      label Групова відмітка ( стати на потрібну комірку та зажати клавішу Alt )
+      - @reasons_absences.each do | v |
+        button.btn_gradient *{ data: { reasons_absence_id: v[ :id ], next_id: v[ :next_id ],
+          next_val: v[ :next_mark ] } } = v[ :mark ]
+      button.btn_refresh Оновити дітей
+
+    .parent_table

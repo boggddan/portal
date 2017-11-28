@@ -1,0 +1,13 @@
+main#timesheet_new
+
+  #col_t.clmn *{ data: { caption: 'Створення нового табелю',
+    path_create: institution_timesheets_create_path,
+    path_view: institution_timesheets_dates_path,
+    path_exit: institution_timesheets_index_path } }
+
+    h1 Створення нового табелю
+    .panel
+      = render 'layouts/label_text', label_attr: {class: :icon_сalendar}, text: 'З', input_attr: {id: :date_start}
+      = render 'layouts/label_text', label_attr: {class: :icon_сalendar}, text: 'ПО', input_attr: {id: :date_end}
+      button.btn_create
+      button.btn_exit

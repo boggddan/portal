@@ -193,6 +193,10 @@ nav#main_menu {
     content: '\e179';
   }
 
+  li[ data-page = 'products_moves' ] > a:before {
+    content: '\e178';
+  }
+
   li[data-page=institution_reports] > a:before {
     content: '\e045';
   }

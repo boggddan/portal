@@ -25,6 +25,8 @@ html
           a *{ href: institution_timesheets_index_path } Табелі
         li.item *{ data: { page: :menu_requirements } }
           a *{ href: institution_menu_requirements_index_path } Меню-вимоги
+        li.item *{ data: { page: :products_moves } }
+          a *{ href: institution_products_moves_index_path } Переміщення
         li.item *{ data: { page: :institution_reports } }
           a Звіти
           ul
@@ -38,7 +40,7 @@ html
           a Довідники
           ul
             li.item *{ data: { page: :dishes_product_norm } }
-              a *{ href: institution_reference_books_dishes_products_norms_path } Технічна карта продуктів
+              a *{ href: 'institution_reference_books_dishes_products_norms_path' } Технічна карта продуктів
         li.info
           span = current_user[ :username ]
           span = current_institution[ :name ]
