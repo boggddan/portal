@@ -16,6 +16,7 @@ class Institution::ProductsMovesController < Institution::BaseController
                :number_sa,
                :date_sa,
                :is_confirmed,
+               :is_del_1c,
                "CASE WHEN institution_id = #{ institution_id } THEN 0 ELSE 1 END AS tip",
                "CASE WHEN institution_id = #{ institution_id } THEN 'Видача' ELSE 'Прийом' END AS tip_name",
                'institutions.name AS institution_name' )
