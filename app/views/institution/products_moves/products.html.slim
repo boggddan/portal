@@ -1,0 +1,37 @@
+- label_text = 'layouts/label_text'
+- disabled = @products_move[ :number_sa ].present?
+
+main#products_move_products *{ data: { \
+  id: @products_move[ :id ],
+  tip: @products_move[ :tip ],
+  disabled: disabled.to_s,
+  path: { \
+    send: institution_products_moves_send_sa_path,
+    exit: institution_products_moves_index_path,
+    update: institution_products_moves_update_path } } }
+
+  h1.icon
+  .panel_main.row_3
+    .panel
+      button.btn_send
+      button.btn_gradient.btn_confirmed Прийнято
+      button.btn_exit
+
+      - if disabled
+        = render label_text, label_attr: { class: :icon_number }, text: 'Надіслано:',
+          input_attr: { value: @products_move[ :number_sa ], disabled: true }
+        = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
+          input_attr: { data: { date: @products_move[ :date_sa ] }, disabled: true }
+
+    .panel
+      = render label_text, label_attr: { class: :icon_number }, text: 'Перемідення №',
+        input_attr: { id: :number, value: @products_move[ :number ], disabled: true }
+      = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
+        input_attr: { id: :date, data: { date: @products_move[ :date ] } }
+      select#to_institution_id
+        = options_for_select( @institutions, selected: @products_move[ :to_institution_id ], disabled: @products_move[ :institution_id ] )
+
+  .clmn *{data: { path_update: institution_receipts_product_update_path}}
+    h2 Продукти харчування
+    .parent_table = render('table_products_move_products', disabled: disabled ) if @products_move_products.present?
+

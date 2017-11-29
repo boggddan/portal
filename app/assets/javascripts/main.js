@@ -491,6 +491,8 @@ $( document ).on( 'turbolinks:load', ( ) => {
   const elemUserNew = document.getElementById( 'user_new' );
   const elemLogIn = document.getElementById( 'log_in' );
   const elemDishesProductsNorms = document.getElementById( 'dishes_products_norms' );
+  const elemProductsMoveProducts = document.getElementById( 'products_move_products' );
+
 
   const elemFormSplash = document.getElementById( 'form_splash' );
   if ( elemFormSplash ) objFormSplash = new FormSplash( elemFormSplash );
@@ -505,4 +507,5 @@ $( document ).on( 'turbolinks:load', ( ) => {
   else if ( elemUserNew ) objUserNew = new UserNew( elemUserNew );
   else if ( elemLogIn ) objLogIn = new LogIn( elemLogIn );
   else if ( elemDishesProductsNorms ) objDishesProductsNorms = new DishesProductsNorms( elemDishesProductsNorms );
+  else if ( elemProductsMoveProducts ) objProductsMoveProducts = new ProductsMoveProducts( elemProductsMoveProducts );
 } );

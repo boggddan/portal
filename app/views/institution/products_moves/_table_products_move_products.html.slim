@@ -1,0 +1,23 @@
+- clmn_count = 2
+
+table.table
+  colgroup
+    col
+    col.number
+
+  thead
+    tr
+      th Продукт харчування
+      th Кількість
+
+  tbody
+    - products_type_id = nil
+    - @products_move_products.each do | pmp |
+
+      - if products_type_id != pmp[ :products_type_id ]
+        - products_type_id = pmp[ :products_type_id ]
+        tr.row_group.type : td *{ colspan: clmn_count } = pmp[ :products_type_name ]
+
+      tr.row_data *{ data: { id: pmp[ :id ] } }
+        td.name = pmp[ :product_name ]
+        td.count : &text *{ name: :amount, value: pmp[ :amount ] }

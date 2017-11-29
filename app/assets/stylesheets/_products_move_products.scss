@@ -1,0 +1,32 @@
+@mixin row-group( $bgc, $pl ) {
+  cursor: default;
+
+  &:hover,
+  td:hover,
+  td { background-color: $bgc; }
+
+  :first-child { padding-left: $pl; text-align: left; }
+}
+
+#products_move_products {
+
+  .btn_confirmed {
+    // margin-right: 50px;
+
+    &:not(:disabled) {
+      background-image: linear-gradient( to right, #b5e8b3, #cbf1ca 51%, #b5e8b3 100% );
+      color: black;
+    }
+  }
+
+  .clmn {
+    // flex-basis: 640px;
+    width: 700px;
+
+
+    tr {
+      &.type { @include row-group( #f1f1f1, 15px ); }
+      &.row_data td:first-child { padding-left: 25px; };
+    }
+  }
+}
