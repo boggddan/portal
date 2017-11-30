@@ -8,7 +8,8 @@ main#products_move_products *{ data: { \
   path: { \
     send: institution_products_moves_send_sa_path,
     exit: institution_products_moves_index_path,
-    update: institution_products_moves_update_path } } }
+    update: institution_products_moves_update_path,
+    update_price: institution_products_moves_prices_path } } }
 
   h1.icon
   .panel_main.row_3
@@ -16,6 +17,8 @@ main#products_move_products *{ data: { \
       button.btn_send
       button.btn_gradient.btn_confirmed Прийнято
       button.btn_exit
+
+      button.btn_default.btn_prices Оновити залишки та ціни
 
       - if disabled
         = render label_text, label_attr: { class: :icon_number }, text: 'Надіслано:',
@@ -31,7 +34,7 @@ main#products_move_products *{ data: { \
       select#to_institution_id
         = options_for_select( @institutions, selected: @products_move[ :to_institution_id ], disabled: @products_move[ :institution_id ] )
 
-  .clmn *{data: { path_update: institution_receipts_product_update_path}}
+  .clmn *{data: { path_update: institution_products_moves_product_update_path}}
     h2 Продукти харчування
     .parent_table = render('table_products_move_products', disabled: disabled ) if @products_move_products.present?
 

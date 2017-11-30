@@ -1,14 +1,20 @@
-- clmn_count = 2
+- clmn_count = 5
 
 table.table
   colgroup
     col
     col.number
+    col.number
+    col.number
+    col.number
 
   thead
     tr
       th Продукт харчування
+      th Ціна
+      th Залишок
       th Кількість
+      th Сумма
 
   tbody
     - products_type_id = nil
@@ -18,6 +24,10 @@ table.table
         - products_type_id = pmp[ :products_type_id ]
         tr.row_group.type : td *{ colspan: clmn_count } = pmp[ :products_type_name ]
 
-      tr.row_data *{ data: { id: pmp[ :id ] } }
+      tr.row_data
         td.name = pmp[ :product_name ]
-        td.count : &text *{ name: :amount, value: pmp[ :amount ] }
+        td.price = pmp[ :price ]
+        td.balance = pmp[ :balance ]
+        td.amount : &text *{ name: :amount, value: pmp[ :amount ], data: { id: pmp[ :id ] }}
+        td.sum
+

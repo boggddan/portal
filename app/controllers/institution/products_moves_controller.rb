@@ -33,11 +33,11 @@ class Institution::ProductsMovesController < Institution::BaseController
 
   def create
     institution_id = current_user[ :userable_id ]
-
+    date = Date.today
     sql = <<-SQL.squish
         WITH new_products_moves( id ) AS (
-          INSERT INTO products_moves ( institution_id )
-            VALUES ( #{ institution_id } )
+          INSERT INTO products_moves ( institution_id, date )
+            VALUES ( #{ institution_id }, '#{ date }' )
             RETURNING id
             )
           INSERT INTO products_move_products
@@ -50,6 +50,9 @@ class Institution::ProductsMovesController < Institution::BaseController
 
     products_move_id = JSON.parse( ActiveRecord::Base.connection.execute( sql )
       .to_json, symbolize_names: true )[ 0 ][ :products_move_id ]
+
+    update_prices( products_move_id, date ) # Обновление остатков і цен продуктов
+
 
     href = institution_products_moves_products_path( { id: products_move_id } )
     result = { status: true, href: href }
@@ -150,11 +153,14 @@ class Institution::ProductsMovesController < Institution::BaseController
 
       @products_move_products = JSON.parse( ProductsMoveProduct
         .joins( { product: :products_type } )
-        .select( :product_id,
-                :amount,
-                'products.products_type_id',
-                'products_types.name AS products_type_name',
-                'products.name AS product_name' )
+        .select( :id,
+                 :product_id,
+                 :balance,
+                 :price,
+                 :amount,
+                 'products.products_type_id',
+                 'products_types.name AS products_type_name',
+                 'products.name AS product_name' )
         .where( products_move_id: @products_move[ :id ] )
         .order( 'products_types.priority',
                 'products_types.name',
@@ -174,51 +180,117 @@ class Institution::ProductsMovesController < Institution::BaseController
     render json: { status: status }
   end
 
-  def dates_update # Обновление маркера
-    data = params.permit( :reasons_absence_id ).to_h
-    status = update_base_with_id( :timesheet_dates, params[ :id ], data )
+  def product_update # Обновление количества по продуктам
+    data = params.permit( :amount ).to_h
+    status = update_base_with_id( :products_move_products, params[ :id ], data )
     render json: { status: status }
   end
 
-  def dates_updates # Обновление группы маркеров
-    data = params.permit( { ids: [] }, :reasons_absence_id ).to_h
-    reasons_absence_id = data[ :reasons_absence_id ]
 
-    if data.present?
-      sql = "UPDATE timesheet_dates SET " +
-              "reasons_absence_id = #{ reasons_absence_id } " +
-            "FROM UNNEST(ARRAY" +
-              "#{ data[ :ids ].map { | o | o.to_i }.to_s }" +
-            ") as ids " +
-            "WHERE id = ids "
+  def get_actual_price( date, products )
+    goods = products
+      .map { | o | { 'Product' => o[ :code ] } }
 
-      ActiveRecord::Base.connection.execute( sql )
+    message = {
+      'CreateRequest' => {
+        'Branch_id' => current_branch[ :code ],
+        'Institutions_id' => current_institution[ :code ],
+        'Date' => date,
+        'ArrayOfGoods' => goods
+      }
+    }
+
+    savon_return = get_savon( :get_actual_price, message )
+    response = savon_return[ :response ]
+    web_service = savon_return[ :web_service ]
+
+    array_of_goods = response[ :array_of_goods ]
+
+    if response[ :interface_state ] == 'OK'&& array_of_goods
+      actual_prices = array_of_goods.class == Hash ? [ ] << array_of_goods : array_of_goods
+      result = { status: true, actual_prices: actual_prices }
+    else
+      result = { status: false, caption: 'Неуспішна сихронізація з ІС',
+                 message: web_service.merge!( response: response ) }
     end
 
-    render json: { status: true }
+    return result
   end
 
-  def ajax_filter_timesheet_dates # Фильтрация таблицы
-    id = params[ :id ]
-    @timesheet = Timesheet.find( id )
-    field = params[ :field ]
-
-    where = ''
-    where = "#{ field == 'children_group_id' ? field : 'children_groups.children_category_id' }
-      = #{ params[ :field_id ] }" if ['children_group_id', 'children_category_id'].include?(field)
-
-    @timesheet_dates = JSON.parse( TimesheetDate
-      .select( :id, :timesheet_id, 'children_groups.children_category_id', :children_group_id, :child_id,
-               :reasons_absence_id, :date,
-               'children_categories.name AS category_name', 'children_groups.name AS group_name',
-               'children.name AS child_name', 'reasons_absences.mark AS mark',
-               'children_categories.code AS category_code', 'children_groups.code AS group_code',
-               'children.code AS child_code', 'reasons_absences.code AS reason_code' )
-      .joins( { children_group: :children_category }, :child, :reasons_absence )
-      .order( 'category_name', 'group_name', 'child_name', :date )
-      .where( timesheet_id: id )
-      .where( where )
+  def update_prices( products_move_id, date ) # Обновление остатков і цен продуктов
+    products_move_products = JSON.parse( ProductsMoveProduct
+      .joins( :product )
+      .select( :id,
+               :product_id,
+               :price,
+               :balance,
+               'products.code',
+               'products.name' )
+      .where( products_move_id: products_move_id )
+      .order( 'products.name' )
       .to_json, symbolize_names: true )
+
+    return_prices = get_actual_price( date, products_move_products )
+
+    if return_prices[ :status ]
+      products_move_products_sql = ''
+
+      actual_prices = return_prices[ :actual_prices ]
+      prices_message = [ ]
+      prices_data = [ ]
+
+      products_move_products.each { | pmp |
+        actual_price = actual_prices.find { | o | o[ :product ].strip == pmp[ :code ] }
+
+        if actual_price
+          price = actual_price[ :price ].to_d.truncate( 5 )
+          balance = actual_price[ :quantity ].to_d.truncate( 3 )
+
+          if price != pmp[ :price ].to_d || balance != pmp[ :balance ].to_d
+            prices_message << {
+              'Продукт' => pmp[ :name ],
+              'Ціна' => price,
+              'Залишок' => balance
+            }
+
+            prices_data << {
+              product_id: pmp[ :product_id ],
+              price: price,
+              balance: balance
+            }
+
+            products_move_products_sql << <<-SQL.squish
+                UPDATE products_move_products
+                  SET price = #{ price },
+                      balance =#{ balance }
+                  WHERE id = #{ pmp[ :id ] } ;
+              SQL
+          end
+        end
+      }
+
+      if prices_data.any?
+        ActiveRecord::Base.connection.execute( products_move_products_sql )
+        result = { status: true, caption: 'Оновлені продукти', message: prices_message, data: prices_data }
+      else
+        result = { status: true }
+      end
+    else
+      result =  return_prices
+    end
   end
+
+  def prices # Обновление остатков і цен продуктов
+    products_move = JSON.parse( ProductsMove
+      .select( :id, :date )
+      .find( params[ :id ] )
+      .to_json, symbolize_names: true )
+
+    result = update_prices( products_move[ :id ], products_move[ :date ] ) # Обновление остатков і цен продуктов
+
+    render json: result
+  end
+
+
 end
 

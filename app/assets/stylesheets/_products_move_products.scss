@@ -20,13 +20,20 @@
   }
 
   .clmn {
-    // flex-basis: 640px;
-    width: 700px;
+    width: 900px;
 
 
     tr {
       &.type { @include row-group( #f1f1f1, 15px ); }
       &.row_data td:first-child { padding-left: 25px; };
+
+      &.negative {
+        td.name,
+        td.amount input {
+          font-weight: bold;
+          color: red;
+        }
+      }
     }
   }
 }

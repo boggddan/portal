@@ -6,6 +6,8 @@ namespace :products_moves do
   post :create # Создание документа
   get :products # Отображение товаров
 
+  post :product_update # Обновление количества по продуктам
+  post :prices # Обновление количества по продуктам
   post :update # Обновление реквизитов документа
   post :send_sa # Веб-сервис отправки переміщення
   post :confirmed # Веб-сервис отправки переміщення
