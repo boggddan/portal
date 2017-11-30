@@ -24,10 +24,10 @@ table.table
         - products_type_id = pmp[ :products_type_id ]
         tr.row_group.type : td *{ colspan: clmn_count } = pmp[ :products_type_name ]
 
-      tr.row_data
+      tr.row_data *{ data: { product_id: pmp[ :product_id ] } }
         td.name = pmp[ :product_name ]
         td.price = pmp[ :price ]
         td.balance = pmp[ :balance ]
-        td.amount : &text *{ name: :amount, value: pmp[ :amount ], data: { id: pmp[ :id ] }}
+        td.amount : &text *{ name: :amount, value: pmp[ :amount ], data: { id: pmp[ :id ] } }
         td.sum
 

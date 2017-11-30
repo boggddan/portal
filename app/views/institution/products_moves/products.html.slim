@@ -31,6 +31,7 @@ main#products_move_products *{ data: { \
         input_attr: { id: :number, value: @products_move[ :number ], disabled: true }
       = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
         input_attr: { id: :date, data: { date: @products_move[ :date ] } }
+      | Отримувач
       select#to_institution_id
         = options_for_select( @institutions, selected: @products_move[ :to_institution_id ], disabled: @products_move[ :institution_id ] )
 

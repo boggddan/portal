@@ -99,23 +99,30 @@ class ProductsMoveProducts {
     const captionPrices = `Обновлення данних цін та залишків з ІС [id: ${ this.dataId }]`;
     const data = { id: this.dataId };
     const { parentElem: { dataset: { pathUpdatePrice: urlPrices } } } = this;
+    const isToInstitution = this.parentElem.querySelector( '#to_institution_id option[selected]').disabled;
 
-    ( async () => {
-      const prices = await MyLib.ajax( captionPrices, urlPrices, 'post', data, 'json', null, true );
-      if ( prices ) {
-        this.calcPrices( prices );
-      } else {
-        const isCountGtrBalance = await this.countGtrBalance( );
-        if ( isCountGtrBalance ) {
-          const captionSend = `Відправка данних в ІС [id: ${ this.dataId }]`;
+    if ( isToInstitution ) {
+      const caption = 'Незаповнений реквізит';
+      const message = 'Виберіть сад отримувач продуктів';
+      objFormSplash.open( 'error', caption, message );
+    } else {
+      ( async () => {
+        const prices = await MyLib.ajax( captionPrices, urlPrices, 'post', data, 'json', null, true );
+        if ( prices ) {
+          this.calcPrices( prices );
+        } else {
+          const isCountGtrBalance = await this.countGtrBalance( );
+          if ( isCountGtrBalance ) {
+            const captionSend = `Відправка данних в ІС [id: ${ this.dataId }]`;
 
-          const successAjaxSend = ( ) => window.location.reload( );
-          const { parentElem: { dataset: { send: urlSend } } } = this;
+            const successAjaxSend = ( ) => window.location.reload( );
+            const { parentElem: { dataset: { send: urlSend } } } = this;
 
-          await MyLib.ajax( captionSend, urlSend, 'post', data, 'json', successAjaxSend, true );
+            // await MyLib.ajax( captionSend, urlSend, 'post', data, 'json', successAjaxSend, true );
+          }
         }
-      }
-    } )( );
+      } )( );
+    }
   }
 
   countGtrBalance( ) {
@@ -153,7 +160,7 @@ class ProductsMoveProducts {
 
   calcPrices( prices ) {
     prices.forEach( value => {
-      const row = this.colPrTable.querySelector( `tbody tr.row_data[ data-product-id = "${ value.product_id }" ] ` );
+      const row = this.table.querySelector( `tbody tr.row_data[ data-product-id = "${ value.product_id }" ] ` );
       row.querySelector( 'td.balance' ).textContent = MyLib.numToStr( value.balance, -1 );
       row.querySelector( 'td.price' ).textContent = MyLib.numToStr( value.price, -1 );
     } );
