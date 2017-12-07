@@ -2313,7 +2313,7 @@ class SyncCatalogsController < ApplicationController
         }.stringify_keys!.except( *obj.keys )
 
         if error.empty?
-          date_start = Time.at( obj[ :date_start.to_i ] ).to_date
+          date_start = Time.at( obj[ :date_start ].to_i ).to_date
           date_end = Time.at( obj[ :date_end ].to_i ).to_date
           ( date_start..date_end ).each { | date |
             values_insert << [ ].tap { | value |
