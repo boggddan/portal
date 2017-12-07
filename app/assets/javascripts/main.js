@@ -140,7 +140,7 @@ class MyLib {
     };
 
     const success = data => {
-      let returnSuccess = null;
+      let returnSuccess = data;
 
       if ( dataType === 'json' ) {
         const { caption: dataCaption = caption, message: dataMessage, status: dataStatus } = data;
@@ -157,7 +157,6 @@ class MyLib {
             document.getElementById( 'view' ).innerHTML = view;
           } else if ( dataMessage ) {
             objFormSplash.open( 'info', dataCaption, dataMessageContent );
-            returnSuccess = dataData;
           } else if ( reload ) {
             window.location.reload( );
           }

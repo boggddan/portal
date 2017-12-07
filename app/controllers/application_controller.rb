@@ -58,7 +58,13 @@
 
   def check_date_block( date_start, date_end = nil )
     where = date_end.present? ? { date: date_start..date_end } : { date: date_start }
-    DateBlock.select( :date ).where( where ).pluck( :date ).map{ | o | o.strftime( '%d.%m.%Y' ) }.join( ',' )
+    DateBlock
+      .select( :date )
+      .where( institution_id: current_user[ :userable_id ] )
+      .where( where )
+      .pluck( :date )
+      .map{ | o | o.strftime( '%d.%m.%Y' ) }
+      .join( ',' )
   end
 
   def insert_base_single( table, data )

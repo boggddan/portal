@@ -206,6 +206,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
 
   def send_sa # Веб-сервис отправки
     institution_order_id = params[ :id ]
+    institution_id = current_user[ :userable_id ]
 
     institution_order = JSON.parse( InstitutionOrder
       .select( :id, :number, :date_start, :date_end )
@@ -318,6 +319,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
 
   def correction_send_sa # Веб-сервис отправки
     io_correction_id = params[ :id ]
+    institution_id = current_user[ :userable_id ]
 
     io_correction = JSON.parse( IoCorrection
       .joins( :institution_order )

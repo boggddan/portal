@@ -523,8 +523,24 @@ class Institution::MenuRequirementsController < Institution::BaseController
 
   def update # Обновление реквизитов документа
     data = params.permit( :splendingdate ).to_h
-    status = update_base_with_id( :menu_requirements, params[ :id ], data )
-    render json: { status: status }
+
+    result = nil
+    splendingdate = data[ :splendingdate ]
+
+    if splendingdate.present?
+      date_blocks = check_date_block( splendingdate )
+
+      if date_blocks.present?
+        caption = 'Блокування документів'
+        message = "Дата списання #{ date_blocks } закрита для відправлення!"
+        result = { status: false, message: message, caption: caption }
+      else
+        status = update_base_with_id( :menu_requirements, params[ :id ], data )
+        result = { status: status }
+      end
+    end
+
+    render json: result
   end
 
   def meals_dish_update #

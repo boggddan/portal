@@ -23,14 +23,7 @@ class MenuRequirementProducts {
       onSelect( ) {
         const that = this;
         const { value } = that;
-        if ( moment( value, 'DD.MM.YYYY' ).isAfter( moment( '2017-10-31' ) ) ) {
-          self.changeMenuRequirement( that );
-        } else {
-          ( { dataset: { oldValue: that.value } } = that );
-          const caption = 'Дата списання';
-          const message = 'Списання до 01.11.2017 не формується! Виберіть іншу дату.';
-          objFormSplash.open( 'error', caption, message );
-        }
+        self.changeMenuRequirement( that );
       }
     } );
 
@@ -231,8 +224,8 @@ class MenuRequirementProducts {
 
     ( async () => {
       const prices = await MyLib.ajax( captionPrices, urlPrices, 'post', data, 'json', null, true );
-      if ( prices ) {
-        this.calcPrPrices( prices );
+      if ( prices.status && prices.data ) {
+        this.calcPrPrices( prices.data );
       } else {
         const isCountGtrBalance = pf === 'plan' || await this.countGtrBalance( pf );
         if ( isCountGtrBalance ) {
@@ -284,8 +277,8 @@ class MenuRequirementProducts {
 
     ( async () => {
       const prices = await MyLib.ajax( caption, url, 'post', data, 'json', null, true );
-      if ( prices ) this.calcPrPrices( prices );
-    } )();
+      if ( prices.status && prices.data ) this.calcPrPrices( prices.data );
+    } )( );
   }
 
   calcPrPrices( prices ) {
@@ -594,13 +587,16 @@ class MenuRequirementProducts {
     const { id: nameVal, dataset: { oldValue: valOld }, value: val } = elem;
 
     if ( val !== valOld ) {
-      elem.dataset.oldValue = val;
       const { dataId } = this;
 
       const data = { id: dataId, [ nameVal ]: val };
       const caption = `Зміна значення ${ nameVal } з ${ valOld } на ${ val } [id: ${ dataId }]`;
       const { parentElem: { dataset: { pathUpdate: url } } } = this;
-      MyLib.ajax( caption, url, 'post', data, 'json', false, false );
+
+      ( async () => {
+        const result = await MyLib.ajax( caption, url, 'post', data, 'json', null, true );
+        if ( result.status ) elem.dataset.oldValue = val; else elem.value = valOld;
+      } )( );
     }
   }
 
