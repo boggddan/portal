@@ -203,61 +203,54 @@ class Institution::TimesheetsController < Institution::BaseController
     date_start = timesheet[ :date_eb ]
     date_end = timesheet[ :date_ee ]
 
-    date_blocks = check_date_block( date_start, date_end )
-    if date_blocks.present?
-      caption = 'Блокування документів'
-      message = "Дата [ #{ date_blocks } ] в табелі закрита для відправлення!"
-      result = { status: false, message: message, caption: caption }
-    else
-      timesheet_dates = JSON.parse( TimesheetDate
-        .joins( { children_group: :children_category }, :child, :reasons_absence )
-        .select( :id, :date,
-                'children_categories.code AS category_code',
-                'children_groups.code AS group_code',
-                'children.code AS child_code',
-                'reasons_absences.code AS reason_code' )
-        .where( timesheet_id: timesheet_id )
-        .order( 'category_code', 'group_code', 'child_code', :date )
-        .to_json, symbolize_names: true )
+    timesheet_dates = JSON.parse( TimesheetDate
+      .joins( { children_group: :children_category }, :child, :reasons_absence )
+      .select( :id, :date,
+              'children_categories.code AS category_code',
+              'children_groups.code AS group_code',
+              'children.code AS child_code',
+              'reasons_absences.code AS reason_code' )
+      .where( timesheet_id: timesheet_id )
+      .order( 'category_code', 'group_code', 'child_code', :date )
+      .to_json, symbolize_names: true )
 
-      result = { }
-      if timesheet_dates.present?
-        ts = timesheet_dates.map{ | o | {
-          'Child_code' => o[ :child_code ],
-          'Children_group_code' => o[ :group_code ],
-          'Reasons_absence_code' => o[ :reason_code ],
-          'Date' => o[ :date ]
-          }
+    result = { }
+    if timesheet_dates.present?
+      ts = timesheet_dates.map{ | o | {
+        'Child_code' => o[ :child_code ],
+        'Children_group_code' => o[ :group_code ],
+        'Reasons_absence_code' => o[ :reason_code ],
+        'Date' => o[ :date ]
         }
+      }
 
-        message = {
-          'CreateRequest' => {
-            'Institutions_id' => current_institution[ :code ],
-            'NumberFromWebPortal' => timesheet[ :number ],
-            'StartDate' => timesheet[ :date_vb ],
-            'EndDate' => timesheet[ :date_ve ],
-            'StartDateOfTheFill' => date_start,
-            'EndDateOfTheFill' => date_end,
-            'TS' => ts,
-            'User' => current_user[ :username ]
-         }
+      message = {
+        'CreateRequest' => {
+          'Institutions_id' => current_institution[ :code ],
+          'NumberFromWebPortal' => timesheet[ :number ],
+          'StartDate' => timesheet[ :date_vb ],
+          'EndDate' => timesheet[ :date_ve ],
+          'StartDateOfTheFill' => date_start,
+          'EndDateOfTheFill' => date_end,
+          'TS' => ts,
+          'User' => current_user[ :username ]
         }
+      }
 
-        savon_return = get_savon( :creation_time_sheet, message )
-        response = savon_return[ :response ]
-        web_service = savon_return[ :web_service ]
+      savon_return = get_savon( :creation_time_sheet, message )
+      response = savon_return[ :response ]
+      web_service = savon_return[ :web_service ]
 
-        if response[ :interface_state ] == 'OK'
-          data = { date_sa: Date.today, number_sa: response[ :respond ].to_s }
-          update_base_with_id( :timesheets, timesheet_id, data )
-          result = { status: true }
-        else
-          result = { status: false, caption: 'Неуспішна сихронізація з ІС',
-                    message: web_service.merge!( response: response ) }
-        end
+      if response[ :interface_state ] == 'OK'
+        data = { date_sa: Date.today, number_sa: response[ :respond ].to_s }
+        update_base_with_id( :timesheets, timesheet_id, data )
+        result = { status: true }
       else
-        result = { status: false, caption: 'Немає данних' }
+        result = { status: false, caption: 'Неуспішна сихронізація з ІС',
+                  message: web_service.merge!( response: response ) }
       end
+    else
+      result = { status: false, caption: 'Немає данних' }
     end
 
     render json: result
