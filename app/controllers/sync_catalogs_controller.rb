@@ -2313,8 +2313,8 @@ class SyncCatalogsController < ApplicationController
         }.stringify_keys!.except( *obj.keys )
 
         if error.empty?
-          date_start = Time.at( obj[ :date_start ] ).to_date
-          date_end = Time.at( obj[ :date_end ] ).to_date
+          date_start = Time.at( obj[ :date_start.to_i ] ).to_date
+          date_end = Time.at( obj[ :date_end ].to_i ).to_date
           ( date_start..date_end ).each { | date |
             values_insert << [ ].tap { | value |
               value << institutions[ :obj ][ obj[ :institution_code ].to_i ]
@@ -2378,9 +2378,9 @@ class SyncCatalogsController < ApplicationController
               ( institution_id = #{ institutions[ :obj ][ obj[ :institution_code ].to_i ] }
                 AND
                 date BETWEEN
-                  '#{ Time.at( obj[ :date_start ] ).to_date }'
+                  '#{ Time.at( obj[ :date_start ].to_i ).to_date }'
                   AND
-                  '#{ Time.at( obj[ :date_end ] ).to_date }'
+                  '#{ Time.at( obj[ :date_end ].to_i ).to_date }'
               )
             SQL
         else
