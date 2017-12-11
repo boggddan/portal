@@ -105,7 +105,12 @@ $ffIcon: 'Glyphicons Halflings';
     background-color: #dadada;
   }
 
+  label select {
+    margin-left: 2px;
+  }
+
   select {
+    height: 100%;
     margin-right: $mr;
     border-radius: $bdrs;
     border: 1px solid #e7e7e7;

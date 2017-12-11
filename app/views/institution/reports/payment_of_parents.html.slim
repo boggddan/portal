@@ -1,0 +1,20 @@
+- label_text = 'layouts/label_text'
+
+main#payment_of_parents *{ data: { path_view: institution_reports_ajax_payment_of_parents_path } }
+
+  h1 Звіт "Взаєморозрахунки з батьками"
+  .panel
+    = render 'layouts/label_text', label_attr: {class: :icon_сalendar}, text: 'З', input_attr: {id: :date_start}
+    = render 'layouts/label_text', label_attr: {class: :icon_сalendar}, text: 'ПО', input_attr: {id: :date_end}
+
+    label
+      | Пошук по
+      select#type_search
+        option *{ value: 'personal_account' } особистому рахунку
+        option *{ value: 'child_name' } коду
+    = render 'layouts/label_text', label_attr: { class: :icon_number }, text: '', input_attr: { id: :code_search, placeholder: 'всі діти...' }
+
+    button.btn_create
+    button.btn_print
+
+  #view

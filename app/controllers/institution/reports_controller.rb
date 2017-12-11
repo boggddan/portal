@@ -101,11 +101,49 @@ class Institution::ReportsController < Institution::BaseController
         'EndDate' => params[ :date_end ].to_date,
         'Institutions_id' => current_institution[ :code ],
         'Children_group_id' => params[ :children_group_code ] || '',
-         'IsPDF' => is_pdf.to_s
+        'IsPDF' => is_pdf.to_s
       }
     }
 
     savon_return = get_savon( :get_report_the_record_of_attendance_of_children, message )
+    response = savon_return[ :response ]
+    web_service = savon_return[ :web_service ]
+
+    render json: response[ :interface_state ] == 'OK' ?
+      { status: true, ( is_pdf == true ? :href : :view ) => response[ :respond ] }
+      :
+      { status: false, caption: 'Неуспішна сихронізація з ІС',
+        message: web_service.merge!( response: response ) }
+  end
+
+  # Табель обліку відвідування дітей
+  def payment_of_parents
+
+  end
+
+  def ajax_payment_of_parents
+    is_pdf = params[ :is_pdf ]
+    type_search = params[ :type_search ]
+    code_search = params[ :code_search ] || nil
+
+    personal_account = type_search == 'personal_account' ? code_search : code_search
+    child_name = type_search == 'child_name' ? code_search : nil
+
+    message = {
+      'CreateRequest' => {
+        'StartDate' => params[ :date_start ].to_date,
+        'EndDate' => params[ :date_end ].to_date,
+        'Branch_id' => current_branch[ :code ],
+        'Institutions_id' => current_institution[ :code ],
+        'PersonalAccount' => personal_account,
+        'ChildName' => child_name,
+        'TypeOfInstitution' => nil,
+        'Advance' => 'true',
+        'IsPDF' => is_pdf.to_s
+      }
+    }
+
+    savon_return = get_savon( :get_report_the_consolidated_statement_for_payment, message )
     response = savon_return[ :response ]
     web_service = savon_return[ :web_service ]
 

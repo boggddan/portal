@@ -212,7 +212,8 @@ nav#main_menu {
 
   li[data-page=institution_reports_cost_baby_day],
   li[data-page=institution_reports_balances_in_warehouses],
-  li[data-page=institution_reports_attendance_of_children] {
+  li[data-page=institution_reports_attendance_of_children],
+  li[ data-page = 'institution_reports_payment_of_parents' ] {
     & > a::before {
       content: '\e045';
     }
