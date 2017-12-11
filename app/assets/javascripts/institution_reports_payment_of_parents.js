@@ -28,20 +28,28 @@ $( document ).on( 'turbolinks:load', ( ) => {
       .on( 'click', function( ) { // нажатие на кнопочку создать
         const { value: dateStart } = document.getElementById( 'date_start' );
         const { value: dateEnd } = document.getElementById( 'date_end' );
-        const { value: typeSearch } = document.getElementById( 'type_search' );
-        const { value: codeSearch } = document.getElementById( 'code_search' );
-        const isPdf = this.classList.contains( 'btn_print' );
-        const data = {
-          date_start: dateStart,
-          date_end: dateEnd,
-          type_search: typeSearch,
-          code_search: codeSearch,
-          is_pdf: isPdf
-        };
+        const typeSearch = 'personal_account';
+        // const { value: typeSearch } = document.getElementById( 'type_search' );
+        const codeSearchElem = document.getElementById( 'code_search' );
+        const { value: codeSearch } = codeSearchElem;
+        if ( codeSearchElem.checkValidity() ) {
+          const isPdf = this.classList.contains( 'btn_print' );
+          const data = {
+            date_start: dateStart,
+            date_end: dateEnd,
+            type_search: typeSearch,
+            code_search: codeSearch,
+            is_pdf: isPdf
+          };
 
-        const { [ 0 ]: { dataset: { pathView: url } } } = parentElem;
-        const caption = 'Формування звіта в ІС';
-        MyLib.ajax( caption, url, 'post', data, 'json', null, true );
+          const { [ 0 ]: { dataset: { pathView: url } } } = parentElem;
+          const caption = 'Формування звіта в ІС';
+          MyLib.ajax( caption, url, 'post', data, 'json', null, true );
+        } else {
+          const caption = 'Особовий рахунок';
+          const message = 'Неправильний формат особистого рахунку!';
+          objFormSplash.open( 'error', caption, message );
+        }
       } )
       .end( )
       .find( '#date_start' ) // начальная дата фильтрации

@@ -7,13 +7,13 @@ main#payment_of_parents *{ data: { path_view: institution_reports_ajax_payment_o
     = render 'layouts/label_text', label_attr: {class: :icon_сalendar}, text: 'З', input_attr: {id: :date_start}
     = render 'layouts/label_text', label_attr: {class: :icon_сalendar}, text: 'ПО', input_attr: {id: :date_end}
 
-    label
-      | Пошук по
-      select#type_search
-        option *{ value: 'personal_account' } особистому рахунку
-        option *{ value: 'child_name' } коду
-    = render 'layouts/label_text', label_attr: { class: :icon_number }, text: '', input_attr: { id: :code_search, placeholder: 'всі діти...' }
-
+    / label
+    /   | Пошук по
+    /   select#type_search
+    /     option *{ value: 'personal_account' } особовому рахунку
+    /     option *{ value: 'child_name' } коду
+    = render 'layouts/label_text', label_attr: { class: :icon_number }, text: 'Пошук по особовому рахунку', \
+      input_attr: { id: :code_search, placeholder: 'всі діти...', pattern: '[0-9]*' }
     button.btn_create
     button.btn_print
 
