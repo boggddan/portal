@@ -11,7 +11,7 @@ class Institution::ProductsMovesController < Institution::BaseController
       SQL
 
     @products_moves = JSON.parse( ProductsMove
-      .joins( :to_institution )
+      .joins( :to_institution, :institution )
       .joins( 'LEFT JOIN date_blocks ON products_moves.date = date_blocks.date' )
       .select( :id,
                :number,
@@ -23,7 +23,8 @@ class Institution::ProductsMovesController < Institution::BaseController
                "NOT date_blocks.date ISNULL OR products_moves.institution_id = #{ institution_id } AS disabled",
                "products_moves.institution_id = #{ institution_id } AS is_post",
                "CASE WHEN products_moves.institution_id = #{ institution_id } THEN 'Видача' ELSE 'Прийом' END AS type_name",
-               'institutions.name AS institution_name' )
+               "CASE WHEN products_moves.institution_id = #{ institution_id } THEN institutions.name ELSE institutions_products_moves.name END AS institution_name"
+              )
       .where( date: params[ :date_start ]..params[ :date_end ] )
       .where( where )
       .order( "#{ params[ :sort_field ] } #{ params[ :sort_order ] }" )

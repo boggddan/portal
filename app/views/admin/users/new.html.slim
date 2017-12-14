@@ -38,6 +38,6 @@ main#user_new  *{ data: { \
     .panel *{ data: { userable_type: 'Supplier' } }
       label
         &radio *{ name: :userable_type }
-        | Дитячий садок:
-      select.align_right
+        | Постачальник:
+      select.align_right *{ disabled: true }
         = options_for_select( @supplier )

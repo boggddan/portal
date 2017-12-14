@@ -1,7 +1,7 @@
 #products_moves {
   flex-direction: row;
 
-  #col_pm {
+  .clmn {
     flex-basis: 1000px;
     table {
       col:first-child { width: 100px; }
