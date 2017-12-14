@@ -27,14 +27,15 @@ table.table *{ data: { type: :list_doc }  }
     - @products_moves.each do | products_move |
       tr *{ data: { id: products_move[ :id ] } }
         - number_sa = products_move[ :number_sa ]
-        - tip = products_move[ :tip ]
-        td *{ data: { tip: tip } } = products_move[ :tip_name ]
+        - disabled = products_move[ :disabled ]
+        - is_post = products_move[ :is_post ]
+        td *{ data: { type: is_post ? 1 : 0 } } = products_move[ :type_name ]
         td = date_str( products_move[ :date ].to_date )
         td *{ data: { delete: true } } = products_move[ :number ]
         td = date_str( products_move[ :date ].to_date ) if number_sa.present?
         td *{ class: ( products_move[ :is_del_1c ] ? :is_del  : '' ) } = number_sa
         td = products_move[ :institution_name ]
         td *{ class: products_move[ :is_confirmed ] ? :check : '' }
-        td : button.btn_view *{ disabled: !number_sa.present? || tip == 1 }
-        td : button.btn_edit *{ disabled: number_sa.present? }
-        td : button.btn_del *{ disabled: number_sa.present? || tip == 1 }
+        td : button.btn_view *{ disabled: disabled }
+        td : button.btn_edit *{ disabled: !disabled }
+        td : button.btn_del *{ disabled: number_sa.present? || !is_post }

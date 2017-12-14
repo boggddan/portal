@@ -6,7 +6,10 @@ class ProductsMoveProducts {
     const self = this;
     const parentElem = elem;
 
-    const disabled = parentElem.dataset.disabled === 'true';
+    this.isDateBlocks = parentElem.dataset.isDateBlocks === 'true';
+    this.isConfirmed = parentElem.dataset.isConfirmed === 'true';
+    this.isSendFirst = parentElem.dataset.isSendFirst === 'true';
+    this.isPost = parentElem.dataset.isPost === 'true';
 
     ( { textContent: this.user } = document.querySelector( '#main_menu li.info span:first-child' ) );
 
@@ -16,29 +19,34 @@ class ProductsMoveProducts {
     } );
 
     const date = parentElem.querySelector( '#date' );
-
     ( { value: date.dataset.oldValue } = date );
-    date.disabled = disabled;
-    $( date ).datepicker( {
-      onSelect( ) { self.changeProductsMove( this ) }
-    } );
+    $( date ).datepicker( { onSelect( ) { self.changeProductsMove( this ) } } );
+    date.disabled = this.isDateBlocks || !this.isSendFirst || !this.isPost;
 
-    parentElem.querySelector( '#to_institution_id' ).addEventListener( 'change', event => this.changeProductsMove( event.currentTarget ) );
+    const toInstitutionId = parentElem.querySelector( '#to_institution_id' );
+    toInstitutionId.addEventListener( 'change', event => this.changeProductsMove( event.currentTarget ) );
+    toInstitutionId.disabled = this.isDateBlocks || !this.isSendFirst || !this.isPost;
 
     const btnExit = parentElem.querySelector( '.btn_exit' );
     btnExit.addEventListener( 'click', ( ) => this.clickExit( ) );
+    if ( !this.isDateBlocks && this.isPost ) {
+      btnExit.classList.remove( 'btn_exit' );
+      btnExit.classList.add( 'btn_save' );
+    }
 
     parentElem.querySelector( 'h1' ).addEventListener( 'click', event => this.clickHeader( event.currentTarget ) );
 
-    const btnSend = parentElem.querySelector( '.btn_send' )
+    const btnSend = parentElem.querySelector( '.btn_send' );
     btnSend.addEventListener( 'click', event => this.clickSend( event ) );
+    btnSend.disabled = this.isDateBlocks || !this.isPost;
 
-    const btnConfirmed = parentElem.querySelector( '.btn_confirmed' )
+    const btnConfirmed = parentElem.querySelector( '.btn_confirmed' );
     btnConfirmed.addEventListener( 'click', event => this.clickConfirmed( event ) );
-    // btnConfirmed.disabled = disabledFact;
+    btnConfirmed.disabled = this.isDateBlocks || this.isSendFirst || this.isConfirmed || this.isPost;
 
     const btnPrices = parentElem.querySelector( '.btn_prices' );
     btnPrices.addEventListener( 'click', ( ) => this.clickBtnPrices( ) );
+    btnPrices.disabled = this.isDateBlocks || !this.isPost;
 
     const clmn = parentElem.querySelector( '.clmn' );
     const table = clmn.querySelector( 'table' );
@@ -64,7 +72,7 @@ class ProductsMoveProducts {
     [ this.dataId ] = [ +parentElem.dataset.id ];
 
     this.headerText( );
-    this.clmnInit()
+    this.clmnInit();
   }
 
   changeProductsMove( target ) {
@@ -78,7 +86,11 @@ class ProductsMoveProducts {
       const data = { id: dataId, [ nameValue ]: value };
       const caption = `Зміна значення ${ nameValue } з ${ oldValue } на ${ value } [id: ${ dataId }]`;
       const { parentElem: { dataset: { pathUpdate: url } } } = this;
-      MyLib.ajax( caption, url, 'post', data, 'json', false, false );
+
+      ( async () => {
+        const result = await MyLib.ajax( caption, url, 'post', data, 'json', null, true );
+        if ( result.status ) elem.dataset.oldValue = value; else elem.value = oldValue;
+      } )( );
     }
   }
 
@@ -99,7 +111,8 @@ class ProductsMoveProducts {
     const captionPrices = `Обновлення данних цін та залишків з ІС [id: ${ this.dataId }]`;
     const data = { id: this.dataId };
     const { parentElem: { dataset: { pathUpdatePrice: urlPrices } } } = this;
-    const isToInstitution = this.parentElem.querySelector( '#to_institution_id option[selected]').disabled;
+    const toInstitution = this.parentElem.querySelector( '#to_institution_id' );
+    const { options: { [ toInstitution.selectedIndex ]: { disabled: isToInstitution } } } = toInstitution;
 
     if ( isToInstitution ) {
       const caption = 'Незаповнений реквізит';
@@ -107,22 +120,31 @@ class ProductsMoveProducts {
       objFormSplash.open( 'error', caption, message );
     } else {
       ( async () => {
-        const prices = await MyLib.ajax( captionPrices, urlPrices, 'post', data, 'json', null, true );
-        if ( prices ) {
-          this.calcPrices( prices );
+        const respond = await MyLib.ajax( captionPrices, urlPrices, 'post', data, 'json', null, true );
+        if ( respond.status && respond.data ) {
+          this.calcPrices( respond.data );
         } else {
           const isCountGtrBalance = await this.countGtrBalance( );
           if ( isCountGtrBalance ) {
             const captionSend = `Відправка данних в ІС [id: ${ this.dataId }]`;
 
             const successAjaxSend = ( ) => window.location.reload( );
-            const { parentElem: { dataset: { send: urlSend } } } = this;
+            const { parentElem: { dataset: { pathSend: urlSend } } } = this;
 
-            // await MyLib.ajax( captionSend, urlSend, 'post', data, 'json', successAjaxSend, true );
+            await MyLib.ajax( captionSend, urlSend, 'post', data, 'json', successAjaxSend, true );
           }
         }
       } )( );
     }
+  }
+
+  clickConfirmed( ) {
+    const caption = `Підтвердження переміщення [id: ${ this.dataId }]`;
+    const data = { id: this.dataId };
+    const { parentElem: { dataset: { pathConfirmed: url } } } = this;
+
+    const successAjaxSend = ( ) => window.location.reload( );
+    MyLib.ajax( caption, url, 'post', data, 'json', successAjaxSend, true );
   }
 
   countGtrBalance( ) {
@@ -191,7 +213,6 @@ class ProductsMoveProducts {
       const elemChild = child;
       const value = +elemChild.textContent;
       elemChild.textContent = MyLib.numToStr( value, -1 );
-
     } );
 
     this.table.querySelectorAll( 'td.amount input' ).forEach( child => {
@@ -200,7 +221,7 @@ class ProductsMoveProducts {
       elemChild.dataset.oldValue = value;
       elemChild.value = MyLib.numToStr( value, -1 );
 
-      // elem.disabled = currentDisabled;
+      elemChild.disabled = this.isDateBlocks || !this.isPost;
     } );
 
     this.calcSum( );
@@ -246,6 +267,4 @@ class ProductsMoveProducts {
       MyLib.ajax( caption, url, 'post', data, 'json', successAjax, false );
     }
   }
-
-
 }

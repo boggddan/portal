@@ -3,10 +3,13 @@
 
 main#products_move_products *{ data: { \
   id: @products_move[ :id ],
-  tip: @products_move[ :tip ],
-  disabled: disabled.to_s,
+  is_post: @products_move[ :is_post ].to_s,
+  is_date_blocks: @is_date_blocks.to_s,
+  is_confirmed: @products_move[ :is_confirmed ].to_s,
+  is_send_first: @products_move[ :number_sa ].empty?.to_s,
   path: { \
     send: institution_products_moves_send_sa_path,
+    confirmed: institution_products_moves_confirmed_path,
     exit: institution_products_moves_index_path,
     update: institution_products_moves_update_path,
     update_price: institution_products_moves_prices_path } } }

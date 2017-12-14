@@ -22,7 +22,6 @@
   .clmn {
     width: 900px;
 
-
     tr {
       &.type { @include row-group( #f1f1f1, 15px ); }
       &.row_data td:first-child { padding-left: 25px; };

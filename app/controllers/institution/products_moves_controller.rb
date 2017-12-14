@@ -5,11 +5,14 @@ class Institution::ProductsMovesController < Institution::BaseController
   def filter # Фильтрация документов
     institution_id = current_user[ :userable_id ]
     where = <<-SQL.squish
-        ( institution_id = #{ institution_id } OR to_institution_id = #{ institution_id } )
+        ( products_moves.institution_id = #{ institution_id }
+          OR
+          products_moves.to_institution_id = #{ institution_id } )
       SQL
 
     @products_moves = JSON.parse( ProductsMove
       .joins( :to_institution )
+      .joins( 'LEFT JOIN date_blocks ON products_moves.date = date_blocks.date' )
       .select( :id,
                :number,
                :date,
@@ -17,8 +20,9 @@ class Institution::ProductsMovesController < Institution::BaseController
                :date_sa,
                :is_confirmed,
                :is_del_1c,
-               "CASE WHEN institution_id = #{ institution_id } THEN 0 ELSE 1 END AS tip",
-               "CASE WHEN institution_id = #{ institution_id } THEN 'Видача' ELSE 'Прийом' END AS tip_name",
+               "NOT date_blocks.date ISNULL OR products_moves.institution_id = #{ institution_id } AS disabled",
+               "products_moves.institution_id = #{ institution_id } AS is_post",
+               "CASE WHEN products_moves.institution_id = #{ institution_id } THEN 'Видача' ELSE 'Прийом' END AS type_name",
                'institutions.name AS institution_name' )
       .where( date: params[ :date_start ]..params[ :date_end ] )
       .where( where )
@@ -53,7 +57,6 @@ class Institution::ProductsMovesController < Institution::BaseController
 
     update_prices( products_move_id, date ) # Обновление остатков і цен продуктов
 
-
     href = institution_products_moves_products_path( { id: products_move_id } )
     result = { status: true, href: href }
 
@@ -61,79 +64,126 @@ class Institution::ProductsMovesController < Institution::BaseController
   end
 
   def send_sa
-    # timesheet_id = params[ :id ]
+    products_move = JSON.parse( ProductsMove
+      .joins( :to_institution )
+      .select( :id,
+               :number,
+               :date,
+               :number_sa,
+               'institutions.code AS to_institution_code' )
+      .find( params[ :id ] )
+      .to_json( ), symbolize_names: true )
 
-    # timesheet = JSON.parse( Timesheet
-    #   .select( :id,
-    #             :number,
-    #             :date_vb,
-    #             :date_ve,
-    #             :date_eb,
-    #             :date_ee )
-    #   .find( timesheet_id )
-    #   .to_json, symbolize_names: true )
+    date_blocks = check_date_block( products_move[ :date ] )
+    if date_blocks.present?
+      caption = 'Блокування документів'
+      message = "Дата [ #{ date_blocks } ] в переміщенні закрита для відправлення!"
+      result = { status: false, message: message, caption: caption }
+    else
+      products_move_products = JSON.parse( ProductsMoveProduct
+        .joins( :product )
+        .select( 'products.code AS code',
+                :balance,
+                :price,
+                :amount,
+                'ROUND( products_move_products.amount * products_move_products.price, 5 ) AS sum' )
+        .where( products_move_id: products_move[ :id ] )
+        .order( 'products.name' )
+        .to_json( ), symbolize_names: true )
+        .map { | o |
+          { 'CodeOfGoods' => o[ :code ],
+            'Balance' => o[ :balance ], # залишок
+            'Price' => o[ :price ], # ціна
+            'Amount' => o[ :amount ], # кількість
+            'Sum' => o[ :sum ] # сумма
+          }
+        }
 
-    # date_start = timesheet[ :date_eb ]
-    # date_end = timesheet[ :date_ee ]
+      message = {
+        'CreateRequest' => {
+          'Institutions_id' => current_institution[ :code ], # Підрозділ передавач
+          'ToInstitutions_id' => products_move[ :to_institution_code ], # Підрозділ приймач
+          'NumberFromWebPortal' => products_move[ :number ],
+          'Date' => products_move[ :date ],
+          'Products' => products_move_products,
+          'Number1C' => products_move[ :number_sa ],
+          'User' => current_user[ :username ]
+        }
+      }
 
-    # date_blocks = check_date_block( date_start, date_end )
-    # if date_blocks.present?
-    #   caption = 'Блокування документів'
-    #   message = "Дата [ #{ date_blocks } ] в табелі закрита для відправлення!"
-    #   result = { status: false, message: message, caption: caption }
-    # else
-    #   timesheet_dates = JSON.parse( TimesheetDate
-    #     .joins( { children_group: :children_category }, :child, :reasons_absence )
-    #     .select( :id, :date,
-    #             'children_categories.code AS category_code',
-    #             'children_groups.code AS group_code',
-    #             'children.code AS child_code',
-    #             'reasons_absences.code AS reason_code' )
-    #     .where( timesheet_id: timesheet_id )
-    #     .order( 'category_code', 'group_code', 'child_code', :date )
-    #     .to_json, symbolize_names: true )
+      File.open( "./products_move.txt", 'w' ) { | f | f.write( message ) }
+      response = { interface_state: 'OK', respond: Time.now.to_i }
 
-    #   result = { }
-    #   if timesheet_dates.present?
-    #     ts = timesheet_dates.map{ | o | {
-    #       'Child_code' => o[ :child_code ],
-    #       'Children_group_code' => o[ :group_code ],
-    #       'Reasons_absence_code' => o[ :reason_code ],
-    #       'Date' => o[ :date ]
-    #       }
-    #     }
+      # savon_return = get_savon( :creation_time_sheet, message )
+      # response = savon_return[ :response ]
+      # web_service = savon_return[ :web_service ]
 
-    #     message = {
-    #       'CreateRequest' => {
-    #         'Institutions_id' => current_institution[ :code ],
-    #         'NumberFromWebPortal' => timesheet[ :number ],
-    #         'StartDate' => timesheet[ :date_vb ],
-    #         'EndDate' => timesheet[ :date_ve ],
-    #         'StartDateOfTheFill' => date_start,
-    #         'EndDateOfTheFill' => date_end,
-    #         'TS' => ts,
-    #         'User' => current_user[ :username ]
-    #      }
-    #     }
+      if response[ :interface_state ] == 'OK'
+        ProductsMove.update( products_move[ :id ],
+                             date_sa: Date.today,
+                             number_sa: response[ :respond ],
+                             is_confirmed: false )
 
-    #     savon_return = get_savon( :creation_time_sheet, message )
-    #     response = savon_return[ :response ]
-    #     web_service = savon_return[ :web_service ]
+        result = { status: true }
+      else
+        result = { status: false, caption: 'Неуспішна сихронізація з ІС',
+                  message: web_service.merge!( response: response ) }
+      end
+    end
 
-    #     if response[ :interface_state ] == 'OK'
-    #       data = { date_sa: Date.today, number_sa: response[ :respond ].to_s }
-    #       update_base_with_id( :timesheets, timesheet_id, data )
-    #       result = { status: true }
-    #     else
-    #       result = { status: false, caption: 'Неуспішна сихронізація з ІС',
-    #                 message: web_service.merge!( response: response ) }
-    #     end
-    #   else
-    #     result = { status: false, caption: 'Немає данних' }
-    #   end
-    # end
+    render json: result
+  end
 
-    # render json: result
+  def confirmed
+    products_move = JSON.parse( ProductsMove
+      .joins( :to_institution )
+      .select( :id,
+              :number,
+              :date,
+              :number_sa,
+              'institutions.code AS to_institution_code' )
+      .find( params[ :id ] )
+      .to_json( ), symbolize_names: true )
+
+    date_blocks = check_date_block( products_move[ :date ] )
+    if date_blocks.present?
+      caption = 'Блокування документів'
+      message = "Дата [ #{ date_blocks } ] в переміщенні закрита для підтвердження!"
+      result = { status: false, message: message, caption: caption }
+    else
+      message = {
+        'CreateRequest' => {
+          'Institutions_id' => current_institution[ :code ], # Підрозділ передавач
+          'NumberFromWebPortal' => products_move[ :number ],
+          'Number1C' => products_move[ :number_sa ],
+          'User' => current_user[ :username ]
+        }
+      }
+
+      File.open( "./products_move_confimed.txt", 'w' ) { | f | f.write( message ) }
+      result = { status: true }
+
+      ProductsMove.update( products_move[ :id ], is_confirmed: true )
+
+      # savon_return = get_savon( :creation_time_sheet, message )
+      # response = savon_return[ :response ]
+      # web_service = savon_return[ :web_service ]
+
+      #     if response[ :interface_state ] == 'OK'
+      #       data = { date_sa: Date.today, number_sa: response[ :respond ].to_s }
+      #       update_base_with_id( :timesheets, timesheet_id, data )
+      #       result = { status: true }
+      #     else
+      #       result = { status: false, caption: 'Неуспішна сихронізація з ІС',
+      #                 message: web_service.merge!( response: response ) }
+      #     end
+      #   else
+      #     result = { status: false, caption: 'Немає данних' }
+      #   end
+      # end
+    end
+
+    render json: result
   end
 
   def products #
@@ -147,37 +197,65 @@ class Institution::ProductsMovesController < Institution::BaseController
                :date_sa,
                :institution_id,
                :to_institution_id,
-               "CASE WHEN institution_id = #{ institution_id } THEN 0 ELSE 1 END AS tip" )
+               :is_confirmed,
+               "CASE WHEN institution_id = #{ institution_id } THEN true ELSE false END AS is_post" )
       .find( params[ :id ] )
       .to_json, symbolize_names: true )
 
-      @products_move_products = JSON.parse( ProductsMoveProduct
-        .joins( { product: :products_type } )
-        .select( :id,
-                 :product_id,
-                 :balance,
-                 :price,
-                 :amount,
-                 'products.products_type_id',
-                 'products_types.name AS products_type_name',
-                 'products.name AS product_name' )
-        .where( products_move_id: @products_move[ :id ] )
-        .order( 'products_types.priority',
-                'products_types.name',
-                'products.name' )
-        .to_json, symbolize_names: true )
+    @is_date_blocks = check_date_block( @products_move[ :date ] ).present?
 
-        @institutions = Institution
-          .select(:id, :name )
-          .where( branch_id: current_institution[ :branch_id ] )
-          .order( :name )
-          .pluck( :name, :id )
+    @products_move_products = JSON.parse( ProductsMoveProduct
+      .joins( { product: :products_type } )
+      .select( :id,
+                :product_id,
+                :balance,
+                :price,
+                :amount,
+                'products.products_type_id',
+                'products_types.name AS products_type_name',
+                'products.name AS product_name' )
+      .where( products_move_id: @products_move[ :id ] )
+      .order( 'products_types.priority',
+              'products_types.name',
+              'products.name' )
+      .to_json, symbolize_names: true )
+
+      where_institution = @products_move[ :to_institution_id ] == institution_id ? '' :
+        " id != #{ institution_id } "
+
+      @institutions = Institution
+        .select(:id, :name )
+        .where( branch_id: current_institution[ :branch_id ] )
+        .where( where_institution )
+        .order( :name )
+        .pluck( :name, :id )
   end
 
   def update # Обновление реквизитов документа
     data = params.permit( :date, :to_institution_id ).to_h
-    status = update_base_with_id( :products_moves, params[ :id ], data )
-    render json: { status: status }
+
+    result = nil
+    date = data[ :date ]
+
+    is_update = data.present?
+
+    if date.present?
+      date_blocks = check_date_block( date )
+
+      if date_blocks.present?
+        caption = 'Блокування документів'
+        message = "Дата #{ date_blocks } закрита для відправлення!"
+        is_update = false
+        result = { status: false, message: message, caption: caption }
+      end
+    end
+
+    if is_update
+      status = update_base_with_id( :products_moves, params[ :id ], data )
+      result = { status: status }
+    end
+
+    render json: result
   end
 
   def product_update # Обновление количества по продуктам
@@ -185,7 +263,6 @@ class Institution::ProductsMovesController < Institution::BaseController
     status = update_base_with_id( :products_move_products, params[ :id ], data )
     render json: { status: status }
   end
-
 
   def get_actual_price( date, products )
     goods = products
@@ -290,6 +367,8 @@ class Institution::ProductsMovesController < Institution::BaseController
 
     render json: result
   end
+
+
 
 
 end

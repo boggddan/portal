@@ -8,8 +8,8 @@
 
       td:first-child {
         font-weight: bold;
-        &[ data-tip = '1' ] { color: green; }
-        &[ data-tip = '0' ] { color: red; }
+        &[ data-type = '0' ] { color: green; }
+        &[ data-type = '1' ] { color: red; }
       }
     }
   }

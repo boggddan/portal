@@ -47,7 +47,7 @@ $( document ).on( 'turbolinks:load', ( ) => {
           MyLib.ajax( caption, url, 'post', data, 'json', null, true );
         } else {
           const caption = 'Особовий рахунок';
-          const message = 'Неправильний формат особистого рахунку!';
+          const message = 'Неправильний формат, особовий рахунок складається лише з цифр!';
           objFormSplash.open( 'error', caption, message );
         }
       } )
