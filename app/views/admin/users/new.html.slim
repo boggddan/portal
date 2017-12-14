@@ -37,7 +37,7 @@ main#user_new  *{ data: { \
 
     .panel *{ data: { userable_type: 'Supplier' } }
       label
-        &radio *{ name: :userable_type }
+        &radio *{ name: :userable_type, disabled: true }
         | Постачальник:
-      select.align_right *{ disabled: true }
+      select.align_right
         = options_for_select( @supplier )
