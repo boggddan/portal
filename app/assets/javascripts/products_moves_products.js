@@ -10,6 +10,7 @@ class ProductsMoveProducts {
     this.isConfirmed = parentElem.dataset.isConfirmed === 'true';
     this.isSendFirst = parentElem.dataset.isSendFirst === 'true';
     this.isPost = parentElem.dataset.isPost === 'true';
+    this.isEdit = parentElem.dataset.isEdit === 'true';
 
     ( { textContent: this.user } = document.querySelector( '#main_menu li.info span:first-child' ) );
 
@@ -29,7 +30,7 @@ class ProductsMoveProducts {
 
     const btnExit = parentElem.querySelector( '.btn_exit' );
     btnExit.addEventListener( 'click', ( ) => this.clickExit( ) );
-    if ( !this.isDateBlocks && this.isPost ) {
+    if ( !this.isDateBlocks && this.isPost && this.isEdit ) {
       btnExit.classList.remove( 'btn_exit' );
       btnExit.classList.add( 'btn_save' );
     }
@@ -38,15 +39,19 @@ class ProductsMoveProducts {
 
     const btnSend = parentElem.querySelector( '.btn_send' );
     btnSend.addEventListener( 'click', event => this.clickSend( event ) );
-    btnSend.disabled = this.isDateBlocks || !this.isPost;
+    btnSend.disabled = this.isDateBlocks || !this.isPost || !this.isEdit;
 
     const btnConfirmed = parentElem.querySelector( '.btn_confirmed' );
-    btnConfirmed.addEventListener( 'click', event => this.clickConfirmed( event ) );
-    btnConfirmed.disabled = this.isDateBlocks || this.isSendFirst || this.isConfirmed || this.isPost;
+    btnConfirmed.addEventListener( 'click', ( ) => this.clickConfirmed( ) );
+    btnConfirmed.disabled = this.isDateBlocks || this.isEdit || this.isConfirmed || this.isPost;
+
+    const btnEdit = parentElem.querySelector( '.btn_edit' );
+    btnEdit.addEventListener( 'click', ( ) => this.clickEdit( ) );
+    btnEdit.disabled = this.isDateBlocks || this.isEdit || !this.isPost;
 
     const btnPrices = parentElem.querySelector( '.btn_prices' );
     btnPrices.addEventListener( 'click', ( ) => this.clickBtnPrices( ) );
-    btnPrices.disabled = this.isDateBlocks || !this.isPost;
+    btnPrices.disabled = this.isDateBlocks || !this.isPost || !this.isEdit;
 
     const clmn = parentElem.querySelector( '.clmn' );
     const table = clmn.querySelector( 'table' );
@@ -147,6 +152,15 @@ class ProductsMoveProducts {
     MyLib.ajax( caption, url, 'post', data, 'json', successAjaxSend, true );
   }
 
+  clickEdit( ) {
+    const caption = `Редагування переміщення [id: ${ this.dataId }]`;
+    const data = { id: this.dataId };
+    const { parentElem: { dataset: { pathEdit: url } } } = this;
+
+    const successAjaxSend = ( ) => window.location.reload( );
+    MyLib.ajax( caption, url, 'post', data, 'json', successAjaxSend, true );
+  }
+
   countGtrBalance( ) {
     let status = true;
 
@@ -221,7 +235,7 @@ class ProductsMoveProducts {
       elemChild.dataset.oldValue = value;
       elemChild.value = MyLib.numToStr( value, -1 );
 
-      elemChild.disabled = this.isDateBlocks || !this.isPost;
+      elemChild.disabled = this.isDateBlocks || !this.isPost || !this.isEdit;
     } );
 
     this.calcSum( );

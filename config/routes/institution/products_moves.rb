@@ -10,5 +10,6 @@ namespace :products_moves do
   post :prices # Обновление количества по продуктам
   post :update # Обновление реквизитов документа
   post :send_sa # Веб-сервис отправки переміщення
-  post :confirmed # Веб-сервис отправки переміщення
+  post :confirmed #
+  post :edit #
 end

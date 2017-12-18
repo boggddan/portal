@@ -7,9 +7,11 @@ main#products_move_products *{ data: { \
   is_date_blocks: @is_date_blocks.to_s,
   is_confirmed: @products_move[ :is_confirmed ].to_s,
   is_send_first: @products_move[ :number_sa ].empty?.to_s,
+  is_edit: @products_move[ :is_edit ].to_s,
   path: { \
     send: institution_products_moves_send_sa_path,
     confirmed: institution_products_moves_confirmed_path,
+    edit: institution_products_moves_edit_path,
     exit: institution_products_moves_index_path,
     update: institution_products_moves_update_path,
     update_price: institution_products_moves_prices_path } } }
@@ -18,6 +20,7 @@ main#products_move_products *{ data: { \
   .panel_main.row_3
     .panel
       button.btn_send
+      button.btn_gradient.btn_edit Редагувати
       button.btn_gradient.btn_confirmed Прийнято
       button.btn_exit
 

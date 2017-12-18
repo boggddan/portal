@@ -20,7 +20,7 @@ class Institution::ProductsMovesController < Institution::BaseController
                :date_sa,
                :is_confirmed,
                :is_del_1c,
-               "NOT date_blocks.date ISNULL OR products_moves.institution_id = #{ institution_id } AS disabled",
+               "NOT date_blocks.date ISNULL OR products_moves.institution_id = #{ institution_id } AND products_moves.is_edit AS disabled",
                "products_moves.institution_id = #{ institution_id } AS is_post",
                "CASE WHEN products_moves.institution_id = #{ institution_id } THEN 'Видача' ELSE 'Прийом' END AS type_name",
                "CASE WHEN products_moves.institution_id = #{ institution_id } THEN institutions.name ELSE institutions_products_moves.name END AS institution_name"
@@ -123,7 +123,8 @@ class Institution::ProductsMovesController < Institution::BaseController
         ProductsMove.update( products_move[ :id ],
                              date_sa: Date.today,
                              number_sa: response[ :respond ],
-                             is_confirmed: false )
+                             is_confirmed: false,
+                             is_edit: false )
 
         result = { status: true }
       else
@@ -187,6 +188,27 @@ class Institution::ProductsMovesController < Institution::BaseController
     render json: result
   end
 
+  def edit
+    products_move = JSON.parse( ProductsMove
+      .joins( :to_institution )
+      .select( :id,
+              :date )
+      .find( params[ :id ] )
+      .to_json( ), symbolize_names: true )
+
+    date_blocks = check_date_block( products_move[ :date ] )
+    if date_blocks.present?
+      caption = 'Блокування документів'
+      message = "Дата [ #{ date_blocks } ] в переміщенні закрита для редагування!"
+      result = { status: false, message: message, caption: caption }
+    else
+      ProductsMove.update( products_move[ :id ], is_edit: true )
+      result = { status: true }
+    end
+
+    render json: result
+  end
+
   def products #
     institution_id = current_user[ :userable_id ]
 
@@ -199,6 +221,7 @@ class Institution::ProductsMovesController < Institution::BaseController
                :institution_id,
                :to_institution_id,
                :is_confirmed,
+               :is_edit,
                "CASE WHEN institution_id = #{ institution_id } THEN true ELSE false END AS is_post" )
       .find( params[ :id ] )
       .to_json, symbolize_names: true )
