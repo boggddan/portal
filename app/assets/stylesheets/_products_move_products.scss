@@ -19,7 +19,9 @@
   }
 
   .clmn {
-    width: 900px;
+    flex-direction: column;
+    flex-basis: 900px;
+    -width: 900px;
 
     tr {
       &.type { @include row-group( #f1f1f1, 15px ); }

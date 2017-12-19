@@ -150,9 +150,9 @@ table.table {
       cursor: pointer;
 
       &:hover {
-        td:not(.active),
-        select:not(:focus),
-        input:not(:focus) {
+        td:not( .active ),
+        select:not( :focus ),
+        input:not( :focus ) {
           background-color: #c0def7;
         }
 
@@ -162,9 +162,12 @@ table.table {
       }
 
       &:nth-child(odd):not(.selected):not(:hover) {
-        td:not(.hover):not(.active),
+        td:not(.hover):not(.active) {
+          background-color: #f5ffe0;
+        }
+
         input {
-          background-color: #f7ffda;
+          background-color: #e7ffd7;
         }
       }
 
@@ -184,9 +187,9 @@ table.table {
         background-color: #FFE419;
       }
 
-      td:hover:not(.active),
-      select:hover:not(:focus),
-      input:hover:not(:focus) {
+      td:hover:not( .active ),
+      select:hover:not( :focus ),
+      input:hover:not( :focus ) {
         background-color: #a1caec;
       }
 
@@ -195,9 +198,9 @@ table.table {
         cursor: default;
 
         &,
-        td:not(.active),
-        select:not(:focus):not(:hover),
-        input:not(:focus):not(:hover) {
+        td:not( .active ),
+        select:not( :focus ):not( :hover ),
+        input:not( :focus ):not( :hover ) {
           background-color: #e7e7e7;
         }
       }
@@ -235,7 +238,15 @@ table.table {
     outline: none;
     background-color: white;
 
-    &:hover:not(:focus) {
+    &:not( :hover ):not( :disabled ):not( :focus ) {
+      background-color: #f6fee6;
+    }
+
+    &:hover:not( :disabled ):not( :focus ) {
+      background-color: #f5ffe0;
+    }
+
+    &:hover:not( :focus ) {
       background-color: #a1caec;
     }
   }

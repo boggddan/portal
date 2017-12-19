@@ -56,6 +56,8 @@ class ProductsMoveProducts {
     const clmn = parentElem.querySelector( '.clmn' );
     const table = clmn.querySelector( 'table' );
 
+    $( table ).tableHeadFixer( ); // фиксируем шапку таблицы
+
     table.addEventListener( 'change', event => {
       if ( event.target.matches( 'input' ) ) {
         this.changeCountProduct( event.target );
