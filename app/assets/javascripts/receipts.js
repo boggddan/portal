@@ -149,7 +149,7 @@ $( document ).on( 'turbolinks:load', ( ) => {
       .end( )
       .on( 'click', 'td, th[data-sort]', function( ) {
         const $this = $( this );
-        if ( $this === 'th' ) {
+        if ( $this.is( 'th' ) ) {
           MyLib.tableHeaderClick( $this[ 0 ], filterTable ); // нажатие для сортировки
         } else {
           const $tr = $this.closest( 'tr' );

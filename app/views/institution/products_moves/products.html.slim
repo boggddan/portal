@@ -41,7 +41,7 @@ main#products_move_products *{ data: { \
       select#to_institution_id
         = options_for_select( @institutions, selected: @products_move[ :to_institution_id ], disabled: @products_move[ :institution_id ] )
 
-  .clmn *{data: { path_update: institution_products_moves_product_update_path}}
+  .clmn_main : .clmn *{data: { path_update: institution_products_moves_product_update_path}}
     h2 Продукти харчування
     .parent_table = render('table_products_move_products', disabled: disabled ) if @products_move_products.present?
 
