@@ -73,9 +73,6 @@ class Institution::ReferenceBooksController < Institution::BaseController
       } }
       .keys
 
-      File.open( "#{ $dir }dpn_dishes_products", 'w' ) { | f | f.write(  @dpn_dishes_products.to_json ) }
-
-
     # Только сгрупиррованые продкуты и блюда для html-таблицы
     @dpn_children_categories = @dishes_products_norms.group_by { | o |
       { children_category_id: o[ :children_category_id ],

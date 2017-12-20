@@ -112,7 +112,7 @@ class Institution::ProductsMovesController < Institution::BaseController
         }
       }
 
-      File.open( "./products_move.txt", 'w' ) { | f | f.write( message ) }
+      # File.open( "./products_move.txt", 'w' ) { | f | f.write( message ) }
       response = { interface_state: 'OK', respond: Time.now.to_i }
 
       # savon_return = get_savon( :creation_time_sheet, message )
@@ -162,7 +162,7 @@ class Institution::ProductsMovesController < Institution::BaseController
         }
       }
 
-      File.open( "./products_move_confimed.txt", 'w' ) { | f | f.write( message ) }
+      # File.open( "./products_move_confimed.txt", 'w' ) { | f | f.write( message ) }
       result = { status: true }
 
       ProductsMove.update( products_move[ :id ], is_confirmed: true )
