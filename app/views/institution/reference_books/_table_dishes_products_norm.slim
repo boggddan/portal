@@ -54,9 +54,15 @@ table.table
                              dish_id: dish_id, products_type_id: products_type_id } }
         td.name = dp[ :product_name ]
         - @dpn_children_categories.each do | cc |
-          td = '%g' % ( @dishes_products_norms.select{ | o | o[ :children_category_id ] == cc[ :children_category_id ] && \
-                                  o[ :dish_id ] == dish_id && \
-                                  o[ :product_id ] == product_id } \
-                  .fetch( 0, { amount: '-' } )[ :amount ].to_f * koef_measure )
+          - dpn = @dishes_products_norms.select{ | o | \
+              o[ :children_category_id ] == cc[ :children_category_id ] && \
+              o[ :dish_id ] == dish_id && \
+              o[ :product_id ] == product_id } \
+                .fetch( 0, { amount: '-', institution_code: '' } )
+          td.amount *{ data: { institution: dpn[ :institution_code ] } }
+            = '%g' % ( dpn[ :amount ].to_f * koef_measure )
         td.cell_mark *{ class: dp[ :enabled ]  ? :check : '',
-          data: { id: dp[ :dishes_product_id ], dish_id: dish_id, product_id: product_id } }
+          data: { id: dp[ :dishes_product_id ],
+                  dish_id: dish_id,
+                  product_id: product_id } }
+

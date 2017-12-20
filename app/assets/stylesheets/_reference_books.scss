@@ -15,7 +15,6 @@
     table { width: 0; }
     col:nth-child( 1 ) { width: 350px; }
     col:last-child { width: 60px; }
-    // col ~ col { width: 60px; }
   }
 
   tr {
@@ -23,7 +22,26 @@
     &.dish { @include row-group( 'td', #dadada, #333, 15px, left ); }
     &.products_type { @include row-group( 'td', #f1f1f1, #333, 27px, left ); }
 
+    &:nth-child( even ):not( .selected ):not( :hover ) {
+      td:not( .hover ):not( .active )[ data-institution = '0' ] {
+        background-color: #f7f7f7;
+      }
+    }
+
+    &:nth-child( odd ):not( .selected ):not( :hover ) {
+      td:not( .hover ):not( .active )[ data-institution = '0' ] {
+        background-color: #dfffc9;
+      }
+    }
+
+
     &.row_data {
+
+      [ data-institution = '0' ] {
+        text-decoration: underline;
+
+      }
+
       .name {
         cursor: default;
         padding-left: 39px;

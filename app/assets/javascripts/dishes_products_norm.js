@@ -10,12 +10,12 @@ class DishesProductsNorms {
     if ( colNormTable ) {
       colNormTable.addEventListener( 'click', event => {
         if ( event.target.matches( 'tr.row_group td.cell_mark' ) ) {
-          this.clickNormGroup( event.target );
+          // this.clickNormGroup( event.target );
           event.stopPropagation();
         }
 
-        if ( event.target.matches( 'tr.row_data td.cell_mark' ) ) {
-          this.clickNormCell( event.target );
+        if ( event.target.matches( 'tr.row_data td.cell_mark:not( [ data-institution = "0" ] )' ) ) {
+          // this.clickNormCell( event.target );
           event.stopPropagation();
         }
       } );
@@ -32,9 +32,9 @@ class DishesProductsNorms {
     }
     //-----------------------------------
 
-    MyLib.mainMenuActive( 'institution_reference_books' );
-
     [ this.parentElem, this.colNorm, this.colNormTable ] = [ parentElem, colNorm, colNormTable ];
+
+    this.colNormInit( );
   }
 
   clickNormGroup( target ) {
@@ -115,6 +115,13 @@ class DishesProductsNorms {
   colNormInit( ) {
     this.colNormTable.querySelectorAll( 'tr.row_group.dish' )
       .forEach( child => this.checkDishChoose( child.dataset.dishId ) );
+
+    this.colNormTable.querySelectorAll( 'td.amount' )
+      .forEach( child => {
+        const childElem = child;
+        console.log('dfdf')
+        childElem.textContent = MyLib.numToStr( +childElem.textContent, -1 );
+      } );
   }
 
   static clickRow( elem ) {

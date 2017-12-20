@@ -35,9 +35,10 @@ class Institution::ReferenceBooksController < Institution::BaseController
       SQL
 
     @dishes_products_norms = JSON.parse( DishesProduct
-      .joins( dishes_products_norms: :children_category,
-              dish: :dishes_category,
-              product: :products_type
+      .joins( { dishes_products_norms: :children_category },
+              { dish: :dishes_category },
+              { product: :products_type },
+              :institution
        )
       .select(
         "DISTINCT ON( #{ sql_fields_distinct } ) dishes_products.id AS dishes_product_id",
@@ -52,7 +53,8 @@ class Institution::ReferenceBooksController < Institution::BaseController
         'dishes_products_norms.children_category_id',
         'children_categories.name AS children_category_name',
         :enabled,
-        'dishes_products_norms.amount'
+        'dishes_products_norms.amount',
+        'institutions.code AS institution_code'
       )
       .where( sql_where )
       .order( sql_order )
@@ -60,9 +62,7 @@ class Institution::ReferenceBooksController < Institution::BaseController
 
     # Только сгрупиррованые продкуты и блюда для html-таблицы
     @dpn_dishes_products = @dishes_products_norms.group_by { | o |
-      { dishes_product_id: o[ :dishes_product_id ],
-        enabled: o[ :enabled ],
-        dish_id: o[ :dish_id ],
+      { dish_id: o[ :dish_id ],
         dish_name: o[ :dish_name ],
         dishes_category_id: o[ :dishes_category_id ],
         dishes_category_name: o[ :dishes_category_name ],
@@ -72,6 +72,9 @@ class Institution::ReferenceBooksController < Institution::BaseController
         products_type_name: o[ :products_type_name ]
       } }
       .keys
+
+      File.open( "#{ $dir }dpn_dishes_products", 'w' ) { | f | f.write(  @dpn_dishes_products.to_json ) }
+
 
     # Только сгрупиррованые продкуты и блюда для html-таблицы
     @dpn_children_categories = @dishes_products_norms.group_by { | o |
