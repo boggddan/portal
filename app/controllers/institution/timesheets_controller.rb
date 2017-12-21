@@ -211,6 +211,7 @@ class Institution::TimesheetsController < Institution::BaseController
               'children.code AS child_code',
               'reasons_absences.code AS reason_code' )
       .where( timesheet_id: timesheet_id )
+      .where.not( children_categories: { code: '000000027' } )
       .order( 'category_code', 'group_code', 'child_code', :date )
       .to_json, symbolize_names: true )
 
@@ -392,6 +393,7 @@ class Institution::TimesheetsController < Institution::BaseController
         children_groups.children_category_id', :children_group_id,
         'children_categories.name AS category_name', 'children_groups.name AS group_name' )
       .where( timesheet_id: @timesheet[ :id ] )
+      .where.not( children_categories: { code: '000000027' } )
       .each do | o |
         if children_category_id != o.children_category_id
           children_category_id = o.children_category_id
@@ -452,6 +454,7 @@ class Institution::TimesheetsController < Institution::BaseController
       .joins( { children_group: :children_category }, :child, :reasons_absence )
       .order( 'category_name', 'group_name', 'child_name', :date )
       .where( timesheet_id: id )
+      .where.not( children_categories: { code: '000000027' } )
       .where( where )
       .to_json, symbolize_names: true )
   end

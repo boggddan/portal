@@ -75,10 +75,12 @@ class Institution::MenuRequirementsController < Institution::BaseController
     @dishes_products_norms = get_dishes_products_norms( institution_id )
 
     menu_children_category = JSON.parse( MenuChildrenCategory
+      .joins( :children_category )
       .select( :children_category_id,
                :count_all_plan )
       .where( menu_requirement_id: menu_requirement_id )
       .where.not( count_all_plan: 0 )
+      .where.not( children_categories: { code: '000000027' } )
       .to_json( except: :id ), symbolize_names: true )
 
     mcc_count = menu_children_category
@@ -180,7 +182,8 @@ class Institution::MenuRequirementsController < Institution::BaseController
               'menu_meals_dishes.dish_id',
               'dishes.name as dish_name',
               'children_categories.name AS category_name' )
-      .where( 'menu_meals_dishes.menu_requirement_id = ? ', menu_requirement_id )
+      .where( menu_meals_dishes: { menu_requirement_id: menu_requirement_id } )
+      .where.not( children_categories: { code: '000000027' } )
       .order( 'meals.priority',
               'meals.name',
               'dishes.priority',
@@ -225,7 +228,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
                :date_sap,
                :date_saf,
                :institution_id
-                )
+            )
       .find( params[ :id ] )
       .to_json, symbolize_names: true )
 
@@ -239,6 +242,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
                :count_exemption_fact,
                'children_categories.name' )
       .where( menu_requirement_id: @menu_requirement[ :id ] )
+      .where.not( children_categories: { code: '000000027' } )
       .order( 'children_categories.priority',
               'children_categories.name' )
       .to_json, symbolize_names: true )
@@ -400,9 +404,10 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .to_json, symbolize_names: true )
 
     children_categories = JSON.parse( ChildrenCategory
-      .joins( :children_groups )
+      .joins( children_groups: :children_category )
       .select( :id )
-      .where( 'children_groups.institution_id = ?', institution_id )
+      .where( children_groups: { institution_id: institution_id } )
+      .where.not( children_categories: { code: '000000027' } )
       .group( :id )
       .order( :name )
       .to_json, symbolize_names: true )
@@ -433,7 +438,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .select{ | o | o[ :enabled ] }
     ###
 
-    if children_categories.present? && ( dishes_products.present? || false )
+    if children_categories.present? && dishes_products.present?
       ActiveRecord::Base.transaction do
         data = { institution_id: institution_id,
                  branch_id: current_institution[ :branch_id ] }
@@ -502,7 +507,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       result = { status: false,
         message:
           "#{ children_categories.present? ? '' : 'Немає групп у підрозділі, заповнненя через ІС або web-servis <children_groups>. ' }" +
-          "#{ dishes_products.present? ? '' : 'Невибрано жодної страви у <Довіднии -> Технологічна карта>. ' } "
+          "#{ dishes_products.present? ? '' : 'Невибрано жодної страви у <Довідники -> Технологічна карта>. ' } "
       }
     end
 
@@ -608,6 +613,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
           .joins( :children_category )
           .select( :count_all_plan, :count_exemption_plan, 'children_categories.code as code' )
           .where( menu_requirement_id: menu_requirement_id )
+          .where.not( children_categories: { code: '000000027' } )
           .where( '( count_all_plan != 0 OR count_exemption_plan != 0 )' )
           .to_json, symbolize_names: true )
 
@@ -627,6 +633,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
                   'children_categories.code AS category_code' )
           .where( menu_requirement_id: menu_requirement_id )
           .where( 'menu_products.count_plan != ? ', 0 )
+          .where.not( children_categories: { code: '000000027' } )
           .group( 'products.code',
                   'children_categories.code' )
           .to_json, symbolize_names: true )
@@ -716,6 +723,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
         .select( :count_all_fact, :count_exemption_fact, 'children_categories.code as code' )
         .where( menu_requirement_id: menu_requirement_id )
         .where( '( count_all_fact != 0 OR count_exemption_fact != 0 )' )
+        .where.not( children_categories: { code: '000000027' } )
         .to_json, symbolize_names: true )
 
       joins_menu_products_prices = <<-SQL.squish
@@ -832,6 +840,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
                 :count_all_plan, :count_exemption_plan,
                 :count_all_fact, :count_exemption_fact )
         .where( menu_requirement_id: menu_requirement_id )
+        .where.not( children_categories: { code: '000000027' } )
         .order( 'children_categories.priority', 'children_categories.name' )
         .as_json( except: :id ) )
       .merge!( products: MenuProduct
@@ -845,6 +854,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
                   'products.name AS product_name',
                   :count_plan, :count_fact )
         .where( 'menu_meals_dishes.menu_requirement_id = ? ', menu_requirement_id )
+        .where.not( children_categories: { code: '000000027' } )
         .order( 'meals.priority', 'meals.name',
                 'dishes.priority', 'dishes.name',
                 'children_categories.priority', 'children_categories.name',
