@@ -14,42 +14,37 @@ class Institution::MenuRequirementsController < Institution::BaseController
   end
 
   def get_dishes_products_norms( institution_id )
-    # Нормы
-    sql_fields_distinct = %w(
-      dishes_products_norms.children_category_id
-      dishes_products.dish_id
-      dishes_products.product_id
-    ).join( ',' )
-
-    sql_institution_empty = <<-SQL
-        dishes_products.institution_id = ( SELECT id FROM institutions WHERE code = 0 )
+    sql = <<-SQL.squish
+        SELECT aa.dish_id,
+               dishes_products.product_id,
+               dishes_products_norms.children_category_id,
+               dishes_products_norms.amount
+        FROM (
+          SELECT DISTINCT ON( dish_id ) institution_dishes.id AS institution_dish_id,
+                 institution_dishes.dish_id,
+                 institution_dishes.enabled
+          FROM institution_dishes
+          INNER JOIN institutions ON institutions.id = institution_dishes.institution_id
+          WHERE institutions.code = 0
+                OR
+                institution_dishes.institution_id = #{ institution_id }
+          ORDER by dish_id,
+                  institutions.code DESC
+        ) aa
+        INNER JOIN dishes_products ON aa.institution_dish_id = dishes_products.institution_dish_id
+        INNER JOIN dishes_products_norms ON dishes_products.id = dishes_products_norms.dishes_product_id
+        INNER JOIN (
+          SELECT DISTINCT ON ( children_categories.id ) children_categories.id AS children_category_id
+          FROM children_categories
+          LEFT JOIN children_groups ON children_categories.id = children_groups.children_category_id
+          WHERE children_groups.institution_id = #{ institution_id }
+                AND
+                children_categories.code != '000000027'
+        ) bb ON dishes_products_norms.children_category_id = bb.children_category_id
+        WHERE aa.enabled = true
       SQL
 
-    sql_where = <<-SQL
-        ( dishes_products.institution_id = #{ institution_id }
-          OR #{ sql_institution_empty } )
-        AND
-          dishes_products_norms.children_category_id IN
-            ( SELECT DISTINCT children_category_id FROM children_groups
-              WHERE institution_id = #{ institution_id } )
-        AND dishes_products.enabled = true
-      SQL
-
-    sql_order = <<-SQL
-        #{ sql_fields_distinct },
-        CASE WHEN #{ sql_institution_empty } THEN 0 ELSE 1 END DESC
-      SQL
-
-    dishes_products_norms = JSON.parse( DishesProduct
-      .joins( :dishes_products_norms )
-      .select(
-        "DISTINCT ON( #{ sql_fields_distinct } ) dishes_products.dish_id",
-        :product_id,
-        'dishes_products_norms.children_category_id',
-        'dishes_products_norms.amount'
-      )
-      .where( sql_where )
-      .order( sql_order )
+    dishes_products_norms = JSON.parse( ActiveRecord::Base.connection.execute( sql )
       .to_json, symbolize_names: true )
   end
 
@@ -413,32 +408,41 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .to_json, symbolize_names: true )
 
     # Нормы
-    sql_institution_empty = <<-SQL
-        dishes_products.institution_id = ( SELECT id FROM institutions WHERE code = 0 )
+    sql = <<-SQL.squish
+        SELECT aa.dish_id,
+               dishes_products.product_id,
+               dishes_products_norms.children_category_id,
+               dishes_products_norms.amount
+        FROM (
+          SELECT DISTINCT ON( dish_id ) institution_dishes.id AS institution_dish_id,
+                 institution_dishes.dish_id,
+                 institution_dishes.enabled
+          FROM institution_dishes
+          INNER JOIN institutions ON institutions.id = institution_dishes.institution_id
+          WHERE institutions.code = 0
+                OR
+                institution_dishes.institution_id = #{ institution_id }
+          ORDER by dish_id,
+                  institutions.code DESC
+        ) aa
+        INNER JOIN dishes_products ON aa.institution_dish_id = dishes_products.institution_dish_id
+        INNER JOIN dishes_products_norms ON dishes_products.id = dishes_products_norms.dishes_product_id
+        INNER JOIN (
+          SELECT DISTINCT ON ( children_categories.id ) children_categories.id AS children_category_id
+          FROM children_categories
+          LEFT JOIN children_groups ON children_categories.id = children_groups.children_category_id
+          WHERE children_groups.institution_id = #{ institution_id }
+                AND
+                children_categories.code != '000000027'
+        ) bb ON dishes_products_norms.children_category_id = bb.children_category_id
+        WHERE aa.enabled = true
       SQL
 
-    sql_where = <<-SQL
-        ( dishes_products.institution_id = #{ institution_id }
-          OR #{ sql_institution_empty } )
-        AND
-          dishes_products_norms.children_category_id IN
-            ( SELECT DISTINCT children_category_id FROM children_groups
-              WHERE institution_id = #{ institution_id } )
-      SQL
-
-    dishes_products = JSON.parse( DishesProduct
-      .joins( :dishes_products_norms )
-      .select( 'DISTINCT ON( dishes_products.dish_id ) bool_or( enabled ) AS enabled',
-               :dish_id )
-      .where( sql_where )
-      .group( :institution_id, :dish_id )
-      .order( :dish_id,
-             "CASE WHEN #{ sql_institution_empty } THEN 0 ELSE 1 END DESC" )
+    dishes_products_norms = JSON.parse( ActiveRecord::Base.connection.execute( sql )
       .to_json, symbolize_names: true )
-      .select{ | o | o[ :enabled ] }
     ###
 
-    if children_categories.present? && dishes_products.present?
+    if children_categories.present? && dishes_products_norms.present?
       ActiveRecord::Base.transaction do
         data = { institution_id: institution_id,
                  branch_id: current_institution[ :branch_id ] }
@@ -457,9 +461,9 @@ class Institution::MenuRequirementsController < Institution::BaseController
               md[ :meal_id ] == empty_meal_id &&
               md[ :dish_id ] == empty_dish_id
             ) &&
-            ( dishes_products.find { | o |
+            ( dishes_products_norms.find { | o |
               o[ :dish_id ] == md[ :dish_id ]
-            } || false )
+            } )
           }
           .each{ | o |
             mmd_values << [ ].tap { | value |
@@ -507,7 +511,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       result = { status: false,
         message:
           "#{ children_categories.present? ? '' : 'Немає групп у підрозділі, заповнненя через ІС або web-servis <children_groups>. ' }" +
-          "#{ dishes_products.present? ? '' : 'Невибрано жодної страви у <Довідники -> Технологічна карта>. ' } "
+          "#{ dishes_products_norms.present? ? '' : 'Невибрано жодної страви у <Довідники -> Технологічна карта>. ' } "
       }
     end
 

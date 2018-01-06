@@ -452,7 +452,7 @@ class MenuRequirementProducts {
 
         elem.disabled = currentDisabled || elem.dataset.id === '0';
         elem.name = nameCurrentPf;
-        elem.value = MyLib.numToStr( val, -1 );
+        elem.value = elem.dataset.id === '0' ? '-' : MyLib.numToStr( val, -1 );
       } );
     } );
 

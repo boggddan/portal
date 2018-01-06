@@ -2142,32 +2142,11 @@ class SyncCatalogsController < ApplicationController
   #   ]
   # }
   def dishes_products_norms_update
-    children_categories = JSON.parse( ChildrenCategory
-      .select( :id, :code )
-      .to_json, symbolize_names: true )
-
-    products = JSON.parse( Product
-      .select( :id, :code )
-      .to_json, symbolize_names: true )
-
-    dishes = JSON.parse( Dish
-      .select( :id, :code )
-      .to_json, symbolize_names: true )
-
-    institutions = JSON.parse( Institution
-      .select( :id, :code )
-      .to_json, symbolize_names: true )
-
-    dishes_products_all= JSON.parse( DishesProduct
-      .joins( :institution, :dish, :product )
-      .select( :id, :institution_id, :dish_id, :product_id )
-      .to_json, symbolize_names: true )
+    dishes_products_norms = params.permit(
+      dishes_products_norms: [ :institution_code, :dish_code, :product_code, :children_category_code, :amount ]
+    )[ :dishes_products_norms ]
 
     errors = [ ]
-
-    dishes_products_norms = params.permit(
-      dishes_products_norms: [ :institution_code, :dish_code, :product_code, :children_category_code, :amount]
-    )[ :dishes_products_norms ]
 
     institutions_codes = dishes_products_norms.group_by { | o | o[ :institution_code ].to_i || 0 }.keys
     institutions = exists_codes( :institutions, institutions_codes )
@@ -2186,94 +2165,97 @@ class SyncCatalogsController < ApplicationController
     errors << children_categories[ :error ] unless children_categories[ :status ]
 
     if errors.empty?
-      dishes_products_norms_update = dishes_products_norms
-        .map.with_index { | o, i | o.merge!( index: i + 1 ) } # нумеруем индексы что бы в случае несоотвествия структуры вывести номер строки
-        .group_by { | o | dishes_products_all # группируем с одновременным добавлением :id по :code
-          .select { | t |
-            t[ :institution_id ] == institutions[ :obj ][ o[ :institution_code ].to_i ] &&
-            t[ :dish_id ] == dishes[ :obj ][ o[ :dish_code ] ] &&
-            t[ :product_id ] == products[ :obj ][ o[ :product_code ] ] }
-          .fetch(0, { # Если не нашло ничего значит добавляем ID = 0, это те записи которые будут вставлени в таблицу <dishes_products>
-            id: 0,
-            institution_id: institutions[ :obj ][ o[ :institution_code ].to_i ],
-            dish_id: dishes[ :obj ][ o[ :dish_code ] ],
-            product_id: products[ :obj ][ o[ :product_code ] ] } )
-          .merge!(
+      sql = ''
+
+      institution_dishes = dishes_products_norms
+        .sort_by { | o |
+          [
+            o[ :institution_code],
+            o[ :dish_code ],
+            o[ :product_code ],
+            o[ :children_category_code ]
+          ]
+        }
+        .group_by { | o |
+          {
             institution_code: o[ :institution_code ],
-            dish_code: o[ :dish_code ],
-            product_code: o[ :product_code ]
-          )
+            dish_code: o[ :dish_code ]
+          }
         }
-
-      dishes_products_new = dishes_products_norms_update.select { | k, _ | k[ :id ].zero? }
-
-      if dishes_products_new.present? # Вставка недостающих записей в <dishes_products>
-        fields_dp = %w( institution_id dish_id product_id ).join( ',' )
-        values_dp = dishes_products_new
-          .map { | k, _ | "( #{ k
-            .slice( :institution_id, :dish_id, :product_id )
-            .values.join( ',' ) }
-          )" }.join(',')
-
-        sql_dp = <<-SQL.squish
-            INSERT INTO dishes_products ( #{ fields_dp } )
-              VALUES #{ values_dp }
-              RETURNING id, institution_id, dish_id, product_id  ;
+        .each { | k, v |
+          sql << <<-SQL.squish
+            WITH
+              new_institution_dishes( id ) AS (
+                INSERT INTO institution_dishes
+                  ( institution_id, dish_id, enabled )
+                  VALUES (
+                    #{ institutions[ :obj ][ k[ :institution_code ].to_i ] },
+                    #{ dishes[ :obj ][ k[ :dish_code ] ] },
+                    true
+                  )
+                  ON CONFLICT ( institution_id, dish_id )
+                  DO UPDATE SET enabled = EXCLUDED.enabled
+                  RETURNING id
+              )
           SQL
 
-        dishes_products_insert = JSON.parse( ActiveRecord::Base.connection.execute( sql_dp )
-          .to_json, symbolize_names: true )
+          v.group_by { | o | { product_code: o[ :product_code ] } }
+            .each { | k1, v1 |
+              product_id = products[ :obj ][ k1[ :product_code ] ]
 
-        # Заменяем значения ID на новые те что вставленные
-        dishes_products_insert.each { | o |
-          dishes_products_norms_update.select { | t |
-            t[ :institution_id ] == o[ :institution_id ] &&
-            t[ :dish_id ] == o[ :dish_id ] &&
-            t[ :product_id ] == o[ :product_id ] }.keys[0][:id] = o[ :id ]
-        }
-      end
+              new_dishes_products_norms_values = [ ]
+              v1.group_by { | o |
+                  { children_category_code: o[ :children_category_code ] } }
+                .each { | k2, v2 |
+                  new_dishes_products_norms_values <<
+                    "( ( SELECT id FROM new_dishes_products_#{ product_id } )," +
+                  "#{ children_categories[ :obj ][ k2[ :children_category_code ] ] }," +
+                  "#{ v2[ 0 ][ :amount ] } )"
+                }
 
-      arr_values_dpn = [ ]
+              sql << <<-SQL.squish
+                , new_dishes_products_#{ product_id }( id ) AS (
+                  INSERT INTO dishes_products
+                    ( institution_dish_id, product_id )
+                    VALUES (
+                      ( SELECT id FROM new_institution_dishes ),
+                      #{ products[ :obj ][ k1[ :product_code ] ] }
+                    )
+                    ON CONFLICT ( institution_dish_id, product_id )
+                    DO UPDATE SET institution_dish_id = EXCLUDED.institution_dish_id
+                    RETURNING id
+                ),
 
-      dishes_products_norms_update.each do | key_dpnu, value_dpnu |
-        value_dpnu.each do | obj |
-          error = { institution_code: 'Не знайдений параметр [institution_code]',
-            dish_code: 'Не знайдений параметр [dish_code]',
-            product_code: 'Не знайдений параметр [product_code]',
-            children_category_code: 'Не знайдений параметр [children_category_code]',
-            amount: 'Не знайдений параметр [amount]' }.stringify_keys!.except( *obj.keys )
+                del_dishes_products_#{ product_id } AS (
+                  DELETE FROM dishes_products
+                    WHERE institution_dish_id = ( SELECT id FROM new_institution_dishes )
+                          AND
+                          id NOT IN ( SELECT id FROM new_dishes_products_#{ product_id } )
+                ),
 
-          if error.empty?
-            arr_values_dpn << [ ].tap { | value |
-              value << key_dpnu[ :id ]
-              value << children_categories[ :obj ][ ( obj[ :children_category_code] || '' ).strip ]
-              value << obj[ :amount ] || 0
+                new_dishes_products_norms_#{ product_id }( id ) AS (
+                    INSERT INTO dishes_products_norms
+                      ( dishes_product_id, children_category_id, amount )
+                      VALUES #{ new_dishes_products_norms_values.join( ',' ) }
+                      ON CONFLICT ( dishes_product_id, children_category_id )
+                      DO UPDATE SET amount = EXCLUDED.amount
+                      RETURNING id
+                  ),
+                  del_dishes_products_norms_#{ product_id } AS (
+                    DELETE FROM dishes_products_norms
+                      WHERE dishes_product_id = ( SELECT id FROM new_dishes_products_#{ product_id } )
+                            AND
+                            id NOT IN ( SELECT id FROM new_dishes_products_norms_#{ product_id } )
+                  )
+              SQL
             }
-          else
-            errors << { index: "Рядок [#{ obj[ :index ] }]" }.merge!( error )
-          end
-        end
-      end
 
-      if errors.empty?
-        values_dpn = arr_values_dpn.map { | o | "( #{ o.join( ',' ) } )" }.join( ',' )
+          sql << 'SELECT true;'
+        }
 
-        sql_dpn = <<-SQL.squish
-            INSERT INTO dishes_products_norms ( dishes_product_id, children_category_id, amount )
-              VALUES #{ values_dpn }
-              ON CONFLICT ( dishes_product_id, children_category_id )
-                DO UPDATE SET amount = EXCLUDED.amount
-              RETURNING id ;
-          SQL
+      ActiveRecord::Base.connection.execute( sql )
 
-        ids = JSON.parse( ActiveRecord::Base.connection.execute( sql_dpn )
-          .to_json, symbolize_names: true )
-          .map{ | o | o[ :id ] }
-
-        result = { status: true, ids: ids }
-      else
-        result = { status: false, errors: errors }
-      end
+      result = { status: true }
     else
       result = { status: false, errors: errors }
     end

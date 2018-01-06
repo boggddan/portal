@@ -84,7 +84,6 @@ class Institution::ProductsMovesController < Institution::BaseController
       products_move_products = JSON.parse( ProductsMoveProduct
         .joins( :product )
         .select( 'products.code AS code',
-                :balance,
                 :price,
                 :amount,
                 'ROUND( products_move_products.amount * products_move_products.price, 5 ) AS sum' )
@@ -93,10 +92,9 @@ class Institution::ProductsMovesController < Institution::BaseController
         .to_json( ), symbolize_names: true )
         .map { | o |
           { 'CodeOfGoods' => o[ :code ],
-            'Balance' => o[ :balance ], # залишок
             'Price' => o[ :price ], # ціна
-            'Amount' => o[ :amount ], # кількість
-            'Sum' => o[ :sum ] # сумма
+            'Quantity' => o[ :amount ], # кількість
+            'Amount' => o[ :sum ] # сумма
           }
         }
 
@@ -106,18 +104,17 @@ class Institution::ProductsMovesController < Institution::BaseController
           'ToInstitutions_id' => products_move[ :to_institution_code ], # Підрозділ приймач
           'NumberFromWebPortal' => products_move[ :number ],
           'Date' => products_move[ :date ],
-          'Products' => products_move_products,
+          'User' => current_user[ :username ],
           'Number1C' => products_move[ :number_sa ],
-          'User' => current_user[ :username ]
+          'Products' => products_move_products
         }
       }
 
-      # File.open( "./products_move.txt", 'w' ) { | f | f.write( message ) }
       response = { interface_state: 'OK', respond: Time.now.to_i }
 
-      # savon_return = get_savon( :creation_time_sheet, message )
-      # response = savon_return[ :response ]
-      # web_service = savon_return[ :web_service ]
+      savon_return = get_savon( :create_internal_displacement, message )
+      response = savon_return[ :response ]
+      web_service = savon_return[ :web_service ]
 
       if response[ :interface_state ] == 'OK'
         ProductsMove.update( products_move[ :id ],
@@ -155,34 +152,23 @@ class Institution::ProductsMovesController < Institution::BaseController
     else
       message = {
         'CreateRequest' => {
-          'Institutions_id' => current_institution[ :code ], # Підрозділ передавач
           'NumberFromWebPortal' => products_move[ :number ],
-          'Number1C' => products_move[ :number_sa ],
-          'User' => current_user[ :username ]
+          'User' => current_user[ :username ],
+          'Number1C' => products_move[ :number_sa ]
         }
       }
 
-      # File.open( "./products_move_confimed.txt", 'w' ) { | f | f.write( message ) }
-      result = { status: true }
+      savon_return = get_savon( :confim_internal_displacement, message )
+      response = savon_return[ :response ]
+      web_service = savon_return[ :web_service ]
 
-      ProductsMove.update( products_move[ :id ], is_confirmed: true )
-
-      # savon_return = get_savon( :creation_time_sheet, message )
-      # response = savon_return[ :response ]
-      # web_service = savon_return[ :web_service ]
-
-      #     if response[ :interface_state ] == 'OK'
-      #       data = { date_sa: Date.today, number_sa: response[ :respond ].to_s }
-      #       update_base_with_id( :timesheets, timesheet_id, data )
-      #       result = { status: true }
-      #     else
-      #       result = { status: false, caption: 'Неуспішна сихронізація з ІС',
-      #                 message: web_service.merge!( response: response ) }
-      #     end
-      #   else
-      #     result = { status: false, caption: 'Немає данних' }
-      #   end
-      # end
+      if response[ :interface_state ] == 'OK'
+        ProductsMove.update( products_move[ :id ], is_confirmed: true )
+        result = { status: true }
+      else
+        result = { status: false, caption: 'Неуспішна сихронізація з ІС',
+                  message: web_service.merge!( response: response ) }
+      end
     end
 
     render json: result

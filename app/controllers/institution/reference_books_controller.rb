@@ -3,61 +3,69 @@ class Institution::ReferenceBooksController < Institution::BaseController
   def dishes_products_norms # Вартість дітодня за меню-вимогами
     institution_id = current_user[ :userable_id ]
 
-    sql_fields_distinct = %w(
-      dishes_categories.priority
-      dishes_categories.name
-      dishes_products_norms.children_category_id
-      dishes.priority
-      dishes.name
-      dishes_products.dish_id
-      products_types.priority
-      products_types.name
-      products.name
-      dishes_products.product_id
-    ).join( ',' )
+    sql = <<-SQL.squish
+        SELECT aa.institution_dish_id,
+               aa.institution_code,
+               aa.dishes_category_id,
+               aa.dishes_category_name,
+               aa.dish_id,
+               aa.dish_name,
+               products.products_type_id,
+               products.name AS product_name,
+               products_types.name AS products_type_name,
+               dishes_products.product_id,
+               dishes_products_norms.children_category_id,
+               bb.children_category_name,
+               aa.enabled,
+               dishes_products_norms.amount
+        FROM (
+          SELECT DISTINCT ON( dish_id ) institution_dishes.id AS institution_dish_id,
+                 institutions.code AS institution_code,
+                 institution_dishes.institution_id,
+                 institution_dishes.dish_id,
+                 institution_dishes.enabled,
+                 dishes_categories.priority AS dishes_category_priority,
+                 dishes.dishes_category_id,
+                 dishes_categories.name AS dishes_category_name,
+                 dishes_categories.name,
+                 dishes.priority AS dish_priority,
+                 dishes.name AS dish_name
+          FROM institution_dishes
+          INNER JOIN institutions ON institutions.id = institution_dishes.institution_id
+          INNER JOIN dishes ON dishes.id = institution_dishes.dish_id
+          INNER JOIN dishes_categories ON dishes_categories.id = dishes.dishes_category_id
+          WHERE institutions.code = 0
+                OR
+                institution_dishes.institution_id = #{ institution_id }
+          ORDER by dish_id,
+                  institutions.code DESC
+        ) aa
+        INNER JOIN dishes_products ON aa.institution_dish_id = dishes_products.institution_dish_id
+        INNER JOIN dishes_products_norms ON dishes_products.id = dishes_products_norms.dishes_product_id
+        INNER JOIN (
+          SELECT DISTINCT ON ( children_categories.id ) children_categories.id AS children_category_id,
+                children_categories.name as children_category_name,
+                children_categories.priority as children_category_priority
+          FROM children_categories
+          LEFT JOIN children_groups ON children_categories.id = children_groups.children_category_id
+          WHERE children_groups.institution_id = #{ institution_id }
+                AND
+                children_categories.code != '000000027'
+        ) bb ON dishes_products_norms.children_category_id = bb.children_category_id
+        INNER JOIN products ON products.id = dishes_products.product_id
+        INNER JOIN products_types ON products_types.id = products.products_type_id
+        ORDER BY aa.dishes_category_priority,
+                aa.dishes_category_name,
+                aa.dish_priority,
+                aa.dish_name,
+                products_types.priority,
+                products_types.name,
+                products.name,
+                bb.children_category_priority,
+                bb.children_category_name
+        SQL
 
-    sql_institution_empty = <<-SQL
-        dishes_products.institution_id = ( SELECT id FROM institutions WHERE code = 0 )
-      SQL
-
-    sql_where = <<-SQL
-        ( dishes_products.institution_id = #{ institution_id }
-          OR #{ sql_institution_empty } )
-        AND
-          dishes_products_norms.children_category_id IN
-            ( SELECT DISTINCT children_category_id FROM children_groups
-              WHERE institution_id = #{ institution_id } )
-      SQL
-
-    sql_order = <<-SQL
-        #{ sql_fields_distinct },
-        CASE WHEN #{ sql_institution_empty } THEN 0 ELSE 1 END DESC
-      SQL
-
-    @dishes_products_norms = JSON.parse( DishesProduct
-      .joins( { dishes_products_norms: :children_category },
-              { dish: :dishes_category },
-              { product: :products_type },
-              :institution
-       )
-      .select(
-        "DISTINCT ON( #{ sql_fields_distinct } ) dishes_products.id AS dishes_product_id",
-        'dishes.dishes_category_id',
-        'dishes_categories.name AS dishes_category_name',
-        :dish_id,
-        'dishes.name AS dish_name',
-        'products.products_type_id',
-        'products.name as product_name',
-        'products_types.name AS products_type_name',
-        :product_id,
-        'dishes_products_norms.children_category_id',
-        'children_categories.name AS children_category_name',
-        :enabled,
-        'dishes_products_norms.amount',
-        'institutions.code AS institution_code'
-      )
-      .where( sql_where )
-      .order( sql_order )
+    @dishes_products_norms = JSON.parse( ActiveRecord::Base.connection.execute( sql )
       .to_json, symbolize_names: true )
 
     # Только сгрупиррованые продкуты и блюда для html-таблицы
@@ -69,7 +77,10 @@ class Institution::ReferenceBooksController < Institution::BaseController
         product_id: o[ :product_id ],
         product_name: o[ :product_name ],
         products_type_id: o[ :products_type_id ],
-        products_type_name: o[ :products_type_name ]
+        products_type_name: o[ :products_type_name ],
+        institution_code: o[ :institution_code ],
+        institution_dish_id: o[ :institution_dish_id ],
+        enabled: o[ :enabled ]
       } }
       .keys
 
@@ -82,37 +93,8 @@ class Institution::ReferenceBooksController < Institution::BaseController
   end
 
   def dishes_products_update # Обновление "Продукти в стравах підрозділу"
-    data = params.permit( { dishes_products: [ :id, :dish_id, :product_id ] }, :enabled ).to_h
-    enabled = data[ :enabled ]
-
-    if data.present?
-      sql = ''
-
-      ids = data[ :dishes_products ].select{ | o | o [ :id ].nonzero? }.map { | o | o[ :id ] }
-
-      sql << <<-SQL.squish if ids.any?
-          UPDATE dishes_products SET
-            enabled = #{ enabled }
-              FROM UNNEST( ARRAY #{ ids.to_s } ) as ids
-              WHERE id = ids;
-        SQL
-
-      fields = %w( institution_id dish_id product_id enabled ).join( ',' )
-      dishes_products = data[ :dishes_products ]
-        .select{ | o | o [ :id ].zero? }
-        .map{ | o | "( #{ ( [ current_user[ :userable_id ], enabled ].insert( 1, o.slice( :dish_id, :product_id ).values ) ).join( ',' ) } )" }
-        .join( ',' )
-
-      sql << <<-SQL.squish.prepend( ' ' ) if dishes_products.present?
-          INSERT INTO dishes_products ( #{ fields } )
-            VALUES #{ dishes_products }
-            ON CONFLICT ( institution_id, dish_id, product_id )
-              DO UPDATE SET enabled = EXCLUDED.enabled ;
-        SQL
-
-      ActiveRecord::Base.connection.execute( sql ) if sql.present?
-    end
-
+    data = params.permit( :institution_dish_id, :enabled ).to_h
+    InstitutionDish.where( id: data[ :institution_dish_id ] ).update_all( enabled: data[ :enabled ] ) if data.present?
     render json: { status: true }
   end
 

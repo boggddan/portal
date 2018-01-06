@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  institutions: one
+  dishes: one
+  enabled: false
+
+two:
+  institutions: two
+  dishes: two
+  enabled: false

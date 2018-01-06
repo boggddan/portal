@@ -13,34 +13,34 @@
 
   .parent_table {
     table { width: 0; }
-    col:nth-child( 1 ) { width: 350px; }
-    col:last-child { width: 60px; }
+    col:first-child { width: 40px; }
+    col:nth-child( 2 ) { width: 350px; }
   }
 
   tr {
     &.dishes_category { @include row-group( 'td', #aaa, #fff, 3px, left ); }
-    &.dish { @include row-group( 'td', #dadada, #333, 15px, left ); }
+    &.dish {
+      cursor: default;
+      text-align: center;
+
+      &:hover,
+      td:hover,
+      td:not(.hover) { background-color: #f7f7f7; color: #333; }
+
+      &[ data-institution = '0' ] td:first-child { color: #e7e7e7; }
+      &:not( [ data-institution = '0' ] ) td:first-child {
+        cursor: pointer;
+        &:hover,
+        &:not(.hover) { background-color: #dfffc9; }
+      }
+
+      :nth-child( 2 ) { padding-left: 5px; text-align: left; }
+    }
+
     &.products_type { @include row-group( 'td', #f1f1f1, #333, 27px, left ); }
-
-    &:nth-child( even ):not( .selected ):not( :hover ) {
-      td:not( .hover ):not( .active )[ data-institution = '0' ] {
-        background-color: #f7f7f7;
-      }
-    }
-
-    &:nth-child( odd ):not( .selected ):not( :hover ) {
-      td:not( .hover ):not( .active )[ data-institution = '0' ] {
-        background-color: #dfffc9;
-      }
-    }
 
 
     &.row_data {
-
-      [ data-institution = '0' ] {
-        text-decoration: underline;
-
-      }
 
       .name {
         cursor: default;
