@@ -50,7 +50,7 @@ ECHO.
 
 ECHO ***
 ECHO Create database
-createdb --echo --locale=%Locale% --encoding=%Encoding% %PGDATABASE%
+createdb --echo --locale=%PgLocale% --encoding=%PgEncoding% %PGDATABASE%
 ECHO.
 
 REM "--clean --if-exists"is generate error!!!

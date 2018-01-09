@@ -21,7 +21,7 @@ SET /P ComfirmExec=Are you sure (Y/[N])?
 ECHO.
 IF /I [%ComfirmExec%] NEQ [Y] GOTO :EOF
 
-createdb --echo --locale=%Locale% --encoding=%Encoding%
+createdb --echo --locale=%PgLocale% --encoding=%PgEncoding%
 
 ECHO ON
 PAUSE

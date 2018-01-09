@@ -2255,6 +2255,9 @@ class SyncCatalogsController < ApplicationController
 
       ActiveRecord::Base.connection.execute( sql )
 
+      File.open( "./public/web_get/cu_dishes_products_norms.txt", 'a' ) { | f |
+        f.write( "\n *** #{ Time.now} ***#{ params.to_json }" ) }
+
       result = { status: true }
     else
       result = { status: false, errors: errors }
