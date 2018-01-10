@@ -17,5 +17,7 @@ Rails.application.routes.draw do
   draw :admin # Пользователи
 
   draw :sessions # Сесия
+
+  get '*path' => redirect( '/' )
 end
 
