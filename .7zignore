@@ -2,3 +2,5 @@
 */log
 */tmp
 */public/assets
+*/public/web_get/*
+*/public/web_send/*
