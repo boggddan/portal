@@ -121,10 +121,17 @@ class ProductsMoveProducts {
     const toInstitution = this.parentElem.querySelector( '#to_institution_id' );
     const { options: { [ toInstitution.selectedIndex ]: { disabled: isToInstitution } } } = toInstitution;
 
-    if ( isToInstitution ) {
-      const caption = 'Незаповнений реквізит';
-      const message = 'Виберіть сад отримувач продуктів';
-      objFormSplash.open( 'error', caption, message );
+    const amountNotZero = this.table.querySelectorAll( 'tr.row_data td.amount input:not([ value = "" ]' );
+
+    let error = false;
+    let message = '';
+
+    if ( !amountNotZero.length ) {
+      error = true;
+      message = 'Незаповнена кількість';
+    } else if ( isToInstitution ) {
+      error = true;
+      message = 'Виберіть сад отримувач продуктів';
     } else {
       ( async () => {
         const respond = await MyLib.ajax( captionPrices, urlPrices, 'post', data, 'json', null, true );
@@ -143,6 +150,12 @@ class ProductsMoveProducts {
         }
       } )( );
     }
+
+    if ( error ) {
+      const caption = 'Незаповнений реквізит';
+      objFormSplash.open( 'error', caption, message );
+    }
+
   }
 
   clickConfirmed( ) {
@@ -235,7 +248,9 @@ class ProductsMoveProducts {
       const elemChild = child;
       const value = +elemChild.value;
       elemChild.dataset.oldValue = value;
-      elemChild.value = MyLib.numToStr( value, -1 );
+      const valueInput = MyLib.numToStr( value, -1 );
+      elemChild.value = valueInput;
+      elemChild.setAttribute( 'value', valueInput );
 
       elemChild.disabled = this.isDateBlocks || !this.isPost || !this.isEdit;
     } );
@@ -272,6 +287,7 @@ class ProductsMoveProducts {
 
       const successAjax = () => {
         elem.value = strValue;
+        elem.setAttribute( 'value', strValue );
         dataset.oldValue = value;
         this.calcSum( );
       };

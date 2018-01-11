@@ -48,6 +48,8 @@ POST | /api/cu_supplier | { "code": "25", "name": "ТОВ Постач № 25" }
 GET | Отримання данних. Вказано в множині (закінчення на `-s(-es)`), **параметрів не потрібно** - даний запит повертає всі дані. Наприклад `GET /api/cu_suppliers`.
 POST | Коригування данних
 DELETE | Видалення даних (`"type": 0` фізично видаляє запис з таблиці )
+GET /web_get/*.txt | Перегляд відправлених запитів з ІС. Де * - це назва запиту, наприклад `cu_menu_requirement_plan`
+GET /web_send/*.txt | Перегляд відправлених запитів в ІС. Де * - це назва веб-сервісу ІС, наприклад `CreateMenuRequirementPlan`
 
 ## Довідники [:top:](#Зміст)
 
@@ -197,6 +199,8 @@ POST /api/cu_dishes_products_norms
     { "institution_code": 14, "dish_code": "000000002", "product_code": "000000047", "children_category_code": "000000001", "amount": 0.05 }
   ]
 }
+
+GET /web_get/cu_dishes_products_norms.txt
 ```
 
 ### *Дата блокування документів* - `date_blocks` [:top:](#Зміст)
@@ -259,7 +263,9 @@ DELETE /api/institution_order_correction { "institution_code": "14", "institutio
 ```json
 POST /api/cu_menu_requirement_plan { "branch_code": "0003", "institution_code": "14", "number": "000000000002", "date": "1485296673", "splendingdate": "1485296673", "date_sap": "1485296673", "number_sap": "000000000001", "children_categories": [ { "children_category_code": "000000001", "count_all_plan": 55, "count_exemption_plan": 19 }, { "children_category_code": "000000002", "count_all_plan": 3, "count_exemption_plan": 7 } ], "products": [ { "children_category_code": "000000001", "product_code": "000000079  ", "count_plan": 15 }, { "children_category_code": "000000002", "product_code": "000000079  ", "count_plan": 21 } ] }
 
-DELETE api/menu_requirement { "institution_code": "14", "number": "KL-000000024", "type": 1 }
+DELETE /api/menu_requirement { "institution_code": "14", "number": "KL-000000024", "type": 1 }
+
+GET /web_get/cu_menu_requirement_fact.txt
 ```
 
 - Факт
@@ -268,6 +274,8 @@ DELETE api/menu_requirement { "institution_code": "14", "number": "KL-000000024"
 POST /api/cu_menu_requirement_fact { "branch_code": "0003", "institution_code": "14", "number": "000000000002", "date": "1485296673", "splendingdate": "1485296673", "date_saf": "1485296673", "number_saf": "000000000001", "children_categories": [ { "children_category_code": "000000001", "count_all_fact": 55, "count_exemption_fact": 19 }, { "children_category_code": "000000002", "count_all_fact": 3, "count_exemption_fact": 7 } ], "products": [ { "children_category_code": "000000001", "product_code": "000000079  ", "count_fact": 15 }, { "children_category_code": "000000002", "product_code": "000000079  ", "count_fact": 21 } ] }
 
 DELETE api/menu_requirement { "institution_code": "14", "number": "KL-000000024", "type": 2 }
+
+GET /web_get/cu_menu_requirement_fact.txt
 ```
 
 - Перегляд документа
