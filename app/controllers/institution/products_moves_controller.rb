@@ -88,6 +88,7 @@ class Institution::ProductsMovesController < Institution::BaseController
                 :amount,
                 'ROUND( products_move_products.amount * products_move_products.price, 5 ) AS sum' )
         .where( products_move_id: products_move[ :id ] )
+        .where.not( amount: 0 )
         .order( 'products.name' )
         .to_json( ), symbolize_names: true )
         .map { | o |
@@ -377,9 +378,6 @@ class Institution::ProductsMovesController < Institution::BaseController
 
     render json: result
   end
-
-
-
 
 end
 
