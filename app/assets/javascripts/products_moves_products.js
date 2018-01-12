@@ -278,7 +278,7 @@ class ProductsMoveProducts {
     const { dataset } = elem;
 
     const oldValue = +dataset.oldValue;
-    const value = MyLib.toNumber( elem.value, 3 );
+    const value = elem.value < 0 ? 0 : MyLib.toNumber( elem.value, 3 );
     const strValue = MyLib.numToStr( value, -1 );
 
     if ( value === oldValue ) elem.value = strValue;

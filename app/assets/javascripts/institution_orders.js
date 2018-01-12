@@ -118,7 +118,8 @@ $( document ).on( 'turbolinks:load', ( ) => {
           if ( !$tr.hasClass( 'selected' ) ) MyLib.rowClick( $tr[ 0 ], filterTableCorrection );
 
           const { 0: button } = $this.children( 'button' );
-          if ( button ) {
+
+          if ( button && !button.disabled ) {
             const { classList } = button;
             if ( classList.contains( 'btn_del' ) ) {
               const buttonDel = ( ) => {
@@ -153,7 +154,7 @@ $( document ).on( 'turbolinks:load', ( ) => {
           if ( !$tr.hasClass( 'selected' ) ) MyLib.rowClick( $tr[ 0 ], null );
 
           const { 0: button } = $this.children( 'button' );
-          if ( button ) {
+          if ( button && !button.disabled ) {
             const { classList } = button;
             if ( classList.contains( 'btn_del' ) ) MyLib.tableDelClick( button, null );
             else if ( classList.contains( 'btn_view' ) || classList.contains( 'btn_edit' ) ) MyLib.tableEditClick( button );

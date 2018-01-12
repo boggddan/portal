@@ -191,12 +191,14 @@ class Institution::TimesheetsController < Institution::BaseController
     timesheet_id = params[ :id ]
 
     timesheet = JSON.parse( Timesheet
+      .joins( :institution )
       .select( :id,
-                :number,
-                :date_vb,
-                :date_ve,
-                :date_eb,
-                :date_ee )
+               :number,
+               :date_vb,
+               :date_ve,
+               :date_eb,
+               :date_ee,
+               'institutions.code AS institution_code' )
       .find( timesheet_id )
       .to_json, symbolize_names: true )
 
@@ -227,7 +229,7 @@ class Institution::TimesheetsController < Institution::BaseController
 
       message = {
         'CreateRequest' => {
-          'Institutions_id' => current_institution[ :code ],
+          'Institutions_id' => timesheet[ :institution_code ],
           'NumberFromWebPortal' => timesheet[ :number ],
           'StartDate' => timesheet[ :date_vb ],
           'EndDate' => timesheet[ :date_ve ],
@@ -260,7 +262,8 @@ class Institution::TimesheetsController < Institution::BaseController
   def refresh # Обновление данных о детях
     id = params[ :id ]
     timesheet = JSON.parse( Timesheet
-      .select( :id, :date_eb, :date_ee )
+      .joins( :institution )
+      .select( :id, :date_eb, :date_ee, 'institutions.code AS institution_code' )
       .find( id )
       .to_json, symbolize_names: true )
 
@@ -268,7 +271,7 @@ class Institution::TimesheetsController < Institution::BaseController
       'CreateRequest' => {
         'StartDate' => timesheet[ :date_eb ].to_date,
         'EndDate' => timesheet[ :date_ee ].to_date,
-        'Institutions_id' => current_institution[ :code ]
+        'Institutions_id' => timesheet[ :institution_code ]
       }
     }
 
