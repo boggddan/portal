@@ -50,7 +50,7 @@ class Institution::ReferenceBooksController < Institution::BaseController
           LEFT JOIN children_groups ON children_categories.id = children_groups.children_category_id
           WHERE children_groups.institution_id = #{ institution_id }
                 AND
-                children_categories.code != '000000027'
+                children_categories.is_del != false
         ) bb ON dishes_products_norms.children_category_id = bb.children_category_id
         INNER JOIN products ON products.id = dishes_products.product_id
         INNER JOIN products_types ON products_types.id = products.products_type_id

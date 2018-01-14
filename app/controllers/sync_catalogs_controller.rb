@@ -2451,5 +2451,87 @@ class SyncCatalogsController < ApplicationController
       render json: error && error.any? ? { result: false, error: [ error ] }
       : { result: true, json: menu_requirement }
   end
+  ###############################################################################################
+
+
+  ###############################################################################################
+  # # DELETE /api/delete
+  # { "change":
+  #   [
+  #     {
+  #       "table_name": "children_groups",
+  #       "data": [
+  #         { "code": "000000005", "is_del": false },
+  #         { "code": "000000006", "is_del": true },
+  #         { "code": "481709", "is_del": null }
+  #       ]
+  #     },
+  #     {
+  #       "table_name": "children_categories",
+  #       "data": [
+  #         { "code": "000000010", "is_del": false },
+  #         { "code": "000000003", "is_del": true },
+  #         { "code": "000000011", "is_del": null }
+  #       ]
+  #     },
+  #     {
+  #       "table_name": "products",
+  #       "data": [
+  #         { "code": "000000054", "is_del": false },
+  #         { "code": "000000126", "is_del": true },
+  #         { "code": "000000027", "is_del": null }
+  #       ]
+  #     }
+  #   ]
+  # }
+  def delete
+    data = params.permit( { change: [ :table_name, data: [ :code, :is_del ] ] } )[ :change ]
+
+    tables_check = %w( children_groups children_categories products )
+    sql = ''
+    error = [ ]
+    result = { }
+
+    data
+      .group_by { | o | o[ :table_name ] }
+      .each { | table_name, table_data |
+        error << "Таблиця [ #{ table_name } ] не знайдена" unless tables_check.include?( table_name )
+
+        table_data_merge = [ ]
+
+        # Объединение все записей массива по одной таблице
+        table_data.each { | o | o[:data].each { | u | table_data_merge << u } }
+
+        table_data_merge
+          .group_by { | o | o[ :is_del ] }
+          .each { | is_del, codes |
+            codes_str = codes.map { | o | "'#{ o[ :code ] }'" }.join(',')
+
+            if is_del.nil?
+              sql << <<-SQL.squish
+                DELETE FROM #{ table_name }
+                  USING UNNEST( ARRAY[ #{ codes_str } ] ) AS codes
+                  WHERE code = codes;
+              SQL
+            else
+              sql << <<-SQL.squish
+                UPDATE #{ table_name } SET
+                  is_del = #{ is_del }
+                  FROM UNNEST( ARRAY[ #{ codes_str } ] ) AS codes
+                  WHERE code = codes;
+              SQL
+            end
+          }
+      }
+
+      if error.empty?
+        ActiveRecord::Base.connection.execute( sql )
+        result = { status: true, sql: sql }
+      else
+        result = { status: false, error: error }
+      end
+
+      render json: result
+  end
 
 end

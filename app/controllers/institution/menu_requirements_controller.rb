@@ -13,41 +13,6 @@ class Institution::MenuRequirementsController < Institution::BaseController
     render json: { status: true }
   end
 
-  def get_dishes_products_norms( institution_id )
-    sql = <<-SQL.squish
-        SELECT aa.dish_id,
-               dishes_products.product_id,
-               dishes_products_norms.children_category_id,
-               dishes_products_norms.amount
-        FROM (
-          SELECT DISTINCT ON( dish_id ) institution_dishes.id AS institution_dish_id,
-                 institution_dishes.dish_id,
-                 institution_dishes.enabled
-          FROM institution_dishes
-          INNER JOIN institutions ON institutions.id = institution_dishes.institution_id
-          WHERE institutions.code = 0
-                OR
-                institution_dishes.institution_id = #{ institution_id }
-          ORDER by dish_id,
-                  institutions.code DESC
-        ) aa
-        INNER JOIN dishes_products ON aa.institution_dish_id = dishes_products.institution_dish_id
-        INNER JOIN dishes_products_norms ON dishes_products.id = dishes_products_norms.dishes_product_id
-        INNER JOIN (
-          SELECT DISTINCT ON ( children_categories.id ) children_categories.id AS children_category_id
-          FROM children_categories
-          LEFT JOIN children_groups ON children_categories.id = children_groups.children_category_id
-          WHERE children_groups.institution_id = #{ institution_id }
-                AND
-                children_categories.code != '000000027'
-        ) bb ON dishes_products_norms.children_category_id = bb.children_category_id
-        WHERE aa.enabled = true
-      SQL
-
-    dishes_products_norms = JSON.parse( ActiveRecord::Base.connection.execute( sql )
-      .to_json, symbolize_names: true )
-  end
-
   def create_products
     menu_requirement_id = params[ :id ]
 
@@ -67,15 +32,51 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .group( :id )
       .to_json, symbolize_names: true )
 
-    @dishes_products_norms = get_dishes_products_norms( institution_id )
+    sql = <<-SQL.squish
+      SELECT aa.dish_id,
+             dishes_products.product_id,
+             dishes_products_norms.children_category_id,
+             dishes_products_norms.amount
+      FROM (
+        SELECT DISTINCT ON( dish_id ) institution_dishes.id AS institution_dish_id,
+               institution_dishes.dish_id,
+               institution_dishes.enabled
+        FROM institution_dishes
+        INNER JOIN institutions ON institutions.id = institution_dishes.institution_id
+        WHERE institutions.code = 0
+              OR
+              institution_dishes.institution_id = #{ institution_id }
+        ORDER by dish_id,
+                institutions.code DESC
+      ) aa
+      INNER JOIN dishes_products ON aa.institution_dish_id = dishes_products.institution_dish_id
+      INNER JOIN products ON dishes_products.product_id = products.id
+      INNER JOIN dishes_products_norms ON dishes_products.id = dishes_products_norms.dishes_product_id
+      INNER JOIN (
+        SELECT DISTINCT ON ( children_categories.id ) children_categories.id AS children_category_id
+        FROM children_categories
+        LEFT JOIN children_groups ON children_categories.id = children_groups.children_category_id
+        WHERE children_groups.institution_id = #{ institution_id }
+              AND
+              children_groups.is_del = false
+              AND
+              children_categories.is_del = false
+      ) bb ON dishes_products_norms.children_category_id = bb.children_category_id
+      WHERE aa.enabled = true
+            AND
+            products.is_del = false
+    SQL
+
+    @dishes_products_norms = JSON.parse( ActiveRecord::Base.connection.execute( sql )
+      .to_json, symbolize_names: true )
 
     menu_children_category = JSON.parse( MenuChildrenCategory
       .joins( :children_category )
       .select( :children_category_id,
                :count_all_plan )
-      .where( menu_requirement_id: menu_requirement_id )
+      .where( menu_requirement_id: menu_requirement_id,
+              children_categories: { is_del: false } )
       .where.not( count_all_plan: 0 )
-      .where.not( children_categories: { code: '000000027' } )
       .to_json( except: :id ), symbolize_names: true )
 
     mcc_count = menu_children_category
@@ -227,6 +228,8 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .find( params[ :id ] )
       .to_json, symbolize_names: true )
 
+    institution_id = @menu_requirement[ :institution_id ]
+
     @menu_children_categories = JSON.parse( MenuChildrenCategory
       .joins( :children_category )
       .select( :id,
@@ -250,7 +253,38 @@ class Institution::MenuRequirementsController < Institution::BaseController
               cost_date: :desc )
       .to_json, symbolize_names: true )
 
-    @dishes_products_norms = get_dishes_products_norms( @menu_requirement[ :institution_id ] )
+    sql = <<-SQL.squish
+      SELECT aa.dish_id,
+             dishes_products.product_id,
+             dishes_products_norms.children_category_id,
+             dishes_products_norms.amount
+      FROM (
+        SELECT DISTINCT ON( dish_id ) institution_dishes.id AS institution_dish_id,
+               institution_dishes.dish_id,
+               institution_dishes.enabled
+        FROM institution_dishes
+        INNER JOIN institutions ON institutions.id = institution_dishes.institution_id
+        WHERE institutions.code = 0
+              OR
+              institution_dishes.institution_id = #{ institution_id }
+        ORDER by dish_id,
+                institutions.code DESC
+      ) aa
+      INNER JOIN dishes_products ON aa.institution_dish_id = dishes_products.institution_dish_id
+      INNER JOIN dishes_products_norms ON dishes_products.id = dishes_products_norms.dishes_product_id
+      INNER JOIN (
+        SELECT DISTINCT ON ( children_categories.id ) children_categories.id AS children_category_id
+        FROM children_categories
+        LEFT JOIN children_groups ON children_categories.id = children_groups.children_category_id
+        WHERE children_groups.institution_id = #{ institution_id }
+              AND
+              children_categories.code != '000000027'
+      ) bb ON dishes_products_norms.children_category_id = bb.children_category_id
+      WHERE aa.enabled = true
+    SQL
+
+    @dishes_products_norms = JSON.parse( ActiveRecord::Base.connection.execute( sql )
+      .to_json, symbolize_names: true )
 
     menu_meals_dishes( @menu_requirement[ :id ] )
     menu_products( @menu_requirement[ :id ] )
@@ -401,8 +435,8 @@ class Institution::MenuRequirementsController < Institution::BaseController
     children_categories = JSON.parse( ChildrenCategory
       .joins( children_groups: :children_category )
       .select( :id )
-      .where( children_groups: { institution_id: institution_id } )
-      .where.not( children_categories: { code: '000000027' } )
+      .where( children_groups: { institution_id: institution_id, is_del: false },
+              children_categories: { is_del: false } )
       .group( :id )
       .order( :name )
       .to_json, symbolize_names: true )
@@ -426,6 +460,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
                   institutions.code DESC
         ) aa
         INNER JOIN dishes_products ON aa.institution_dish_id = dishes_products.institution_dish_id
+        INNER JOIN products ON dishes_products.product_id = products.id
         INNER JOIN dishes_products_norms ON dishes_products.id = dishes_products_norms.dishes_product_id
         INNER JOIN (
           SELECT DISTINCT ON ( children_categories.id ) children_categories.id AS children_category_id
@@ -433,9 +468,13 @@ class Institution::MenuRequirementsController < Institution::BaseController
           LEFT JOIN children_groups ON children_categories.id = children_groups.children_category_id
           WHERE children_groups.institution_id = #{ institution_id }
                 AND
-                children_categories.code != '000000027'
+                children_groups.is_del = false
+                AND
+                children_groups.is_del = false
         ) bb ON dishes_products_norms.children_category_id = bb.children_category_id
         WHERE aa.enabled = true
+              AND
+              products.is_del = false
       SQL
 
     dishes_products_norms = JSON.parse( ActiveRecord::Base.connection.execute( sql )
