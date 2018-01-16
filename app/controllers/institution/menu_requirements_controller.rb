@@ -21,7 +21,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .select( :id,
                :splendingdate,
                :institution_id,
-               'insitutions.code AS institution_code',
+               'institutions.code AS institution_code',
                'branches.code AS branch_code' )
       .find( menu_requirement_id )
       .to_json, symbolize_names: true )
