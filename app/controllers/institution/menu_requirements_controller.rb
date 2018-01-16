@@ -16,11 +16,13 @@ class Institution::MenuRequirementsController < Institution::BaseController
   def create_products
     menu_requirement_id = params[ :id ]
 
-    institution_id = current_user[ :userable_id ]
-
     @menu_requirement = JSON.parse( MenuRequirement
+      .joins( institution: :branch )
       .select( :id,
-               :splendingdate )
+               :splendingdate,
+               :institution_id,
+               'insitutions.code AS institution_code',
+               'branches.code AS branch_code' )
       .find( menu_requirement_id )
       .to_json, symbolize_names: true )
 
@@ -45,7 +47,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
         INNER JOIN institutions ON institutions.id = institution_dishes.institution_id
         WHERE institutions.code = 0
               OR
-              institution_dishes.institution_id = #{ institution_id }
+              institution_dishes.institution_id = #{ @menu_requirement[ :institution_id ] }
         ORDER by dish_id,
                 institutions.code DESC
       ) aa
@@ -56,7 +58,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
         SELECT DISTINCT ON ( children_categories.id ) children_categories.id AS children_category_id
         FROM children_categories
         LEFT JOIN children_groups ON children_categories.id = children_groups.children_category_id
-        WHERE children_groups.institution_id = #{ institution_id }
+        WHERE children_groups.institution_id = #{ @menu_requirement[ :institution_id ] }
               AND
               children_groups.is_del = false
               AND
@@ -159,7 +161,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       SQL
 
     ActiveRecord::Base.connection.execute( sql_menu_products_price )
-    update_prices( menu_requirement_id, @menu_requirement[ :splendingdate ] ) # Обновление остатков і цен продуктов
+    update_prices( @menu_requirement ) # Обновление остатков і цен продуктов
     menu_products( menu_requirement_id )
   end
 
@@ -317,15 +319,15 @@ class Institution::MenuRequirementsController < Institution::BaseController
         id: k[ 1 ], name: v[ 0 ][ :dishes_name ] } }
   end
 
-  def get_actual_price( date, products )
+  def get_actual_price( menu_requirement, products )
     goods = products
       .map { | o | { 'Product' => o[ :code ] } }
 
     message = {
       'CreateRequest' => {
-        'Branch_id' => current_branch[ :code ],
-        'Institutions_id' => current_institution[ :code ],
-        'Date' => date,
+        'Branch_id' => menu_requirement[ :branch_code ],
+        'Institutions_id' => menu_requirement[ :institution_code ],
+        'Date' => menu_requirement[ :splendingdate ],
         'ArrayOfGoods' => goods
       }
     }
@@ -347,7 +349,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
     return result
   end
 
-  def update_prices( menu_requirement_id, splendingdate ) # Обновление остатков і цен продуктов
+  def update_prices( menu_requirement ) # Обновление остатков і цен продуктов
     menu_products_price = JSON.parse( MenuProductsPrice
       .joins( :product )
       .select( :id,
@@ -356,11 +358,11 @@ class Institution::MenuRequirementsController < Institution::BaseController
                :balance,
                'products.code',
                'products.name' )
-      .where( menu_requirement_id: menu_requirement_id )
+      .where( menu_requirement_id: menu_requirement[ :id ] )
       .order( 'products.name' )
       .to_json, symbolize_names: true )
 
-    return_prices = get_actual_price( splendingdate, menu_products_price )
+    return_prices = get_actual_price( menu_requirement, menu_products_price )
 
     if return_prices[ :status ]
       menu_products_prices_sql = ''
@@ -412,11 +414,15 @@ class Institution::MenuRequirementsController < Institution::BaseController
 
   def prices # Обновление остатков і цен продуктов
     menu_requirement = JSON.parse( MenuRequirement
-      .select( :id, :splendingdate )
+      .joins( institution: :branch )
+      .select( :id,
+               :splendingdate,
+               'institutions.code AS institution_code',
+               'branches.code AS branch_code' )
       .find( params[ :id ] )
       .to_json, symbolize_names: true )
 
-    result = update_prices( menu_requirement[ :id ], menu_requirement[ :splendingdate ] ) # Обновление остатков і цен продуктов
+    result = update_prices( menu_requirement ) # Обновление остатков і цен продуктов
 
     render json: result
   end
@@ -601,10 +607,13 @@ class Institution::MenuRequirementsController < Institution::BaseController
     menu_requirement_id = params[ :id ]
 
     menu_requirement = JSON.parse( MenuRequirement
+      .joins( institution: :branch )
       .select( :number,
                :splendingdate,
                :date,
-               :number_sap )
+               :number_sap,
+               'institutions.code AS institution_code',
+               'branches.code AS branch_code' )
       .find( menu_requirement_id )
     .to_json, symbolize_names: true )
 
@@ -695,8 +704,8 @@ class Institution::MenuRequirementsController < Institution::BaseController
 
           message = {
             'CreateRequest' => {
-              'Branch_id' => current_branch[ :code ],
-              'Institutions_id' => current_institution[ :code ],
+              'Branch_id' => menu_requirement[ :branch_code ],
+              'Institutions_id' => menu_requirement[ :institution_code ],
               'SplendingDate' => menu_requirement[ :splendingdate ],
               'Date' => menu_requirement[ :date ],
               'Goods' => goods,
@@ -746,10 +755,13 @@ class Institution::MenuRequirementsController < Institution::BaseController
     menu_requirement_id = params[ :id ]
 
     menu_requirement = JSON.parse( MenuRequirement
+      .joins( institution: :branch )
       .select( :number,
                :splendingdate,
                :date,
-               :number_saf )
+               :number_saf,
+               'institutions.code AS institution_code',
+               'branches.code AS branch_code' )
       .find( menu_requirement_id )
       .to_json, symbolize_names: true )
 
@@ -804,8 +816,8 @@ class Institution::MenuRequirementsController < Institution::BaseController
 
         message = {
           'CreateRequest' => {
-            'Branch_id' => current_branch[ :code ],
-            'Institutions_id' => current_institution[ :code],
+            'Branch_id' => menu_requirement[ :branch_code ],
+            'Institutions_id' => menu_requirement[ :institution_code],
             'SplendingDate' => splendingdate,
             'Date' => menu_requirement[ :date ],
             'Goods' => goods,
