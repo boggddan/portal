@@ -206,15 +206,21 @@ class Institution::InstitutionOrdersController < Institution::BaseController
 
   def send_sa # Веб-сервис отправки
     institution_order_id = params[ :id ]
-    institution_id = current_user[ :userable_id ]
 
     institution_order = JSON.parse( InstitutionOrder
-      .select( :id, :number, :date_start, :date_end )
+      .joins( :institution )
+      .select( :id,
+               :number,
+               :date_start,
+               :date_end,
+               :institution_id,
+               'institutions.code AS institution_code' )
       .find( institution_order_id )
       .to_json, symbolize_names: true )
 
     date_start = institution_order[ :date_start ]
     date_end = institution_order[ :date_end ]
+    institution_id = institution_order[ :institution_id ]
 
     date_blocks = check_date_block( date_start, date_end )
     if date_blocks.present?
@@ -235,7 +241,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
                                                       'Date' => o[ :date ],
                                                       'Count_po' => o[ :amount ] } }
 
-        message = { 'CreateRequest' => { 'Institutions_id' => current_institution[ :code ],
+        message = { 'CreateRequest' => { 'Institutions_id' => institution_order[ :institution_code ],
                                         'DateStart' => institution_order[ :date_start ],
                                         'DateFinish' => institution_order[ :date_end ],
                                         'NumberFromWebPortal' => institution_order[ :number ],
@@ -319,19 +325,21 @@ class Institution::InstitutionOrdersController < Institution::BaseController
 
   def correction_send_sa # Веб-сервис отправки
     io_correction_id = params[ :id ]
-    institution_id = current_user[ :userable_id ]
 
     io_correction = JSON.parse( IoCorrection
-      .joins( :institution_order )
+      .joins( institution_order: :institution )
       .select( :number,
                'institution_orders.number AS io_number',
                'institution_orders.date_start',
-               'institution_orders.date_end' )
+               'institution_orders.date_end',
+               'institution_orders.institution_id',
+               'institutions.code AS institution_code' )
       .find( io_correction_id )
       .to_json, symbolize_names: true )
 
     date_start = io_correction[ :date_start ]
     date_end = io_correction[ :date_end ]
+    institution_id = io_correction[ :institution_id ]
 
     date_blocks = check_date_block( date_start, date_end )
     if date_blocks.present?
@@ -353,7 +361,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
                                                   'Date' => o[ :date ],
                                                   'Count_po' => o[ :diff_amount ] } }
 
-        message = { 'CreateRequest' => { 'Institutions_id' => current_institution[ :code ],
+        message = { 'CreateRequest' => { 'Institutions_id' => io_correction[ :institution_code ],
                                         'NumberFromWebPortal' => io_correction[ :number ],
                                         'ApplicationNumber' => io_correction[ :io_number ],
                                         'TMC' => tmc,

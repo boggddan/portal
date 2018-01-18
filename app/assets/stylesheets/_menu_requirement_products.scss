@@ -170,6 +170,11 @@
 
       &.type { @include row-group( 'td', #f1f1f1, #333, 50px, left ); }
 
+      td.price.zero {
+        font-weight: bold;
+        color: red;
+      }
+
       .balance {
         border-right: 3px solid #777;
         border-left: 2px solid #f1f1f1;

@@ -22,7 +22,6 @@ class MenuRequirementProducts {
     $( splendingdate ).datepicker( {
       onSelect( ) {
         const that = this;
-        const { value } = that;
         self.changeMenuRequirement( that );
       }
     } );
@@ -229,16 +228,42 @@ class MenuRequirementProducts {
       } else {
         const isCountGtrBalance = pf === 'plan' || await this.countGtrBalance( pf );
         if ( isCountGtrBalance ) {
-          const pfData = `pathSend${ MyLib.capitalize( pf ) }`;
-          const captionSend = `Відправка данних в ІС [id: ${ this.dataId }]`;
+          const isPriseNotZero = pf === 'plan' || await this.priceIsZero( pf );
 
-          const successAjaxSend = ( ) => window.location.reload( );
-          const { parentElem: { dataset: { [ pfData ]: urlSend } } } = this;
+          if ( isPriseNotZero ) {
+            const pfData = `pathSend${ MyLib.capitalize( pf ) }`;
+            const captionSend = `Відправка данних в ІС [id: ${ this.dataId }]`;
 
-          await MyLib.ajax( captionSend, urlSend, 'post', data, 'json', successAjaxSend, true );
+            const successAjaxSend = ( ) => window.location.reload( );
+            const { parentElem: { dataset: { [ pfData ]: urlSend } } } = this;
+
+            await MyLib.ajax( captionSend, urlSend, 'post', data, 'json', successAjaxSend, true );
+          }
         }
       }
     } )( );
+  }
+
+  priceIsZero( pf ) {
+    let status = true;
+    const pricesIsZero = [ ];
+    this.colPrTable.querySelectorAll( 'td.price.zero' ).forEach( child => {
+      const trElem = child.closest( ' tr ' );
+      const count = +trElem.querySelector( `td.count.cell_count[ data-count-pf = '${ pf }' ]` ).textContent;
+      if ( count ) {
+        const { textContent: product } = trElem.querySelector( 'td.name' );
+        pricesIsZero.push( { 'Продукт:': product, 'Кількість:': count } );
+      }
+    } );
+
+    if ( pricesIsZero.length ) {
+      const caption = 'Нульова ціна продукта';
+      const message = pricesIsZero;
+      objFormSplash.open( 'error', caption, message );
+      status = false;
+    }
+
+    return status;
   }
 
   countGtrBalance( pf ) {
@@ -508,7 +533,8 @@ class MenuRequirementProducts {
       this.colPrTable.querySelectorAll( 'tbody tr.row_data' ).forEach( tr => {
         const trElem = tr;
 
-        const price = +trElem.querySelector( 'td.price' ).textContent;
+        const priceElem = trElem.querySelector( 'td.price' );
+        const price = +priceElem.textContent;
         const balance = MyLib.toRound( +trElem.querySelector( 'td.balance' ).textContent, 3 );
 
         arrPlanFact.forEach( pf => {
@@ -534,6 +560,13 @@ class MenuRequirementProducts {
             const diff =  MyLib.numToStr( MyLib.toRound( countProductPf - countPlan, 3 ), -1 );
             trElem.querySelector( `td.cell_diff[data-count-pf=${ pf }]` ).textContent = diff;
             trElem.dataset[ `${ pf }Negative` ] = MyLib.toRound( countProductPf, 3 ) > balance;
+            if ( !price && countProductPf ) {
+              priceElem.classList.add( 'zero' );
+              priceElem.textContent = '0';
+            } else if ( !price && !countProductPf ) {
+              priceElem.classList.remove( 'zero' );
+              priceElem.textContent = '';
+            }
           }
 
           trElem.querySelector( `td.cell_count[data-count-pf=${ pf }]` )
