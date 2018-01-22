@@ -884,6 +884,8 @@ class SyncCatalogsController < ApplicationController
               date_end: 'Не знайдений параметр [date_end]',
               products: 'Не знайдений параметр [products]' }.stringify_keys!.except( *params.keys )
     number = params[ :number ].strip
+    date = date_int_to_str( params[ :date ] )
+
     id = 0
     if error.empty?
       supplier = supplier_code( params[ :supplier_code ].strip )
@@ -894,17 +896,17 @@ class SyncCatalogsController < ApplicationController
 
       if error.empty?
         ActiveRecord::Base.transaction do
-          update_fields = { supplier: supplier,
+          update_fields = { branch: branch,
+                            supplier: supplier,
                             is_del_1c: false,
-                            date: date_int_to_str( params[ :date ] ),
                             date_start: date_int_to_str( params[ :date_start ] ),
                             date_end: date_int_to_str( params[ :date_end ] ) }
 
-          if supplier_order = branch.supplier_orders.find_by( number: number )
+          if supplier_order = SupplierOrder.find_by( number: number, date: date )
             supplier_order.update( update_fields )
           else
             supplier_order = SupplierOrder.create_with( update_fields )
-              .create( branch: branch, supplier: supplier, number: number )
+              .create( number: number, date: date )
           end
 
           id = supplier_order.id
@@ -912,7 +914,7 @@ class SyncCatalogsController < ApplicationController
           supplier_order_products = supplier_order.supplier_order_products
           supplier_order_products.update_all( count: 0 )
 
-          error_products = []
+          error_products = [ ]
           params[ :products ].each_with_index do | product_par, index |
             error = { institution_code: 'Не знайдений параметр [institution_code]',
                       product_code: 'Не знайдений параметр [product_code]',
