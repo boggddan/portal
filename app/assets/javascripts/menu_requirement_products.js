@@ -579,8 +579,8 @@ class MenuRequirementProducts {
 
       this.categories.forEach( categoryId => {
         arrPlanFact.forEach( pf => {
-          this.colCcTable.querySelector( `tr[data-id='${ categoryId }'] .sum_products_${ pf }` )
-            .textContent = MyLib.numToStr( MyLib.toRound( sumAll[ categoryId ][ pf ], 2 ), -1 );
+          const categoryElem = this.colCcTable.querySelector( `tr[data-id='${ categoryId }'] .sum_products_${ pf }` );
+          if ( categoryElem ) categoryElem.textContent = MyLib.numToStr( MyLib.toRound( sumAll[ categoryId ][ pf ], 2 ), -1 );
         } );
       } );
 
