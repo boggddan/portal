@@ -275,15 +275,43 @@ GET /web_get/cu_dishes_products_norms.txt
 ### *Замовлення постачальнику* - `supplier_orders` [:top:](#Зміст)
 
 ```json
-POST /api/cu_supplier_order { "branch_code": "00000000006", "supplier_code": "00000000023", "number": "ІС000000001", "date": 1504001724, "date_start": 1498867200, "date_end": 1519862400, "products": [ { "institution_code": "14", "product_code": "000000079", "contract_number": "BX-0000001", "contract_number_manual": "РР000000001", "date": 1495542284, "count": 12, "price": 10.05}, {"institution_code": "14", "product_code": "000000046  ", "contract_number": "BX-0000001", "contract_number_manual": "", "date": 1495628684, "count": 15, "price": 17.12 } ] }
-GET api/supplier_order?supplier_order?branch_code=0003&number=00000011
-DELETE api/supplier_order { "branch_code": "00000000003", "number": "000000000006", "type": 1 }
+POST /api/cu_supplier_order
+{ "branch_code": "00000000006",
+  "supplier_code": "00000000023",
+  "number": "ІС000000001",
+  "number_manual": "РР000000001",
+  "date": "1516665600",
+  "date_start": "1516665600",
+  "date_end": "1516665600",
+  "products": [
+    { "institution_code": "14", "product_code": "000000079", "contract_number": "BX-0000001", "contract_number_manual": "", "date": 1495542284, "count": 12, "price": 10.05},
+    { "institution_code": "14", "product_code": "000000046  ", "contract_number": "BX-0000001", "contract_number_manual": "", "date": 1495628684, "count": 15, "price": 17.12 }
+  ]
+}
+
+GET api/supplier_order?branch_code=00000000006&number=ІС000000001&date=2018-01-23
+DELETE api/supplier_order { "branch_code": "00000000006", "number": "ІС000000001", "date": "1516665600", "type": 1 }
 ```
 
 ### *Надходження ТМЦ* - `receipts` [:top:](#Зміст)
 
 ```json
-POST /api/cu_receipt { "institution_code": "14", "supplier_order_number": "000000000002", "contract_number": "Ис-000000001", "number": "0000000000011", "invoice_number": "00000012", "date": "1485296673", "date_sa": "1485296673", "number_sa": "000000000001", "products": [ { "product_code": "000000079", "date": "1504224000", "count": 25, "count_invoice": 25, "causes_deviation_code": "" }, { "product_code": "000000046", "date": "1504224000", "count": 19, "count_invoice": 30, "causes_deviation_code": "000000002" } ] }
+POST /api/cu_receipt
+{ "institution_code": "14",
+  "supplier_order_number": "ІС000000001",
+  "supplier_order_date": "1516665600",
+  "contract_number": "Ис-000000001",
+  "number": "0000000000011",
+  "invoice_number": "00000012",
+  "date": "1516665600",
+  "date_sa": "1516665600",
+  "number_sa": "000000000001",
+  "products": [
+    { "product_code": "000000079", "date": "1504224000", "count": 25, "count_invoice": 25, "causes_deviation_code": "" },
+    { "product_code": "000000046", "date": "1504224000", "count": 19, "count_invoice": 30, "causes_deviation_code": "000000002" }
+  ]
+}
+
 GET /api/receipt?/receipt?institution_code=14&number=KL-000000005
 DELETE /api/receipt { "institution_code": "14", "number": "000000000002" }
 ```

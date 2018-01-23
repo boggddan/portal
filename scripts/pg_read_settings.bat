@@ -10,18 +10,6 @@ FOR %%* in ("%~dp0..") DO SET ProjectPath=%%~f*
 SET FileConfig=%ProjectPath%\project.cfg
 SET BaseConfig=%ProjectPath%\config\database.yml
 
-REM В переменную записывем с файла "env" активный режим
-SET /P Env=< %ProjectPath%\env
-
-REM С файла настроек ".env.*" считываем порт
-FOR /F "delims==; tokens=1,2" %%a IN ( %ProjectPath%\.env.%Env% ) DO (
-  IF /I %%a==PORT SET PORT=%%b
-  IF /I %%a==COLOR SET Color=%%b
-)
-
-REM Change console color
-COLOR %Color%
-
 REM Project dir name
 FOR %%* IN ( "%ProjectPath%" ) DO SET ProjectName=%%~n*
 
@@ -45,6 +33,9 @@ ENDLOCAL ^
   && SET "PGPASSWORD=%PGPASSWORD%"
 
 FOR /F "delims==; tokens=1,2" %%a IN ( %FileConfig% ) DO (
+  REM В переменную записывем с файла "env" активный режим
+  IF /I %%a EQU Env SET Env=%%b
+
   IF /I %%a EQU PgServiceName SET PgServiceName=%%b
 
   REM Specifies the file system location of the database configuration files
@@ -64,6 +55,15 @@ FOR /F "delims==; tokens=1,2" %%a IN ( %FileConfig% ) DO (
 )
 
 SET PATH=%PgBin%;%ArhPath%;%PATH%
+
+REM С файла настроек ".env.*" считываем порт
+FOR /F "delims==; tokens=1,2" %%a IN ( %ProjectPath%\.env.%Env% ) DO (
+  IF /I %%a==PORT SET PORT=%%b
+  IF /I %%a==COLOR SET Color=%%b
+)
+
+REM Change console color
+COLOR %Color%
 
 REM Current time with leading zero
 SET cTime=%TIME: =0%

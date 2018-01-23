@@ -118,12 +118,12 @@ class SyncCatalogsController < ApplicationController
   end
 
 
-  def supplier_order_number( branch, number )
+  def supplier_order_number( branch, number, date )
     number = number.nil? ? '' : number.strip
-    if supplier_order = SupplierOrder.find_by( branch: branch, number: number )
+    if supplier_order = SupplierOrder.find_by( branch: branch, number: number, date: date )
       supplier_order
     else
-      { error: { supplier_order: "Не знайдений номер заявки постачальникам [#{ number }]" } }
+      { error: { supplier_order: "Не знайдений номер заявки постачальникам [#{ number }] від #{ date.to_date.strftime( '%d.%m.%Y' ) }" } }
     end
   end
 
@@ -874,7 +874,18 @@ class SyncCatalogsController < ApplicationController
 
   ###############################################################################################
   # POST /api/cu_supplier_order
-  # { "branch_code": "00000000007", "supplier_code": "00000000023", "number": "ІС000000001", "number_manual": "РР000000001", "date": 1504001724, "date_start": 1498867200, "date_end": 1519862400, "products": [ { "institution_code": "14", "product_code": "000000079", "contract_number": "BX-0000001", "date": 1495542284, "count": 12, "price": 10.05}, {"institution_code": "14", "product_code": "000000046  ", "contract_number": "BX-0000001", "date": 1495628684, "count": 15, "price": 17.12 } ] }
+  # { "branch_code": "00000000006",
+  #   "supplier_code": "00000000023",
+  #   "number": "ІС000000001",
+  #   "number_manual": "РР000000001",
+  #   "date": 1516665600,
+  #   "date_start": 1498867200,
+  #   "date_end": 1519862400,
+  #   "products": [
+  #     { "institution_code": "14", "product_code": "000000079", "contract_number": "BX-0000001", "contract_number_manual": "", "date": 1495542284, "count": 12, "price": 10.05},
+  #     { "institution_code": "14", "product_code": "000000046  ", "contract_number": "BX-0000001", "contract_number_manual": "", "date": 1495628684, "count": 15, "price": 17.12 }
+  #   ]
+  # }
   def supplier_order_update
     error = { branch_code: 'Не знайдений параметр [branch_code]',
               supplier_code: 'Не знайдений параметр [supplier_code]',
@@ -958,10 +969,12 @@ class SyncCatalogsController < ApplicationController
       : { result: true, number: number, id: id }
   end
 
-  # GET api/supplier_order?branch_code=0003&number=00000011
+  # GET api/supplier_order?branch_code=00000000006&number=00000011&date=2018-01-23
   def supplier_order_view
     error = { branch_code: 'Не знайдений параметр [branch_code]',
-              number: 'Не знайдений параметр [number]' }.stringify_keys!.except( *params.keys )
+              number: 'Не знайдений параметр [number]',
+              date: 'Не знайдений параметр [date]'
+            }.stringify_keys!.except( *params.keys )
 
     if error.size == 2
       error = {}
@@ -971,7 +984,7 @@ class SyncCatalogsController < ApplicationController
         branch = branch_code( params[ :branch_code ].strip )
 
         unless error = branch[ :error ]
-          supplier_order = supplier_order_number( branch, params[ :number ].strip )
+          supplier_order = supplier_order_number( branch, params[ :number ].strip, params[ :date ] )
           error = supplier_order[ :error ]
         end
       end
@@ -984,7 +997,7 @@ class SyncCatalogsController < ApplicationController
       : { result: false, error: [ error ] }
   end
 
-  # DELETE api/supplier_order { "branch_code": "00000000003", "number": "000000000006", "type": 1 }
+  # DELETE api/supplier_order { "branch_code": "00000000006", "number": "ІС000000001", "date": 1516665600, "type": 1 }
   def supplier_order_delete
     error = { branch_code: 'Не знайдений параметр [branch_code]',
               type: 'Не знайдений параметр [type]',
@@ -995,7 +1008,9 @@ class SyncCatalogsController < ApplicationController
 
         unless error = branch[ :error ]
           number = params[ :number ]
-          supplier_order = supplier_order_number( branch, number )
+          date = date_int_to_str( params[ :date ] )
+          supplier_order = supplier_order_number( branch, number, date )
+
           unless error = supplier_order[ :error ]
             type = params[ :type ]
             case type
@@ -1009,19 +1024,30 @@ class SyncCatalogsController < ApplicationController
       end
 
     render json: error && error.any? ? { result: false, error: [ error ] }
-                     : { result: true, number: number, id: supplier_order.id }
+                     : { result: true, number: number, date: date, id: supplier_order.id }
   end
   ###############################################################################################
 
   ###############################################################################################
   # POST /api/cu_receipt
-  # { "institution_code": "14", "supplier_order_number": "000000000002", "contract_number": "Ис-000000001", "number": "0000000000011", "invoice_number": "00000012", "date": "1485296673", "date_sa": "1485296673", "number_sa": "000000000001",
-  #   "products": [{"product_code": "000000079", "date": "1504224000", "count": 25, "count_invoice": 25, "causes_deviation_code": ""},
-  #                {"product_code": "000000046", "date": "1504224000", "count": 19, "count_invoice": 30, "causes_deviation_code": "000000002"}]
+  # { "institution_code": "14",
+  #   "supplier_order_number": "000000000002",
+  #   "supplier_order_date": "1516665600",
+  #   "contract_number": "Ис-000000001",
+  #   "number": "0000000000011",
+  #   "invoice_number": "00000012",
+  #   "date": "1516665600",
+  #   "date_sa": "1516665600",
+  #   "number_sa": "000000000001",
+  #   "products": [
+  #     { "product_code": "000000079", "date": "1504224000", "count": 25, "count_invoice": 25, "causes_deviation_code": "" },
+  #     { "product_code": "000000046", "date": "1504224000", "count": 19, "count_invoice": 30, "causes_deviation_code": "000000002" }
+  #   ]
   # }
   def receipt_update
     error = { institution_code: 'Не знайдений параметр [institution_code]',
               supplier_order_number: 'Не знайдений параметр [supplier_order_number]',
+              supplier_order_date: 'Не знайдений параметр [supplier_order_date]',
               contract_number: 'Не знайдений параметр [contract_number]',
               number: 'Не знайдений параметр [number]',
               invoice_number: 'Не знайдений параметр [invoice_number]',
@@ -1035,7 +1061,9 @@ class SyncCatalogsController < ApplicationController
       institution = institution_code( params[ :institution_code ] )
 
       unless error = institution[ :error ]
-        supplier_order = supplier_order_number( institution.branch, params[ :supplier_order_number ].strip )
+        supplier_order = supplier_order_number( institution.branch,
+                                                params[ :supplier_order_number ].strip,
+                                                date_int_to_str( params[ :supplier_order_date ] ) )
 
         unless error = supplier_order[ :error ]
           ActiveRecord::Base.transaction do
