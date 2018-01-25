@@ -47,13 +47,15 @@ class Institution::ReceiptsController < Institution::BaseController
   def send_sa # Веб-сервис отправки поступления
     receipt_id = params[ :id ]
     receipt = JSON.parse( Receipt
-      .joins( :supplier_order )
+      .joins( :supplier_order, :institution )
       .select( :id,
                :invoice_number,
                :number,
                :date,
                :contract_number,
-               'supplier_orders.number AS so_number' )
+               'supplier_orders.number AS so_number',
+               'supplier_orders.date AS so_date',
+               'institutions.code AS institution_code' )
       .find( receipt_id )
       .to_json, symbolize_names: true )
 
@@ -94,12 +96,13 @@ class Institution::ReceiptsController < Institution::BaseController
 
         message = {
           'GetRequest' => {
-            'Institutions_id' => current_institution[ :code ],
+            'Institutions_id' => receipt[ :institution_code ],
             'InvoiceNumber' => receipt[ :invoice_number ],
             'ContractNumber' => receipt[ :contract_number ],
             'OrderNumber' => receipt[ :so_number ],
             'NumberFromWebPortal' => receipt[ :number ],
             'Date' => receipt[ :date ],
+            'DateOfOrderNumber' => receipt[ :so_date ],
             'Goods' => goods,
             'User' => current_user[ :username ]
           }
