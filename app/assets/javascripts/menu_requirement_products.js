@@ -629,11 +629,7 @@ class MenuRequirementProducts {
 
       ( async () => {
         const result = await MyLib.ajax( caption, url, 'post', data, 'json', null, true );
-        if ( result.status ) elem.dataset.oldValue = val;
-        else {
-          elem.value = valOld;
-          elem.setAttribute( 'value', valOld );
-        }
+        if ( result.status ) elem.dataset.oldValue = val; else elem.value = valOld;
       } )( );
     }
   }
