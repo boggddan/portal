@@ -194,8 +194,26 @@ class Institution::InstitutionOrdersController < Institution::BaseController
 
   def update # Обновление реквизитов документа заявки
     data = params.permit( :date ).to_h
-    status = update_base_with_id( :institution_orders, params[ :id ], data )
-    render json: { status: status }
+
+    result = nil
+    date = data[ :date ]
+
+    if date.present?
+      id = params[ :id ]
+      institution_id = InstitutionOrder.select( :institution_id ).find( id ).institution_id
+      date_blocks = check_date_block( institution_id, date )
+
+      if date_blocks.present?
+        caption = 'Блокування документів'
+        message = "Дата списання #{ date_blocks } закрита для редагування!"
+        result = { status: false, message: message, caption: caption }
+      else
+        status = update_base_with_id( :institution_orders, id, data )
+        result = { status: status }
+      end
+    end
+
+    render json: result
   end
 
   def product_update # Обновление количества
@@ -222,7 +240,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
     date_end = institution_order[ :date_end ]
     institution_id = institution_order[ :institution_id ]
 
-    date_blocks = check_date_block( date_start, date_end )
+    date_blocks = check_date_block( institution_id, date_start, date_end )
     if date_blocks.present?
       caption = 'Блокування документів'
       message = "Дата [ #{ date_blocks } ] в заявці закрита для відправлення!"
@@ -313,8 +331,28 @@ class Institution::InstitutionOrdersController < Institution::BaseController
 
   def correction_update # Обновление реквизитов документа корректировки
     data = params.permit( :date ).to_h
-    status = update_base_with_id( :io_corrections, params[ :id ], data )
-    render json: { status: status }
+
+    result = nil
+    date = data[ :date ]
+
+    if date.present?
+      id = params[ :id ]
+      institution_id = IoCorrection.joins( :institution_order )
+        .select( 'institution_orders.institution_id' ).find( id ).institution_id
+
+      date_blocks = check_date_block( institution_id, date )
+
+      if date_blocks.present?
+        caption = 'Блокування документів'
+        message = "Дата списання #{ date_blocks } закрита для редагування!"
+        result = { status: false, message: message, caption: caption }
+      else
+        status = update_base_with_id( :io_corrections, id, data )
+        result = { status: status }
+      end
+    end
+
+    render json: result
   end
 
   def correction_product_update # Обновление количества корректировки заявки
@@ -341,10 +379,10 @@ class Institution::InstitutionOrdersController < Institution::BaseController
     date_end = io_correction[ :date_end ]
     institution_id = io_correction[ :institution_id ]
 
-    date_blocks = check_date_block( date_start, date_end )
+    date_blocks = check_date_block( institution_id, date_start, date_end )
     if date_blocks.present?
       caption = 'Блокування документів'
-      message = "Дата [ #{ date_blocks } ] в заявці закрита для відправлення!"
+      message = "Дата [ #{ date_blocks } ] в коректуванні заявки закрита для відправлення!"
       result = { status: false, message: message, caption: caption }
     else
       io_correction_products = JSON.parse( IoCorrectionProduct

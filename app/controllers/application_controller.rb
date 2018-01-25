@@ -56,11 +56,11 @@
     [ 'String', 'Date' ].include?( value.class.name ) ? "'#{ value }'" : value
   end
 
-  def check_date_block( date_start, date_end = nil )
+  def check_date_block( institution_id, date_start, date_end = nil )
     where = date_end.present? ? { date: date_start..date_end } : { date: date_start }
     DateBlock
       .select( :date )
-      .where( institution_id: current_user[ :userable_id ] )
+      .where( institution_id: institution_id )
       .where( where )
       .pluck( :date )
       .map{ | o | o.strftime( '%d.%m.%Y' ) }

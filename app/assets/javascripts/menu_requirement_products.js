@@ -54,7 +54,6 @@ class MenuRequirementProducts {
     else btnPrint.disabled = true;
 
     const btnPrices = parentElem.querySelector( '.btn_prices' );
-    btnPrices.disabled = disabledFact;
 
     btnPrices.addEventListener( 'click', ( ) => this.clickBtnPrices( ) );
 
@@ -162,7 +161,7 @@ class MenuRequirementProducts {
     [ this.parentElem, this.colCc, this.colCcTable, this.colMd, this.colMdCreate, this.colMdTable, this.colPr ] =
       [ parentElem, colCc, colCcTable, colMd, colMdCreate, colMdTable, colPr ];
 
-    [ this.splendingdate ] = [ splendingdate ];
+    [ this.splendingdate, this.btnPrices ] = [ splendingdate, btnPrices ];
 
     [ this.dataId, this.disabledPlan, this.disabledFact ] =
       [ +parentElem.dataset.id, disabledPlan, disabledFact ];
@@ -422,6 +421,7 @@ class MenuRequirementProducts {
     if ( this.colPrTable ) {
       this.buttonColPr.classList.add( 'nav' );
       this.buttonColPr.disabled = false;
+      ( { disabledFact: this.btnPrices.disabled } = this );
 
       this.splendingdate.disabled = true;
 
@@ -445,6 +445,7 @@ class MenuRequirementProducts {
       this.buttonColPr.classList.remove( 'nav' );
       this.buttonColPr.disabled = true;
       this.calcCategories( );
+      this.btnPrices.disabled = true;
     }
   }
 

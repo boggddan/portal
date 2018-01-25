@@ -30,6 +30,24 @@ $( document ).on( 'turbolinks:load', ( ) => {
       }
     };
 
+    const changeReceipt = target => {
+      const elem = target;
+      const { id: nameVal, dataset: { oldValue: valOld }, value: val } = elem;
+
+      if ( val !== valOld ) {
+        const { [ 0 ]: mainElem } = $parentElem;
+        const { dataset: { id: dataId } } = mainElem;
+
+        const data = { id: dataId, [ nameVal ]: val };
+        const caption = `Зміна значення ${ nameVal } з ${ valOld } на ${ val } [id: ${ dataId }]`;
+        const { dataset: { pathUpdate: url } } = mainElem;
+        ( async () => {
+          const result = await MyLib.ajax( caption, url, 'post', data, 'json', null, true );
+          if ( result.status ) elem.dataset.oldValue = val; else elem.value = valOld;
+        } )( );
+      }
+    };
+
     $parentElem
       .find( 'h1' )
       .on( 'click', function( ) { MyLib.clickHeader( $( this ) ) } )
@@ -47,13 +65,19 @@ $( document ).on( 'turbolinks:load', ( ) => {
       .end( )
       .find( '.btn_exit, .btn_save' )
       .on( 'click', function( ) { MyLib.btnExitClick( $( this ) ) } )
-      .end( )
-      .find( '#date' )
-      .data( 'old-value', $( '#date' ).val( ) )
-      .datepicker( { onSelect( ) { MyLib.changeValue( $( this ), 'main', headerText ) } } )
-      .end( )
-      .find( '#invoice_number' )
-      .on( 'change', function( ) { MyLib.changeValue( $( this ), 'main', false ) } );
+      .end( );
+
+    const date = $parentElem[ 0 ].querySelector( '#date' );
+    ( { value: date.dataset.oldValue } = date );
+    $( date ).datepicker( {
+      onSelect( ) {
+        changeReceipt( this );
+      }
+    } );
+
+    const invoiceNumber = $parentElem[ 0 ].querySelector( '#invoice_number' );
+    ( { value: invoiceNumber.dataset.oldValue } = invoiceNumber );
+    invoiceNumber.addEventListener( 'click', event => changeReceipt( event.currentTarget ) );
 
     $( '.clmn' )
       .find( 'tr.row_data' )

@@ -582,14 +582,16 @@ class Institution::MenuRequirementsController < Institution::BaseController
     splendingdate = data[ :splendingdate ]
 
     if splendingdate.present?
-      date_blocks = check_date_block( splendingdate )
+      id = params[ :id ]
+      institution_id = MenuRequirement.select( :institution_id ).find( id ).institution_id
+      date_blocks = check_date_block( institution_id, splendingdate )
 
       if date_blocks.present?
         caption = 'Блокування документів'
         message = "Дата списання #{ date_blocks } закрита для відправлення!"
         result = { status: false, message: message, caption: caption }
       else
-        status = update_base_with_id( :menu_requirements, params[ :id ], data )
+        status = update_base_with_id( :menu_requirements, id, data )
         result = { status: status }
       end
     end
@@ -612,14 +614,16 @@ class Institution::MenuRequirementsController < Institution::BaseController
                :splendingdate,
                :date,
                :number_sap,
+               :institution_id,
                'institutions.code AS institution_code',
                'branches.code AS branch_code' )
       .find( menu_requirement_id )
     .to_json, symbolize_names: true )
 
     splendingdate = menu_requirement[ :splendingdate ]
+    institution_id = menu_requirement[ :institution_id ]
 
-    date_blocks = check_date_block( splendingdate )
+    date_blocks = check_date_block( institution_id, splendingdate )
     if date_blocks.present?
       caption = 'Блокування документів'
       message = "Дата списання #{ date_blocks } закрита для відправлення!"
@@ -628,7 +632,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       sql_where_exists = <<-SQL.squish
           menu_requirements.splendingdate = '#{ splendingdate }'
           AND
-          menu_requirements.institution_id = #{ current_user[ :userable_id ] }
+          menu_requirements.institution_id = #{ institution_id }
           AND
           menu_requirements.id != #{ menu_requirement_id }
           AND
@@ -760,14 +764,16 @@ class Institution::MenuRequirementsController < Institution::BaseController
                :splendingdate,
                :date,
                :number_saf,
+               :institution_id,
                'institutions.code AS institution_code',
                'branches.code AS branch_code' )
       .find( menu_requirement_id )
       .to_json, symbolize_names: true )
 
-    splendingdate =  menu_requirement[ :splendingdate ]
+    splendingdate = menu_requirement[ :splendingdate ]
+    institution_id = menu_requirement[ :institution_id ]
 
-    date_blocks = check_date_block( splendingdate )
+    date_blocks = check_date_block( institution_id, splendingdate )
     if date_blocks.present?
       caption = 'Блокування документів'
       message = "Дата списання #{ date_blocks } закрита для відправлення!"

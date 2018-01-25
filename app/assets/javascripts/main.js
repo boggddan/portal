@@ -130,7 +130,6 @@ class MyLib {
   }
 
   static ajax( caption, url, type, dataValue, dataType, callSuccess, loader = true ) {
-    let result = null;
     this.pageLoader( loader );
 
     const scriptRun = text => {
@@ -140,16 +139,15 @@ class MyLib {
     };
 
     const success = data => {
-      let returnSuccess = data;
+      const returnSuccess = data;
 
       if ( dataType === 'json' ) {
         const { caption: dataCaption = caption, message: dataMessage, status: dataStatus } = data;
-
+        
         let dataMessageContent = '';
         if ( dataMessage ) dataMessageContent = `<pre>${ JSON.stringify( dataMessage, null, 2 ) }</pre>`;
-
         if ( dataStatus ) {
-          const { href, view, reload, data: dataData } = data;
+          const { href, view, reload } = data;
           if ( href ) {
             if ( href.search( /.pdf$/i ) === -1 ) this.assignLocation( href );
             else objFormSplash.open( 'print', caption, href );

@@ -53,6 +53,7 @@ class Institution::ReceiptsController < Institution::BaseController
                :number,
                :date,
                :contract_number,
+               :institution_id,
                'supplier_orders.number AS so_number',
                'supplier_orders.date AS so_date',
                'institutions.code AS institution_code' )
@@ -60,7 +61,9 @@ class Institution::ReceiptsController < Institution::BaseController
       .to_json, symbolize_names: true )
 
     date = receipt[ :date ]
-    date_blocks = check_date_block( date )
+    institution_id = receipt[ :institution_id ]
+
+    date_blocks = check_date_block( institution_id, date )
     if date_blocks.present?
       caption = 'Блокування документів'
       message = "Дата поставки [ #{ date_blocks } ] закрита для відправлення!"
@@ -211,8 +214,32 @@ class Institution::ReceiptsController < Institution::BaseController
 
   def update # Обновление реквизитов документа поступления
     data = params.permit( :date, :invoice_number ).to_h
-    status = update_base_with_id( :receipts, params[ :id ], data )
-    render json: { status: status }
+
+    result = nil
+
+    if data.present?
+      date = data[ :date ]
+
+      if date.present?
+        id = params[ :id ]
+        institution_id = Receipt.select( :institution_id ).find( id ).institution_id
+
+        date_blocks = check_date_block( institution_id, date )
+        if date_blocks.present?
+          caption = 'Блокування документів'
+          message = "Дата списання #{ date_blocks } закрита для редагування!"
+          result = { status: false, message: message, caption: caption }
+        else
+          status = update_base_with_id( :receipts, id, data )
+          result = { status: status }
+        end
+      else
+        status = update_base_with_id( :receipts, id, data )
+        result = { status: status }
+      end
+    end
+
+    render json: result
   end
 
   def print # Веб-сервис отправки

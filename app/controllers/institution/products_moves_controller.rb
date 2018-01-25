@@ -66,16 +66,19 @@ class Institution::ProductsMovesController < Institution::BaseController
 
   def send_sa
     products_move = JSON.parse( ProductsMove
-      .joins( :to_institution )
+      .joins( :to_institution, :institution )
       .select( :id,
                :number,
                :date,
                :number_sa,
+               :institution_id,
+               'institutions_products_moves.code AS institution_code',
                'institutions.code AS to_institution_code' )
       .find( params[ :id ] )
       .to_json( ), symbolize_names: true )
 
-    date_blocks = check_date_block( products_move[ :date ] )
+
+    date_blocks = check_date_block( products_move[ :institution_id ], products_move[ :date ] )
     if date_blocks.present?
       caption = 'Блокування документів'
       message = "Дата [ #{ date_blocks } ] в переміщенні закрита для відправлення!"
@@ -101,7 +104,7 @@ class Institution::ProductsMovesController < Institution::BaseController
 
       message = {
         'CreateRequest' => {
-          'Institutions_id' => current_institution[ :code ], # Підрозділ передавач
+          'Institutions_id' => products_move[ :institution_code ], # Підрозділ передавач
           'ToInstitutions_id' => products_move[ :to_institution_code ], # Підрозділ приймач
           'NumberFromWebPortal' => products_move[ :number ],
           'Date' => products_move[ :date ],
@@ -136,16 +139,15 @@ class Institution::ProductsMovesController < Institution::BaseController
 
   def confirmed
     products_move = JSON.parse( ProductsMove
-      .joins( :to_institution )
       .select( :id,
-              :number,
-              :date,
-              :number_sa,
-              'institutions.code AS to_institution_code' )
+               :number,
+               :number_sa,
+               :date,
+               :institution_id )
       .find( params[ :id ] )
       .to_json( ), symbolize_names: true )
 
-    date_blocks = check_date_block( products_move[ :date ] )
+    date_blocks = check_date_block( products_move[ :institution_id ], products_move[ :date ] )
     if date_blocks.present?
       caption = 'Блокування документів'
       message = "Дата [ #{ date_blocks } ] в переміщенні закрита для підтвердження!"
@@ -179,11 +181,12 @@ class Institution::ProductsMovesController < Institution::BaseController
     products_move = JSON.parse( ProductsMove
       .joins( :to_institution )
       .select( :id,
-              :date )
+               :date,
+               :institution_id )
       .find( params[ :id ] )
       .to_json( ), symbolize_names: true )
 
-    date_blocks = check_date_block( products_move[ :date ] )
+    date_blocks = check_date_block( products_move[ :institution_id ], products_move[ :date ] )
     if date_blocks.present?
       caption = 'Блокування документів'
       message = "Дата [ #{ date_blocks } ] в переміщенні закрита для редагування!"
@@ -213,7 +216,7 @@ class Institution::ProductsMovesController < Institution::BaseController
       .find( params[ :id ] )
       .to_json, symbolize_names: true )
 
-    @is_date_blocks = check_date_block( @products_move[ :date ] ).present?
+    @is_date_blocks = check_date_block( institution_id, @products_move[ :date ] ).present?
 
     @products_move_products = JSON.parse( ProductsMoveProduct
       .joins( { product: :products_type } )
@@ -249,9 +252,12 @@ class Institution::ProductsMovesController < Institution::BaseController
     date = data[ :date ]
 
     is_update = data.present?
+    id = params[ :id ]
 
     if date.present?
-      date_blocks = check_date_block( date )
+      institution_id = ProductsMove.select( :institution_id ).find( id ).institution_id
+
+      date_blocks = check_date_block( institution_id, date )
 
       if date_blocks.present?
         caption = 'Блокування документів'
@@ -262,7 +268,7 @@ class Institution::ProductsMovesController < Institution::BaseController
     end
 
     if is_update
-      status = update_base_with_id( :products_moves, params[ :id ], data )
+      status = update_base_with_id( :products_moves, id, data )
       result = { status: status }
     end
 
