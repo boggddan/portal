@@ -96,7 +96,11 @@ class ProductsMoveProducts {
 
       ( async () => {
         const result = await MyLib.ajax( caption, url, 'post', data, 'json', null, true );
-        if ( result.status ) elem.dataset.oldValue = value; else elem.value = oldValue;
+        if ( result.status ) elem.dataset.oldValue = value;
+        else {
+          elem.value = oldValue;
+          elem.setAttribute( 'value', oldValue );
+        }
       } )( );
     }
   }
