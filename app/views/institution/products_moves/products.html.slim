@@ -33,7 +33,7 @@ main#products_move_products *{ data: { \
           input_attr: { data: { date: @products_move[ :date_sa ] }, disabled: true }
 
     .panel
-      = render label_text, label_attr: { class: :icon_number }, text: 'Перемідення №',
+      = render label_text, label_attr: { class: :icon_number }, text: 'Переміщення №',
         input_attr: { id: :number, value: @products_move[ :number ], disabled: true }
       = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
         input_attr: { id: :date, data: { date: @products_move[ :date ] } }

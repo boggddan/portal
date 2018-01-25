@@ -12,7 +12,7 @@ class Institution::ProductsMovesController < Institution::BaseController
 
     @products_moves = JSON.parse( ProductsMove
       .joins( :to_institution, :institution )
-      .joins( 'LEFT JOIN date_blocks ON products_moves.date = date_blocks.date' )
+      .joins( 'LEFT JOIN date_blocks ON products_moves.date = date_blocks.date AND products_moves.institution_id = date_blocks.institution_id' )
       .select( :id,
                :number,
                :date,

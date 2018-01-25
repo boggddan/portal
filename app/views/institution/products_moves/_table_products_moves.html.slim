@@ -36,6 +36,6 @@ table.table *{ data: { type: :list_doc }  }
         td *{ class: ( products_move[ :is_del_1c ] ? :is_del  : '' ) } = number_sa
         td = products_move[ :institution_name ]
         td *{ class: products_move[ :is_confirmed ] ? :check : '' }
-        td : button.btn_view *{ disabled: disabled }
-        td : button.btn_edit *{ disabled: !disabled }
+        td : button.btn_view *{ disabled: !disabled }
+        td : button.btn_edit *{ disabled: disabled }
         td : button.btn_del *{ disabled: number_sa.present? || !is_post }
