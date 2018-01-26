@@ -219,9 +219,9 @@ class Institution::ReceiptsController < Institution::BaseController
 
     if data.present?
       date = data[ :date ]
+      id = params[ :id ]
 
       if date.present?
-        id = params[ :id ]
         institution_id = Receipt.select( :institution_id ).find( id ).institution_id
 
         date_blocks = check_date_block( institution_id, date )
@@ -230,12 +230,12 @@ class Institution::ReceiptsController < Institution::BaseController
           message = "Дата списання #{ date_blocks } закрита для редагування!"
           result = { status: false, message: message, caption: caption }
         else
-          status = update_base_with_id( :receipts, id, data )
-          result = { status: status }
+          Receipt.where( id: id ).update_all( data )
+          result = { status: true }
         end
       else
-        status = update_base_with_id( :receipts, id, data )
-        result = { status: status }
+        Receipt.where( id: id ).update_all( data )
+        result = { status: true }
       end
     end
 

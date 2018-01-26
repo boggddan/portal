@@ -77,7 +77,7 @@ $( document ).on( 'turbolinks:load', ( ) => {
 
     const invoiceNumber = $parentElem[ 0 ].querySelector( '#invoice_number' );
     ( { value: invoiceNumber.dataset.oldValue } = invoiceNumber );
-    invoiceNumber.addEventListener( 'click', event => changeReceipt( event.currentTarget ) );
+    invoiceNumber.addEventListener( 'change', event => changeReceipt( event.currentTarget ) );
 
     $( '.clmn' )
       .find( 'tr.row_data' )
