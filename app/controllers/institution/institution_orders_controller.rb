@@ -192,30 +192,6 @@ class Institution::InstitutionOrdersController < Institution::BaseController
         .order( :date, 'products_types.priority','products.name' )
   end
 
-  def update # Обновление реквизитов документа заявки
-    data = params.permit( :date ).to_h
-
-    result = nil
-    date = data[ :date ]
-
-    if date.present?
-      id = params[ :id ]
-      institution_id = InstitutionOrder.select( :institution_id ).find( id ).institution_id
-      date_blocks = check_date_block( institution_id, date )
-
-      if date_blocks.present?
-        caption = 'Блокування документів'
-        message = "Дата списання #{ date_blocks } закрита для редагування!"
-        result = { status: false, message: message, caption: caption }
-      else
-        status = update_base_with_id( :institution_orders, id, data )
-        result = { status: status }
-      end
-    end
-
-    render json: result
-  end
-
   def product_update # Обновление количества
     data = params.permit( :amount ).to_h
     status = update_base_with_id( :institution_order_products, params[ :id ], data )
@@ -327,32 +303,6 @@ class Institution::InstitutionOrdersController < Institution::BaseController
         .joins( product: [ :products_type ] )
         .select( 'products.name AS name', 'products_types.name AS type' )
         .order( :date, 'products_types.priority','products.name' )
-  end
-
-  def correction_update # Обновление реквизитов документа корректировки
-    data = params.permit( :date ).to_h
-
-    result = nil
-    date = data[ :date ]
-
-    if date.present?
-      id = params[ :id ]
-      institution_id = IoCorrection.joins( :institution_order )
-        .select( 'institution_orders.institution_id' ).find( id ).institution_id
-
-      date_blocks = check_date_block( institution_id, date )
-
-      if date_blocks.present?
-        caption = 'Блокування документів'
-        message = "Дата списання #{ date_blocks } закрита для редагування!"
-        result = { status: false, message: message, caption: caption }
-      else
-        status = update_base_with_id( :io_corrections, id, data )
-        result = { status: status }
-      end
-    end
-
-    render json: result
   end
 
   def correction_product_update # Обновление количества корректировки заявки

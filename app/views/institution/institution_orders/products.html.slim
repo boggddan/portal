@@ -7,8 +7,7 @@ main#institution_order_products *{ data: { \
   path: { \
   send: institution_institution_orders_send_sa_path,
   print: institution_institution_orders_print_path,
-  exit: institution_institution_orders_index_path,
-  update: institution_institution_orders_update_path } } }
+  exit: institution_institution_orders_index_path } } }
 
   h1.icon
 
@@ -30,7 +29,7 @@ main#institution_order_products *{ data: { \
       = render label_text, label_attr: { class: :icon_number }, text: 'Заявка №',
         input_attr: { id: :number, value: @institution_order.number, disabled: true }
       = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
-        input_attr: { id: :date, name: :date, value:  date_str( @institution_order.date ), disabled: disabled, readonly: true }
+        input_attr: { id: :date, value:  date_str( @institution_order.date ), disabled: true }
 
   .clmn_main
     #col_iop.clmn *{ data: { path_update: institution_institution_orders_product_update_path } }

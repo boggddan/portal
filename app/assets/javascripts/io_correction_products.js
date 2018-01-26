@@ -39,24 +39,6 @@ $( document ).on( 'turbolinks:load', ( ) => {
       }
     };
 
-    const changeIoCorrention = target => {
-      const elem = target;
-      const { id: nameVal, dataset: { oldValue: valOld }, value: val } = elem;
-
-      if ( val !== valOld ) {
-        const { [ 0 ]: mainElem } = $parentElem;
-        const { dataset: { id: dataId } } = mainElem;
-
-        const data = { id: dataId, [ nameVal ]: val };
-        const caption = `Зміна значення ${ nameVal } з ${ valOld } на ${ val } [id: ${ dataId }]`;
-        const { dataset: { pathUpdate: url } } = mainElem;
-        ( async () => {
-          const result = await MyLib.ajax( caption, url, 'post', data, 'json', null, true );
-          if ( result.status ) elem.dataset.oldValue = val; else elem.value = valOld;
-        } )( );
-      }
-    };
-
     $parentElem
       .find( 'h1' )
       .on( 'click', function( ) { MyLib.clickHeader( $( this ) ) } )
@@ -67,14 +49,6 @@ $( document ).on( 'turbolinks:load', ( ) => {
       .find( '.btn_exit, .btn_save' )
       .on( 'click', function( ) { MyLib.btnExitClick( $( this ) ) } )
       .end( );
-
-    const date = $parentElem[ 0 ].querySelector( '#date' );
-    ( { value: date.dataset.oldValue } = date );
-    $( date ).datepicker( {
-      onSelect( ) {
-        changeIoCorrention( this );
-      }
-    } );
 
     $( '#col_iocp' )
       .find( 'tr.row_data' )

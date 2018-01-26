@@ -5,8 +5,7 @@
 main#io_correction_products *{ data: { \
   id: @io_correction.id,
   path: { send: institution_institution_orders_correction_send_sa_path,
-  exit: institution_institution_orders_index_path,
-  update: institution_institution_orders_correction_update_path } } }
+  exit: institution_institution_orders_index_path } } }
 
   h1.icon
 
@@ -25,13 +24,12 @@ main#io_correction_products *{ data: { \
       = render label_text, label_attr: { class: :icon_number }, text: 'Коректування заявки №',
         input_attr: { id: :number, value: @io_correction.number, disabled: true }
       = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
-        input_attr: { id: :date, name: :date, value:  date_str( @io_correction.date ), disabled: disabled, readonly: true }
+        input_attr: { id: :date, value:  date_str( @io_correction.date ), disabled: true }
 
       = render label_text, label_attr: {class: :icon_number }, text: 'заявки №',
         input_attr: { value: @io_correction.io_number, disabled: true }
       = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
         input_attr: { value:  date_str( @io_correction.io_date ), disabled: true }
-
 
   #col_iocp.clmn *{ data: { path_update: institution_institution_orders_correction_product_update_path } }
     h2 Продукти харчування
