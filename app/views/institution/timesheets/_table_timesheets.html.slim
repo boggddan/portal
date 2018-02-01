@@ -29,6 +29,6 @@ table.table *{ data: { type: :list_doc }  }
         td *{ class: ( timesheet[ :is_del_1c ] ? :is_del  : '' ) } = number_sa
         td = date_str( timesheet[ :date_eb ].to_date )
         td = date_str( timesheet[ :date_ee ].to_date )
-        td : button.btn_view *{ disabled: disabled }
-        td : button.btn_edit *{ disabled: !disabled }
+        td : button.btn_view *{ disabled: !disabled }
+        td : button.btn_edit *{ disabled: disabled }
         td : button.btn_del *{ disabled: number_sa.present? }

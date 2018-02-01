@@ -13,7 +13,7 @@ class Institution::TimesheetsController < Institution::BaseController
                :date_eb,
                :date_ee,
                :is_del_1c,
-               "date_blocks.date ISNULL OR NOT timesheets.is_edit AS disabled"
+               "NOT ( date_blocks.date ISNULL AND timesheets.is_edit ) AS disabled"
       )
       .where( institution_id: current_user[ :userable_id ],
               date: params[ :date_start ]..params[ :date_end ] )
