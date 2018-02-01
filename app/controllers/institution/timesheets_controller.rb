@@ -220,7 +220,7 @@ class Institution::TimesheetsController < Institution::BaseController
       message = "Дата [ #{ date_blocks } ] в табелі закрита для редагування!"
       result = { status: false, message: message, caption: caption }
     else
-      ProductsMove.update( timesheet[ :id ], is_edit: true )
+      Timesheet.update( timesheet[ :id ], is_edit: true )
       result = { status: true }
     end
 
