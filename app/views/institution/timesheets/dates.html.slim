@@ -12,8 +12,7 @@ main#timesheet_dates *{ data: { \
     send: institution_timesheets_send_sa_path,
     exit: institution_timesheets_index_path,
     refresh: institution_timesheets_refresh_path,
-    edit: institution_timesheets_edit_path,
-    update: institution_timesheets_update_path } } }
+    edit: institution_timesheets_edit_path } } }
 
   h1.icon
   .panel_main.row_2
@@ -32,7 +31,7 @@ main#timesheet_dates *{ data: { \
       = render label_text, label_attr: { class: :icon_number }, text: 'Табель №',
         input_attr: { id: :number, value: @timesheet[ :number ], disabled: true }
       = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
-        input_attr: { id: :date, data: { date: @timesheet[ :date ] }, readonly: true }
+        input_attr: { id: :date, data: { date: @timesheet[ :date ] }, disabled: true }
 
       = render label_text, label_attr: { class: :icon_сalendar }, text: 'З',
         input_attr: { data: { date: @timesheet[ :date_eb ] }, disabled: true }

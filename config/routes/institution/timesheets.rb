@@ -9,7 +9,6 @@ namespace :timesheets do
   get :dates # Отображение дней табеля
   post :ajax_filter_timesheet_dates # Фильтрация таблицы
   post :edit #
-  post :update # Обновление реквизитов документа
   post :refresh # Обновление данных о детях
   post :dates_update # Обновление маркера
   post :dates_updates # Обновление группы маркеров

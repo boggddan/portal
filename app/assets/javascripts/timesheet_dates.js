@@ -2,17 +2,11 @@
 
 class TimesheetDates {
   constructor( elem ) {
-    const self = this;
     const parentElem = elem;
 
     this.isDateBlocks = parentElem.dataset.isDateBlocks === 'true';
     this.isSendFirst = parentElem.dataset.isSendFirst === 'true';
     this.isEdit = parentElem.dataset.isEdit === 'true';
-
-    const date = parentElem.querySelector( '#date' );
-    ( { value: date.dataset.oldValue } = date );
-    date.disabled = !this.isEdit;
-    $( date ).datepicker( { onSelect( ) { self.changeTimesheet( this ) } } );
 
     const btnExit = parentElem.querySelector( '.btn_exit' );
     btnExit.addEventListener( 'click', ( ) => this.clickExit( ) );
@@ -122,21 +116,6 @@ class TimesheetDates {
     } );
 
     this.calcMarks( );
-  }
-
-  changeTimesheet( target ) {
-    const elem = target;
-    const { id: nameVal, dataset: { oldValue: valOld }, value: val } = elem;
-
-    if ( val !== valOld ) {
-      elem.dataset.oldValue = val;
-      const { dataId } = this;
-      this.headerText( );
-      const caption = `Зміна значення ${ nameVal } з ${ valOld } на ${ val } [id: ${ dataId }]`;
-      const data = { id: dataId, [ nameVal ]: val };
-      const { parentElem: { dataset: { pathUpdate: url } } } = this;
-      MyLib.ajax( caption, url, 'post', data, 'json', null, false );
-    }
   }
 
   // нажатие на кнопочку выход

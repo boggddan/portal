@@ -469,12 +469,6 @@ class Institution::TimesheetsController < Institution::BaseController
       end
   end
 
-  def update # Обновление реквизитов документа
-    data = params.permit( :date ).to_h
-    status = update_base_with_id( :timesheets, params[ :id ], data )
-    render json: { status: status }
-  end
-
   def dates_update # Обновление маркера
     data = params.permit( :reasons_absence_id ).to_h
     status = update_base_with_id( :timesheet_dates, params[ :id ], data )
