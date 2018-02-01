@@ -117,7 +117,6 @@ class SyncCatalogsController < ApplicationController
     end
   end
 
-
   def supplier_order_number( branch, number, date )
     number = number.nil? ? '' : number.strip
     if supplier_order = SupplierOrder.find_by( branch: branch, number: number, date: date )
@@ -1471,6 +1470,10 @@ class SyncCatalogsController < ApplicationController
   #                 {"children_category_code": "000000002", "product_code": "000000079  ", "count_plan": 21 }]
   #  }
   def menu_requirement_plan_update
+    render json: { result: false, error: 'Веб-сервіс відключений' }
+  end
+
+  def off_menu_requirement_plan_update
     error = { branch_code: 'Не знайдений параметр [branch_code]',
               institution_code: 'Не знайдений параметр [institution_code]',
               number: 'Не знайдений параметр [number]',
@@ -1651,6 +1654,10 @@ class SyncCatalogsController < ApplicationController
   #                 {"children_category_code": "000000002", "product_code": "000000079  ", "count_fact": 21 }]
   #  }
   def menu_requirement_fact_update
+    render json: { result: false, error: 'Веб-сервіс відключений' }
+  end
+
+  def off_menu_requirement_fact_update
     error = { branch_code: 'Не знайдений параметр [branch_code]',
               institution_code: 'Не знайдений параметр [institution_code]',
               number: 'Не знайдений параметр [number]',

@@ -5,20 +5,18 @@ class TimesheetDates {
     const self = this;
     const parentElem = elem;
 
-    const disabled = parentElem.dataset.disabled === 'true';
+    this.isDateBlocks = parentElem.dataset.isDateBlocks === 'true';
+    this.isSendFirst = parentElem.dataset.isSendFirst === 'true';
+    this.isEdit = parentElem.dataset.isEdit === 'true';
 
     const date = parentElem.querySelector( '#date' );
     ( { value: date.dataset.oldValue } = date );
-    date.disabled = disabled;
+    date.disabled = !this.isEdit;
     $( date ).datepicker( { onSelect( ) { self.changeTimesheet( this ) } } );
 
     const btnExit = parentElem.querySelector( '.btn_exit' );
     btnExit.addEventListener( 'click', ( ) => this.clickExit( ) );
-
-    if ( !disabled ) {
-      btnExit.classList.remove( 'btn_exit' );
-      btnExit.classList.add( 'btn_save' );
-    }
+    if ( !this.isDateBlocks && this.isEdit ) btnExit.classList.replace( 'btn_exit', 'btn_save' );
 
     parentElem.querySelector( 'h1' ).addEventListener( 'click', event => this.clickHeader( event.currentTarget ) );
 
@@ -26,18 +24,22 @@ class TimesheetDates {
     groupTimesheet.addEventListener( 'change', event => this.filterGroups( event ) );
 
     const btnSend = parentElem.querySelector( '.btn_send' );
-    btnSend.disabled = disabled;
+    btnSend.disabled = this.isDateBlocks || !this.isEdit;
     btnSend.addEventListener( 'click', ( ) => this.clickSend( ) );
 
+    const btnEdit = parentElem.querySelector( '.btn_edit' );
+    btnEdit.addEventListener( 'click', ( ) => this.clickEdit( ) );
+    btnEdit.disabled = this.isDateBlocks || this.isEdit;
+
     const btnRefresh = parentElem.querySelector( '.btn_refresh' );
-    btnRefresh.disabled = disabled;
+    btnRefresh.disabled = this.isDateBlocks || !this.isEdit;
     btnRefresh.addEventListener( 'click', ( ) => this.clickRefresh( ) );
 
     const colTd = parentElem.querySelector( '#col_td' );
 
     parentElem.querySelectorAll( 'button[data-reasons-absence-id]' ).forEach( child => {
       const elemChild = child;
-      elemChild.disabled = disabled;
+      elemChild.disabled = this.isDateBlocks || !this.isEdit;
       elemChild.addEventListener( 'click', event => this.clickReasonAbsence( event ) );
     } );
 
@@ -90,7 +92,7 @@ class TimesheetDates {
       } );
     }
 
-    [ this.dataId, this.disabled ] = [ +parentElem.dataset.id, disabled ];
+    [ this.dataId ] = [ +parentElem.dataset.id ];
 
     [ this.parentElem, this.colTd, this.colTdParentTable ] = [ parentElem, colTd, colTdParentTable ];
 
@@ -149,6 +151,15 @@ class TimesheetDates {
     const data = { id: this.dataId };
     const successAjax = ( ) => window.location.reload( );
     MyLib.ajax( caption, url, 'post', data, 'json', successAjax, true );
+  }
+
+  clickEdit( ) {
+    const caption = `Редагування табеля [id: ${ this.dataId }]`;
+    const data = { id: this.dataId };
+    const { parentElem: { dataset: { pathEdit: url } } } = this;
+
+    const successAjaxSend = ( ) => window.location.reload( );
+    MyLib.ajax( caption, url, 'post', data, 'json', successAjaxSend, true );
   }
 
   clickRefresh( ) {
@@ -241,7 +252,7 @@ class TimesheetDates {
   cellMarkClickLeft( target ) {
     const elem = target;
 
-    if ( !this.disabled && !elem.hasAttribute( 'disabled' ) ) {
+    if ( this.isEdit && !elem.hasAttribute( 'disabled' ) ) {
       const reasonsAbsence = this.colTd
         .querySelector( `button[data-reasons-absence-id='${ elem.dataset.reasonsAbsenceId }']` );
 
@@ -257,7 +268,7 @@ class TimesheetDates {
     event.preventDefault( );
     const { target: elem } = event;
 
-    if ( !this.disabled && !elem.getAttribute( 'disabled' ) ) {
+    if ( this.isEdit && !elem.getAttribute( 'disabled' ) ) {
       const reasonsAbsence = this.colTd.querySelector( 'button[data-reasons-absence-id]' );
       const { dataset: { reasonsAbsenceId } } = reasonsAbsence;
       elem.dataset.reasonsAbsenceId = reasonsAbsenceId;
@@ -280,7 +291,7 @@ class TimesheetDates {
     const { classList } = elem;
     elem.focus( );
 
-    if ( !this.disabled ) this.changeMarkCell( event );
+    if ( this.isEdit ) this.changeMarkCell( event );
 
     const className = 'hover';
     if ( !elem.classList.contains( className ) && !classList.contains( 'name' ) ) {
@@ -298,7 +309,7 @@ class TimesheetDates {
 
   cellMarkKeyDown( event ) {
     event.preventDefault( );
-    if ( !this.disabled && !event.repeat && event.altKey ) {
+    if ( this.isEdit && !event.repeat && event.altKey ) {
       this.rangeData.minRow = 999999;
       this.rangeData.minCell = 999999;
       this.rangeData.maxRow = 0;

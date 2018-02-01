@@ -35,7 +35,7 @@ $( document ).on( 'turbolinks:load', ( ) => {
       const { id: nameVal, dataset: { oldValue: valOld }, value: val } = elem;
 
       if ( val !== valOld ) {
-        const { [ 0 ]: mainElem } = $parentElem;
+        const { 0: mainElem } = $parentElem;
         const { dataset: { id: dataId } } = mainElem;
 
         const data = { id: dataId, [ nameVal ]: val };
@@ -46,6 +46,16 @@ $( document ).on( 'turbolinks:load', ( ) => {
           if ( result.status ) elem.dataset.oldValue = val; else elem.value = valOld;
         } )( );
       }
+    };
+
+    const clickBtnPrint = ( ) => {
+      const { 0: mainElem } = $parentElem;
+      const { dataset: { id: dataId } } = mainElem;
+
+      const data = { id: dataId };
+      const caption = `Надходження [id: ${ dataId }]`;
+      const { dataset: { pathPrint: url } } = mainElem;
+      MyLib.ajax( caption, url, 'post', data, 'json', null, true );
     };
 
     $parentElem
@@ -78,6 +88,9 @@ $( document ).on( 'turbolinks:load', ( ) => {
     const invoiceNumber = $parentElem[ 0 ].querySelector( '#invoice_number' );
     ( { value: invoiceNumber.dataset.oldValue } = invoiceNumber );
     invoiceNumber.addEventListener( 'change', event => changeReceipt( event.currentTarget ) );
+
+    const btnPrint = $parentElem[ 0 ].querySelector( '.btn_print' );
+    if ( btnPrint ) btnPrint.addEventListener( 'click', ( ) => clickBtnPrint( ) );
 
     $( '.clmn' )
       .find( 'tr.row_data' )

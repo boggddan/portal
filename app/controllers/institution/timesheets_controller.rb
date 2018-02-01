@@ -4,10 +4,21 @@ class Institution::TimesheetsController < Institution::BaseController
   def new ; end
 
   def ajax_filter_timesheets # Фильтрация документов
-    @timesheets = Timesheet
+    @timesheets = JSON.parse( Timesheet
+      .joins( 'LEFT JOIN date_blocks ON timesheets.date_ee = date_blocks.date AND timesheets.institution_id = date_blocks.institution_id' )
+      .select( :id,
+               :number,
+               :date,
+               :number_sa,
+               :date_eb,
+               :date_ee,
+               :is_del_1c,
+               "date_blocks.date ISNULL OR NOT timesheets.is_edit AS disabled"
+      )
       .where( institution_id: current_user[ :userable_id ],
               date: params[ :date_start ]..params[ :date_end ] )
       .order( "#{ params[ :sort_field ] } #{ params[ :sort_order ] }" )
+      .to_json, symbolize_names: true )
   end
 
   def delete # Удаление документа
@@ -19,6 +30,7 @@ class Institution::TimesheetsController < Institution::BaseController
   def create
     date_start = params[ :date_start ].to_date
     date_end = params[ :date_end ].to_date
+    institution_id = current_user[ :userable_id ]
 
     where = <<-SQL.squish
         ( date_eb BETWEEN '#{ date_start }' AND '#{ date_end }'
@@ -32,7 +44,7 @@ class Institution::TimesheetsController < Institution::BaseController
                :date,
                :date_eb,
                :date_ee )
-      .where( institution_id: current_user[ :userable_id ],
+      .where( institution_id: institution_id,
               is_del_1c: false )
       .where( where )
       .order( :number )
@@ -47,141 +59,169 @@ class Institution::TimesheetsController < Institution::BaseController
                      'З': date_str( v[ :date_eb ].to_date ),
                      'ПО': date_str( v[ :date_ee ].to_date ) } } }
     else
-      message = {
-        'CreateRequest' => {
-          'StartDate' => date_start,
-          'EndDate' => date_end,
-          'Institutions_id' => current_institution[ :code ]
-        }
-      }
-
-      savon_return = get_savon( :get_data_time_sheet, message )
-      response = savon_return[ :response ]
-      web_service = savon_return[ :web_service ]
-
-      result = { }
-      ts_data = response[ :ts ]
-
-      if response[ :interface_state ] == 'OK' && ts_data && ts_data.present?
-        error = { }
-
-        values = ts_data.map.with_index { | o, row |
-          "( #{ row + 1 }#{ row.zero? ? '::INTEGER' : '' },
-            #{ o.values_at( :child_code, :children_group_code, :reasons_absence_code, :date )
-                .map.with_index { | v, i | "'#{ v.class.name == 'Nori::StringWithAttributes' ? v.strip : v }'#{ row.zero? ?
-                  if i.between?( 0, 2 ) then '::VARCHAR(9)' elsif i==3 then '::DATE' else '' end
-                    : '' }"  }
-          .join( ',' ) } )" }.join( ',' )
-
-        sql_create_table = <<-SQL.squish
-            ROLLBACK;
-            BEGIN;
-
-            CREATE TEMP TABLE timesheets_get (
-                id,
-                child_code,
-                children_group_code,
-                reasons_absence_code,
-                date
-              )
-            ON COMMIT DROP
-            AS ( VALUES #{ values } );
-
-            CREATE INDEX ON timesheets_get( child_code );
-            CREATE INDEX ON timesheets_get( children_group_code );
-            CREATE INDEX ON timesheets_get( reasons_absence_code );
-          SQL
-
-        sql_select = <<-SQL.squish
-          SELECT
-            aa.id,
-            COALESCE( bb.id, 0 ) AS child_id,
-            COALESCE( bb.name, 'Не знайдений код дитини' ) AS child_name,
-            COALESCE( cc.id, 0 ) AS children_group_id,
-            COALESCE( cc.name, 'Не знайдений код групи' ) AS children_group_name,
-            COALESCE( dd.id, 0 ) AS reasons_absence_id,
-            COALESCE( dd.name, 'Не знайдений код причини відсутності' ) AS reasons_absence_name,
-            aa.child_code,
-            aa.children_group_code,
-            aa.reasons_absence_code,
-            aa.date
-            FROM timesheets_get aa
-            LEFT JOIN children bb ON aa.child_code = bb.code
-            LEFT JOIN children_groups cc ON aa.children_group_code = cc.code
-            LEFT JOIN reasons_absences dd ON aa.reasons_absence_code = dd.code
-            ORDER BY aa.children_group_code,
-                     aa.child_code,
-                     aa.reasons_absence_code,
-                     aa.date;
-        SQL
-
-        timesheets_get = nil
-
-        ActiveRecord::Base.connection_pool
-          .with_connection { | connection |
-            connection.execute( sql_create_table )
-            timesheets_get = JSON.parse( connection.execute( sql_select ).to_json, symbolize_names: true )
-            connection.exec_query( 'COMMIT;' )
+      date_blocks = check_date_block( institution_id, date_end )
+      if date_blocks.present?
+        caption = 'Блокування документів'
+        message = "Дата [ #{ date_blocks } ] в табелі закрита для створення!"
+        result = { status: false, message: message, caption: caption }
+      else
+        message = {
+          'CreateRequest' => {
+            'StartDate' => date_start,
+            'EndDate' => date_end,
+            'Institutions_id' => current_institution[ :code ]
           }
+        }
 
-        error = timesheets_get
-          .select { | o | o[ :children_group_id ].zero? || o[ :child_id ].zero? || o[ :reasons_absence_id ].zero? }
-          .group_by { | o | [
-            'Код групи': o[ :children_group_code ],
-            'Назва групи': o[ :children_group_name ],
-            'Код дитини': o[ :child_code ],
-            'П.І.Б. дитини': o[ :child_name ],
-            'Код причини відстуності': o[ :reasons_absence_code ],
-            'Причина відсутності': o[ :reasons_absence_name ]
-          ] }.keys
+        savon_return = get_savon( :get_data_time_sheet, message )
+        response = savon_return[ :response ]
+        web_service = savon_return[ :web_service ]
 
-        if error.empty?
-          insert_sql_values = timesheets_get.map.with_index { | o, row |
-            "( #{ o.values_at( :children_group_id, :child_id, :reasons_absence_id, :date )
-                  .map.with_index { | v, i | "'#{ v }'#{ row.zero? ?
-                    if i.between?( 0, 2 ) then '::INTEGER' elsif i==3 then '::DATE' else '' end
+        result = { }
+        ts_data = response[ :ts ]
+
+        if response[ :interface_state ] == 'OK' && ts_data && ts_data.present?
+          error = { }
+
+          values = ts_data.map.with_index { | o, row |
+            "( #{ row + 1 }#{ row.zero? ? '::INTEGER' : '' },
+              #{ o.values_at( :child_code, :children_group_code, :reasons_absence_code, :date )
+                  .map.with_index { | v, i | "'#{ v.class.name == 'Nori::StringWithAttributes' ? v.strip : v }'#{ row.zero? ?
+                    if i.between?( 0, 2 ) then '::VARCHAR(9)' elsif i==3 then '::DATE' else '' end
                       : '' }"  }
             .join( ',' ) } )" }.join( ',' )
 
-          sql = <<-SQL.squish
-              WITH new_menu_requirement( timesheet_id ) AS (
-                INSERT INTO timesheets
-                  ( institution_id, branch_id, date_vb, date_ve, date_eb, date_ee )
-                  VALUES (
-                    #{ current_user[ :userable_id ] },
-                    #{ current_institution[ :branch_id ] },
-                    '#{ response[ :date_vb ] }',
-                    '#{ response[ :date_ve ] }',
-                    '#{ response[ :date_eb ] }',
-                    '#{ response[ :date_ee ] }' )
-                  RETURNING id
-                  ),
-                  data_td ( children_group_id, child_id, reasons_absence_id, date) AS (
-                    VALUES #{ insert_sql_values } )
-                INSERT INTO timesheet_dates
-                  ( timesheet_id, children_group_id, child_id, reasons_absence_id, date )
-                  SELECT new_menu_requirement.timesheet_id,
-                          data_td.children_group_id,
-                          data_td.child_id,
-                          data_td.reasons_absence_id,
-                          data_td.date
-                    FROM new_menu_requirement,
-                          data_td
-                  RETURNING timesheet_id
+          sql_create_table = <<-SQL.squish
+              ROLLBACK;
+              BEGIN;
+
+              CREATE TEMP TABLE timesheets_get (
+                  id,
+                  child_code,
+                  children_group_code,
+                  reasons_absence_code,
+                  date
+                )
+              ON COMMIT DROP
+              AS ( VALUES #{ values } );
+
+              CREATE INDEX ON timesheets_get( child_code );
+              CREATE INDEX ON timesheets_get( children_group_code );
+              CREATE INDEX ON timesheets_get( reasons_absence_code );
             SQL
 
-          timesheet_id = JSON.parse( ActiveRecord::Base.connection.execute( sql )
-            .to_json, symbolize_names: true )[ 0 ][ :timesheet_id ]
+          sql_select = <<-SQL.squish
+            SELECT
+              aa.id,
+              COALESCE( bb.id, 0 ) AS child_id,
+              COALESCE( bb.name, 'Не знайдений код дитини' ) AS child_name,
+              COALESCE( cc.id, 0 ) AS children_group_id,
+              COALESCE( cc.name, 'Не знайдений код групи' ) AS children_group_name,
+              COALESCE( dd.id, 0 ) AS reasons_absence_id,
+              COALESCE( dd.name, 'Не знайдений код причини відсутності' ) AS reasons_absence_name,
+              aa.child_code,
+              aa.children_group_code,
+              aa.reasons_absence_code,
+              aa.date
+              FROM timesheets_get aa
+              LEFT JOIN children bb ON aa.child_code = bb.code
+              LEFT JOIN children_groups cc ON aa.children_group_code = cc.code
+              LEFT JOIN reasons_absences dd ON aa.reasons_absence_code = dd.code
+              ORDER BY aa.children_group_code,
+                      aa.child_code,
+                      aa.reasons_absence_code,
+                      aa.date;
+          SQL
 
-          href = institution_timesheets_dates_path( { id: timesheet_id } )
-          result = { status: true, href: href }
+          timesheets_get = nil
+
+          ActiveRecord::Base.connection_pool
+            .with_connection { | connection |
+              connection.execute( sql_create_table )
+              timesheets_get = JSON.parse( connection.execute( sql_select ).to_json, symbolize_names: true )
+              connection.exec_query( 'COMMIT;' )
+            }
+
+          error = timesheets_get
+            .select { | o | o[ :children_group_id ].zero? || o[ :child_id ].zero? || o[ :reasons_absence_id ].zero? }
+            .group_by { | o | [
+              'Код групи': o[ :children_group_code ],
+              'Назва групи': o[ :children_group_name ],
+              'Код дитини': o[ :child_code ],
+              'П.І.Б. дитини': o[ :child_name ],
+              'Код причини відстуності': o[ :reasons_absence_code ],
+              'Причина відсутності': o[ :reasons_absence_name ]
+            ] }.keys
+
+          if error.empty?
+            insert_sql_values = timesheets_get.map.with_index { | o, row |
+              "( #{ o.values_at( :children_group_id, :child_id, :reasons_absence_id, :date )
+                    .map.with_index { | v, i | "'#{ v }'#{ row.zero? ?
+                      if i.between?( 0, 2 ) then '::INTEGER' elsif i==3 then '::DATE' else '' end
+                        : '' }"  }
+              .join( ',' ) } )" }.join( ',' )
+
+            sql = <<-SQL.squish
+                WITH new_menu_requirement( timesheet_id ) AS (
+                  INSERT INTO timesheets
+                    ( institution_id, branch_id, date_vb, date_ve, date_eb, date_ee )
+                    VALUES (
+                      #{ current_user[ :userable_id ] },
+                      #{ current_institution[ :branch_id ] },
+                      '#{ response[ :date_vb ] }',
+                      '#{ response[ :date_ve ] }',
+                      '#{ response[ :date_eb ] }',
+                      '#{ response[ :date_ee ] }' )
+                    RETURNING id
+                    ),
+                    data_td ( children_group_id, child_id, reasons_absence_id, date) AS (
+                      VALUES #{ insert_sql_values } )
+                  INSERT INTO timesheet_dates
+                    ( timesheet_id, children_group_id, child_id, reasons_absence_id, date )
+                    SELECT new_menu_requirement.timesheet_id,
+                            data_td.children_group_id,
+                            data_td.child_id,
+                            data_td.reasons_absence_id,
+                            data_td.date
+                      FROM new_menu_requirement,
+                            data_td
+                    RETURNING timesheet_id
+              SQL
+
+            timesheet_id = JSON.parse( ActiveRecord::Base.connection.execute( sql )
+              .to_json, symbolize_names: true )[ 0 ][ :timesheet_id ]
+
+            href = institution_timesheets_dates_path( { id: timesheet_id } )
+            result = { status: true, href: href }
+          else
+            result = { status: false, caption: 'Неможливо створити документ', message: error }
+          end
         else
-          result = { status: false, caption: 'Неможливо створити документ', message: error }
+          result = { status: false, caption: 'За вибраний період даних немає в ІС',
+                    message: web_service.merge!( response: response ) }
         end
-      else
-        result = { status: false, caption: 'За вибраний період даних немає в ІС',
-                   message: web_service.merge!( response: response ) }
       end
+    end
+
+    render json: result
+  end
+
+  def edit
+    timesheet = JSON.parse( Timesheet
+      .select( :id,
+               :date_ee,
+               :institution_id )
+      .find( params[ :id ] )
+      .to_json( ), symbolize_names: true )
+
+    date_blocks = check_date_block( timesheet[ :institution_id ], timesheet[ :date_ee ] )
+    if date_blocks.present?
+      caption = 'Блокування документів'
+      message = "Дата [ #{ date_blocks } ] в табелі закрита для редагування!"
+      result = { status: false, message: message, caption: caption }
+    else
+      ProductsMove.update( timesheet[ :id ], is_edit: true )
+      result = { status: true }
     end
 
     render json: result
@@ -198,6 +238,8 @@ class Institution::TimesheetsController < Institution::BaseController
                :date_ve,
                :date_eb,
                :date_ee,
+               :number_sa,
+               :institution_id,
                'institutions.code AS institution_code' )
       .find( timesheet_id )
       .to_json, symbolize_names: true )
@@ -205,55 +247,64 @@ class Institution::TimesheetsController < Institution::BaseController
     date_start = timesheet[ :date_eb ]
     date_end = timesheet[ :date_ee ]
 
-    timesheet_dates = JSON.parse( TimesheetDate
-      .joins( { children_group: :children_category }, :child, :reasons_absence )
-      .select( :id, :date,
-              'children_categories.code AS category_code',
-              'children_groups.code AS group_code',
-              'children.code AS child_code',
-              'reasons_absences.code AS reason_code' )
-      .where( timesheet_id: timesheet_id )
-      .where.not( children_categories: { code: '000000027' } )
-      .order( 'category_code', 'group_code', 'child_code', :date )
-      .to_json, symbolize_names: true )
-
-    result = { }
-    if timesheet_dates.present?
-      ts = timesheet_dates.map{ | o | {
-        'Child_code' => o[ :child_code ],
-        'Children_group_code' => o[ :group_code ],
-        'Reasons_absence_code' => o[ :reason_code ],
-        'Date' => o[ :date ]
-        }
-      }
-
-      message = {
-        'CreateRequest' => {
-          'Institutions_id' => timesheet[ :institution_code ],
-          'NumberFromWebPortal' => timesheet[ :number ],
-          'StartDate' => timesheet[ :date_vb ],
-          'EndDate' => timesheet[ :date_ve ],
-          'StartDateOfTheFill' => date_start,
-          'EndDateOfTheFill' => date_end,
-          'TS' => ts,
-          'User' => current_user[ :username ]
-        }
-      }
-
-      savon_return = get_savon( :creation_time_sheet, message )
-      response = savon_return[ :response ]
-      web_service = savon_return[ :web_service ]
-
-      if response[ :interface_state ] == 'OK'
-        data = { date_sa: Date.today, number_sa: response[ :respond ].to_s }
-        update_base_with_id( :timesheets, timesheet_id, data )
-        result = { status: true }
-      else
-        result = { status: false, caption: 'Неуспішна сихронізація з ІС',
-                  message: web_service.merge!( response: response ) }
-      end
+    date_blocks = check_date_block( timesheet[ :institution_id ], date_end )
+    if date_blocks.present?
+      caption = 'Блокування документів'
+      message = "Дата списання #{ date_blocks } закрита для відправлення!"
+      result = { status: false, message: message, caption: caption }
     else
-      result = { status: false, caption: 'Немає данних' }
+      timesheet_dates = JSON.parse( TimesheetDate
+        .joins( { children_group: :children_category }, :child, :reasons_absence )
+        .select( :id, :date,
+                'children_categories.code AS category_code',
+                'children_groups.code AS group_code',
+                'children.code AS child_code',
+                'reasons_absences.code AS reason_code' )
+        .where( timesheet_id: timesheet_id )
+        .where.not( children_categories: { code: '000000027' } )
+        .order( 'category_code', 'group_code', 'child_code', :date )
+        .to_json, symbolize_names: true )
+
+      result = { }
+      if timesheet_dates.present?
+        ts = timesheet_dates.map{ | o | {
+          'Child_code' => o[ :child_code ],
+          'Children_group_code' => o[ :group_code ],
+          'Reasons_absence_code' => o[ :reason_code ],
+          'Date' => o[ :date ]
+          }
+        }
+
+        message = {
+          'CreateRequest' => {
+            'Institutions_id' => timesheet[ :institution_code ],
+            'NumberFromWebPortal' => timesheet[ :number ],
+            'StartDate' => timesheet[ :date_vb ],
+            'EndDate' => timesheet[ :date_ve ],
+            'StartDateOfTheFill' => date_start,
+            'EndDateOfTheFill' => date_end,
+            'TS' => ts,
+            'User' => current_user[ :username ]
+          }
+        }
+
+        savon_return = get_savon( :creation_time_sheet, message )
+        response = savon_return[ :response ]
+        web_service = savon_return[ :web_service ]
+
+        if response[ :interface_state ] == 'OK'
+          data = { date_sa: Date.today,
+                   number_sa: response[ :respond ].to_s,
+                   is_edit: false }
+          update_base_with_id( :timesheets, timesheet_id, data )
+          result = { status: true }
+        else
+          result = { status: false, caption: 'Неуспішна сихронізація з ІС',
+                    message: web_service.merge!( response: response ) }
+        end
+      else
+        result = { status: false, caption: 'Немає данних' }
+      end
     end
 
     render json: result
@@ -374,9 +425,19 @@ class Institution::TimesheetsController < Institution::BaseController
 
   def dates # Отображение дней табеля
     @timesheet = JSON.parse( Timesheet
-      .select( :id, :number, :date, :number_sa, :date_sa, :date_eb, :date_ee )
+      .select( :id,
+               :number,
+               :date,
+               :number_sa,
+               :date_sa,
+               :date_eb,
+               :date_ee,
+               :institution_id,
+               :is_edit )
       .find( params[ :id ] )
       .to_json, symbolize_names: true )
+
+    @is_date_blocks = check_date_block( @timesheet[ :institution_id ], @timesheet[ :date_ee ] ).present?
 
     reasons_absences = JSON.parse( ReasonsAbsence.select( :id, :code, :mark ).where( code: '' )
       .or( ReasonsAbsence.select( :id, :code, :mark ).where.not( mark: '' ) )

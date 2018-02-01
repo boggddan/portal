@@ -3,18 +3,23 @@
 - label_text = 'layouts/label_text'
 
 main#timesheet_dates *{ data: { \
-  id: @timesheet[ :id ], disabled: disabled.to_s,
+  id: @timesheet[ :id ],
+  is_date_blocks: @is_date_blocks.to_s,
+  is_send_first: @timesheet[ :number_sa ].empty?.to_s,
+  is_edit: @timesheet[ :is_edit ].to_s,
   reasons_absences: @reasons_absences.map { | o | o[ :id ] },
   path: { \
     send: institution_timesheets_send_sa_path,
     exit: institution_timesheets_index_path,
     refresh: institution_timesheets_refresh_path,
+    edit: institution_timesheets_edit_path,
     update: institution_timesheets_update_path } } }
 
   h1.icon
   .panel_main.row_2
     .panel
       button.btn_send
+      button.btn_gradient.btn_edit Редагувати
       button.btn_exit
       - if disabled
         = render label_text, label_attr: { class: :icon_number }, text: 'Надіслано документ:',

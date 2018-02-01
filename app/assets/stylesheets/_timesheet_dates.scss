@@ -10,6 +10,11 @@
 }
 
 #timesheet_dates {
+  .btn_edit:not( :disabled ) {
+    background-image: linear-gradient( to right, #b5e8b3, #cbf1ca 51%, #b5e8b3 100% );
+    color: black;
+  }
+
   .clmn {
 
     label {

@@ -20,13 +20,15 @@ table.table *{ data: { type: :list_doc }  }
       th *{ colspan: 3 }
 
   tbody
-    - @timesheets.each do | tm |
-      tr *{ data: { id: tm.id } }
-        td = date_str( tm.date )
-        td *{ data: { delete: true } } = tm.number
-        td *{ class: ( tm.is_del_1c ? :is_del  : '' ) } = tm.number_sa
-        td = date_str( tm.date_eb )
-        td = date_str( tm.date_ee )
-        td : button.btn_view *{ disabled: !tm.number_sa.present? }
-        td : button.btn_edit *{ disabled: tm.number_sa.present? }
-        td : button.btn_del *{ disabled: tm.number_sa.present? }
+    - @timesheets.each do | timesheet |
+      - number_sa = timesheet[ :number_sa ]
+      - disabled = timesheet[ :disabled ]
+      tr *{ data: { id: timesheet[ :id ] } }
+        td = date_str( timesheet[ :date ].to_date )
+        td *{ data: { delete: true } } = timesheet[ :number ]
+        td *{ class: ( timesheet[ :is_del_1c ] ? :is_del  : '' ) } = number_sa
+        td = date_str( timesheet[ :date_eb ].to_date )
+        td = date_str( timesheet[ :date_ee ].to_date )
+        td : button.btn_view *{ disabled: disabled }
+        td : button.btn_edit *{ disabled: !disabled }
+        td : button.btn_del *{ disabled: number_sa.present? }
