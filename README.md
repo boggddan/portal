@@ -27,6 +27,7 @@
 - [Документи](#Документи-top)
   - [*Замовлення постачальнику* - `supplier_orders`](#Замовлення-постачальнику---supplier_orders-top)
   - [*Надходження ТМЦ* - `receipts`](#Надходження-ТМЦ---receipts-top)
+  - [*Заміна номеру договору у замовленнях постачальнику та надходженнях ТМЦ*](#Заміна-номеру-договору-у-замовленнях-постачальнику-та-надходженнях-ТМЦ-top)
   - [*Замовлення продуктів харчування* - `institution_orders`](#Замовлення-продуктів-харчування---institution_orders-top)
   - [*Коригування замовлення продуктів харчування* - `io_corrections`](#Коригування-замовлення-продуктів-харчування---io_corrections-top)
   - [*Меню-вимога* - `menu_requirements`](#Меню-вимога---menu_requirements-top)
@@ -314,6 +315,17 @@ POST /api/cu_receipt
 
 GET /api/receipt?/receipt?institution_code=14&number=KL-000000005
 DELETE /api/receipt { "institution_code": "14", "number": "000000000002" }
+```
+
+### *Заміна номеру договору у замовленнях постачальнику та надходженнях ТМЦ* [:top:](#Зміст)
+
+```json
+DELETE /api/replace_contract_number
+{
+  "contract_number_old": "112",
+  "contract_number_new": "11111",
+  "year": "2018"
+}
 ```
 
 ### *Замовлення продуктів харчування* - `institution_orders` [:top:](#Зміст)

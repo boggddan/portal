@@ -2571,4 +2571,55 @@ class SyncCatalogsController < ApplicationController
       render json: result
   end
 
+
+
+  ###############################################################################################
+  # DELETE /api/replace_contract_number
+  # {
+  #   "contract_number_old": "112",
+  #   "contract_number_new": "11111",
+  #   "year": "2018"
+  # }
+  def replace_contract_number
+    error = {
+      contract_number_old: 'Не знайдений параметр [contract_number_old]',
+      contract_number_new: 'Не знайдений параметр [contract_number_new]',
+      year: 'Не знайдений параметр [ year ]'
+    }.stringify_keys!.except( *params.keys )
+
+    if error.empty?
+      contract_number_old = params[ :contract_number_old ]
+      contract_number_new = params[ :contract_number_new ]
+      year = params[ :year ]
+
+      sql = <<-SQL.squish
+          WITH
+            upd_supplier_order_products( supplier_order_id ) AS (
+              UPDATE supplier_order_products SET
+                contract_number = '#{ contract_number_new }'
+                FROM supplier_orders aa
+              WHERE aa.id = supplier_order_products.supplier_order_id
+                  AND
+                  contract_number = '#{ contract_number_old }'
+                  AND
+                  date_part( 'year', aa.date_start ) = #{ year }
+              RETURNING aa.id
+          )
+          UPDATE receipts SET
+              contract_number = '#{ contract_number_new }'
+            FROM
+                ( SELECT DISTINCT supplier_order_id FROM upd_supplier_order_products ) aa
+            WHERE aa.supplier_order_id = receipts.supplier_order_id
+                  AND
+                  receipts.contract_number = '#{ contract_number_old }'
+        SQL
+
+      ActiveRecord::Base.connection.execute( sql )
+      result = { status: true }
+    else
+      result = { status: false, error: error }
+    end
+
+    render json: result
+  end
 end

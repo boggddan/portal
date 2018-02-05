@@ -102,4 +102,5 @@ scope :api, controller: :sync_catalogs do
   delete :timesheet_delete, path: :timesheet
 
   delete :delete
+  post :replace_contract_number
 end
