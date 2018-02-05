@@ -2596,22 +2596,22 @@ class SyncCatalogsController < ApplicationController
           WITH
             upd_supplier_order_products( supplier_order_id ) AS (
               UPDATE supplier_order_products SET
-                contract_number = '#{ contract_number_new }'
+                contract_number_manual = '#{ contract_number_new }'
                 FROM supplier_orders aa
               WHERE aa.id = supplier_order_products.supplier_order_id
                   AND
-                  contract_number = '#{ contract_number_old }'
+                  contract_number_manual = '#{ contract_number_old }'
                   AND
-                  date_part( 'year', aa.date_start ) = #{ year }
+                  date_part( 'year', aa.date ) = #{ year }
               RETURNING aa.id
           )
           UPDATE receipts SET
-              contract_number = '#{ contract_number_new }'
+              contract_number_manual = '#{ contract_number_new }'
             FROM
                 ( SELECT DISTINCT supplier_order_id FROM upd_supplier_order_products ) aa
             WHERE aa.supplier_order_id = receipts.supplier_order_id
                   AND
-                  receipts.contract_number = '#{ contract_number_old }'
+                  receipts.contract_number_manual = '#{ contract_number_old }'
         SQL
 
       ActiveRecord::Base.connection.execute( sql )
