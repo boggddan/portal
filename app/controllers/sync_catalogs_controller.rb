@@ -1792,6 +1792,20 @@ class SyncCatalogsController < ApplicationController
 
               ActiveRecord::Base.connection.execute( sql_menu_products_price )
 
+              ###########################################
+
+              menu_requirement = JSON.parse( MenuRequirement
+                .joins( institution: :branch )
+                .select( :id,
+                         :splendingdate,
+                         'institutions.code AS institution_code',
+                         'branches.code AS branch_code' )
+                .find( id )
+                .to_json, symbolize_names: true )
+
+              update_prices_for_menu_requirement( menu_requirement )
+              ###########################################
+
               File.open( "./public/web_get/cu_menu_requirement_fact.txt", 'a' ) { | f |
                 f.write( "\n *** #{ Time.now} ***#{ params.to_json }" )
               }
@@ -2625,22 +2639,22 @@ class SyncCatalogsController < ApplicationController
           WITH
             upd_supplier_order_products( supplier_order_id ) AS (
               UPDATE supplier_order_products SET
-                contract_number_manual = '#{ contract_number_new }'
+                contract_number = '#{ contract_number_new }'
                 FROM supplier_orders aa
               WHERE aa.id = supplier_order_products.supplier_order_id
                   AND
-                  contract_number_manual = '#{ contract_number_old }'
+                  contract_number = '#{ contract_number_old }'
                   AND
                   date_part( 'year', aa.date ) = #{ year }
               RETURNING aa.id
           )
           UPDATE receipts SET
-              contract_number_manual = '#{ contract_number_new }'
+              contract_number = '#{ contract_number_new }'
             FROM
                 ( SELECT DISTINCT supplier_order_id FROM upd_supplier_order_products ) aa
             WHERE aa.supplier_order_id = receipts.supplier_order_id
                   AND
-                  receipts.contract_number_manual = '#{ contract_number_old }'
+                  receipts.contract_number = '#{ contract_number_old }'
         SQL
 
       ActiveRecord::Base.connection.execute( sql )

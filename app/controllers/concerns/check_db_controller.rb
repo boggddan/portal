@@ -66,8 +66,86 @@ module CheckDbController
         obj: obj.map { | o | [ o[ :code ], o[ :id ] ] }.to_h,
         error: { table => "Не знайдені кода: #{ error_codes.to_s.gsub( '"', '\'' ) }" } }
     end
-
-
   end
 
+  def update_prices_for_menu_requirement( menu_requirement ) # Обновление остатков і цен продуктов
+    menu_products_price = JSON.parse( MenuProductsPrice
+      .joins( :product )
+      .select( :id,
+               :product_id,
+               :price,
+               :balance,
+               'products.code',
+               'products.name' )
+      .where( menu_requirement_id: menu_requirement[ :id ] )
+      .order( 'products.name' )
+      .to_json, symbolize_names: true )
+
+    goods = menu_products_price
+      .map { | o | { 'Product' => o[ :code ] } }
+
+    message = {
+      'CreateRequest' => {
+        'Branch_id' => menu_requirement[ :branch_code ],
+        'Institutions_id' => menu_requirement[ :institution_code ],
+        'Date' => menu_requirement[ :splendingdate ],
+        'ArrayOfGoods' => goods
+      }
+    }
+
+    savon_return = get_savon( :get_actual_price, message )
+    response = savon_return[ :response ]
+    web_service = savon_return[ :web_service ]
+
+    array_of_goods = response[ :array_of_goods ]
+
+    if response[ :interface_state ] == 'OK'&& array_of_goods
+      actual_prices = array_of_goods.class == Hash ? [ ] << array_of_goods : array_of_goods
+
+      menu_products_prices_sql = ''
+
+      prices_message = [ ]
+      prices_data = [ ]
+
+      menu_products_price.each { | mpp |
+        actual_price = actual_prices.find { | o | o[ :product ].strip == mpp[ :code ] }
+
+        if actual_price
+          price = actual_price[ :price ].to_d.truncate( 5 )
+          balance = actual_price[ :quantity ].to_d.truncate( 3 )
+
+          if price != mpp[ :price ].to_d || balance != mpp[ :balance ].to_d
+            prices_message << {
+              'Продукт' => mpp[ :name ],
+              'Ціна' => price,
+              'Залишок' => balance
+            }
+
+            prices_data << {
+              product_id: mpp[ :product_id ],
+              price: price,
+              balance: balance
+            }
+
+            menu_products_prices_sql << <<-SQL.squish
+                UPDATE menu_products_prices
+                  SET price = #{ price },
+                      balance =#{ balance }
+                  WHERE id = #{ mpp[ :id ] } ;
+              SQL
+          end
+        end
+      }
+
+      if prices_data.any?
+        ActiveRecord::Base.connection.execute( menu_products_prices_sql )
+        result = { status: true, caption: 'Оновлені продукти', message: prices_message, data: prices_data }
+      else
+        result = { status: true }
+      end
+    else
+      result = { status: false, caption: 'Неуспішна сихронізація з ІС',
+                 message: web_service.merge!( response: response ) }
+    end
+  end
 end

@@ -161,7 +161,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       SQL
 
     ActiveRecord::Base.connection.execute( sql_menu_products_price )
-    update_prices( @menu_requirement ) # Обновление остатков і цен продуктов
+    update_prices_for_menu_requirement( @menu_requirement ) # Обновление остатков і цен продуктов
     menu_products( menu_requirement_id )
   end
 
@@ -319,98 +319,98 @@ class Institution::MenuRequirementsController < Institution::BaseController
         id: k[ 1 ], name: v[ 0 ][ :dishes_name ] } }
   end
 
-  def get_actual_price( menu_requirement, products )
-    goods = products
-      .map { | o | { 'Product' => o[ :code ] } }
+  # def get_actual_price( menu_requirement, products )
+  #   goods = products
+  #     .map { | o | { 'Product' => o[ :code ] } }
 
-    message = {
-      'CreateRequest' => {
-        'Branch_id' => menu_requirement[ :branch_code ],
-        'Institutions_id' => menu_requirement[ :institution_code ],
-        'Date' => menu_requirement[ :splendingdate ],
-        'ArrayOfGoods' => goods
-      }
-    }
+  #   message = {
+  #     'CreateRequest' => {
+  #       'Branch_id' => menu_requirement[ :branch_code ],
+  #       'Institutions_id' => menu_requirement[ :institution_code ],
+  #       'Date' => menu_requirement[ :splendingdate ],
+  #       'ArrayOfGoods' => goods
+  #     }
+  #   }
 
-    savon_return = get_savon( :get_actual_price, message )
-    response = savon_return[ :response ]
-    web_service = savon_return[ :web_service ]
+  #   savon_return = get_savon( :get_actual_price, message )
+  #   response = savon_return[ :response ]
+  #   web_service = savon_return[ :web_service ]
 
-    array_of_goods = response[ :array_of_goods ]
+  #   array_of_goods = response[ :array_of_goods ]
 
-    if response[ :interface_state ] == 'OK'&& array_of_goods
-      actual_prices = array_of_goods.class == Hash ? [ ] << array_of_goods : array_of_goods
-      result = { status: true, actual_prices: actual_prices }
-    else
-      result = { status: false, caption: 'Неуспішна сихронізація з ІС',
-                 message: web_service.merge!( response: response ) }
-    end
+  #   if response[ :interface_state ] == 'OK'&& array_of_goods
+  #     actual_prices = array_of_goods.class == Hash ? [ ] << array_of_goods : array_of_goods
+  #     result = { status: true, actual_prices: actual_prices }
+  #   else
+  #     result = { status: false, caption: 'Неуспішна сихронізація з ІС',
+  #                message: web_service.merge!( response: response ) }
+  #   end
 
-    return result
-  end
+  #   return result
+  # end
 
-  def update_prices( menu_requirement ) # Обновление остатков і цен продуктов
-    menu_products_price = JSON.parse( MenuProductsPrice
-      .joins( :product )
-      .select( :id,
-               :product_id,
-               :price,
-               :balance,
-               'products.code',
-               'products.name' )
-      .where( menu_requirement_id: menu_requirement[ :id ] )
-      .order( 'products.name' )
-      .to_json, symbolize_names: true )
+  # def update_prices( menu_requirement ) # Обновление остатков і цен продуктов
+  #   menu_products_price = JSON.parse( MenuProductsPrice
+  #     .joins( :product )
+  #     .select( :id,
+  #              :product_id,
+  #              :price,
+  #              :balance,
+  #              'products.code',
+  #              'products.name' )
+  #     .where( menu_requirement_id: menu_requirement[ :id ] )
+  #     .order( 'products.name' )
+  #     .to_json, symbolize_names: true )
 
-    return_prices = get_actual_price( menu_requirement, menu_products_price )
+  #   return_prices = get_actual_price( menu_requirement, menu_products_price )
 
-    if return_prices[ :status ]
-      menu_products_prices_sql = ''
+  #   if return_prices[ :status ]
+  #     menu_products_prices_sql = ''
 
-      actual_prices = return_prices[ :actual_prices ]
-      prices_message = [ ]
-      prices_data = [ ]
+  #     actual_prices = return_prices[ :actual_prices ]
+  #     prices_message = [ ]
+  #     prices_data = [ ]
 
-      menu_products_price.each { | mpp |
-        actual_price = actual_prices.find { | o | o[ :product ].strip == mpp[ :code ] }
+  #     menu_products_price.each { | mpp |
+  #       actual_price = actual_prices.find { | o | o[ :product ].strip == mpp[ :code ] }
 
-        if actual_price
-          price = actual_price[ :price ].to_d.truncate( 5 )
-          balance = actual_price[ :quantity ].to_d.truncate( 3 )
+  #       if actual_price
+  #         price = actual_price[ :price ].to_d.truncate( 5 )
+  #         balance = actual_price[ :quantity ].to_d.truncate( 3 )
 
-          if price != mpp[ :price ].to_d || balance != mpp[ :balance ].to_d
-            prices_message << {
-              'Продукт' => mpp[ :name ],
-              'Ціна' => price,
-              'Залишок' => balance
-            }
+  #         if price != mpp[ :price ].to_d || balance != mpp[ :balance ].to_d
+  #           prices_message << {
+  #             'Продукт' => mpp[ :name ],
+  #             'Ціна' => price,
+  #             'Залишок' => balance
+  #           }
 
-            prices_data << {
-              product_id: mpp[ :product_id ],
-              price: price,
-              balance: balance
-            }
+  #           prices_data << {
+  #             product_id: mpp[ :product_id ],
+  #             price: price,
+  #             balance: balance
+  #           }
 
-            menu_products_prices_sql << <<-SQL.squish
-                UPDATE menu_products_prices
-                  SET price = #{ price },
-                      balance =#{ balance }
-                  WHERE id = #{ mpp[ :id ] } ;
-              SQL
-          end
-        end
-      }
+  #           menu_products_prices_sql << <<-SQL.squish
+  #               UPDATE menu_products_prices
+  #                 SET price = #{ price },
+  #                     balance =#{ balance }
+  #                 WHERE id = #{ mpp[ :id ] } ;
+  #             SQL
+  #         end
+  #       end
+  #     }
 
-      if prices_data.any?
-        ActiveRecord::Base.connection.execute( menu_products_prices_sql )
-        result = { status: true, caption: 'Оновлені продукти', message: prices_message, data: prices_data }
-      else
-        result = { status: true }
-      end
-    else
-      result =  return_prices
-    end
-  end
+  #     if prices_data.any?
+  #       ActiveRecord::Base.connection.execute( menu_products_prices_sql )
+  #       result = { status: true, caption: 'Оновлені продукти', message: prices_message, data: prices_data }
+  #     else
+  #       result = { status: true }
+  #     end
+  #   else
+  #     result =  return_prices
+  #   end
+  # end
 
   def prices # Обновление остатков і цен продуктов
     menu_requirement = JSON.parse( MenuRequirement
@@ -422,7 +422,7 @@ class Institution::MenuRequirementsController < Institution::BaseController
       .find( params[ :id ] )
       .to_json, symbolize_names: true )
 
-    result = update_prices( menu_requirement ) # Обновление остатков і цен продуктов
+    result = update_prices_for_menu_requirement( menu_requirement ) # Обновление остатков і цен продуктов
 
     render json: result
   end
