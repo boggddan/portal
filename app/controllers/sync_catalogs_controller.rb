@@ -1469,11 +1469,11 @@ class SyncCatalogsController < ApplicationController
   #    "products": [{"children_category_code": "000000001", "product_code": "000000079  ", "count_plan": 15 },
   #                 {"children_category_code": "000000002", "product_code": "000000079  ", "count_plan": 21 }]
   #  }
-  def menu_requirement_plan_update
-    render json: { result: false, error: 'Веб-сервіс відключений' }
-  end
+  # def menu_requirement_plan_update
+  #   render json: { result: false, error: 'Веб-сервіс відключений' }
+  # end
 
-  def off_menu_requirement_plan_update
+  def menu_requirement_plan_update
     error = { branch_code: 'Не знайдений параметр [branch_code]',
               institution_code: 'Не знайдений параметр [institution_code]',
               number: 'Не знайдений параметр [number]',
@@ -1483,8 +1483,10 @@ class SyncCatalogsController < ApplicationController
               number_sap: 'Не знайдений параметр [number_sap]',
               children_categories: 'Не знайдений параметр [children_categories]',
               products: 'Не знайдений параметр [products]' }.stringify_keys!.except( *params.keys )
+
     number = params[ :number ].strip
     id = 0
+    menu_requirement = nil
     if error.empty?
       branch = branch_code( params[ :branch_code ].strip )
       error.merge!( branch[ :error ] ) if branch[ :error ]
@@ -1496,18 +1498,18 @@ class SyncCatalogsController < ApplicationController
         ActiveRecord::Base.transaction do
           date = date_int_to_str( params[ :date ] )
           splendingdate = params[ :splendingdate ].empty? ? date : date_int_to_str( params[ :splendingdate ] )
-          update_fields = { date: date, branch: branch,
+          update_fields = { date: date,
+                            branch: branch,
                             is_del_plan_1c: false,
                             splendingdate: splendingdate,
                             date_sap: date_int_to_str( params[ :date_sap ] ),
                             number_sap: params[ :number_sap ] }
 
-          if menu_requirement = institution.menu_requirements.find_by( number: number )
-            menu_requirement.update( update_fields )
-          else
-            menu_requirement = MenuRequirement.create_with( update_fields ).create( institution: institution )
-            number = menu_requirement.number
+          unless menu_requirement = institution.menu_requirements.find_by( number: number )
+            menu_requirement = MenuRequirement.create( institution: institution, number: '' )
           end
+
+          menu_requirement.update( update_fields )
 
           id = menu_requirement.id
 
@@ -1642,7 +1644,7 @@ class SyncCatalogsController < ApplicationController
     end
 
     render json: error && error.any? ? { result: false, error: [ error ] }
-      : { result: true, number: number, id: id }
+      : { result: true, number: MenuRequirement.find( id ).number, id: id }
   end
 
   ###############################################################################################
@@ -1653,11 +1655,11 @@ class SyncCatalogsController < ApplicationController
   #    "products": [{"children_category_code": "000000001", "product_code": "000000079  ", "count_fact": 15 },
   #                 {"children_category_code": "000000002", "product_code": "000000079  ", "count_fact": 21 }]
   #  }
-  def menu_requirement_fact_update
-    render json: { result: false, error: 'Веб-сервіс відключений' }
-  end
+  # def menu_requirement_fact_update
+  #   render json: { result: false, error: 'Веб-сервіс відключений' }
+  # end
 
-  def off_menu_requirement_fact_update
+  def menu_requirement_fact_update
     error = { branch_code: 'Не знайдений параметр [branch_code]',
               institution_code: 'Не знайдений параметр [institution_code]',
               number: 'Не знайдений параметр [number]',
@@ -1724,6 +1726,7 @@ class SyncCatalogsController < ApplicationController
               .where( 'menu_meals_dishes.menu_requirement_id = ? ', id )
 
             menu_products.where.not( menu_meals_dish: menu_meals_dish ).delete_all
+            menu_products.update( count_fact: 0 )
 
             error_products = []
             params[ :products ].each_with_index do | product_par, index |
@@ -1762,6 +1765,32 @@ class SyncCatalogsController < ApplicationController
               menu_products.where( count_plan: 0, count_fact: 0 ).delete_all
               menu_meals_dish.update( is_enabled: true )
               menu_requirement.menu_meals_dishes.where( is_enabled: false ).delete_all
+
+              #================================
+              sql_menu_products_price = <<-SQL.squish
+                INSERT INTO menu_products_prices ( menu_requirement_id, product_id )
+                  SELECT menu_meals_dishes.menu_requirement_id,
+                        menu_products.product_id
+                    FROM menu_products
+                    LEFT JOIN menu_meals_dishes ON menu_products.menu_meals_dish_id = menu_meals_dishes.id
+                    LEFT JOIN menu_products_prices ON
+                      menu_products.product_id = menu_products_prices.product_id AND
+                      menu_meals_dishes.menu_requirement_id = menu_products_prices.menu_requirement_id
+                    WHERE menu_products_prices.id isnull AND
+                      menu_meals_dishes.menu_requirement_id = #{ id }
+                    GROUP BY 1, 2;
+                  DELETE FROM menu_products_prices WHERE
+                    product_id NOT IN (
+                      SELECT DISTINCT product_id
+                        FROM menu_products
+                        LEFT JOIN menu_meals_dishes ON
+                          menu_products.menu_meals_dish_id = menu_meals_dishes.id
+                        WHERE menu_meals_dishes.menu_requirement_id = menu_products_prices.menu_requirement_id
+                    ) AND
+                    menu_requirement_id = #{ id }
+                SQL
+
+              ActiveRecord::Base.connection.execute( sql_menu_products_price )
 
               File.open( "./public/web_get/cu_menu_requirement_fact.txt", 'a' ) { | f |
                 f.write( "\n *** #{ Time.now} ***#{ params.to_json }" )

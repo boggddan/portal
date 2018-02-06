@@ -1,0 +1,1 @@
+{"id":369323,"branch_id":3,"institution_id":38,"number":"","date":"2017-06-22","splendingdate":"2017-06-23","date_sap":"2017-06-22","date_saf":null,"created_at":"2018-02-06T09:39:36.042Z","updated_at":"2018-02-06T09:39:36.042Z","number_sap":"В-0000000030","number_saf":"","is_del_plan_1c":false,"is_del_fact_1c":false}
