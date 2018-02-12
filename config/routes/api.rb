@@ -74,6 +74,9 @@ scope :api, controller: :sync_catalogs do
   post :date_blocks_update, path: :cu_date_blocks
   delete :date_blocks_delete, path: :date_blocks
 
+  post :timesheet_date_blocks_update, path: :cu_timesheet_date_blocks
+  delete :timesheet_date_blocks_delete, path: :timesheet_date_blocks
+
   # Обновление документов
   post :supplier_order_update, path: :cu_supplier_order
   get :supplier_order_view, path: :supplier_order

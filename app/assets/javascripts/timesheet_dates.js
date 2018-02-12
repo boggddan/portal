@@ -231,7 +231,7 @@ class TimesheetDates {
   cellMarkClickLeft( target ) {
     const elem = target;
 
-    if ( this.isEdit && !elem.hasAttribute( 'disabled' ) ) {
+    if ( this.isEdit && !elem.hasAttribute( 'disabled' ) && !this.isDateBlocks ) {
       const reasonsAbsence = this.colTd
         .querySelector( `button[data-reasons-absence-id='${ elem.dataset.reasonsAbsenceId }']` );
 
@@ -247,7 +247,7 @@ class TimesheetDates {
     event.preventDefault( );
     const { target: elem } = event;
 
-    if ( this.isEdit && !elem.getAttribute( 'disabled' ) ) {
+    if ( this.isEdit && !elem.getAttribute( 'disabled' && !this.isDateBlocks ) ) {
       const reasonsAbsence = this.colTd.querySelector( 'button[data-reasons-absence-id]' );
       const { dataset: { reasonsAbsenceId } } = reasonsAbsence;
       elem.dataset.reasonsAbsenceId = reasonsAbsenceId;

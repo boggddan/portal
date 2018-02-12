@@ -2476,6 +2476,139 @@ class SyncCatalogsController < ApplicationController
 
     render json: result
   end
+  ###############################################################################################
+
+  ###############################################################################################
+  # POST /api/timesheet_date_blocks
+  # { "date_blocks":
+  #   [
+  #     { "institution_code": 14, "date_start": 1509494400, "date_end": 1510576706 }
+  #   ]
+  # }
+  def timesheet_date_blocks_update
+    errors = [ ]
+    ids = [ ]
+
+    date_blocks = params.permit(
+      date_blocks: [ :institution_code, :date_start, :date_end ]
+    )[ :date_blocks ]
+
+    institutions_codes = date_blocks.group_by { | o | o[ :institution_code ].to_i || 0 }.keys
+    institutions = exists_codes( :institutions, institutions_codes )
+    errors << institutions[ :error ] unless institutions[ :status ]
+
+    if errors.empty?
+
+      values_insert = [ ]
+
+      date_blocks.each_with_index do | obj, index |
+        error = {
+          institution_code: 'Не знайдений параметр [institution_code]',
+          date_start: 'Не знайдений параметр [date_start]',
+          date_end: 'Не знайдений параметр [date_end]'
+        }.stringify_keys!.except( *obj.keys )
+
+        if error.empty?
+          date_start = Time.at( obj[ :date_start ].to_i ).to_date
+          date_end = Time.at( obj[ :date_end ].to_i ).to_date
+          ( date_start..date_end ).each { | date |
+            values_insert << [ ].tap { | value |
+              value << institutions[ :obj ][ obj[ :institution_code ].to_i ]
+              value << "'#{ date }'"
+            }
+          }
+        else
+          errors << { index: "Рядок [#{ index }]" }.merge!( error )
+        end
+      end
+
+      if errors.empty?
+        values_sql_insert = values_insert.map { | o | "( #{ o.join( ',' ) } )" }.join( ',' )
+
+        sql = <<-SQL.squish
+            INSERT INTO timesheet_date_blocks ( institution_id, date )
+              VALUES #{ values_sql_insert }
+              ON CONFLICT ( institution_id, date ) DO NOTHING
+              RETURNING id ;
+          SQL
+
+        ids = JSON.parse( ActiveRecord::Base.connection.execute( sql )
+          .to_json, symbolize_names: true )
+          .map{ | o | o[ :id ] }
+
+        result = { status: true, ids: ids }
+      else
+        result = { status: false, errors: errors }
+      end
+    else
+      result = { status: false, errors: errors }
+    end
+
+    render json: result
+  end
+
+  def timesheet_date_blocks_delete
+    errors = []
+    ids = []
+
+    date_blocks = params.permit(
+      date_blocks: [ :institution_code, :date_start, :date_end ]
+    )[ :date_blocks ]
+
+    institutions_codes = date_blocks.group_by { | o | o[ :institution_code ].to_i || 0 }.keys
+    institutions = exists_codes( :institutions, institutions_codes )
+    errors << institutions[ :error ] unless institutions[ :status ]
+
+    if errors.empty?
+      values_delete = [ ]
+
+      date_blocks.each_with_index do | obj, index |
+        error = {
+          institution_code: 'Не знайдений параметр [institution_code]',
+          date_start: 'Не знайдений параметр [date_start]',
+          date_end: 'Не знайдений параметр [date_end]'
+        }.stringify_keys!.except( *obj.keys )
+
+        if error.empty?
+          values_delete << <<-SQL.squish
+              ( institution_id = #{ institutions[ :obj ][ obj[ :institution_code ].to_i ] }
+                AND
+                date BETWEEN
+                  '#{ Time.at( obj[ :date_start ].to_i ).to_date }'
+                  AND
+                  '#{ Time.at( obj[ :date_end ].to_i ).to_date }'
+              )
+            SQL
+        else
+          errors << { index: "Рядок [#{ index }]" }.merge!( error )
+        end
+      end
+
+      if errors.empty?
+        values_sql_delete = values_delete.join( ' OR ' )
+
+        sql = <<-SQL.squish
+            DELETE FROM timesheet_date_blocks
+              WHERE #{ values_sql_delete }
+              RETURNING id ;
+          SQL
+
+        ids = JSON.parse( ActiveRecord::Base.connection.execute( sql )
+          .to_json, symbolize_names: true )
+          .map{ | o | o[ :id ] }
+
+        result = { status: true, ids: ids }
+      else
+        result = { status: false, errors: errors }
+      end
+    else
+      result = { status: false, errors: errors }
+    end
+
+    render json: result
+  end
+
+  ###############################################################################################
 
   ###############################################################################################
   # GET /api/print_menu_requirement?institution_code=14&number=018В-0000121

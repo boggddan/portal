@@ -24,6 +24,7 @@
   - [*Прийоми їжі* - `meals`](#Прийоми-їжі---meals-top)
   - [*Норми продуктів підрозділу по категоріях дітей в стравах* - `dishes_products_norms`](#Норми-продуктів-підрозділу-по-категоріях-дітей-в-стравах---dishes_products_norms-top)
   - [*Дата блокування документів* - `date_blocks`](#Дата-блокування-документів---date_blocks-top)
+  - [*Дата блокування табеля* - `timesheet_date_blocks`](#Дата-блокування-табеля---timesheet_date_blocks-top)
 - [Документи](#Документи-top)
   - [*Замовлення постачальнику* - `supplier_orders`](#Замовлення-постачальнику---supplier_orders-top)
   - [*Надходження ТМЦ* - `receipts`](#Надходження-ТМЦ---receipts-top)
@@ -264,6 +265,24 @@ GET /web_get/cu_dishes_products_norms.txt
   }
 
   DELETE /api/date_blocks
+  { "date_blocks":
+    [
+      { "institution_code": 14, "date_start": 1509494400, "date_end": 1510576706 }
+    ]
+  }
+```
+
+### *Дата блокування табеля* - `timesheet_date_blocks` [:top:](#Зміст)
+
+```json
+  POST /api/cu_timesheet_date_blocks
+  { "date_blocks":
+    [
+      { "institution_code": 14, "date_start": 1509494400, "date_end": 1510576706 }
+    ]
+  }
+
+  DELETE /api/timesheet_date_blocks
   { "date_blocks":
     [
       { "institution_code": 14, "date_start": 1509494400, "date_end": 1510576706 }

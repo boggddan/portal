@@ -3,9 +3,19 @@ class Institution::TimesheetsController < Institution::BaseController
   def index ; end
   def new ; end
 
+  def check_timesheet_date_block( institution_id, date )
+    TimesheetDateBlock
+      .select( :date )
+      .where( institution_id: institution_id,
+              date: date )
+      .pluck( :date )
+      .map{ | o | o.strftime( '%d.%m.%Y' ) }
+      .join( ',' )
+  end
+
   def ajax_filter_timesheets # Фильтрация документов
     @timesheets = JSON.parse( Timesheet
-      .joins( 'LEFT JOIN date_blocks ON timesheets.date_ee = date_blocks.date AND timesheets.institution_id = date_blocks.institution_id' )
+      .joins( 'LEFT JOIN timesheet_date_blocks ON timesheets.date_ee = timesheet_date_blocks.date AND timesheets.institution_id = timesheet_date_blocks.institution_id' )
       .select( :id,
                :number,
                :date,
@@ -13,7 +23,7 @@ class Institution::TimesheetsController < Institution::BaseController
                :date_eb,
                :date_ee,
                :is_del_1c,
-               "NOT ( date_blocks.date ISNULL AND timesheets.is_edit ) AS disabled"
+               "NOT ( timesheet_date_blocks.date ISNULL AND timesheets.is_edit ) AS disabled"
       )
       .where( institution_id: current_user[ :userable_id ],
               date: params[ :date_start ]..params[ :date_end ] )
@@ -24,7 +34,6 @@ class Institution::TimesheetsController < Institution::BaseController
   def delete # Удаление документа
     Timesheet.find( params[ :id ] ).destroy
     render json: { status: true }
-
   end
 
   def create
@@ -59,7 +68,8 @@ class Institution::TimesheetsController < Institution::BaseController
                      'З': date_str( v[ :date_eb ].to_date ),
                      'ПО': date_str( v[ :date_ee ].to_date ) } } }
     else
-      date_blocks = check_date_block( institution_id, date_end )
+      date_blocks = check_timesheet_date_block( institution_id, date_end )
+
       if date_blocks.present?
         caption = 'Блокування документів'
         message = "Дата [ #{ date_blocks } ] в табелі закрита для створення!"
@@ -214,7 +224,7 @@ class Institution::TimesheetsController < Institution::BaseController
       .find( params[ :id ] )
       .to_json( ), symbolize_names: true )
 
-    date_blocks = check_date_block( timesheet[ :institution_id ], timesheet[ :date_ee ] )
+    date_blocks = check_timesheet_date_block( timesheet[ :institution_id ], timesheet[ :date_ee ] )
     if date_blocks.present?
       caption = 'Блокування документів'
       message = "Дата [ #{ date_blocks } ] в табелі закрита для редагування!"
@@ -247,7 +257,7 @@ class Institution::TimesheetsController < Institution::BaseController
     date_start = timesheet[ :date_eb ]
     date_end = timesheet[ :date_ee ]
 
-    date_blocks = check_date_block( timesheet[ :institution_id ], date_end )
+    date_blocks = check_timesheet_date_block( timesheet[ :institution_id ], date_end )
     if date_blocks.present?
       caption = 'Блокування документів'
       message = "Дата списання #{ date_blocks } закрита для відправлення!"
@@ -437,7 +447,7 @@ class Institution::TimesheetsController < Institution::BaseController
       .find( params[ :id ] )
       .to_json, symbolize_names: true )
 
-    @is_date_blocks = check_date_block( @timesheet[ :institution_id ], @timesheet[ :date_ee ] ).present?
+    @is_date_blocks = check_timesheet_date_block( @timesheet[ :institution_id ], @timesheet[ :date_ee ] ).present?
 
     reasons_absences = JSON.parse( ReasonsAbsence.select( :id, :code, :mark ).where( code: '' )
       .or( ReasonsAbsence.select( :id, :code, :mark ).where.not( mark: '' ) )
