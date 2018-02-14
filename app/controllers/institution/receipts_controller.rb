@@ -143,7 +143,8 @@ class Institution::ReceiptsController < Institution::BaseController
       end
     else
       result = { status: false,
-                 caption: "Період Замовлення постачальника #{ so_date_start.strftime( '%d.%m.%Y' ) }" +
+                 caption: 'Невірний реквізит',
+                 message: "Період Замовлення постачальника #{ so_date_start.strftime( '%d.%m.%Y' ) }" +
                  " - #{ so_date_end.strftime( '%d.%m.%Y' ) } відрізняється від дати в поставці " +
                  "#{ date.strftime( '%d.%m.%Y' ) }" }
     end
