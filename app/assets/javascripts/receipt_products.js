@@ -58,6 +58,11 @@ $( document ).on( 'turbolinks:load', ( ) => {
       MyLib.ajax( caption, url, 'post', data, 'json', null, true );
     };
 
+    $parentElem[ 0 ].querySelectorAll( 'input[data-date]' ).forEach( child => {
+      const elemChild = child;
+      elemChild.value = MyLib.toDateFormat( elemChild.dataset.date );
+    } );
+
     $parentElem
       .find( 'h1' )
       .on( 'click', function( ) { MyLib.clickHeader( $( this ) ) } )

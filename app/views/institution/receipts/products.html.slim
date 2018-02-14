@@ -1,9 +1,9 @@
 /
-- disabled = @receipt.number_sa.present?
+- disabled = @receipt[ :number_sa ].present?
 - label_text = 'layouts/label_text'
 
 main#receipt_products *{data: {\
-  id: @receipt.id,
+  id: @receipt[ :id ],
   path: { \
   send: institution_receipts_send_sa_path,
   print: institution_receipts_print_path,
@@ -21,26 +21,26 @@ main#receipt_products *{data: {\
         button.btn_print
 
         = render label_text, label_attr: {class: :icon_number}, text: 'Надіслано: документ',
-          input_attr: {value: @receipt.number_sa, disabled: true}
+          input_attr: {value: @receipt[ :number_sa ], disabled: true}
 
         = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
-          input_attr: {value:  date_str(@receipt.date_sa), disabled: true}
+          input_attr: { data: { date: @receipt[ :date_sa ] }, disabled: true}
 
     .panel
       = render label_text, label_attr: { class: :icon_number }, text: 'Поставка №',
-        input_attr: { id: :number, value: @receipt.number, disabled: true }
+        input_attr: { id: :number, value: @receipt[ :number ], disabled: true }
       = render label_text, label_attr: { class: :icon_сalendar }, text: 'від',
-        input_attr: { id: :date, name: :date, value:  date_str(@receipt.date), disabled: disabled, readonly: true }
+        input_attr: { id: :date, name: :date, data: { date: @receipt[ :date ] }, disabled: disabled, readonly: true }
       = render label_text, label_attr: {class: :icon_number}, text: 'Накладна №',
-        input_attr: { id: :invoice_number, name: :invoice_number, value: @receipt.invoice_number, disabled: disabled }
-      = render label_text, label_attr: {class: :icon_number}, text: 'за замовленням №',
-        input_attr: { value: @receipt.supplier_order.number, disabled: true }
+        input_attr: { id: :invoice_number, name: :invoice_number, value: @receipt[ :invoice_number ], disabled: disabled }
+      = render label_text, label_attr: { class: :icon_number }, text: 'за замовленням №',
+        input_attr: { value: @receipt[ :supplier_order_number ], disabled: true }
 
     .panel
       = render label_text, label_attr: {class: :icon_filter}, text: 'Постачальник',
-        input_attr: {id: :supplier_name, value: @receipt.supplier_order.supplier.name, disabled: true}
+        input_attr: {id: :supplier_name, value: @receipt[ :supplier_name ], disabled: true}
       = render label_text, label_attr: {class: :icon_filter}, text: 'за договором №',
-        input_attr: {id: :contract_number, value: @receipt.contract_number, disabled: true}
+        input_attr: {id: :contract_number, value: @receipt[ :contract_number ], disabled: true}
 
   .clmn *{data: { path_update: institution_receipts_product_update_path}}
     h2 Продукти харчування

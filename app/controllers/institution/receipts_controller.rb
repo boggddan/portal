@@ -56,82 +56,96 @@ class Institution::ReceiptsController < Institution::BaseController
                :institution_id,
                'supplier_orders.number AS so_number',
                'supplier_orders.date AS so_date',
+               'supplier_orders.date_start AS so_date_start',
+               'supplier_orders.date_end AS so_date_end',
                'institutions.code AS institution_code' )
       .find( receipt_id )
       .to_json, symbolize_names: true )
 
-    date = receipt[ :date ]
+
+    so_date_start = receipt[ :so_date_start ].to_date
+    so_date_end = receipt[ :so_date_end ].to_date
+
+    date = receipt[ :date ].to_date
     institution_id = receipt[ :institution_id ]
 
-    date_blocks = check_date_block( institution_id, date )
-    if date_blocks.present?
-      caption = 'Блокування документів'
-      message = "Дата поставки [ #{ date_blocks } ] закрита для відправлення!"
-      result = { status: false, message: message, caption: caption }
-    else
-      receipt_products = JSON.parse( ReceiptProduct
-        .joins( :causes_deviation, :product )
-        .select( :id, :count, :count_invoice, :date, :product_id,
-                'causes_deviations.code AS deviation_code',
-                'products.code AS product_code')
-        .where( receipt_id: receipt_id )
-        .where.not( count: 0 )
-        .or( ReceiptProduct
-            .joins( :causes_deviation, :product )
-            .select(:id, :count, :count_invoice, :date, :product_id,
-                'causes_deviations.code AS deviation_code',
-                'products.code AS product_code')
-            .where( receipt_id: receipt_id )
-            .where.not( count_invoice: 0 )
-        )
-        .to_json, symbolize_names: true )
+    if date.beetwen?( so_date_start, so_date_end )
 
-      result = { }
-
-      if receipt_products.present?
-        goods = receipt_products.map{ | o | {
-          'CodeOfGoods' => o[ :product_code ],
-          'Quantity' => o[ :count ],
-          'Count_invoice' => o[ :count_invoice ],
-          'Cause_deviation_code' => o[ :deviation_code ]
-          }
-        }
-
-        message = {
-          'GetRequest' => {
-            'Institutions_id' => receipt[ :institution_code ],
-            'InvoiceNumber' => receipt[ :invoice_number ],
-            'ContractNumber' => receipt[ :contract_number ],
-            'OrderNumber' => receipt[ :so_number ],
-            'NumberFromWebPortal' => receipt[ :number ],
-            'Date' => receipt[ :date ],
-            'DateOfOrderNumber' => receipt[ :so_date ],
-            'Goods' => goods,
-            'User' => current_user[ :username ]
-          }
-        }
-
-        savon_return = get_savon( :create_doc_supply_goods, message )
-        response = savon_return[ :response ]
-        web_service = savon_return[ :web_service ]
-
-        if response[ :interface_state ] == 'OK'
-          ActiveRecord::Base.transaction do
-            data = { date_sa: Date.today, number_sa: response[ :respond ].to_s }
-            update_base_with_id( :receipts, receipt_id, data )
-
-            ReceiptProduct
-              .where( receipt_id: receipt_id, count: 0, count_invoice: 0 )
-              .delete_all
-          end
-          result = { status: true }
-        else
-          result = { status: false, caption: 'Неуспішна сихронізація з ІС',
-                    message: web_service.merge!( response: response ) }
-        end
+      date_blocks = check_date_block( institution_id, date )
+      if date_blocks.present?
+        caption = 'Блокування документів'
+        message = "Дата поставки [ #{ date_blocks } ] закрита для відправлення!"
+        result = { status: false, message: message, caption: caption }
       else
-        result = { status: false, caption: 'Кількість не проставлена' }
+        receipt_products = JSON.parse( ReceiptProduct
+          .joins( :causes_deviation, :product )
+          .select( :id, :count, :count_invoice, :date, :product_id,
+                  'causes_deviations.code AS deviation_code',
+                  'products.code AS product_code')
+          .where( receipt_id: receipt_id )
+          .where.not( count: 0 )
+          .or( ReceiptProduct
+              .joins( :causes_deviation, :product )
+              .select(:id, :count, :count_invoice, :date, :product_id,
+                  'causes_deviations.code AS deviation_code',
+                  'products.code AS product_code')
+              .where( receipt_id: receipt_id )
+              .where.not( count_invoice: 0 )
+          )
+          .to_json, symbolize_names: true )
+
+        result = { }
+
+        if receipt_products.present?
+          goods = receipt_products.map{ | o | {
+            'CodeOfGoods' => o[ :product_code ],
+            'Quantity' => o[ :count ],
+            'Count_invoice' => o[ :count_invoice ],
+            'Cause_deviation_code' => o[ :deviation_code ]
+            }
+          }
+
+          message = {
+            'GetRequest' => {
+              'Institutions_id' => receipt[ :institution_code ],
+              'InvoiceNumber' => receipt[ :invoice_number ],
+              'ContractNumber' => receipt[ :contract_number ],
+              'OrderNumber' => receipt[ :so_number ],
+              'NumberFromWebPortal' => receipt[ :number ],
+              'Date' => receipt[ :date ],
+              'DateOfOrderNumber' => receipt[ :so_date ],
+              'Goods' => goods,
+              'User' => current_user[ :username ]
+            }
+          }
+
+          savon_return = get_savon( :create_doc_supply_goods, message )
+          response = savon_return[ :response ]
+          web_service = savon_return[ :web_service ]
+
+          if response[ :interface_state ] == 'OK'
+            ActiveRecord::Base.transaction do
+              data = { date_sa: Date.today, number_sa: response[ :respond ].to_s }
+              update_base_with_id( :receipts, receipt_id, data )
+
+              ReceiptProduct
+                .where( receipt_id: receipt_id, count: 0, count_invoice: 0 )
+                .delete_all
+            end
+            result = { status: true }
+          else
+            result = { status: false, caption: 'Неуспішна сихронізація з ІС',
+                      message: web_service.merge!( response: response ) }
+          end
+        else
+          result = { status: false, caption: 'Кількість не проставлена' }
+        end
       end
+    else
+      result = { status: false,
+                 caption: "Період Замовлення постачальника #{ so_date_start.strftime( '%d.%m.%Y' ) }" +
+                 " - #{ date_end.strftime( '%d.%m.%Y' ) } відрізняється від дати в поставці " +
+                 "#{ date.strftime( '%d.%m.%Y' ) }" }
     end
 
     render json: result
@@ -190,8 +204,23 @@ class Institution::ReceiptsController < Institution::BaseController
   end
 
   def products # Отображение товаров поступления
-    @receipt = Receipt.find( params[ :id ] )
-    @receipt_products = @receipt.receipt_products
+    @receipt = JSON.parse( Receipt
+      .joins( supplier_order: :supplier )
+      .select( :id,
+               :number_sa,
+               :date_sa,
+               :number,
+               :date,
+               :invoice_number,
+               :contract_number,
+               'supplier_orders.number AS supplier_order_number',
+               'suppliers.name AS supplier_name'
+      )
+      .find( params[ :id ] )
+      .to_json, symbolize_names: true )
+
+    @receipt_products = JSON.parse( ReceiptProduct
+      .joins( :product )
       .select( :id,
                :product_id,
                :causes_deviation_id,
@@ -201,9 +230,10 @@ class Institution::ReceiptsController < Institution::BaseController
                :count_invoice,
                :count,
                'products.name AS name' )
-      .joins( :product )
+      .where( receipt_id: @receipt[ :id ] )
       .order( :date,
               'products.name' )
+      .to_json, symbolize_names: true )
   end
 
   def product_update # Обновление количества

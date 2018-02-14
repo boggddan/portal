@@ -339,7 +339,7 @@ DELETE /api/receipt { "institution_code": "14", "number": "000000000002" }
 ### *Заміна номеру договору у замовленнях постачальнику та надходженнях ТМЦ* [:top:](#Зміст)
 
 ```json
-DELETE /api/replace_contract_number
+POST /api/replace_contract_number
 {
   "contract_number_old": "112",
   "contract_number_new": "11111",
