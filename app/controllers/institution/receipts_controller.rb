@@ -69,7 +69,7 @@ class Institution::ReceiptsController < Institution::BaseController
     date = receipt[ :date ].to_date
     institution_id = receipt[ :institution_id ]
 
-    if date.beetwen?( so_date_start, so_date_end )
+    if date.between?( so_date_start, so_date_end )
 
       date_blocks = check_date_block( institution_id, date )
       if date_blocks.present?
