@@ -144,8 +144,8 @@ class Institution::ReceiptsController < Institution::BaseController
     else
       result = { status: false,
                  caption: "Період Замовлення постачальника #{ so_date_start.strftime( '%d.%m.%Y' ) }" +
-                 " - #{ date_end.strftime( '%d.%m.%Y' ) } відрізняється від дати в поставці " +
-                 "#{ date.strftime( '%d.%m.%Y' ) }" }
+                 " - #{ so_date_end.strftime( '%d.%m.%Y' ) } відрізняється від дати в поставці " +
+                 "#{ so_date.strftime( '%d.%m.%Y' ) }" }
     end
 
     render json: result
