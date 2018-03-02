@@ -14,10 +14,10 @@ class User < ApplicationRecord
   end
 
   def type_short
-    case self.userable_type
-      when 'Admin' then 'А'
-      when 'Institution' then 'Д'
-      when 'Supplier' then 'П'
+    if self.userable_type == 'Admin' then 'А'
+      elsif self.userable_type == 'Institution' && self.institution_type_code == 1 then 'Д'
+      elsif self.userable_type == 'Institution' && self.institution_type_code == 2 then 'Ш'
+      elsif self.userable_type == 'Supplier' then 'П'
       esle ''
     end
   end

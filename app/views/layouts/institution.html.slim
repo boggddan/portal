@@ -12,40 +12,23 @@ html
     = render 'layouts/form_splash'
     = render 'layouts/form_choice'
 
+    - institution = current_institution
+
     nav#main_menu
       ul
         li.caption Портал
         li.item *{ data: { page: :institution_index } }
           a *{ href: institution_index_path } Початкова
-        li.item *{ data: {page: :institution_orders } }
-          a *{ href: institution_institution_orders_index_path } Заявки
-        li.item *{ data: { page: :receipts } }
-          a *{ href: institution_receipts_index_path } Поставки
-        li.item *{ data: { page: :timesheets } }
-          a *{ href: institution_timesheets_index_path } Табелі
-        li.item *{ data: { page: :menu_requirements } }
-          a *{ href: institution_menu_requirements_index_path } Меню-вимоги
-        li.item *{ data: { page: :products_moves } }
-          a *{ href: institution_products_moves_index_path } Переміщення
-        li.item *{ data: { page: :institution_reports } }
-          a Звіти
-          ul
-            li.item *{data: { page: :institution_reports_cost_baby_day } }
-              a *{ href: institution_reports_cost_baby_day_path } Вартість дітодня за меню-вимогами
-            li.item *{ data: { page: :institution_reports_balances_in_warehouses } }
-              a *{ href: institution_reports_balances_in_warehouses_path } Залишки продуктів харчування
-            li.item *{data: { page: :institution_reports_attendance_of_children } }
-              a *{ href: institution_reports_attendance_of_children_path } Табель обліку відвідування дітей
-            li.item *{data: { page: :institution_reports_payment_of_parents } }
-              a *{ href: institution_reports_payment_of_parents_path } Взаєморозрахунки з батьками
-        li.item *{ data: { page: :institution_reference_books } }
-          a Довідники
-          ul
-            li.item *{ data: { page: :dishes_product_norm } }
-              a *{ href: institution_reference_books_dishes_products_norms_path } Технічна карта продуктів
+
+        - case institution[ :institution_type_code ]
+          - when 1
+            = render( 'layouts/menu_kindergarten' )
+          - when 2
+            = render( 'layouts/menu_school' )
+
         li.info
           span = current_user[ :username ]
-          span = current_institution[ :name ]
+          span = institution[ :name ]
         li.item *{ data: { page: :exit } }
           a *{ href: log_out_path } Вихід
 

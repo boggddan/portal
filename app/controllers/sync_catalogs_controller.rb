@@ -1,6 +1,14 @@
 class SyncCatalogsController < ApplicationController
   # skip_before_action :verify_log_in # Отключение фильтра проверки пользователя
 
+  def includeInArr( arr, val, name )
+    if arr.include?( val )
+      { }
+    else
+      { error: { type: "Невірне значення [#{ name } = #{ val }]" } }
+    end
+  end
+
   def branch_code( code )
     code = code.nil? ? '' : code.strip
     if branch = Branch.find_by( code: code )
@@ -213,24 +221,59 @@ class SyncCatalogsController < ApplicationController
   ###############################################################################################
 
   ###############################################################################################
-  # POST /api/cu_institution { "code": "14", "name": "18 (ДОУ)", "prefix": "Д18", "branch_code": "00000000003" }
+  # POST /api/cu_institution
+  # {
+  #   "code": "50187",
+  #   "name": "\"ЗГ Контакт\"",
+  #   "prefix": "КВ1",
+  #   "branch_code": "00000000006",
+  #   "institution_type_code": 1 # тип підрозділу: 1 - сад / 2 - школа
+  # }
   def institution_update
-    error = { code: 'Не знайдений параметр [code]',
-              name: 'Не знайдений параметр [name]',
-              prefix: 'Не знайдений параметр [prefix]',
-              branch_code: 'Не знайдений параметр [branch_code]' }.stringify_keys!.except( *params.keys )
+    error = {
+      code: 'Не знайдений параметр [code]',
+      name: 'Не знайдений параметр [name]',
+      prefix: 'Не знайдений параметр [prefix]',
+      branch_code: 'Не знайдений параметр [branch_code]',
+    }.stringify_keys!.except( *params.keys )
+
+    code = params[ :code ]
+    id = nil
+
     if error.empty?
       branch = branch_code( params[ :branch_code ].strip )
-      unless error = branch[ :error ]
-        code = params[ :code ]
-        update_fields = { name: params[ :name ], prefix: params[ :prefix ], branch: branch }
-        institution = Institution.create_with( update_fields ).find_or_create_by( code: code )
-        institution.update( update_fields )
+      error.merge!( branch[ :error ] ) if branch[ :error ]
+
+      institution_type_code = params[ :institution_type_code ] || 1
+      is_type_valid = includeInArr([ 1, 2 ], institution_type_code, 'institution_type_code')
+      error.merge!( is_type_valid[ :error ] ) if is_type_valid[ :error ]
+
+      if error.empty?
+        sql = <<-SQL.squish
+          INSERT INTO institutions
+            ( branch_id, code, name, prefix, institution_type_code )
+            VALUES (
+              #{ branch[ :id ] },
+              #{ code },
+              '#{ params[ :name ] }',
+              '#{ params[ :prefix ] }',
+              #{ institution_type_code }
+            )
+              ON CONFLICT ( code )
+              DO UPDATE SET branch_id = EXCLUDED.branch_id,
+                            name = EXCLUDED.name,
+                            prefix = EXCLUDED.prefix,
+                            institution_type_code = EXCLUDED.institution_type_code
+            RETURNING id
+        SQL
+
+        id = ActiveRecord::Base.connection.execute( sql )[ 0 ][ 'id' ]
       end
     end
 
-    render json: error && error.any? ? { result: false, error: [ error ] }
-      : { result: true, code: code, id: institution.id }
+    render json: error && error.any? \
+      ? { result: false, error: [ error ] }
+      : { result: true, code: code, id: id }
   end
 
   # GET /api/institution?code=14
@@ -533,76 +576,6 @@ class SyncCatalogsController < ApplicationController
   def causes_deviations_view
     render json: CausesDeviation.all.order( :code ).to_json
   end
-  ###############################################################################################
-
-  ###############################################################################################
-  # POST /api/cu_price_product { "branch_code": "0003", "institution_code": "14", "product_code": "000000079  ", "price_date": "1485296673", "price": 30.25  }
-  # def price_product_update
-  #   error = { branch_code: 'Не знайдений параметр [branch_code]',
-  #             institution_code: 'Не знайдений параметр [institution_code]',
-  #             product_code: 'Не знайдений параметр [product_code]',
-  #             price_date: 'Не знайдений параметр [price_date]',
-  #             price: 'Не знайдений параметр [price]' }.stringify_keys!.except( *params.keys )
-  #   if error.empty?
-  #     branch = branch_code( params[ :branch_code ] )
-  #     error.merge!( branch[ :error ] ) if branch[ :error ]
-
-  #     institution = institution_code( params[ :institution_code ] )
-  #     error.merge!( institution[ :error ] ) if institution[ :error ]
-
-  #     product = product_code( params[ :product_code ] )
-  #     error.merge!( product[ :error ] ) if product[ :error ]
-
-  #     if error.empty?
-  #       update_fields = {  price: params[:price] }
-  #       PriceProduct.create_with( update_fields ).find_or_create_by( branch: branch,
-  #         institution: institution, product: product, price_date: date_int_to_str( params[ :price_date ] ) )
-  #         .update( update_fields )
-  #     end
-  #   end
-
-  #   render json: error.any? ? { result: false, error: [ error ] } : { result: true }
-  # end
-
-  # # GET /api/price_product?branch_code=0003&institution_code=14&product_code=000000079&price_date=2017-01-25
-  # def price_product_view
-  #   error = { branch_code: 'Не знайдений параметр [branch_code]',
-  #             institution_code: 'Не знайдений параметр [institution_code]',
-  #             product_code: 'Не знайдений параметр [product_code]',
-  #             price_date: 'Не знайдений параметр [price_date]' }.stringify_keys!.except( *params.keys )
-
-  #   if error.size == 4
-  #     error = {}
-  #     price_product = PriceProduct.last
-  #   else
-  #     if error.empty?
-  #       branch = branch_code( params[ :branch_code ].strip )
-  #       error.merge!( branch[ :error ] ) if branch[ :error ]
-
-  #       institution = institution_code( params[ :institution_code ] )
-  #       error.merge!( institution[ :error ] ) if institution[ :error ]
-
-  #       product = product_code( params[ :product_code ].strip )
-  #       error.merge!( product[ :error ] ) if product[ :error ]
-
-  #       if error.empty?
-  #         price_product = price_product_date( branch, institution, product, params[ :price_date ] )
-  #         error = price_product[ :error ]
-  #       end
-  #     end
-  #   end
-
-  #   render json: price_product ? price_product.to_json( include: {
-  #       branch: { only: [ :code, :name ] }, institution: { only: [ :code, :name ] }, product: { only: [ :code, :name ] } } )
-  #     : { result: false, error: [error] }
-  # end
-
-  # # GET /api/price_products
-  # def price_products_view
-  #   render json: PriceProduct.all.order( :price_date ).to_json(
-  #     include: { branch: { only: [ :code, :name ] }, institution: { only: [ :code, :name ] },
-  #                product: { only: [ :code, :name ] } } )
-  # end
   ###############################################################################################
 
   ###############################################################################################

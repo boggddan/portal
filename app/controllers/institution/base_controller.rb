@@ -14,7 +14,7 @@ class Institution::BaseController < ApplicationController
 
   def current_institution # Текущее подразделение
     JSON.parse( Institution
-      .select( :id, :code, :name, :branch_id )
+      .select( :id, :code, :name, :branch_id, :institution_type_code )
       .find( current_user[ :userable_id ] )
       .to_json, symbolize_names: true )
   end

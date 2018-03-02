@@ -28,12 +28,19 @@ main#user_new  *{ data: { \
         &radio *{ name: :userable_type }
         | Адміністратор
 
-    .panel *{ data: { userable_type: 'Institution' } }
+    .panel *{ data: { userable_type: 'Institution', type: 1 } }
       label
         &radio *{ name: :userable_type }
         | Дитячий садок:
       select.align_right
-        = options_for_select( @institution )
+        = options_for_select( @kindergartens )
+
+    .panel *{ data: { userable_type: 'Institution', type: 2 } }
+      label
+        &radio *{ name: :userable_type }
+        | Школа:
+      select.align_right
+        = options_for_select( @schools )
 
     .panel *{ data: { userable_type: 'Supplier' } }
       label

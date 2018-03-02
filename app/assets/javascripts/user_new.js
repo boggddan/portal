@@ -7,14 +7,19 @@ class UserNew {
 
     ( { user: { username: this.parentElem.querySelector( '#username' ).value } } = this );
 
-    this.parentElem.querySelectorAll( '[name="userable_type"]' ).forEach( child => {
+    this.parentElem.querySelectorAll( '[ name = "userable_type" ] ' ).forEach( child => {
       child.addEventListener( 'change', event => this.changeUserableType( event ) );
     } );
 
     this.parentElem.querySelector( 'h1' ).textContent = `${ this.user.id ? 'Редагування' : 'Створення' } користувача`;
 
     MyLib.mainMenuActive( 'users' );
-    const panel = this.parentElem.querySelector( `.panel[data-userable-type='${ this.user.userable_type }']` );
+
+    const { user: { type } } = this;
+    const selectorType = type ? `[ data-type = "${ type }" ]` : '';
+
+    const panel = this.parentElem
+      .querySelector( `.panel[ data-userable-type ='${ this.user.userable_type }']${ selectorType }` );
     const radio =  panel.querySelector( 'input' );
     radio.checked = true;
     radio.dispatchEvent( new Event( 'change' ) );
@@ -27,20 +32,23 @@ class UserNew {
   }
 
   changeUserableType( { target: elem } ) {
-    const panel = elem.closest( '.panel' );
-    const { dataset: { userableType } } = panel;
-    const select = panel.querySelector( 'select' );
-    if ( select ) {
-      if ( this.user.userable_type === userableType ) ( { user: { userable_id: select.value } } = this );
-      else select.selectedIndex = 0;
-      select.disabled = false;
-    }
-
-    this.parentElem.querySelectorAll( `.panel:not([data-userable-type='${ userableType }']) select` )
+    this.parentElem.querySelectorAll( '.panel[ data-userable-type ] select' )
       .forEach( child => {
         const elemChild = child;
         elemChild.disabled = true;
       } );
+
+    const panel = elem.closest( '.panel' );
+    const { dataset: { userableType, type } } = panel;
+    const select = panel.querySelector( 'select' );
+    if ( select ) {
+      if ( this.user.userable_type === userableType && type === this.user.type ) {
+        ( { user: { userable_id: select.value } } = this );
+      } else {
+        select.selectedIndex = 0;
+      }
+      select.disabled = false;
+    }
   }
 
   // нажатие на кнопочку выход

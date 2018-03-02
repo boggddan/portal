@@ -13,4 +13,10 @@ class Institution < ApplicationRecord
   has_many   :institution_moves
   has_many   :institution_dishes
   has_many   :users, as: :userable, source_type: 'Institution'
+
+  scope :select_name, -> { select( :id, :name ) }
+  scope :kindergarten, -> { where( institution_type_code: 1 ) }
+  scope :school, -> { where( institution_type_code: 2 ) }
+  scope :order_name, -> { order( name: :asc ) }
+
 end

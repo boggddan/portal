@@ -107,7 +107,15 @@ DELETE /api/delete
 ### *Установи* - `branches` [:top:](#Зміст)
 
 ```json
-POST /api/cu_institution { "code": "14", "name": "18 (ДОУ)", "prefix": "Д18", "branch_code": "00000000003" }
+POST /api/cu_institution
+  {
+    "code": "50187",
+     "name": "\"ЗГ Контакт\"",
+     "prefix": "КВ1",
+     "branch_code": "00000000006",
+     "institution_type_code": 1 // тип підрозділу: 1 - сад / 2 - школа
+  }
+
 GET /api/institution?code=14
 GET /api/institutions
 ```
