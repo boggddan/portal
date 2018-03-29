@@ -249,6 +249,7 @@ class Institution::TimesheetsController < Institution::BaseController
                :date_eb,
                :date_ee,
                :number_sa,
+               :date_sa,
                :institution_id,
                'institutions.code AS institution_code' )
       .find( timesheet_id )
@@ -294,7 +295,9 @@ class Institution::TimesheetsController < Institution::BaseController
             'StartDateOfTheFill' => date_start,
             'EndDateOfTheFill' => date_end,
             'TS' => ts,
-            'User' => current_user[ :username ]
+            'User' => current_user[ :username ],
+            'DocumentDate' => timesheet[ :date_sa ],
+            'Number1C' => timesheet[ :number_sa ]
           }
         }
 
