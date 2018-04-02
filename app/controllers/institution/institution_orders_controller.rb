@@ -61,7 +61,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
             sql_values += ",(#{ id }," +
                           "#{ product_id }," +
                           "'#{ food[ :date ] }'," +
-                          "'#{ food[ :description ] }')"
+                          "'#{ food[ :comments ] }')"
           }
 
           sql = "INSERT INTO institution_order_products ( #{ fields } ) VALUES #{ sql_values[1..-1] }"
@@ -155,7 +155,7 @@ class Institution::InstitutionOrdersController < Institution::BaseController
                           "'#{ date }'," +
                           "#{ amount }," +
                           "#{ amount }," +
-                          "'#{ food[ :description ] }')"
+                          "'#{ food[ :comments ] }')"
           }
 
           sql = "INSERT INTO io_correction_products ( #{ fields } ) VALUES #{ sql_values[1..-1] }"
