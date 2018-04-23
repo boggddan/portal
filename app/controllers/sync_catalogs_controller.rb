@@ -1776,7 +1776,7 @@ class SyncCatalogsController < ApplicationController
                 .find( id )
                 .to_json, symbolize_names: true )
 
-              update_prices_for_menu_requirement( menu_requirement )
+              #update_prices_for_menu_requirement( menu_requirement )
               ###########################################
 
               File.open( "./public/web_get/cu_menu_requirement_fact.txt", 'a' ) { | f |
