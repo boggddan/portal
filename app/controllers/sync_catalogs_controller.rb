@@ -1864,7 +1864,7 @@ class SyncCatalogsController < ApplicationController
           case type
           when 0 then menu_requirement.destroy
           when 1 then menu_requirement.update( is_del_plan_1c: true )
-          when 2 then menu_requirement.update( is_del_fact_1c: true )
+          when 2 then menu_requirement.update( is_del_plan_1c: true, is_del_fact_1c: true )
           else
             error = { type: "Такого значення не існує [#{ type }]" }
           end
