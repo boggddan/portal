@@ -32,6 +32,7 @@ body { /* Главний блок */
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   > main {
+    overflow: hidden;
     padding: 0 15px;
     display: flex;
     flex-direction: column;
@@ -39,6 +40,7 @@ body { /* Главний блок */
 }
 
 #view {
+  overflow: auto;
   margin-bottom: 15px;
 }
 
@@ -68,8 +70,8 @@ h1, h2 {
 h1 { @include h-fz( 22px ); }
 h2 { @include h-fz( 20px ); }
 
-
 .clmn_main {
+  overflow: auto;
   display: flex;
   flex-direction: row;
 }

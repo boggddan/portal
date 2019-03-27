@@ -1,5 +1,5 @@
 main#dishes_products_norms
-
-  #col_norm.clmn *{ data: { path: { update: institution_reference_books_dishes_products_update_path } } }
-    h1 Технічна карта продуктів
-    .parent_table = render( 'table_dishes_products_norm' ) if @dishes_products_norms.present?
+  .clmn_main
+    #col_norm.clmn *{ data: { path: { update: institution_reference_books_dishes_products_update_path } } }
+      h1 Технічна карта продуктів
+      .parent_table = render( 'table_dishes_products_norm' ) if @dishes_products_norms.present?
